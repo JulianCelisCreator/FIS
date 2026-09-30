@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comprobante de pago — Grupo 04</title>
+  <link rel="stylesheet" href="../assets/wireframe.css">
+  <style>
+    .receipt { max-width: 720px; margin: 0 auto; padding: 28px; border: 1px solid var(--line-strong); }
+    .receipt-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; border-bottom: 2px solid var(--ink); padding-bottom: 14px; margin-bottom: 16px; }
+    .receipt-head .num { font-size: 22px; font-weight: 700; }
+    .receipt .total { display: flex; justify-content: space-between; font-size: 20px; font-weight: 700; border-top: 2px solid var(--ink); padding-top: 12px; margin-top: 16px; }
+    .stamp { display: inline-block; border: 3px double var(--ink); padding: 4px 14px; font-weight: 800; letter-spacing: .15em; transform: rotate(-6deg); }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo"><div class="logo-box">LOGO</div> Escuela de Patinaje</div>
+    <div class="user-chip"><span class="role-tag">Contador</span><span class="who">Jorge Méndez</span><div class="avatar"></div></div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar">
+      <h4>Pagos (Admin / Contador)</h4>
+      <a href="../planes/planes.html">Planes y tarifas</a>
+      <a href="../asignar-plan/asignar-plan.html">Asignar / cambiar plan</a>
+      <a href="../cartera/cartera.html">Cartera</a>
+      <a href="../registrar-pago/registrar-pago.html">Registrar pago</a>
+      <a href="../historial-pagos/historial-pagos.html" class="active">Historial de pagos</a>
+      <h4>Vistas de usuario</h4>
+      <a href="../oferta-planes/oferta-planes.html">Oferta de planes</a>
+      <a href="../mis-pagos/mis-pagos.html">Mis pagos (Acudiente)</a>
+      <a href="../mis-pagos/mis-pagos-patinador.html">Mis pagos (Patinador)</a>
+      <h4>Wireframes</h4>
+      <a href="../index.html">← Índice</a>
+    </nav>
+
+    <main class="main">
+      <div class="page-head">
+        <div>
+          <div class="breadcrumb"><a href="../historial-pagos/historial-pagos.html">Historial de pagos</a> / Comprobante N.º 000482</div>
+          <h1>Comprobante de pago</h1>
+          <p><span class="rf">RF-M5-14</span> <span class="rf">RF-M5-15</span></p>
+        </div>
+        <div class="actions">
+          <a href="../historial-pagos/historial-pagos.html" class="btn">← Volver</a>
+          <a href="#" class="btn primary">Descargar PDF</a>
+        </div>
+      </div>
+
+      <div class="card receipt">
+        <div class="receipt-head">
+          <div>
+            <div class="logo"><div class="logo-box">LOGO</div> Escuela de Patinaje</div>
+            <div class="muted" style="font-size:13px;margin-top:6px">NIT 900.000.000-0 · Bogotá D. C.</div>
+          </div>
+          <div class="right">
+            <div class="muted" style="font-size:12px">COMPROBANTE DE PAGO</div>
+            <div class="num">N.º 000482</div>
+            <div class="muted" style="font-size:13px">30/09/2026</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <dl class="kv">
+            <dt>Patinador</dt><dd>Samuel Herrera Díaz</dd>
+            <dt>Documento</dt><dd>TI 1.012.345.678</dd>
+            <dt>Acudiente</dt><dd>Luis Herrera</dd>
+          </dl>
+          <dl class="kv">
+            <dt>Plan</dt><dd>Competencia 6 días</dd>
+            <dt>Periodo</dt><dd>Agosto 2026</dd>
+            <dt>Medio de pago</dt><dd>Transferencia · TRF-88210345</dd>
+          </dl>
+        </div>
+
+        <div class="table-wrap" style="margin-top:18px">
+          <table>
+            <thead><tr><th>Concepto</th><th class="num">Valor</th></tr></thead>
+            <tbody>
+              <tr><td>Valor del cobro (Agosto 2026)</td><td class="num">$300.000</td></tr>
+              <tr><td>Pagos anteriores</td><td class="num">$0</td></tr>
+              <tr><td><strong>Este pago</strong></td><td class="num"><strong>$200.000</strong></td></tr>
+              <tr><td>Saldo restante del cobro</td><td class="num">$100.000</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="total"><span>Total pagado</span><span>$200.000</span></div>
+
+        <p class="muted" style="font-size:12px;margin-top:18px">
+          Registrado por: Jorge Méndez (Contador) · 30/09/2026 10:14 a. m.<br>
+          Soporte interno de pago. No es factura electrónica.
+        </p>
+      </div>
+
+      <div class="note">
+        <strong>Variantes:</strong>
+        (1) En un pago <em>por sesión</em>, “Periodo” se cambia por “Sesiones: 4 × $35.000”.
+        (2) En un pago <em>anulado</em>, el comprobante conserva su número y lleva el sello <span class="stamp">ANULADO</span> junto con el motivo.
+        (3) El PDF tiene el mismo número y los mismos datos, y se genera en menos de 5 s. El Acudiente y el Patinador solo pueden descargar los de sus propios pagos.
+      </div>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cartera — Grupo 04</title>
+  <link rel="stylesheet" href="../assets/wireframe.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo"><div class="logo-box">LOGO</div> Escuela de Patinaje</div>
+    <div class="user-chip"><span class="role-tag">Contador</span><span class="who">Jorge Méndez</span><div class="avatar"></div></div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar">
+      <h4>Pagos (Admin / Contador)</h4>
+      <a href="../planes/planes.html">Planes y tarifas</a>
+      <a href="../asignar-plan/asignar-plan.html">Asignar / cambiar plan</a>
+      <a href="../cartera/cartera.html" class="active">Cartera</a>
+      <a href="../registrar-pago/registrar-pago.html">Registrar pago</a>
+      <a href="../historial-pagos/historial-pagos.html">Historial de pagos</a>
+      <h4>Vistas de usuario</h4>
+      <a href="../oferta-planes/oferta-planes.html">Oferta de planes</a>
+      <a href="../mis-pagos/mis-pagos.html">Mis pagos (Acudiente)</a>
+      <a href="../mis-pagos/mis-pagos-patinador.html">Mis pagos (Patinador)</a>
+      <h4>Wireframes</h4>
+      <a href="../index.html">← Índice</a>
+    </nav>
+
+    <main class="main">
+      <div class="page-head">
+        <div>
+          <div class="breadcrumb">Pagos / Cartera</div>
+          <h1>Estado de cartera</h1>
+          <p>Saldo pendiente y cobros vencidos por patinador. <span class="rf">RF-M5-12</span> <span class="rf">RF-M5-13</span></p>
+        </div>
+        <a href="../registrar-pago/registrar-pago.html" class="btn primary">+ Registrar pago</a>
+      </div>
+
+      <div class="grid-4" style="margin-bottom:18px">
+        <div class="kpi"><div class="label">Cartera pendiente</div><div class="value">$4.860.000</div><div class="sub">en 21 cobros con saldo</div></div>
+        <div class="kpi"><div class="label">Al día</div><div class="value">64</div><div class="sub">patinadores</div></div>
+        <div class="kpi"><div class="label">Pendiente</div><div class="value">14</div><div class="sub">aún no pasa la fecha límite</div></div>
+        <div class="kpi"><div class="label">Vencido</div><div class="value">7</div><div class="sub">$1.620.000 vencidos</div></div>
+      </div>
+
+      <div class="card">
+        <div class="filters">
+          <label class="field">Estado de cartera
+            <select class="input"><option>Todos</option><option>Al día</option><option>Pendiente</option><option selected>Vencido</option></select>
+          </label>
+          <label class="field">Patinador
+            <input class="input" type="search" placeholder="Nombre o documento">
+          </label>
+          <label class="field">Acudiente
+            <input class="input" type="search" placeholder="Nombre del acudiente">
+          </label>
+          <label class="field">Plan
+            <select class="input"><option>Todos</option><option>Formación 3 días</option><option>Competencia 6 días</option><option>Alto rendimiento</option></select>
+          </label>
+          <label class="field">Vence desde
+            <input class="input" type="date" value="2026-08-01">
+          </label>
+          <label class="field">Vence hasta
+            <input class="input" type="date" value="2026-09-30">
+          </label>
+          <div class="actions"><a href="#" class="btn">Limpiar</a></div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Patinador</th>
+                <th>Acudiente</th>
+                <th>Plan</th>
+                <th>Estado</th>
+                <th class="num">Saldo pendiente</th>
+                <th class="num">Cobros vencidos</th>
+                <th>Vencimiento más antiguo</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Samuel Herrera Díaz</strong></td>
+                <td>Luis Herrera</td>
+                <td>Competencia 6 días</td>
+                <td><span class="badge overdue">Vencido</span></td>
+                <td class="num">$450.000</td>
+                <td class="num">2</td>
+                <td>10/08/2026</td>
+                <td><a href="#detalle" class="btn sm">Ver cobros</a></td>
+              </tr>
+              <tr>
+                <td><strong>Sofía Ramírez Torres</strong></td>
+                <td>Carolina Torres</td>
+                <td>Formación 3 días</td>
+                <td><span class="badge overdue">Vencido</span></td>
+                <td class="num">$80.000</td>
+                <td class="num">1</td>
+                <td>10/09/2026</td>
+                <td><a href="#detalle" class="btn sm">Ver cobros</a></td>
+              </tr>
+              <tr>
+                <td><strong>Daniela Castro Ruiz</strong></td>
+                <td class="muted">— (mayor de edad)</td>
+                <td>Alto rendimiento</td>
+                <td><span class="badge overdue">Vencido</span></td>
+                <td class="num">$380.000</td>
+                <td class="num">1</td>
+                <td>05/09/2026</td>
+                <td><a href="#detalle" class="btn sm">Ver cobros</a></td>
+              </tr>
+              <tr>
+                <td><strong>Tomás Vargas Peña</strong></td>
+                <td>Paola Peña</td>
+                <td>Formación 3 días</td>
+                <td><span class="badge overdue">Vencido</span></td>
+                <td class="num">$180.000</td>
+                <td class="num">1</td>
+                <td>10/09/2026</td>
+                <td><a href="#detalle" class="btn sm">Ver cobros</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="muted" style="font-size:13px">Mostrando 4 de 7 · <a href="#">Ver más</a></p>
+
+        <div class="note">
+          <strong>Reglas del estado</strong> (las calcula el sistema, no se editan):
+          <span class="badge ok">Al día</span> sin cobros con saldo ·
+          <span class="badge pending">Pendiente</span> tiene saldo, pero la fecha límite no ha pasado ·
+          <span class="badge overdue">Vencido</span> al menos un cobro con saldo ya pasó su fecha límite (tiene prioridad).
+          La revisión de vencidos corre una vez al día. Vista de solo lectura.
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal: detalle de cobros del patinador -->
+  <div class="modal" id="detalle">
+    <div class="modal-box wide">
+      <a href="#" class="close" aria-label="Cerrar">×</a>
+      <h2>Cobros de Samuel Herrera Díaz</h2>
+      <p class="muted mt-0">Competencia 6 días · Acudiente: Luis Herrera · <span class="badge overdue">Vencido</span></p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Periodo</th><th class="num">Valor</th><th class="num">Pagado</th><th class="num">Saldo</th><th>Fecha límite</th><th>Estado</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>Septiembre 2026</td><td class="num">$300.000</td><td class="num">$150.000</td><td class="num">$150.000</td><td>10/09/2026</td><td><span class="badge overdue">Vencido</span></td><td><a href="../registrar-pago/registrar-pago.html" class="btn sm">Registrar pago</a></td></tr>
+            <tr><td>Agosto 2026</td><td class="num">$300.000</td><td class="num">$0</td><td class="num">$300.000</td><td>10/08/2026</td><td><span class="badge overdue">Vencido</span></td><td><a href="../registrar-pago/registrar-pago.html" class="btn sm">Registrar pago</a></td></tr>
+            <tr><td>Julio 2026</td><td class="num">$300.000</td><td class="num">$300.000</td><td class="num">$0</td><td>10/07/2026</td><td><span class="badge ok">Pagado</span></td><td></td></tr>
+          </tbody>
+          <tfoot><tr><td>Total</td><td></td><td></td><td class="num">$450.000</td><td colspan="3"></td></tr></tfoot>
+        </table>
+      </div>
+      <div class="modal-foot">
+        <a href="../historial-pagos/historial-pagos.html" class="btn">Ver pagos del patinador</a>
+        <a href="#" class="btn">Cerrar</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

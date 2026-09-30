@@ -1,0 +1,44 @@
+# --- Herramientas de IA / editores ---
+/claude
+.claude/
+.vscode/
+.idea/
+*.swp
+*~
+
+# --- Archivos del sistema operativo ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.directory
+
+# --- Temporales de Office / LibreOffice ---
+~$*
+.~lock.*#
+
+# --- Dependencias y builds (si algún grupo usa un framework) ---
+node_modules/
+dist/
+build/
+.cache/
+.parcel-cache/
+.next/
+.vite/
+
+# --- Logs ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Variables de entorno y credenciales ---
+.env
+.env.*
+!.env.example
+
+# --- Archivos pesados que no deben ir al repositorio ---
+*.zip
+*.rar
+*.7z
+*.mp4
+*.mov

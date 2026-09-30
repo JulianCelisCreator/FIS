@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oferta de planes — Grupo 04</title>
+  <link rel="stylesheet" href="../assets/wireframe.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo"><div class="logo-box">LOGO</div> Escuela de Patinaje</div>
+    <div class="user-chip"><span class="role-tag">Acudiente</span><span class="who">Carolina Torres</span><div class="avatar"></div></div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar">
+      <h4>Mi cuenta</h4>
+      <a href="#">Inicio</a>
+      <a href="#">Mis patinadores</a>
+      <a href="../oferta-planes/oferta-planes.html" class="active">Planes</a>
+      <a href="../mis-pagos/mis-pagos.html">Pagos</a>
+      <h4>Wireframes</h4>
+      <a href="../index.html">← Índice</a>
+    </nav>
+
+    <main class="main">
+      <div class="page-head">
+        <div>
+          <div class="breadcrumb">Planes</div>
+          <h1>Planes de la academia</h1>
+          <p>Planes disponibles y su valor vigente al 30/09/2026. <span class="rf">RF-M5-05</span></p>
+        </div>
+      </div>
+
+      <div class="grid-4">
+        <article class="plan-card">
+          <div class="img">imagen / ícono</div>
+          <h3 class="mt-0" style="margin-bottom:0">Clase suelta</h3>
+          <div class="muted">Día único · pago por sesión</div>
+          <div class="price">$35.000 <small>/ sesión</small></div>
+          <ul>
+            <li>Asistes el día que quieras</li>
+            <li>Pagas en la sede cada vez que vienes</li>
+          </ul>
+        </article>
+
+        <article class="plan-card">
+          <div class="img">imagen / ícono</div>
+          <h3 class="mt-0" style="margin-bottom:0">Formación 3 días</h3>
+          <div class="muted">3 días/semana · mensual</div>
+          <div class="price">$180.000 <small>/ mes</small></div>
+          <ul>
+            <li>Pago hasta el día 10 de cada mes</li>
+          </ul>
+        </article>
+
+        <article class="plan-card">
+          <div class="img">imagen / ícono</div>
+          <h3 class="mt-0" style="margin-bottom:0">Competencia 6 días</h3>
+          <div class="muted">6 días/semana · mensual</div>
+          <div class="price">$300.000 <small>/ mes</small></div>
+          <ul>
+            <li>Pago hasta el día 10 de cada mes</li>
+          </ul>
+        </article>
+
+        <article class="plan-card">
+          <div class="img">imagen / ícono</div>
+          <h3 class="mt-0" style="margin-bottom:0">Alto rendimiento</h3>
+          <div class="muted">6 días/semana + gimnasio · mensual</div>
+          <div class="price">$380.000 <small>/ mes</small></div>
+          <ul>
+            <li>Incluye acceso al gimnasio</li>
+            <li>Pago hasta el día 5 de cada mes</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="card-head">
+          <h3>¿Quieres inscribir o cambiar el plan de un patinador?</h3>
+          <a href="../asignar-plan/asignar-plan.html" class="btn primary">Asignar / cambiar plan</a>
+        </div>
+        <p class="muted mt-0" style="margin:0">Puedes hacerlo con los patinadores asociados a tu cuenta. El cambio de plan empieza a regir en el siguiente periodo de facturación.</p>
+      </div>
+
+      <div class="note">
+        <strong>Notas:</strong> esta vista es de solo lectura y la ven igual el Contador, el Acudiente y el Patinador. Solo muestra planes <em>activos</em> que tienen tarifa vigente.
+        El botón “Asignar / cambiar plan” no se le muestra al Contador ni al Patinador menor de edad (RF-M5-06).
+      </div>
+    </main>
+  </div>
+</body>
+</html>
