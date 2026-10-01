@@ -13,7 +13,7 @@
 | Documento fuente | *Lista de Requerimientos Final* v1.0 (21/09/2026) |
 | Requisitos funcionales | **77**, todos en estado *Propuesto* |
 
-Detalle y trazabilidad de los requisitos: [`README_REQUERIMIENTOS.md`](./README_REQUERIMIENTOS.md)
+Detalle y trazabilidad de los requisitos: [`REQUIREMENTS.md`](./REQUIREMENTS.md)
 
 ---
 
