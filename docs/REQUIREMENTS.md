@@ -2,7 +2,7 @@
 
 > Resumen navegable de los **77 RF** de la *Lista de Requerimientos Final* v1.0.
 > Sirve como puente entre requisitos, design system, código y pruebas.
-> Contexto general del proyecto: [`README.md`](./README.md)
+> Contexto general del proyecto: [`CONTEXT.md`](./CONTEXT.md)
 
 ---
 
