@@ -1,0 +1,9 @@
+@layer ps.components {
+  ps-dialog dialog { background: var(--surface-primary); border: var(--stroke-sm) solid var(--border-primary); border-radius: var(--radius-lg); box-shadow: var(--shadow-overlay); padding: var(--spacing-lg); }
+  ps-dialog dialog::backdrop { background: var(--surface-overlay); }
+  .ps-dialog__actions { display: flex; gap: var(--spacing-sm); justify-content: flex-end; margin-top: var(--spacing-lg); }
+  @media (max-width: 768px) {
+    ps-dialog[variant="confirm"] dialog, ps-dialog[variant="reason"] dialog { border-radius: var(--radius-lg); }
+    ps-dialog[variant="form"] dialog { min-width: 100%; }
+  }
+}

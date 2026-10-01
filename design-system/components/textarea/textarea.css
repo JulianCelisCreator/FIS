@@ -1,0 +1,4 @@
+@layer ps.components {
+  .ps-textarea { width: 100%; min-height: var(--control-height-lg); }
+  .ps-textarea__count { font-size: var(--fontsize-xs); line-height: var(--lineheight-xs); font-weight: var(--type-font-weight-regular); color: var(--text-muted); }
+}

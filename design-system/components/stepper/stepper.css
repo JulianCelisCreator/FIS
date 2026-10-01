@@ -1,0 +1,9 @@
+@layer ps.components {
+  .ps-stepper { display: flex; flex-direction: column; gap: var(--spacing-sm); }
+  .ps-stepper__step { display: flex; gap: var(--spacing-sm); align-items: center; }
+  .ps-stepper__dot { width: var(--icon-size-md); height: var(--icon-size-md); border-radius: var(--radius-full); border: var(--stroke-md) solid var(--border-primary); }
+  .ps-stepper__step[data-state="completed"] .ps-stepper__dot { background: var(--surface-success); border-color: var(--border-success); }
+  .ps-stepper__step[data-state="current"] .ps-stepper__dot { border-color: var(--border-info); }
+  .ps-stepper__step[data-state="error"] .ps-stepper__dot { border-color: var(--border-error); }
+  @media (min-width: 1024px) { .ps-stepper { flex-direction: row; } }
+}

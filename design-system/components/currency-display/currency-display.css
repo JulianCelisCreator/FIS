@@ -1,0 +1,5 @@
+@layer ps.components {
+  ps-currency-display, .ps-currency-display { font-size: var(--fontsize-md); line-height: var(--lineheight-md); font-weight: var(--type-font-weight-medium); font-variant-numeric: tabular-nums; color: var(--text-body); }
+  ps-currency-display[size="lg"], .ps-currency-display--lg { font-size: var(--fontsize-xl); line-height: var(--lineheight-xl); font-weight: var(--type-font-weight-semibold); color: var(--text-headings); }
+  .ps-currency-display--right { text-align: right; display: block; }
+}

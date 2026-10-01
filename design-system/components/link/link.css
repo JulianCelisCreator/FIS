@@ -1,0 +1,5 @@
+@layer ps.components {
+  .ps-link { color: var(--text-link); font-size: var(--fontsize-sm); line-height: var(--lineheight-sm); font-weight: var(--type-font-weight-medium); text-decoration: underline; text-underline-offset: var(--spacing-2xs); }
+  .ps-link:hover { text-decoration-thickness: var(--stroke-md); }
+  .ps-link[aria-disabled="true"] { color: var(--text-disabled); pointer-events: none; text-decoration: none; }
+}

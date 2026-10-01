@@ -1,0 +1,8 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DataTable · ps</title><link rel="stylesheet" href="../ps.css"></head>
+<body><div class="ps-container ps-stack">
+<a class="ps-link" href="./index.html">← Catálogo</a>
+<h1>DataTable + CapacityMeter</h1><p class="ps-text-body-sm">RF: M5-13/16, M4-14, M3-02. En móvil, tarjeta con data-label (sin scroll horizontal).</p>
+<ps-data-table><table class="ps-table"><thead><tr><th data-sort="name">Patinador</th><th data-sort="cat">Categoría</th><th>Estado</th><th style="text-align:right">Tarifa</th></tr></thead><tbody><tr><td data-label="Patinador">Sofía Ramírez · Infantil B</td><td data-label="Categoría">Infantil B</td><td data-label="Estado"><ps-status-badge entity="cartera" status="vencido"></ps-status-badge></td><td data-label="Tarifa" class="ps-num">$ 85.000</td></tr></tbody></table></ps-data-table>
+<ps-capacity-meter value="18" max="20" label="Cupo" show-percent></ps-capacity-meter>
+<ps-capacity-meter value="20" max="20" label="Cupo"></ps-capacity-meter>
+</div><script type="module" src="../ps.js"></script></body></html>

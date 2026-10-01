@@ -1,0 +1,8 @@
+@layer ps.components {
+  ps-capacity-meter { display: block; container-type: inline-size; }
+  .ps-capacity__bar { height: var(--spacing-sm); border-radius: var(--radius-full); background: var(--surface-subtle); overflow: hidden; }
+  .ps-capacity__fill { height: 100%; background: var(--border-success); }
+  ps-capacity-meter[data-tone="warning"] .ps-capacity__fill { background: var(--border-warning); }
+  ps-capacity-meter[data-tone="error"] .ps-capacity__fill { background: var(--border-error); }
+  .ps-capacity__meta { display: flex; gap: var(--spacing-xs); align-items: center; font-variant-numeric: tabular-nums; font-size: var(--fontsize-sm); line-height: var(--lineheight-sm); font-weight: var(--type-font-weight-medium); }
+}

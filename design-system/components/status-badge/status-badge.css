@@ -1,0 +1,3 @@
+@layer ps.components {
+  ps-status-badge { display: inline-flex; }
+}

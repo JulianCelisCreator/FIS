@@ -1,0 +1,8 @@
+@layer ps.components {
+  ps-app-shell { display: block; }
+  .ps-shell { display: flex; flex-direction: column; }
+  .ps-shell__body { display: grid; grid-template-columns: 1fr; }
+  .ps-shell__top { display: flex; gap: var(--spacing-md); align-items: center; background: var(--surface-primary); border-bottom: var(--stroke-sm) solid var(--border-primary); min-height: var(--control-height-lg); padding-inline: var(--spacing-md); }
+  .ps-shell__nav { background: var(--surface-primary); border-right: var(--stroke-sm) solid var(--border-primary); padding: var(--spacing-md); }
+  @media (min-width: 1024px) { .ps-shell__body { grid-template-columns: auto 1fr; } }
+}

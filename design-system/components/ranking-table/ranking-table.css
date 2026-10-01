@@ -1,0 +1,4 @@
+@layer ps.components {
+  .ps-ranking-row[aria-current="true"] td { background: var(--surface-selected); }
+  .ps-ranking-pos { font-size: var(--fontsize-xl); line-height: var(--lineheight-xl); font-weight: var(--type-font-weight-semibold); font-variant-numeric: tabular-nums; }
+}

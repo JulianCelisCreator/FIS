@@ -1,0 +1,5 @@
+@layer ps.components {
+  ps-group-card { display: block; container-type: inline-size; }
+  .ps-group-card { background: var(--surface-primary); border: var(--stroke-sm) solid var(--border-primary); border-radius: var(--radius-md); padding: var(--spacing-md); display: flex; flex-direction: column; gap: var(--spacing-sm); }
+  .ps-group-card[aria-disabled="true"] { background: var(--surface-subtle); }
+}

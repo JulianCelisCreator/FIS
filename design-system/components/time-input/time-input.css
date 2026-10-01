@@ -1,0 +1,3 @@
+@layer ps.components {
+  .ps-time-segments { display: flex; gap: var(--spacing-2xs); align-items: center; font-variant-numeric: tabular-nums; }
+}

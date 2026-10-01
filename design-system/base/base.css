@@ -1,0 +1,58 @@
+@layer ps.base {
+  html { font-family: var(--type-font-family-base); }
+  body {
+    background: var(--surface-page);
+    color: var(--text-body);
+    font-size: var(--fontsize-md);
+    line-height: var(--lineheight-md);
+  }
+
+  /* Alias responsivos (derivados, no tokens nuevos — spec §6.5) */
+  :root {
+    --control-height: var(--control-height-lg);
+    --layout-columns: var(--layout-columns-mobile);
+    --layout-margin: var(--layout-margin-mobile);
+    --layout-gutter: var(--layout-gutter-mobile);
+  }
+  @media (min-width: 768px) {
+    :root {
+      --control-height: var(--control-height-md);
+      --layout-columns: var(--layout-columns-tablet);
+      --layout-margin: var(--layout-margin-tablet);
+      --layout-gutter: var(--layout-gutter-tablet);
+    }
+  }
+  @media (min-width: 1024px) {
+    :root {
+      --layout-columns: var(--layout-columns-desktop);
+      --layout-margin: var(--layout-margin-desktop);
+      --layout-gutter: var(--layout-gutter-desktop);
+    }
+  }
+
+  /* Foco global visible */
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: var(--stroke-md) solid var(--border-focus);
+    outline-offset: 2px;
+  }
+
+  /* Respeta movimiento reducido: único movimiento permitido es el spinner */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  /* Reserva espacio pre-registro de Custom Elements (anti-parpadeo, spec §13) */
+  ps-icon:not(:defined), ps-status-badge:not(:defined), ps-field:not(:defined),
+  ps-dialog:not(:defined), ps-tabs:not(:defined), ps-menu:not(:defined),
+  ps-tooltip:not(:defined), ps-data-table:not(:defined), ps-capacity-meter:not(:defined),
+  ps-filter-bar:not(:defined), ps-pagination:not(:defined), ps-app-shell:not(:defined),
+  ps-calendar:not(:defined), ps-combobox:not(:defined), ps-toast-region:not(:defined),
+  ps-avatar:not(:defined), ps-time-display:not(:defined), ps-currency-display:not(:defined),
+  ps-time-input:not(:defined), ps-currency-input:not(:defined), ps-date-input:not(:defined),
+  ps-player-switcher:not(:defined), ps-validation-checklist:not(:defined),
+  ps-group-card:not(:defined), ps-export-menu:not(:defined) {
+    display: inline-block;
+    min-height: var(--control-height-md);
+    visibility: hidden;
+  }
+}

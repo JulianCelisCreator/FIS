@@ -1,0 +1,3 @@
+@layer ps.components {
+  ps-tooltip .ps-tooltip__bubble { background: var(--surface-action); color: var(--text-on-action); border-radius: var(--radius-sm); padding: var(--spacing-xs); font-size: var(--fontsize-xs); line-height: var(--lineheight-xs); font-weight: var(--type-font-weight-regular); }
+}

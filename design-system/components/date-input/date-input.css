@@ -1,0 +1,4 @@
+@layer ps.components {
+  .ps-date-range { display: flex; gap: var(--spacing-sm); }
+  @media (min-width: 768px) { .ps-date-range { gap: var(--spacing-md); } }
+}

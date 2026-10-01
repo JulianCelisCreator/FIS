@@ -1,0 +1,4 @@
+@layer ps.components {
+  ps-filter-bar .ps-filter-bar { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); background: var(--surface-subtle); padding: var(--spacing-md); border-radius: var(--radius-md); }
+  .ps-chip { display: inline-flex; gap: var(--spacing-2xs); align-items: center; background: var(--surface-primary); border: var(--stroke-sm) solid var(--border-primary); border-radius: var(--radius-full); padding-inline: var(--spacing-sm); min-height: var(--control-height-sm); font-size: var(--fontsize-sm); line-height: var(--lineheight-sm); font-weight: var(--type-font-weight-regular); }
+}

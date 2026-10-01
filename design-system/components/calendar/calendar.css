@@ -1,0 +1,9 @@
+@layer ps.components {
+  ps-calendar { display: block; }
+  .ps-calendar__grid { display: grid; grid-template-columns: 1fr; gap: var(--spacing-2xs); }
+  .ps-calendar__day { min-height: var(--control-height-lg); border: var(--stroke-sm) solid var(--border-primary); border-radius: var(--radius-sm); padding: var(--spacing-xs); background: var(--surface-primary); }
+  .ps-calendar__day[aria-current="date"] { border-color: var(--border-action); }
+  .ps-event--class { background: var(--surface-subtle); color: var(--text-body); }
+  .ps-event--competition { background: var(--surface-info); color: var(--text-info); }
+  @media (min-width: 640px) { .ps-calendar__grid { grid-template-columns: repeat(7, 1fr); } }
+}

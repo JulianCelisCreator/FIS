@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Iniciar sesión — Escuela de patinaje</title>
+<link rel="stylesheet" href="../../design-system/ps.css">
+<style>
+  /* Estilos SOLO de esta página de ejemplo (no del DS): centran la columna. */
+  .ps-auth { max-width: 26rem; margin-inline: auto; padding-block: var(--spacing-2xl); }
+  .ps-auth__head { text-align: center; }
+  ps-tabs .ps-tabs__list { justify-content: center; margin-bottom: var(--spacing-lg); }
+  .ps-auth__submit { width: 100%; }
+  .ps-auth__alt { text-align: center; }
+  .ps-auth__trace { margin-top: var(--spacing-2xl); text-align: center; }
+</style>
+</head>
+<body>
+<ps-app-shell>
+  <span data-slot="brand">Escuela de patinaje</span>
+  <div data-slot="content">
+    <main class="ps-container">
+      <div class="ps-auth">
+        <div class="ps-auth__head ps-stack">
+          <h1>Iniciar sesión</h1>
+          <p class="ps-text-body-sm">Tu rol define qué verás al entrar.</p>
+        </div>
+
+        <ps-tabs>
+          <div class="ps-tabs__list" role="tablist" aria-label="Ingresar o registrarse">
+            <button class="ps-tabs__tab" role="tab" aria-selected="true" data-panel="ingresar">Ingresar</button>
+            <button class="ps-tabs__tab" role="tab" aria-selected="false" data-panel="registro">Registrarse</button>
+          </div>
+        </ps-tabs>
+
+        <section id="panel-ingresar" class="ps-auth__form" role="tabpanel" aria-label="Ingresar">
+          <form class="ps-stack" novalidate>
+            <ps-field label="Correo electrónico" required for="correo">
+              <input id="correo" class="ps-input" type="email" autocomplete="email" placeholder="sofia@example.com">
+            </ps-field>
+            <ps-field label="Contraseña" required for="clave">
+              <input id="clave" class="ps-input" type="password" autocomplete="current-password" placeholder="••••••••">
+            </ps-field>
+            <ps-field label="Soy" required for="rol">
+              <select id="rol" class="ps-select">
+                <option value="patinador">Patinador</option>
+                <option value="acudiente">Acudiente</option>
+                <option value="profesor">Profesor</option>
+                <option value="visitante">Visitante</option>
+              </select>
+            </ps-field>
+            <button class="ps-button ps-button--primary ps-button--lg ps-auth__submit" type="submit">Ingresar</button>
+            <p class="ps-auth__alt"><a class="ps-link" href="#">¿Olvidaste tu contraseña?</a></p>
+          </form>
+        </section>
+
+        <section id="panel-registro" class="ps-auth__form" role="tabpanel" aria-label="Registrarse" hidden>
+          <form class="ps-stack" novalidate>
+            <ps-field label="Nombre completo" required for="nombre">
+              <input id="nombre" class="ps-input" type="text" autocomplete="name" placeholder="Sofía Ramírez">
+            </ps-field>
+            <ps-field label="Correo electrónico" required for="correo-r">
+              <input id="correo-r" class="ps-input" type="email" autocomplete="email" placeholder="sofia@example.com">
+            </ps-field>
+            <ps-field label="Me registro como" required help="Si registras a un menor de edad, necesitarás su autorización y su póliza vigente." for="rol-r">
+              <select id="rol-r" class="ps-select">
+                <option value="patinador">Patinador</option>
+                <option value="acudiente">Acudiente</option>
+                <option value="profesor">Profesor</option>
+                <option value="visitante">Visitante</option>
+              </select>
+            </ps-field>
+            <button class="ps-button ps-button--primary ps-button--lg ps-auth__submit" type="submit">Crear cuenta</button>
+          </form>
+        </section>
+
+        <p class="ps-text-caption ps-auth__trace">Ejemplo RF M1-01 · AppShell pública, Tabs, FormField + TextInput + Select, Button primary, Link.</p>
+      </div>
+    </main>
+  </div>
+</ps-app-shell>
+<script type="module">
+import "../../design-system/ps.js";
+const tabs = document.querySelectorAll('ps-tabs [role="tab"]');
+const panels = { ingresar: document.getElementById("panel-ingresar"), registro: document.getElementById("panel-registro") };
+tabs.forEach((t) => t.addEventListener("click", () => {
+  tabs.forEach((o) => o.setAttribute("aria-selected", String(o === t)));
+  panels.ingresar.hidden = t.dataset.panel !== "ingresar";
+  panels.registro.hidden = t.dataset.panel !== "registro";
+}));
+</script>
+</body>
+</html>

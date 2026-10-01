@@ -1,0 +1,10 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Inputs · ps</title><link rel="stylesheet" href="../ps.css"></head>
+<body><div class="ps-container ps-stack">
+<a class="ps-link" href="./index.html">← Catálogo</a>
+<h1>Formularios</h1><p class="ps-text-body-sm">RF: M2-01, M5-01, M5-09/10, M4-13, M6-07. Valor canónico en hidden (ADR-07).</p>
+<ps-field label="Nombre del patinador" required help="Como aparece en el documento"><input class="ps-input" value="Sofía Ramírez"></ps-field>
+<ps-field label="Tarifa del plan" required><ps-currency-input name="tarifa" value="85000"></ps-currency-input></ps-field>
+<ps-field label="Tiempo" help="MM:SS.mmm"><ps-time-input name="tiempo" value="83450"></ps-time-input></ps-field>
+<ps-field label="Fecha de pago" error="Ingresa una fecha no posterior a hoy"><input class="ps-input" value="21/09/2026" aria-invalid="true"></ps-field>
+<form class="ps-transaction-fields"><ps-currency-input name="monto" value="85000"></ps-currency-input><ps-date-input name="fecha"></ps-date-input></form>
+</div><script type="module" src="../ps.js"></script></body></html>

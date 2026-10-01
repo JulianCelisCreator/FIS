@@ -1,0 +1,22 @@
+@layer ps.base {
+  .ps-text-heading-h1 { font-size: var(--fontsize-2xl); line-height: var(--lineheight-2xl); font-weight: var(--type-font-weight-bold); color: var(--text-headings); }
+  .ps-text-heading-h2 { font-size: var(--fontsize-xl); line-height: var(--lineheight-xl); font-weight: var(--type-font-weight-semibold); color: var(--text-headings); }
+  .ps-text-heading-h3 { font-size: var(--fontsize-lg); line-height: var(--lineheight-lg); font-weight: var(--type-font-weight-semibold); color: var(--text-headings); }
+  .ps-text-heading-h4 { font-size: var(--fontsize-lg); line-height: var(--lineheight-lg); font-weight: var(--type-font-weight-semibold); color: var(--text-headings); }
+  .ps-text-heading-h5 { font-size: var(--fontsize-md); line-height: var(--lineheight-md); font-weight: var(--type-font-weight-semibold); color: var(--text-headings); }
+  .ps-text-body-md { font-size: var(--fontsize-md); line-height: var(--lineheight-md); font-weight: var(--type-font-weight-regular); color: var(--text-body); }
+  .ps-text-body-sm { font-size: var(--fontsize-sm); line-height: var(--lineheight-sm); font-weight: var(--type-font-weight-regular); color: var(--text-body); }
+  .ps-text-label { font-size: var(--fontsize-sm); line-height: var(--lineheight-sm); font-weight: var(--type-font-weight-medium); color: var(--text-body); }
+  .ps-text-caption { font-size: var(--fontsize-xs); line-height: var(--lineheight-xs); font-weight: var(--type-font-weight-regular); color: var(--text-muted); }
+  .ps-text-numeric-md { font-size: var(--fontsize-md); line-height: var(--lineheight-md); font-weight: var(--type-font-weight-medium); font-variant-numeric: tabular-nums; color: var(--text-body); }
+  .ps-text-numeric-lg { font-size: var(--fontsize-xl); line-height: var(--lineheight-xl); font-weight: var(--type-font-weight-semibold); font-variant-numeric: tabular-nums; color: var(--text-headings); }
+
+  h1 { font-size: var(--fontsize-2xl); line-height: var(--lineheight-2xl); font-weight: var(--type-font-weight-bold); color: var(--text-headings); }
+  h2 { font-size: var(--fontsize-xl); line-height: var(--lineheight-xl); font-weight: var(--type-font-weight-semibold); color: var(--text-headings); }
+  h3 { font-size: var(--fontsize-lg); line-height: var(--lineheight-lg); font-weight: var(--type-font-weight-semibold); color: var(--text-headings); }
+  @media (min-width: 768px) {
+    h1, .ps-text-heading-h1 { font-size: var(--fontsize-3xl); line-height: var(--lineheight-3xl); }
+    h2, .ps-text-heading-h2 { font-size: var(--fontsize-2xl); line-height: var(--lineheight-2xl); }
+    h3, .ps-text-heading-h3 { font-size: var(--fontsize-xl); line-height: var(--lineheight-xl); }
+  }
+}

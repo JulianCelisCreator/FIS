@@ -1,0 +1,10 @@
+@layer ps.components {
+  .ps-avatar, ps-avatar {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: var(--control-height-md); height: var(--control-height-md);
+    border-radius: var(--radius-full); background: var(--surface-subtle); color: var(--text-muted);
+    font-size: var(--fontsize-sm); line-height: var(--lineheight-sm); font-weight: var(--type-font-weight-semibold);
+  }
+  .ps-avatar--sm { width: var(--control-height-sm); height: var(--control-height-sm); }
+  .ps-avatar--lg { width: var(--control-height-lg); height: var(--control-height-lg); }
+}

@@ -1,0 +1,4 @@
+@layer ps.components {
+  ps-pagination .ps-pagination { display: flex; gap: var(--spacing-xs); align-items: center; }
+  .ps-pagination__info { font-size: var(--fontsize-sm); line-height: var(--lineheight-sm); font-weight: var(--type-font-weight-regular); color: var(--text-muted); }
+}

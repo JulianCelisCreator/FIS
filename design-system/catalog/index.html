@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catálogo · Design System Patinaje (ps)</title>
+<link rel="stylesheet" href="../ps.css">
+<style>body{padding:var(--spacing-lg)}</style>
+</head>
+<body>
+<p class="ps-text-caption">Servir por HTTP local: <code>python3 -m http.server</code> desde la raíz. No funciona con <code>file://</code> (spec ADR-06).</p>
+<h1>Catálogo vivo · ps</h1>
+<p class="ps-text-body-sm">Fuente de verdad: skill <code>patinaje-design-system</code> (tokens.md, components.md, status-and-formats.md). Esta spec implementa <em>cómo</em> se construye, sin redefinir tokens ni componentes.</p>
+<nav aria-label="Componentes"><ul id="nav" class="ps-cluster"></ul></nav>
+<main id="main" class="ps-stack"></main>
+<script type="module">
+const pages = ["tokens","button","badge","inputs","dialog","data-table","capacity-meter","calendar"];
+const nav = document.getElementById("nav");
+for (const p of pages) {
+  const li = document.createElement("li");
+  li.innerHTML = `<a class="ps-link" href="./${p}.html">${p}</a>`;
+  nav.append(li);
+}
+</script>
+</body>
+</html>

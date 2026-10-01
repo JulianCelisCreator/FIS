@@ -1,0 +1,3 @@
+@layer ps.components {
+  ps-export-menu { display: inline-block; }
+}

@@ -1,0 +1,7 @@
+@layer ps.components {
+  .ps-checkbox, .ps-radio { width: var(--icon-size-md); height: var(--icon-size-md); accent-color: var(--surface-action); }
+  .ps-check-row { display: flex; gap: var(--spacing-sm); align-items: flex-start; }
+  .ps-switch { position: relative; width: var(--control-height-lg); height: var(--control-height-sm); }
+  .ps-radio-group { display: flex; flex-direction: column; gap: var(--spacing-sm); }
+  .ps-radio-group--horizontal { flex-direction: row; gap: var(--spacing-md); }
+}

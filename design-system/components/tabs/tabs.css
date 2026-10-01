@@ -1,0 +1,5 @@
+@layer ps.components {
+  ps-tabs .ps-tabs__list { display: flex; gap: var(--spacing-sm); border-bottom: var(--stroke-sm) solid var(--border-primary); overflow-x: auto; }
+  ps-tabs .ps-tabs__tab { background: transparent; border: none; border-bottom: var(--stroke-md) solid transparent; cursor: pointer; min-height: var(--control-height); padding-inline: var(--spacing-sm); color: var(--text-muted); font-size: var(--fontsize-sm); line-height: var(--lineheight-sm); font-weight: var(--type-font-weight-medium); }
+  ps-tabs .ps-tabs__tab[aria-selected="true"] { color: var(--text-headings); border-bottom: var(--stroke-md) solid var(--border-action); }
+}

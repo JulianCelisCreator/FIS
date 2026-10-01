@@ -1,0 +1,6 @@
+@layer ps.components {
+  ps-toast-region { position: fixed; display: flex; flex-direction: column; gap: var(--spacing-sm); padding: var(--spacing-md); }
+  .ps-toast { background: var(--surface-primary); border: var(--stroke-sm) solid var(--border-primary); border-radius: var(--radius-md); box-shadow: var(--shadow-overlay); padding: var(--spacing-md); }
+  .ps-toast--success { border-color: var(--border-success); }
+  .ps-toast--error { border-color: var(--border-error); }
+}
