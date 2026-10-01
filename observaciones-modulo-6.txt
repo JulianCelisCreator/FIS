@@ -1,0 +1,102 @@
+OBSERVACIONES AL MÓDULO 6
+Administración, Reportes, Finanzas e Inventario (sección 4.6)
+Documento: Lista de Requerimientos Final v1.0 (21/09/2026)
+Revisión hecha desde el módulo 5 (Planes, Tarifas y Pagos)
+Fecha: 30/09/2026
+
+Objetivo: señalar los requisitos del módulo 6 cuyo alcance es más amplio de
+lo que dice su enunciado, las ambigüedades y las contradicciones con el
+módulo 5. Van ordenados del más grave al menos grave.
+
+======================================================================
+1. RF-M6-04  Generación de reportes financieros filtrados
+   (el de mayor alcance)
+======================================================================
+- No es atómico: son cuatro reportes en un solo requisito (ingresos, pagos
+  recibidos, cartera pendiente y movimientos de uniformes).
+- "Ingresos" y "pagos recibidos" no se diferencian. Si son lo mismo, sobra
+  uno; si no, hay que definir qué cuenta como ingreso.
+- Depende de "requisitos de facturación", que no existen en el documento.
+  Además, RF-M5-14 excluye de forma explícita la factura electrónica.
+- "Cartera pendiente para un período" es ambiguo: la cartera es el saldo a
+  una fecha, no un acumulado de un rango de fechas.
+- El nombre del módulo ("Finanzas") y el campo "costo" de RF-M6-06 abren la
+  puerta a funciones contables (márgenes, utilidad, egresos) que ningún
+  requisito pide.
+
+======================================================================
+2. RF-M6-08  Registro de préstamo y entrega de uniformes
+======================================================================
+- Es un subsistema completo: préstamo, devolución, estado de la prenda al
+  entregar y al recibir, préstamos vencidos, pérdida y daño.
+- Obliga a controlar cada prenda por separado ("la unidad prestada queda
+  asociada al patinador", "estado de la prenda"), mientras que RF-M6-06
+  maneja el inventario por cantidad. Es un cambio grande de detalle.
+- No dice qué pasa con una pérdida o un daño. Si se le cobra al acudiente,
+  debería generar un cobro en el módulo 5, y esa integración no está en
+  ningún requisito.
+
+======================================================================
+3. RF-M6-07  Registro de venta de uniformes
+======================================================================
+- En la práctica es un punto de venta: varios ítems, medio de pago y
+  comprobante.
+- Las restricciones hablan de devoluciones y "ajustes autorizados", pero
+  esas funciones no tienen requisito propio ni se dice quién las autoriza.
+- No se define la relación con el módulo 5:
+    * ¿El comprobante de venta usa el mismo consecutivo que RF-M5-14?
+    * ¿Se puede vender a crédito? Si sí, ¿la venta entra a la cartera?
+
+======================================================================
+4. RF-M6-06  Registro y control de uniformes
+======================================================================
+- No dice cómo entran las existencias (compras a proveedores). Solo permite
+  "actualizar" la cantidad a mano, lo que choca con la trazabilidad que
+  exigen RF-M6-07 y RF-M6-08.
+- La descripción dice "registrar y actualizar", pero las restricciones
+  hablan también de desactivar y eliminar.
+
+======================================================================
+5. RF-M6-01  Visualización del panel general administrativo
+======================================================================
+- Reúne datos de todos los módulos (patinadores, grupos, profesores,
+  cartera, ingresos, uniformes), así que solo se puede construir y probar
+  al final del proyecto.
+- Toma "profesores activos" de RF-M6-02 (personal), pero los profesores
+  vienen de los módulos 1 y 3. Quedan dos fuentes para el mismo dato.
+
+======================================================================
+6. RF-M6-02  Registro y administración de personal
+======================================================================
+- No es atómico: son cuatro operaciones en un requisito (registrar,
+  consultar, actualizar y desactivar).
+- "Datos laborales" no está definido y puede crecer hacia recursos humanos
+  (contratos, nómina).
+- Se cruza con RF-M1-03 (el Administrador crea las cuentas de profesor) y
+  con el rol Fisioterapeuta, que no aparece en RF-M1-01.
+
+======================================================================
+7. CONTRADICCIONES CON EL MÓDULO 5
+======================================================================
+- Qué puede hacer el Contador: RF-M6-03 y RF-M6-04 dicen que "solo puede
+  consultar información financiera", pero RF-M5-09 y RF-M5-10 le permiten
+  registrar pagos.
+- Nivel de detalle de los permisos: el módulo 5 dice "tener habilitados los
+  permisos correspondientes (RF-M6-03)", como si hubiera permisos por
+  función, pero RF-M6-03 solo asigna un rol completo.
+- RF-M6-03 bloquea "matrículas", algo que no existe en ningún módulo.
+- RF-M6-05 dice que el archivo no debe incluir "datos personales
+  innecesarios", pero no dice cuáles son, así que no se puede verificar.
+
+======================================================================
+8. RECOMENDACIONES
+======================================================================
+1. Separar RF-M6-04 en un requisito por reporte y quitar la dependencia de
+   "facturación".
+2. Priorizar el módulo: hoy los 8 requisitos están en prioridad "Alta", así
+   que en la práctica no hay prioridades. Se sugiere bajar RF-M6-07 y sobre
+   todo RF-M6-08 a "Could" o "Won't" en esta versión.
+3. Agregar un requisito de entrada de inventario, o limitar RF-M6-06 a
+   ajustes manuales con motivo registrado.
+4. Acordar entre los grupos de los módulos 5 y 6 qué puede hacer el
+   Contador, y corregir los requisitos de ambos módulos para que coincidan.

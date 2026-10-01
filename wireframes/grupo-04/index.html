@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wireframes Grupo 04 — Módulo 5</title>
+  <link rel="stylesheet" href="assets/wireframe.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo"><div class="logo-box">LOGO</div> Escuela de Patinaje · Wireframes Grupo 04</div>
+  </header>
+
+  <main class="main" style="max-width:1100px;margin:0 auto">
+    <div class="page-head">
+      <div>
+        <h1>Módulo 5: Planes, Tarifas y Pagos</h1>
+        <p>Wireframes de baja fidelidad (HTML/CSS) de la sección 4.5 del documento de requerimientos (RF-M5-01 a RF-M5-18).</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Páginas</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Página</th><th>Rol que la usa</th><th>Requisitos</th></tr></thead>
+          <tbody>
+            <tr><td><a href="planes/planes.html">Planes y tarifas</a></td><td>Administrador</td><td>RF-M5-01, 02, 03, 04, 05</td></tr>
+            <tr><td><a href="oferta-planes/oferta-planes.html">Oferta de planes</a></td><td>Contador, Acudiente, Patinador</td><td>RF-M5-05</td></tr>
+            <tr><td><a href="asignar-plan/asignar-plan.html">Asignar plan</a> · <a href="asignar-plan/asignar-plan.html#cambiar">Cambiar plan</a></td><td>Administrador, Acudiente, Patinador (mayor de edad)</td><td>RF-M5-06, 07, 08</td></tr>
+            <tr><td><a href="cartera/cartera.html">Cartera</a></td><td>Administrador, Contador</td><td>RF-M5-12, 13</td></tr>
+            <tr><td><a href="registrar-pago/registrar-pago.html">Registrar pago</a> · <a href="registrar-pago/registrar-pago.html#sesion">por sesión</a></td><td>Administrador, Contador</td><td>RF-M5-09, 10, 14</td></tr>
+            <tr><td><a href="historial-pagos/historial-pagos.html">Historial de pagos</a></td><td>Administrador, Contador</td><td>RF-M5-11, 15, 16</td></tr>
+            <tr><td><a href="comprobante/comprobante.html">Comprobante de pago</a></td><td>Todos los roles con acceso al pago</td><td>RF-M5-14, 15</td></tr>
+            <tr><td><a href="mis-pagos/mis-pagos.html">Pagos de mis patinadores</a></td><td>Acudiente</td><td>RF-M5-15, 17</td></tr>
+            <tr><td><a href="mis-pagos/mis-pagos-patinador.html">Mis pagos</a></td><td>Patinador (mayor de edad)</td><td>RF-M5-15, 18</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Requisitos sin pantalla propia</h2>
+      <p class="mt-0">Son procesos automáticos; en los wireframes solo se ven sus resultados:</p>
+      <ul>
+        <li><strong>RF-M5-08 Generación automática de cobros:</strong> los cobros aparecen en Cartera y en Mis pagos; el primero se anuncia al asignar el plan.</li>
+        <li><strong>RF-M5-12 Cálculo del estado de cartera:</strong> se muestra con los estados <span class="badge ok">Al día</span> <span class="badge pending">Pendiente</span> <span class="badge overdue">Vencido</span>.</li>
+        <li><strong>RF-M5-14 Comprobante:</strong> se genera al registrar el pago (modal de confirmación → comprobante).</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Convenciones del wireframe</h2>
+      <ul class="mt-0">
+        <li><span class="rf">RF-M5-xx</span>: requisito que cubre ese elemento.</li>
+        <li><span class="note" style="display:inline-block;margin:0;padding:2px 8px">Recuadro amarillo</span>: nota de diseño o regla de negocio (no forma parte de la interfaz).</li>
+        <li>Los estados se distinguen por forma y texto (● ◐ ▲ ○), no solo por color.</li>
+        <li>Los botones que abren un modal (Editar, Anular, Ver cobros…) funcionan sin instalar nada. Achique la ventana para ver la versión móvil.</li>
+      </ul>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrar pago — Grupo 04</title>
+  <link rel="stylesheet" href="../assets/wireframe.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo"><div class="logo-box">LOGO</div> Escuela de Patinaje</div>
+    <div class="user-chip"><span class="role-tag">Contador</span><span class="who">Jorge Méndez</span><div class="avatar"></div></div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar">
+      <h4>Pagos (Admin / Contador)</h4>
+      <a href="../planes/planes.html">Planes y tarifas</a>
+      <a href="../asignar-plan/asignar-plan.html">Asignar / cambiar plan</a>
+      <a href="../cartera/cartera.html">Cartera</a>
+      <a href="../registrar-pago/registrar-pago.html" class="active">Registrar pago</a>
+      <a href="../historial-pagos/historial-pagos.html">Historial de pagos</a>
+      <h4>Vistas de usuario</h4>
+      <a href="../oferta-planes/oferta-planes.html">Oferta de planes</a>
+      <a href="../mis-pagos/mis-pagos.html">Mis pagos (Acudiente)</a>
+      <a href="../mis-pagos/mis-pagos-patinador.html">Mis pagos (Patinador)</a>
+      <h4>Wireframes</h4>
+      <a href="../index.html">← Índice</a>
+    </nav>
+
+    <main class="main">
+      <div class="page-head">
+        <div>
+          <div class="breadcrumb">Pagos / Registrar pago</div>
+          <h1>Registrar pago</h1>
+          <p>Registro manual de un pago recibido en la sede (efectivo, transferencia o consignación).</p>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <a href="#cobro" data-tab="cobro" class="active">Pago de un cobro mensual <span class="rf">RF-M5-09</span></a>
+        <a href="#sesion" data-tab="sesion">Pago por sesión <span class="rf">RF-M5-10</span></a>
+      </div>
+
+      <!-- ===== Panel: SESIÓN ===== -->
+      <section id="sesion" class="panel">
+        <div class="grid-2">
+          <div class="card">
+            <h3>Patinador</h3>
+            <label class="field">Buscar patinador con plan de día único
+              <input class="input" value="Juan Pablo Rojas">
+            </label>
+            <dl class="kv" style="margin-top:14px">
+              <dt>Plan</dt><dd>Clase suelta (día único)</dd>
+              <dt>Tarifa vigente</dt><dd>$35.000 por sesión</dd>
+              <dt>Acudiente</dt><dd class="muted">— (mayor de edad)</dd>
+            </dl>
+          </div>
+
+          <div class="card">
+            <h3>Datos del pago</h3>
+            <form class="form-grid">
+              <label class="field">Número de sesiones *
+                <input class="input" type="number" value="4" min="1">
+                <span class="hint">Entero mayor o igual a 1.</span>
+              </label>
+              <label class="field">Valor a cobrar
+                <input class="input" value="$140.000" readonly>
+                <span class="hint">4 × $35.000</span>
+              </label>
+              <label class="field">Fecha de pago *
+                <input class="input" type="date" value="2026-09-30">
+              </label>
+              <label class="field">Medio de pago *
+                <select class="input"><option>Efectivo</option><option>Transferencia</option><option>Consignación</option></select>
+              </label>
+              <label class="field full">Referencia de la transacción <span class="hint">(opcional)</span>
+                <input class="input" placeholder="N.º de transferencia o consignación">
+              </label>
+            </form>
+          </div>
+        </div>
+        <div class="note">El sistema crea un cobro por $140.000 que queda <strong>Pagado</strong> de una vez (no deja saldo) y genera el comprobante.</div>
+        <div class="actions" style="justify-content:flex-end">
+          <a href="#" class="btn">Cancelar</a>
+          <a href="#confirmar" class="btn primary">Registrar pago</a>
+        </div>
+      </section>
+
+      <!-- ===== Panel: COBRO (por defecto) ===== -->
+      <section id="cobro" class="panel default">
+        <div class="grid-2">
+          <div class="card">
+            <h3>1. Patinador y cobro</h3>
+            <label class="field">Buscar patinador o acudiente
+              <input class="input" value="Samuel Herrera Díaz">
+            </label>
+            <p class="muted" style="font-size:13px">Competencia 6 días · Acudiente: Luis Herrera · <span class="badge overdue">Vencido</span></p>
+
+            <div class="radio-list">
+              <label><input type="radio" name="cobro" checked>
+                <span><strong>Agosto 2026</strong> · saldo $300.000<small>Valor $300.000 · límite 10/08/2026 · Vencido</small></span></label>
+              <label><input type="radio" name="cobro">
+                <span><strong>Septiembre 2026</strong> · saldo $150.000<small>Valor $300.000 · abonado $150.000 · límite 10/09/2026 · Vencido</small></span></label>
+            </div>
+            <p class="muted" style="font-size:13px">Solo aparecen los cobros que tienen saldo pendiente.</p>
+          </div>
+
+          <div class="card">
+            <h3>2. Datos del pago</h3>
+            <form class="form-grid">
+              <label class="field">Monto (COP) *
+                <input class="input" value="$200.000">
+                <span class="hint">Máximo $300.000 (saldo del cobro).</span>
+              </label>
+              <label class="field">Fecha de pago *
+                <input class="input" type="date" value="2026-09-30">
+                <span class="hint">No puede ser posterior a hoy.</span>
+              </label>
+              <label class="field full">Medio de pago *
+                <select class="input"><option>Seleccione…</option><option>Efectivo</option><option selected>Transferencia</option><option>Consignación</option></select>
+              </label>
+              <label class="field full">Referencia de la transacción <span class="hint">(opcional)</span>
+                <input class="input" value="TRF-88210345">
+              </label>
+            </form>
+
+            <div class="card" style="background:var(--fill);margin:16px 0 0">
+              <dl class="kv">
+                <dt>Saldo actual</dt><dd>$300.000</dd>
+                <dt>Este pago</dt><dd>− $200.000</dd>
+                <dt>Saldo restante</dt><dd>$100.000 (pago parcial)</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <div class="note">
+          <strong>Validaciones:</strong> obligatorios el cobro, el monto, la fecha y el medio de pago; el monto debe ser &gt; 0 y ≤ saldo; se permiten pagos parciales.
+          <br>Un pago registrado <strong>no se puede editar ni borrar</strong>; para corregirlo, el Administrador lo anula desde el historial (RF-M5-11). No hay pagos en línea.
+        </div>
+        <div class="actions" style="justify-content:flex-end">
+          <a href="#" class="btn">Cancelar</a>
+          <a href="#confirmar" class="btn primary">Registrar pago</a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal: confirmación -->
+  <div class="modal" id="confirmar">
+    <div class="modal-box">
+      <a href="#" class="close" aria-label="Cerrar">×</a>
+      <h2>✓ Pago registrado</h2>
+      <p class="muted mt-0">Comprobante <strong>N.º 000482</strong> generado. <span class="rf">RF-M5-14</span></p>
+      <dl class="kv">
+        <dt>Patinador</dt><dd>Samuel Herrera Díaz</dd>
+        <dt>Cobro</dt><dd>Agosto 2026</dd>
+        <dt>Monto</dt><dd>$200.000 · Transferencia</dd>
+        <dt>Saldo restante</dt><dd>$100.000</dd>
+        <dt>Estado de cartera</dt><dd><span class="badge overdue">Vencido</span> (recalculado)</dd>
+      </dl>
+      <div class="modal-foot">
+        <a href="#" class="btn">Registrar otro pago</a>
+        <a href="../comprobante/comprobante.html" class="btn primary">Ver comprobante</a>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .panel { display: none; }
+    .panel.default { display: block; }
+    .panel:target { display: block; }
+    .panel:target ~ .panel.default { display: none; }
+  </style>
+  <script>
+    // Marca la pestaña activa según el ancla de la URL
+    function syncTabs() {
+      var id = location.hash.slice(1);
+      if (id !== 'sesion') id = 'cobro';
+      document.querySelectorAll('.tabs a').forEach(function (a) {
+        a.classList.toggle('active', a.dataset.tab === id);
+      });
+    }
+    window.addEventListener('hashchange', syncTabs);
+    syncTabs();
+  </script>
+</body>
+</html>

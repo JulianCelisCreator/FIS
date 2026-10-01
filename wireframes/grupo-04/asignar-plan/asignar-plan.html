@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asignar o cambiar plan — Grupo 04</title>
+  <link rel="stylesheet" href="../assets/wireframe.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo"><div class="logo-box">LOGO</div> Escuela de Patinaje</div>
+    <div class="user-chip"><span class="role-tag">Administrador</span><span class="who">Andrea López</span><div class="avatar"></div></div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar">
+      <h4>Pagos (Admin / Contador)</h4>
+      <a href="../planes/planes.html">Planes y tarifas</a>
+      <a href="../asignar-plan/asignar-plan.html" class="active">Asignar / cambiar plan</a>
+      <a href="../cartera/cartera.html">Cartera</a>
+      <a href="../registrar-pago/registrar-pago.html">Registrar pago</a>
+      <a href="../historial-pagos/historial-pagos.html">Historial de pagos</a>
+      <h4>Vistas de usuario</h4>
+      <a href="../oferta-planes/oferta-planes.html">Oferta de planes</a>
+      <a href="../mis-pagos/mis-pagos.html">Mis pagos (Acudiente)</a>
+      <a href="../mis-pagos/mis-pagos-patinador.html">Mis pagos (Patinador)</a>
+      <h4>Wireframes</h4>
+      <a href="../index.html">← Índice</a>
+    </nav>
+
+    <main class="main">
+      <div class="page-head">
+        <div>
+          <div class="breadcrumb">Pagos / Asignar o cambiar plan</div>
+          <h1>Asignar o cambiar plan</h1>
+          <p>Vincula a un patinador con un plan activo o cambia el que tiene. <span class="rf">RF-M5-06</span> <span class="rf">RF-M5-07</span></p>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <a href="#asignar" data-tab="asignar" class="active">Asignar plan (patinador sin plan)</a>
+        <a href="#cambiar" data-tab="cambiar">Cambiar plan</a>
+      </div>
+
+      <!-- ===== Panel: CAMBIAR ===== -->
+      <section id="cambiar" class="panel">
+        <div class="grid-2">
+          <div class="card">
+            <h3>1. Patinador</h3>
+            <label class="field">Buscar patinador
+              <input class="input" value="Sofía Ramírez Torres">
+            </label>
+            <dl class="kv" style="margin-top:14px">
+              <dt>Documento</dt><dd>TI 1.023.456.789</dd>
+              <dt>Edad</dt><dd>12 años (menor de edad)</dd>
+              <dt>Acudiente</dt><dd>Carolina Torres</dd>
+              <dt>Plan actual</dt><dd>Formación 3 días · $180.000/mes</dd>
+              <dt>Desde</dt><dd>01/02/2026</dd>
+              <dt>Grupo actual</dt><dd>Intermedio B · Lun–Mié–Vie 4:00 p. m.</dd>
+            </dl>
+          </div>
+
+          <div class="card">
+            <h3>Historial de planes</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Plan</th><th>Desde</th><th>Hasta</th></tr></thead>
+                <tbody>
+                  <tr><td>Formación 3 días</td><td>01/02/2026</td><td>Actual</td></tr>
+                  <tr><td>Clase suelta</td><td>15/01/2026</td><td>31/01/2026</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>2. Nuevo plan</h3>
+          <div class="grid-4">
+            <label class="plan-card current">
+              <strong>Formación 3 días</strong>
+              <span class="muted">3 días/semana</span>
+              <span class="price">$180.000</span>
+              <span class="badge off">Plan actual</span>
+            </label>
+            <label class="plan-card selected">
+              <strong><input type="radio" name="nuevo" checked> Competencia 6 días</strong>
+              <span class="muted">6 días/semana</span>
+              <span class="price">$300.000</span>
+            </label>
+            <label class="plan-card">
+              <strong><input type="radio" name="nuevo"> Alto rendimiento</strong>
+              <span class="muted">6 días/semana + gimnasio</span>
+              <span class="price">$380.000</span>
+            </label>
+            <label class="plan-card">
+              <strong><input type="radio" name="nuevo"> Clase suelta</strong>
+              <span class="muted">Día único</span>
+              <span class="price">$35.000 <small>/ sesión</small></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>3. Resumen del cambio</h3>
+          <dl class="kv">
+            <dt>Plan nuevo</dt><dd>Competencia 6 días · $300.000/mes</dd>
+            <dt>Rige desde</dt><dd>01/10/2026 (siguiente periodo de facturación)</dd>
+            <dt>Cobro de septiembre</dt><dd>No cambia: $180.000 (Formación 3 días)</dd>
+            <dt>Próximo cobro</dt><dd>Octubre 2026 · $300.000 · límite 10/10/2026</dd>
+          </dl>
+          <div class="note">⚠ La frecuencia semanal cambia de 3 a 6 días: habrá que ajustar el grupo del patinador en el módulo de <strong>Grupos y horarios</strong> (sección 4.3). Después de confirmar se muestra un enlace para hacerlo.</div>
+          <div class="actions" style="justify-content:flex-end">
+            <a href="#" class="btn">Cancelar</a>
+            <a href="#" class="btn primary">Confirmar cambio</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Panel: ASIGNAR (por defecto) ===== -->
+      <section id="asignar" class="panel default">
+        <div class="steps">
+          <span class="done">1. Patinador</span>
+          <span class="now">2. Plan</span>
+          <span>3. Confirmación</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>Patinador</h3>
+            <label class="field">Buscar patinador sin plan
+              <input class="input" value="Mateo Ramírez Torres">
+            </label>
+            <dl class="kv" style="margin-top:14px">
+              <dt>Documento</dt><dd>TI 1.034.567.890</dd>
+              <dt>Edad</dt><dd>9 años (menor de edad)</dd>
+              <dt>Acudiente</dt><dd>Carolina Torres ✓ asociado</dd>
+              <dt>Plan actual</dt><dd class="muted">Sin plan</dd>
+            </dl>
+            <div class="note">Si el patinador es menor de edad y no tiene acudiente asociado, se bloquea el paso y se muestra: “Asocie un acudiente antes de asignar un plan (RF-M2-04)”.</div>
+          </div>
+
+          <div class="card">
+            <h3>Plan</h3>
+            <div class="radio-list">
+              <label><input type="radio" name="plan"> <span><strong>Clase suelta</strong> · $35.000 / sesión<small>Día único · se paga por sesión, no genera cobros mensuales</small></span></label>
+              <label><input type="radio" name="plan" checked> <span><strong>Formación 3 días</strong> · $180.000 / mes<small>3 días/semana · pago hasta el día 10</small></span></label>
+              <label><input type="radio" name="plan"> <span><strong>Competencia 6 días</strong> · $300.000 / mes<small>6 días/semana · pago hasta el día 10</small></span></label>
+              <label><input type="radio" name="plan"> <span><strong>Alto rendimiento</strong> · $380.000 / mes<small>6 días/semana + gimnasio · pago hasta el día 5</small></span></label>
+              <label class="disabled"><input type="radio" name="plan" disabled> <span><strong>Formación 3 días (2025)</strong><small>Inactivo, no se puede asignar</small></span></label>
+            </div>
+            <label class="field" style="margin-top:14px">Fecha de inicio *
+              <input class="input" type="date" value="2026-10-01">
+            </label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Resumen</h3>
+          <dl class="kv">
+            <dt>Patinador</dt><dd>Mateo Ramírez Torres</dd>
+            <dt>Plan</dt><dd>Formación 3 días · $180.000/mes</dd>
+            <dt>Inicio</dt><dd>01/10/2026</dd>
+            <dt>Primer cobro</dt><dd>Se genera ahora: Octubre 2026 · $180.000 · límite 10/10/2026 <span class="rf">RF-M5-08</span></dd>
+          </dl>
+          <div class="actions" style="justify-content:flex-end;margin-top:14px">
+            <a href="#" class="btn">Cancelar</a>
+            <a href="#" class="btn primary">Asignar plan</a>
+          </div>
+        </div>
+      </section>
+
+      <div class="note">
+        <strong>Permisos:</strong> el Administrador ve a todos los patinadores; el Acudiente usa la misma pantalla, pero el buscador se cambia por una lista con <em>solo sus patinadores</em>; el Patinador mayor de edad solo se ve a sí mismo (sin buscador). Un patinador que ya tiene un plan activo no aparece en “Asignar”, solo en “Cambiar”.
+      </div>
+    </main>
+  </div>
+
+  <style>
+    .panel { display: none; }
+    .panel.default { display: block; }
+    .panel:target { display: block; }
+    .panel:target ~ .panel.default { display: none; }
+  </style>
+  <script>
+    // Marca la pestaña activa según el ancla de la URL
+    function syncTabs() {
+      var id = location.hash.slice(1) || 'asignar';
+      document.querySelectorAll('.tabs a').forEach(function (a) {
+        a.classList.toggle('active', a.dataset.tab === id);
+      });
+    }
+    window.addEventListener('hashchange', syncTabs);
+    syncTabs();
+  </script>
+</body>
+</html>

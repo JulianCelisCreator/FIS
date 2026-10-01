@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagos del acudiente — Grupo 04</title>
+  <link rel="stylesheet" href="../assets/wireframe.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo"><div class="logo-box">LOGO</div> Escuela de Patinaje</div>
+    <div class="user-chip"><span class="role-tag">Acudiente</span><span class="who">Carolina Torres</span><div class="avatar"></div></div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar">
+      <h4>Mi cuenta</h4>
+      <a href="#">Inicio</a>
+      <a href="#">Mis patinadores</a>
+      <a href="../oferta-planes/oferta-planes.html">Planes</a>
+      <a href="../mis-pagos/mis-pagos.html" class="active">Pagos</a>
+      <h4>Wireframes</h4>
+      <a href="../index.html">← Índice</a>
+    </nav>
+
+    <main class="main">
+      <div class="page-head">
+        <div>
+          <div class="breadcrumb">Pagos</div>
+          <h1>Pagos de mis patinadores</h1>
+          <p>Cobros, pagos y estado de cuenta de cada patinador a tu cargo. <span class="rf">RF-M5-17</span></p>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <a href="#sofia" data-tab="sofia" class="active">Sofía Ramírez Torres <span class="badge overdue">Vencido</span></a>
+        <a href="#mateo" data-tab="mateo">Mateo Ramírez Torres <span class="badge pending">Pendiente</span></a>
+      </div>
+
+      <!-- ===== Mateo ===== -->
+      <section id="mateo" class="panel">
+        <div class="grid-3" style="margin-bottom:18px">
+          <div class="kpi"><div class="label">Estado</div><div class="value"><span class="badge pending">Pendiente</span></div><div class="sub">Tienes un cobro por pagar</div></div>
+          <div class="kpi"><div class="label">Saldo pendiente</div><div class="value">$180.000</div><div class="sub">Paga antes del 10/10/2026</div></div>
+          <div class="kpi"><div class="label">Plan</div><div class="value" style="font-size:18px">Formación 3 días</div><div class="sub">$180.000/mes · desde 01/10/2026</div></div>
+        </div>
+
+        <div class="card">
+          <h3>Cobros pendientes</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Periodo</th><th class="num">Valor</th><th class="num">Saldo</th><th>Fecha límite</th><th>Estado</th></tr></thead>
+              <tbody>
+                <tr><td>Octubre 2026</td><td class="num">$180.000</td><td class="num">$180.000</td><td>10/10/2026</td><td><span class="badge pending">Pendiente</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Pagos realizados</h3>
+          <div class="placeholder">Aún no hay pagos registrados para Mateo.</div>
+        </div>
+      </section>
+
+      <!-- ===== Sofía (por defecto) ===== -->
+      <section id="sofia" class="panel default">
+        <div class="grid-3" style="margin-bottom:18px">
+          <div class="kpi"><div class="label">Estado</div><div class="value"><span class="badge overdue">Vencido</span></div><div class="sub">Un cobro pasó su fecha límite</div></div>
+          <div class="kpi"><div class="label">Saldo pendiente</div><div class="value">$80.000</div><div class="sub">Septiembre 2026</div></div>
+          <div class="kpi"><div class="label">Plan</div><div class="value" style="font-size:18px">Formación 3 días</div><div class="sub">$180.000/mes · desde 01/02/2026</div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>Cobros pendientes</h3>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Periodo</th><th class="num">Valor</th><th class="num">Pagado</th><th class="num">Saldo</th><th>Fecha límite</th><th>Estado</th></tr></thead>
+              <tbody>
+                <tr><td>Septiembre 2026</td><td class="num">$180.000</td><td class="num">$100.000</td><td class="num">$80.000</td><td>10/09/2026</td><td><span class="badge overdue">Vencido</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="muted" style="font-size:13px">¿Cómo pagar? Acércate a la sede o haz una transferencia y envía el soporte a la administración. La academia registra el pago; no hay pagos en línea.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>Pagos realizados</h3>
+            <select class="input" style="width:auto;margin:0"><option>Últimos 6 meses</option><option>2026</option><option>Todo</option></select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Fecha</th><th>Comprobante</th><th>Cobro</th><th class="num">Monto</th><th>Medio</th><th>Estado</th><th></th></tr></thead>
+              <tbody>
+                <tr><td>15/09/2026</td><td>N.º 000461</td><td>Septiembre 2026</td><td class="num">$100.000</td><td>Efectivo</td><td><span class="badge ok">Registrado</span></td><td><a href="../comprobante/comprobante.html" class="btn sm">PDF ↓</a></td></tr>
+                <tr><td>09/08/2026</td><td>N.º 000421</td><td>Agosto 2026</td><td class="num">$180.000</td><td>Transferencia</td><td><span class="badge ok">Registrado</span></td><td><a href="../comprobante/comprobante.html" class="btn sm">PDF ↓</a></td></tr>
+                <tr><td>07/07/2026</td><td>N.º 000389</td><td>Julio 2026</td><td class="num">$180.000</td><td>Transferencia</td><td><span class="badge ok">Registrado</span></td><td><a href="../comprobante/comprobante.html" class="btn sm">PDF ↓</a></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <div class="actions" style="margin-bottom:12px">
+        <a href="../asignar-plan/asignar-plan.html#cambiar" class="btn">Cambiar plan</a>
+        <a href="../oferta-planes/oferta-planes.html" class="btn">Ver planes</a>
+      </div>
+
+      <div class="note">
+        <strong>Notas:</strong> solo lectura: el acudiente no registra, edita ni anula pagos. Solo ve a los patinadores asociados a su cuenta (con un solo patinador, las pestañas no aparecen).
+        El estado y el saldo coinciden con los que ve el Administrador en <a href="../cartera/cartera.html">Cartera</a>.
+      </div>
+    </main>
+  </div>
+
+  <style>
+    .panel { display: none; }
+    .panel.default { display: block; }
+    .panel:target { display: block; }
+    .panel:target ~ .panel.default { display: none; }
+  </style>
+  <script>
+    // Marca la pestaña activa según el ancla de la URL
+    function syncTabs() {
+      var id = location.hash.slice(1);
+      if (id !== 'mateo') id = 'sofia';
+      document.querySelectorAll('.tabs a').forEach(function (a) {
+        a.classList.toggle('active', a.dataset.tab === id);
+      });
+    }
+    window.addEventListener('hashchange', syncTabs);
+    syncTabs();
+  </script>
+</body>
+</html>
