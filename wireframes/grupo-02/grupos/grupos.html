@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Configuración de grupos y aforo · Módulo 3 · Grupo 02</title><link rel="stylesheet" href="../assets/styles.css"></head><body>
+<div class="top"><h1>Módulo 3 · Configuración de grupos y aforo</h1><p class="meta">Wireframe · Grupo 02 · design system FIS</p></div>
+<nav class="pnav" aria-label="Páginas del módulo 3"><a href="../index.html">Índice</a><a href="../grupos/grupos.html" aria-current="page">HU-3.1 Configuración de grupos</a><a href="../asignacion-profesores/asignacion-profesores.html">HU-3.2 Asignación de profesores</a><a href="../horarios/horarios.html">HU-3.3 Programación de horarios de clase</a><a href="../cambio-grupo/cambio-grupo.html">HU-3.4 Selección y cambio de grupo</a><a href="../calendario/calendario.html">HU-3.5 Calendario interactivo</a></nav>
+<main>
+<p class="meta">HU-3.1 · Administrador · Alta · 3 SP · RF2.5, RF1.4 · Escenarios 1 y 2</p>
+<div class="shell"><div class="bar"><span>☰</span><b>Escuela de patinaje</b><span>Sede: Norte</span><span>Admin</span></div>
+<div class="body"><div class="nav"><div>Inicio</div><div class="a">Grupos</div><div>Profesores</div><div>Horarios</div><div>Calendario</div></div>
+<div class="cnt"><div><p class="crumb">Inicio / Grupos</p><h2>Configuración de grupos</h2></div>
+<div class="card"><h3>Nuevo grupo</h3>
+<div class="grid">
+<div class="fld"><label>Nombre <i>*</i></label><div class="in">Ej. Iniciación Norte A</div></div>
+<div class="fld"><label>Nivel técnico <i>*</i></label><div class="in">Iniciación <span>▾</span></div></div>
+<div class="fld"><label>Sede <i>*</i></label><div class="in">Norte <span>▾</span></div></div>
+<div class="fld"><label>Días de clase <i>*</i></label><div class="in err">Seleccione al menos un día <span>▾</span></div><p class="errt">Seleccione al menos un día.</p></div>
+<div class="fld"><label>Cupo máximo <i>*</i></label><div class="in">20</div><p class="hlp">Máximo de personas por grupo.</p></div></div>
+<div class="acts"><span class="btn">Guardar grupo</span><span class="btn sec">Cancelar</span></div></div>
+<div class="chips"><span class="chip">🔍 Buscar grupo</span><span class="chip">Nivel: Todos ▾</span><span class="chip">Sede: Todas ▾</span><span class="chip">Estado: Todos ▾</span></div>
+<div class="tw"><table><thead><tr><th>Grupo</th><th>Nivel</th><th>Sede</th><th>Días</th><th>Ocupación</th><th>Estado</th><th></th></tr></thead><tbody>
+<tr><td>Iniciación Norte A</td><td>Iniciación</td><td>Norte</td><td>Lun · Mié</td><td><div class="cm success"><div class="tr"><i style="width:60%"></i></div><p class="mt"><span>12/20</span><span>Con cupo</span></p></div></td><td><span class="badge success">✓ Con cupo</span></td><td>⋮</td></tr>
+<tr><td>Intermedio Sur B</td><td>Intermedio</td><td>Sur</td><td>Mar · Jue</td><td><div class="cm warning"><div class="tr"><i style="width:90%"></i></div><p class="mt"><span>18/20</span><span>Alerta al 90 %</span></p></div></td><td><span class="badge warning">⚠ Alerta al 90 %</span></td><td>⋮</td></tr>
+<tr><td>Avanzado Norte C</td><td>Avanzado</td><td>Norte</td><td>Vie · Sáb</td><td><div class="cm error"><div class="tr"><i style="width:100%"></i></div><p class="mt"><span>20/20</span><span>Lleno</span></p></div></td><td><span class="badge error">✕ Lleno</span></td><td>⋮</td></tr></tbody></table></div>
+<div class="ann"><b>Notas:</b> Capacity Meter: Con cupo &lt;90 % (verde), Alerta ≥90 % (amarillo), Lleno al 100 % (rojo); siempre con texto + ícono, nunca solo color. Escenario 1: al guardar, el grupo aparece en el listado. Menú ⋮: Editar · Desactivar (nunca «Eliminar»).</div>
+</div></div></div>
+</main></body></html>

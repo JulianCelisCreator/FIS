@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Programación de horarios de clase · Módulo 3 · Grupo 02</title><link rel="stylesheet" href="../assets/styles.css"></head><body>
+<div class="top"><h1>Módulo 3 · Programación de horarios de clase</h1><p class="meta">Wireframe · Grupo 02 · design system FIS</p></div>
+<nav class="pnav" aria-label="Páginas del módulo 3"><a href="../index.html">Índice</a><a href="../grupos/grupos.html">HU-3.1 Configuración de grupos</a><a href="../asignacion-profesores/asignacion-profesores.html">HU-3.2 Asignación de profesores</a><a href="../horarios/horarios.html" aria-current="page">HU-3.3 Programación de horarios de clase</a><a href="../cambio-grupo/cambio-grupo.html">HU-3.4 Selección y cambio de grupo</a><a href="../calendario/calendario.html">HU-3.5 Calendario interactivo</a></nav>
+<main>
+<p class="meta">HU-3.3 · Administrador · Alta · 5 SP · RF2.1, RF2.4</p>
+<div class="shell"><div class="bar"><span>☰</span><b>Escuela de patinaje</b><span>Admin</span></div>
+<div class="body"><div class="nav"><div>Inicio</div><div>Grupos</div><div>Profesores</div><div class="a">Horarios</div><div>Calendario</div></div>
+<div class="cnt"><div class="acts" style="justify-content:space-between"><div><p class="crumb">Inicio / Horarios</p><h2>Programación de horarios</h2></div><span class="btn">+ Nueva franja</span></div>
+<div class="chips"><span class="chip">Sede: Norte ▾</span><span class="chip">Pista: Todas ▾</span><span class="chip">Grupo: Todos ▾</span><span class="chip">Semana 5–10 oct ‹ ›</span></div>
+<div class="tw"><div class="cal"><div class="h"></div><div class="h">Lun</div><div class="h">Mar</div><div class="h">Mié</div><div class="h">Jue</div><div class="h">Vie</div><div class="h">Sáb</div>
+<div>08:00</div><div><div class="ev">Inic. Norte A<br>Pista 1</div></div><div></div><div><div class="ev drag">Inic. Norte A<br>↕ arrastrando</div></div><div></div><div></div><div></div>
+<div>14:00</div><div></div><div><div class="ev">Inter. Sur B<br>Pista 2</div></div><div></div><div><div class="ev">Inter. Sur B<br>Pista 2</div></div><div><div class="ev">Av. Norte C<br>Pista 1</div></div><div><div class="ev">Av. Norte C<br>Pista 1</div></div></div></div>
+<div class="two"><div class="card"><h3>Editar franja</h3><div class="grid"><div class="fld"><label>Grupo <i>*</i></label><div class="in">Iniciación Norte A <span>▾</span></div></div><div class="fld"><label>Día <i>*</i></label><div class="in">Lunes <span>▾</span></div></div><div class="fld"><label>Hora inicio <i>*</i></label><div class="in">08:00</div></div><div class="fld"><label>Hora fin <i>*</i></label><div class="in">10:00</div></div><div class="fld"><label>Pista / sede <i>*</i></label><div class="in">Pista 1 · Norte <span>▾</span></div></div></div>
+<div class="acts"><span class="btn">Guardar</span><span class="btn sec">Cancelar</span><span class="btn dst">Anular franja</span></div></div>
+<div style="display:flex;flex-direction:column;gap:var(--sp4)"><div class="al warning"><span>⚠</span><div><b>Solapamiento de pista</b>Pista 1 está ocupada el lunes 08:00 por otro grupo.</div></div><div class="dlg"><h3>Anular franja</h3><p class="sm">Se notificará a profesores y estudiantes del grupo (Push / Email).</p><div class="fld"><label>Motivo <i>*</i></label><div class="in">Describa el motivo</div></div><div class="acts"><span class="btn sec">Volver</span><span class="btn dis">Confirmar anulación</span></div></div></div></div>
+<div class="ann"><b>Notas:</b> Calendario Drag &amp; Drop para mover franjas; se evita el solapamiento de pista/sede según capacidad; cambios y cancelaciones disparan notificación automática. Se usa «Anular», no «Eliminar»; el motivo es obligatorio (Dialog ConfirmWithReason).</div>
+</div></div></div>
+</main></body></html>
