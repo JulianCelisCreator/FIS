@@ -88,7 +88,7 @@ Cada uno mantiene un `<input>` visible y un `<input type="hidden" name="…">` c
 
 - **El diseño manda.** `tokens.md`, `components.md` y `status-and-formats.md` de la skill son la fuente de verdad. Si el código necesita algo que la skill no dice, **se cambia primero la skill** y después el código.
 - Todo componente implementado debe poder trazarse a una fila de `components.md` y a sus RF.
-- Versionado semántico en `design-system/CHANGELOG.md`. Cada entrada cita el RF o la decisión que la motivó.
+- Versionado semántico en `docs/CHANGELOG.md`. Cada entrada cita el RF o la decisión que la motivó.
 
 ---
 
