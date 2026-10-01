@@ -1,94 +1,103 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Oferta de planes — Grupo 04</title>
-  <link rel="stylesheet" href="../assets/wireframe.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planes de la academia — Escuela de patinaje</title>
+<link rel="stylesheet" href="../../../design-system/ps.css">
+<link rel="stylesheet" href="../assets/grupo-04.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="logo"><div class="logo-box">LOGO</div> Escuela de Patinaje</div>
-    <div class="user-chip"><span class="role-tag">Acudiente</span><span class="who">Carolina Torres</span><div class="avatar"></div></div>
-  </header>
+<ps-app-shell>
+  <span data-slot="brand" class="ps-text-label">Escuela de patinaje</span>
+  <span data-slot="user" class="ps-cluster g4-user">
+    <span class="ps-badge ps-badge--neutral g4-hide-mobile">Acudiente</span>
+    <span class="ps-text-label g4-hide-mobile">Carolina Torres</span>
+    <ps-avatar name="Carolina Torres" size="sm"></ps-avatar>
+  </span>
+  <nav data-slot="nav" aria-label="Navegación principal">
+    <div class="g4-nav-group">
+      <p class="ps-text-caption">Mi cuenta</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="#">Inicio</a></li>
+        <li><a class="ps-link" href="#">Mis patinadores</a></li>
+        <li><span class="ps-text-label" aria-current="page">Planes</span></li>
+        <li><a class="ps-link" href="../mis-pagos/mis-pagos.html">Pagos</a></li>
+      </ul>
+    </div>
+    <div class="g4-nav-group">
+      <p class="ps-text-caption">Wireframes</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="../index.html">Índice</a></li>
+      </ul>
+    </div>
+  </nav>
 
-  <div class="layout">
-    <nav class="sidebar">
-      <h4>Mi cuenta</h4>
-      <a href="#">Inicio</a>
-      <a href="#">Mis patinadores</a>
-      <a href="../oferta-planes/oferta-planes.html" class="active">Planes</a>
-      <a href="../mis-pagos/mis-pagos.html">Pagos</a>
-      <h4>Wireframes</h4>
-      <a href="../index.html">← Índice</a>
-    </nav>
+  <div data-slot="content" class="g4-page">
+    <header class="ps-stack">
+      <nav class="ps-breadcrumb" aria-label="Ruta"><span aria-current="page">Planes</span></nav>
+      <h1>Planes de la academia</h1>
+      <p class="ps-text-body-sm">Planes disponibles y su valor vigente al 30/09/2026.</p>
+      <p class="ps-text-caption">RF-M5-05</p>
+    </header>
 
-    <main class="main">
-      <div class="page-head">
-        <div>
-          <div class="breadcrumb">Planes</div>
-          <h1>Planes de la academia</h1>
-          <p>Planes disponibles y su valor vigente al 30/09/2026. <span class="rf">RF-M5-05</span></p>
-        </div>
+    <div class="g4-cols g4-cols--4">
+      <article class="ps-card ps-stack">
+        <h2 class="ps-text-heading-h4">Clase suelta</h2>
+        <p class="ps-text-caption">Día único · pago por sesión</p>
+        <p><ps-currency-display value="35000" size="lg"></ps-currency-display> <span class="ps-text-body-sm">por sesión</span></p>
+        <div class="ps-text-body-sm"><ul>
+          <li>Asistes el día que quieras.</li>
+          <li>Pagas en la sede cada vez que vienes.</li>
+        </ul></div>
+      </article>
+      <article class="ps-card ps-stack">
+        <h2 class="ps-text-heading-h4">Formación 3 días</h2>
+        <p class="ps-text-caption">3 días/semana · mensual</p>
+        <p><ps-currency-display value="180000" size="lg"></ps-currency-display> <span class="ps-text-body-sm">al mes</span></p>
+        <div class="ps-text-body-sm"><ul>
+          <li>Pago hasta el día 10 de cada mes.</li>
+        </ul></div>
+      </article>
+      <article class="ps-card ps-stack">
+        <h2 class="ps-text-heading-h4">Competencia 6 días</h2>
+        <p class="ps-text-caption">6 días/semana · mensual</p>
+        <p><ps-currency-display value="300000" size="lg"></ps-currency-display> <span class="ps-text-body-sm">al mes</span></p>
+        <div class="ps-text-body-sm"><ul>
+          <li>Pago hasta el día 10 de cada mes.</li>
+        </ul></div>
+      </article>
+      <article class="ps-card ps-stack">
+        <h2 class="ps-text-heading-h4">Alto rendimiento</h2>
+        <p class="ps-text-caption">6 días/semana + gimnasio · mensual</p>
+        <p><ps-currency-display value="380000" size="lg"></ps-currency-display> <span class="ps-text-body-sm">al mes</span></p>
+        <div class="ps-text-body-sm"><ul>
+          <li>Incluye acceso al gimnasio.</li>
+          <li>Pago hasta el día 5 de cada mes.</li>
+        </ul></div>
+      </article>
+    </div>
+
+    <section class="ps-card ps-stack" aria-labelledby="cta">
+      <div class="g4-head">
+        <h2 id="cta" class="ps-text-heading-h4">¿Quieres inscribir o cambiar el plan de un patinador?</h2>
+        <a class="ps-button ps-button--primary" href="../asignar-plan/asignar-plan.html">Asignar o cambiar plan</a>
       </div>
+      <p class="ps-text-body-sm">Puedes hacerlo con los patinadores asociados a tu cuenta. El cambio de plan empieza a regir en el siguiente periodo de facturación.</p>
+    </section>
 
-      <div class="grid-4">
-        <article class="plan-card">
-          <div class="img">imagen / ícono</div>
-          <h3 class="mt-0" style="margin-bottom:0">Clase suelta</h3>
-          <div class="muted">Día único · pago por sesión</div>
-          <div class="price">$35.000 <small>/ sesión</small></div>
-          <ul>
-            <li>Asistes el día que quieras</li>
-            <li>Pagas en la sede cada vez que vienes</li>
-          </ul>
-        </article>
-
-        <article class="plan-card">
-          <div class="img">imagen / ícono</div>
-          <h3 class="mt-0" style="margin-bottom:0">Formación 3 días</h3>
-          <div class="muted">3 días/semana · mensual</div>
-          <div class="price">$180.000 <small>/ mes</small></div>
-          <ul>
-            <li>Pago hasta el día 10 de cada mes</li>
-          </ul>
-        </article>
-
-        <article class="plan-card">
-          <div class="img">imagen / ícono</div>
-          <h3 class="mt-0" style="margin-bottom:0">Competencia 6 días</h3>
-          <div class="muted">6 días/semana · mensual</div>
-          <div class="price">$300.000 <small>/ mes</small></div>
-          <ul>
-            <li>Pago hasta el día 10 de cada mes</li>
-          </ul>
-        </article>
-
-        <article class="plan-card">
-          <div class="img">imagen / ícono</div>
-          <h3 class="mt-0" style="margin-bottom:0">Alto rendimiento</h3>
-          <div class="muted">6 días/semana + gimnasio · mensual</div>
-          <div class="price">$380.000 <small>/ mes</small></div>
-          <ul>
-            <li>Incluye acceso al gimnasio</li>
-            <li>Pago hasta el día 5 de cada mes</li>
-          </ul>
-        </article>
-      </div>
-
-      <div class="card" style="margin-top:18px">
-        <div class="card-head">
-          <h3>¿Quieres inscribir o cambiar el plan de un patinador?</h3>
-          <a href="../asignar-plan/asignar-plan.html" class="btn primary">Asignar / cambiar plan</a>
-        </div>
-        <p class="muted mt-0" style="margin:0">Puedes hacerlo con los patinadores asociados a tu cuenta. El cambio de plan empieza a regir en el siguiente periodo de facturación.</p>
-      </div>
-
-      <div class="note">
-        <strong>Notas:</strong> esta vista es de solo lectura y la ven igual el Contador, el Acudiente y el Patinador. Solo muestra planes <em>activos</em> que tienen tarifa vigente.
-        El botón “Asignar / cambiar plan” no se le muestra al Contador ni al Patinador menor de edad (RF-M5-06).
-      </div>
-    </main>
+    <aside class="ps-card ps-stack" aria-labelledby="notas">
+      <h2 id="notas" class="ps-text-heading-h5">Notas del wireframe</h2>
+      <p class="ps-text-caption">No forman parte de la interfaz.</p>
+      <div class="ps-text-body-sm"><ul>
+        <li>Vista de solo lectura; la ven igual el Contador, el Acudiente y el Patinador. Solo muestra planes activos con tarifa vigente.</li>
+        <li>El botón «Asignar o cambiar plan» no se muestra al Contador ni al Patinador menor de edad (RF-M5-06).</li>
+        <li>Sin imágenes: el Design System no define ilustración ni marca todavía.</li>
+      </ul></div>
+    </aside>
   </div>
+</ps-app-shell>
+<script type="module" src="../../../design-system/ps.js"></script>
+<script type="module" src="../assets/grupo-04.js"></script>
 </body>
 </html>

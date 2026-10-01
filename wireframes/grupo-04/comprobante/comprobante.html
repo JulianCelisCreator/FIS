@@ -1,106 +1,121 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Comprobante de pago — Grupo 04</title>
-  <link rel="stylesheet" href="../assets/wireframe.css">
-  <style>
-    .receipt { max-width: 720px; margin: 0 auto; padding: 28px; border: 1px solid var(--line-strong); }
-    .receipt-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; border-bottom: 2px solid var(--ink); padding-bottom: 14px; margin-bottom: 16px; }
-    .receipt-head .num { font-size: 22px; font-weight: 700; }
-    .receipt .total { display: flex; justify-content: space-between; font-size: 20px; font-weight: 700; border-top: 2px solid var(--ink); padding-top: 12px; margin-top: 16px; }
-    .stamp { display: inline-block; border: 3px double var(--ink); padding: 4px 14px; font-weight: 800; letter-spacing: .15em; transform: rotate(-6deg); }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprobante de pago — Escuela de patinaje</title>
+<link rel="stylesheet" href="../../../design-system/ps.css">
+<link rel="stylesheet" href="../assets/grupo-04.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="logo"><div class="logo-box">LOGO</div> Escuela de Patinaje</div>
-    <div class="user-chip"><span class="role-tag">Contador</span><span class="who">Jorge Méndez</span><div class="avatar"></div></div>
-  </header>
+<ps-app-shell>
+  <span data-slot="brand" class="ps-text-label">Escuela de patinaje</span>
+  <span data-slot="user" class="ps-cluster g4-user">
+    <span class="ps-badge ps-badge--neutral g4-hide-mobile">Contador</span>
+    <span class="ps-text-label g4-hide-mobile">Jorge Méndez</span>
+    <ps-avatar name="Jorge Méndez" size="sm"></ps-avatar>
+  </span>
+  <nav data-slot="nav" aria-label="Navegación principal">
+    <div class="g4-nav-group">
+      <p class="ps-text-caption">Pagos (Admin / Contador)</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="../planes/planes.html">Planes y tarifas</a></li>
+        <li><a class="ps-link" href="../asignar-plan/asignar-plan.html">Asignar o cambiar plan</a></li>
+        <li><a class="ps-link" href="../cartera/cartera.html">Cartera</a></li>
+        <li><a class="ps-link" href="../registrar-pago/registrar-pago.html">Registrar pago</a></li>
+        <li><span class="ps-text-label" aria-current="page">Historial de pagos</span></li>
+      </ul>
+    </div>
+    <div class="g4-nav-group">
+      <p class="ps-text-caption">Vistas de usuario</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="../oferta-planes/oferta-planes.html">Oferta de planes</a></li>
+        <li><a class="ps-link" href="../mis-pagos/mis-pagos.html">Mis pagos (Acudiente)</a></li>
+        <li><a class="ps-link" href="../mis-pagos/mis-pagos-patinador.html">Mis pagos (Patinador)</a></li>
+      </ul>
+    </div>
+    <div class="g4-nav-group">
+      <p class="ps-text-caption">Wireframes</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="../index.html">Índice</a></li>
+      </ul>
+    </div>
+  </nav>
 
-  <div class="layout">
-    <nav class="sidebar">
-      <h4>Pagos (Admin / Contador)</h4>
-      <a href="../planes/planes.html">Planes y tarifas</a>
-      <a href="../asignar-plan/asignar-plan.html">Asignar / cambiar plan</a>
-      <a href="../cartera/cartera.html">Cartera</a>
-      <a href="../registrar-pago/registrar-pago.html">Registrar pago</a>
-      <a href="../historial-pagos/historial-pagos.html" class="active">Historial de pagos</a>
-      <h4>Vistas de usuario</h4>
-      <a href="../oferta-planes/oferta-planes.html">Oferta de planes</a>
-      <a href="../mis-pagos/mis-pagos.html">Mis pagos (Acudiente)</a>
-      <a href="../mis-pagos/mis-pagos-patinador.html">Mis pagos (Patinador)</a>
-      <h4>Wireframes</h4>
-      <a href="../index.html">← Índice</a>
-    </nav>
+  <div data-slot="content" class="g4-page">
+    <header class="g4-head">
+      <div class="ps-stack">
+        <nav class="ps-breadcrumb" aria-label="Ruta">
+          <a href="../historial-pagos/historial-pagos.html">Historial de pagos</a><span aria-hidden="true">/</span><span aria-current="page">Comprobante N.º 000482</span>
+        </nav>
+        <h1>Comprobante de pago</h1>
+        <p class="ps-text-caption">RF-M5-14 · RF-M5-15</p>
+      </div>
+      <div class="ps-cluster">
+        <a class="ps-button ps-button--secondary" href="../historial-pagos/historial-pagos.html"><ps-icon name="arrow-left"></ps-icon>Volver</a>
+        <ps-export-menu formats="pdf"></ps-export-menu>
+      </div>
+    </header>
 
-    <main class="main">
-      <div class="page-head">
+    <article class="ps-card ps-stack" aria-labelledby="comp-num">
+      <div class="g4-head">
         <div>
-          <div class="breadcrumb"><a href="../historial-pagos/historial-pagos.html">Historial de pagos</a> / Comprobante N.º 000482</div>
-          <h1>Comprobante de pago</h1>
-          <p><span class="rf">RF-M5-14</span> <span class="rf">RF-M5-15</span></p>
+          <p class="ps-text-heading-h5">Escuela de patinaje</p>
+          <p class="ps-text-caption">NIT 900.000.000-0 · Bogotá D. C.</p>
         </div>
-        <div class="actions">
-          <a href="../historial-pagos/historial-pagos.html" class="btn">← Volver</a>
-          <a href="#" class="btn primary">Descargar PDF</a>
+        <div>
+          <p class="ps-text-caption">Comprobante de pago</p>
+          <p id="comp-num" class="ps-text-numeric-lg">N.º 000482</p>
+          <p class="ps-cluster ps-text-body-sm">30/09/2026 <ps-status-badge entity="comprobante" status="vigente"></ps-status-badge></p>
         </div>
       </div>
 
-      <div class="card receipt">
-        <div class="receipt-head">
-          <div>
-            <div class="logo"><div class="logo-box">LOGO</div> Escuela de Patinaje</div>
-            <div class="muted" style="font-size:13px;margin-top:6px">NIT 900.000.000-0 · Bogotá D. C.</div>
-          </div>
-          <div class="right">
-            <div class="muted" style="font-size:12px">COMPROBANTE DE PAGO</div>
-            <div class="num">N.º 000482</div>
-            <div class="muted" style="font-size:13px">30/09/2026</div>
-          </div>
-        </div>
-
-        <div class="grid-2">
-          <dl class="kv">
-            <dt>Patinador</dt><dd>Samuel Herrera Díaz</dd>
-            <dt>Documento</dt><dd>TI 1.012.345.678</dd>
-            <dt>Acudiente</dt><dd>Luis Herrera</dd>
-          </dl>
-          <dl class="kv">
-            <dt>Plan</dt><dd>Competencia 6 días</dd>
-            <dt>Periodo</dt><dd>Agosto 2026</dd>
-            <dt>Medio de pago</dt><dd>Transferencia · TRF-88210345</dd>
-          </dl>
-        </div>
-
-        <div class="table-wrap" style="margin-top:18px">
-          <table>
-            <thead><tr><th>Concepto</th><th class="num">Valor</th></tr></thead>
-            <tbody>
-              <tr><td>Valor del cobro (Agosto 2026)</td><td class="num">$300.000</td></tr>
-              <tr><td>Pagos anteriores</td><td class="num">$0</td></tr>
-              <tr><td><strong>Este pago</strong></td><td class="num"><strong>$200.000</strong></td></tr>
-              <tr><td>Saldo restante del cobro</td><td class="num">$100.000</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="total"><span>Total pagado</span><span>$200.000</span></div>
-
-        <p class="muted" style="font-size:12px;margin-top:18px">
-          Registrado por: Jorge Méndez (Contador) · 30/09/2026 10:14 a. m.<br>
-          Soporte interno de pago. No es factura electrónica.
-        </p>
+      <div class="g4-cols g4-cols--2">
+        <dl class="ps-dl">
+          <div><dt>Patinador</dt><dd>Samuel Herrera Díaz</dd></div>
+          <div><dt>Documento</dt><dd>TI 1.012.345.678</dd></div>
+          <div><dt>Acudiente</dt><dd>Luis Herrera</dd></div>
+        </dl>
+        <dl class="ps-dl">
+          <div><dt>Plan</dt><dd>Competencia 6 días</dd></div>
+          <div><dt>Periodo</dt><dd>Agosto 2026</dd></div>
+          <div><dt>Medio de pago</dt><dd>Transferencia · TRF-88210345</dd></div>
+        </dl>
       </div>
 
-      <div class="note">
-        <strong>Variantes:</strong>
-        (1) En un pago <em>por sesión</em>, “Periodo” se cambia por “Sesiones: 4 × $35.000”.
-        (2) En un pago <em>anulado</em>, el comprobante conserva su número y lleva el sello <span class="stamp">ANULADO</span> junto con el motivo.
-        (3) El PDF tiene el mismo número y los mismos datos, y se genera en menos de 5 s. El Acudiente y el Patinador solo pueden descargar los de sus propios pagos.
+      <ps-data-table>
+        <table class="ps-table">
+          <thead><tr><th>Concepto</th><th class="ps-num">Valor</th></tr></thead>
+          <tbody>
+            <tr><td data-label="Concepto">Valor del cobro (agosto 2026)</td><td data-label="Valor" class="ps-num">$&nbsp;300.000</td></tr>
+            <tr><td data-label="Concepto">Pagos anteriores</td><td data-label="Valor" class="ps-num">$&nbsp;0</td></tr>
+            <tr><td data-label="Concepto">Este pago</td><td data-label="Valor" class="ps-num">$&nbsp;200.000</td></tr>
+            <tr><td data-label="Concepto">Saldo restante del cobro</td><td data-label="Valor" class="ps-num">$&nbsp;100.000</td></tr>
+          </tbody>
+        </table>
+      </ps-data-table>
+
+      <div class="g4-head">
+        <p class="ps-text-heading-h5">Total pagado</p>
+        <ps-currency-display value="200000" size="lg"></ps-currency-display>
       </div>
-    </main>
+
+      <p class="ps-audit-entry">Registrado por Jorge Méndez (Contador) · 30/09/2026 10:14 a. m.</p>
+      <p class="ps-text-caption">Soporte interno de pago. No es factura electrónica.</p>
+    </article>
+
+    <aside class="ps-card ps-stack" aria-labelledby="notas">
+      <h2 id="notas" class="ps-text-heading-h5">Notas del wireframe</h2>
+      <p class="ps-text-caption">No forman parte de la interfaz.</p>
+      <div class="ps-text-body-sm"><ul>
+        <li>En un pago por sesión, «Periodo» se cambia por «Sesiones: 4 × $&nbsp;35.000».</li>
+        <li>En un pago anulado, el comprobante conserva su número, cambia su estado a Anulado y muestra el motivo con usuario y fecha.</li>
+        <li>El PDF tiene el mismo número y los mismos datos y se genera en menos de 5 s. El Acudiente y el Patinador solo descargan los de sus propios pagos.</li>
+      </ul></div>
+    </aside>
   </div>
+</ps-app-shell>
+<script type="module" src="../../../design-system/ps.js"></script>
+<script type="module" src="../assets/grupo-04.js"></script>
 </body>
 </html>

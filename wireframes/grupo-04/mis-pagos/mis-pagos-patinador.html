@@ -1,71 +1,100 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mis pagos — Grupo 04</title>
-  <link rel="stylesheet" href="../assets/wireframe.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mis pagos — Escuela de patinaje</title>
+<link rel="stylesheet" href="../../../design-system/ps.css">
+<link rel="stylesheet" href="../assets/grupo-04.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="logo"><div class="logo-box">LOGO</div> Escuela de Patinaje</div>
-    <div class="user-chip"><span class="role-tag">Patinador</span><span class="who">Valentina Gómez</span><div class="avatar"></div></div>
-  </header>
+<ps-app-shell>
+  <span data-slot="brand" class="ps-text-label">Escuela de patinaje</span>
+  <span data-slot="user" class="ps-cluster g4-user">
+    <span class="ps-badge ps-badge--neutral g4-hide-mobile">Patinador</span>
+    <span class="ps-text-label g4-hide-mobile">Valentina Gómez</span>
+    <ps-avatar name="Valentina Gómez" size="sm"></ps-avatar>
+  </span>
+  <nav data-slot="nav" aria-label="Navegación principal">
+    <div class="g4-nav-group">
+      <p class="ps-text-caption">Mi cuenta</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="#">Inicio</a></li>
+        <li><a class="ps-link" href="#">Mi perfil deportivo</a></li>
+        <li><a class="ps-link" href="../oferta-planes/oferta-planes.html">Planes</a></li>
+        <li><span class="ps-text-label" aria-current="page">Mis pagos</span></li>
+      </ul>
+    </div>
+    <div class="g4-nav-group">
+      <p class="ps-text-caption">Wireframes</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="../index.html">Índice</a></li>
+      </ul>
+    </div>
+  </nav>
 
-  <div class="layout">
-    <nav class="sidebar">
-      <h4>Mi cuenta</h4>
-      <a href="#">Inicio</a>
-      <a href="#">Mi perfil deportivo</a>
-      <a href="../oferta-planes/oferta-planes.html">Planes</a>
-      <a href="../mis-pagos/mis-pagos-patinador.html" class="active">Mis pagos</a>
-      <h4>Wireframes</h4>
-      <a href="../index.html">← Índice</a>
-    </nav>
-
-    <main class="main">
-      <div class="page-head">
-        <div>
-          <div class="breadcrumb">Mis pagos</div>
-          <h1>Mis pagos</h1>
-          <p>Tu plan, tus cobros y tus pagos registrados. <span class="rf">RF-M5-18</span></p>
-        </div>
-        <a href="../asignar-plan/asignar-plan.html#cambiar" class="btn">Cambiar mi plan</a>
+  <div data-slot="content" class="g4-page">
+    <header class="g4-head">
+      <div class="ps-stack">
+        <nav class="ps-breadcrumb" aria-label="Ruta"><span aria-current="page">Mis pagos</span></nav>
+        <h1>Mis pagos</h1>
+        <p class="ps-text-body-sm">Tu plan, tus cobros y tus pagos registrados.</p>
+        <p class="ps-text-caption">RF-M5-15 · RF-M5-18</p>
       </div>
+      <a class="ps-button ps-button--secondary" href="../asignar-plan/asignar-plan.html#cambiar">Cambiar mi plan</a>
+    </header>
 
-      <div class="grid-3" style="margin-bottom:18px">
-        <div class="kpi"><div class="label">Estado</div><div class="value"><span class="badge ok">Al día</span></div><div class="sub">No tienes saldos pendientes</div></div>
-        <div class="kpi"><div class="label">Saldo pendiente</div><div class="value">$0</div><div class="sub">Próximo cobro: 01/10/2026</div></div>
-        <div class="kpi"><div class="label">Mi plan</div><div class="value" style="font-size:18px">Alto rendimiento</div><div class="sub">$380.000/mes · pagas hasta el día 5</div></div>
-      </div>
+    <div class="ps-kpi-grid">
+      <div class="ps-kpi ps-stack"><p class="ps-kpi__label">Estado de cartera</p><ps-status-badge entity="cartera" status="al-dia"></ps-status-badge><p class="ps-text-caption">No tienes saldos pendientes</p></div>
+      <div class="ps-kpi"><p class="ps-kpi__label">Saldo pendiente</p><p class="ps-kpi__value">$&nbsp;0</p><p class="ps-text-caption">Próximo cobro: 01/10/2026</p></div>
+      <div class="ps-kpi"><p class="ps-kpi__label">Mi plan</p><p class="ps-text-heading-h5">Alto rendimiento</p><p class="ps-text-caption">$&nbsp;380.000 al mes · pagas hasta el día 5</p></div>
+    </div>
 
-      <div class="card">
-        <h3>Cobros pendientes</h3>
-        <div class="placeholder">✓ No tienes cobros pendientes.</div>
+    <section class="ps-card" aria-labelledby="cobros">
+      <h2 id="cobros" class="ps-text-heading-h4">Cobros pendientes</h2>
+      <div class="ps-empty-state">
+        <ps-icon name="check-circle" size="lg"></ps-icon>
+        <p class="ps-empty-state__title">No tienes cobros pendientes</p>
+        <p class="ps-empty-state__desc">El cobro de octubre se genera el 01/10/2026.</p>
       </div>
+    </section>
 
-      <div class="card">
-        <div class="card-head">
-          <h3>Mis pagos</h3>
-          <select class="input" style="width:auto;margin:0"><option>Últimos 6 meses</option><option>2026</option><option>Todo</option></select>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Fecha</th><th>Comprobante</th><th>Cobro</th><th class="num">Monto</th><th>Medio</th><th>Estado</th><th></th></tr></thead>
-            <tbody>
-              <tr><td>04/09/2026</td><td>N.º 000447</td><td>Septiembre 2026</td><td class="num">$380.000</td><td>Transferencia</td><td><span class="badge ok">Registrado</span></td><td><a href="../comprobante/comprobante.html" class="btn sm">PDF ↓</a></td></tr>
-              <tr><td>03/08/2026</td><td>N.º 000412</td><td>Agosto 2026</td><td class="num">$380.000</td><td>Transferencia</td><td><span class="badge ok">Registrado</span></td><td><a href="../comprobante/comprobante.html" class="btn sm">PDF ↓</a></td></tr>
-              <tr><td>05/07/2026</td><td>N.º 000385</td><td>Julio 2026</td><td class="num">$380.000</td><td>Efectivo</td><td><span class="badge ok">Registrado</span></td><td><a href="../comprobante/comprobante.html" class="btn sm">PDF ↓</a></td></tr>
-            </tbody>
-          </table>
-        </div>
+    <section class="ps-card ps-stack" aria-labelledby="pagos">
+      <div class="g4-head">
+        <h2 id="pagos" class="ps-text-heading-h4">Mis pagos</h2>
+        <ps-field label="Periodo">
+          <select class="ps-select"><option>Últimos 6 meses</option><option>2026</option><option>Todo</option></select>
+        </ps-field>
       </div>
+      <ps-data-table>
+        <table class="ps-table">
+          <thead><tr><th>Fecha</th><th>Comprobante</th><th>Cobro</th><th class="ps-num">Monto</th><th>Medio</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody>
+            <tr><td data-label="Fecha">04/09/2026</td><td data-label="Comprobante">N.º 000447</td><td data-label="Cobro">Septiembre 2026</td><td data-label="Monto" class="ps-num">$&nbsp;380.000</td><td data-label="Medio">Transferencia</td>
+              <td data-label="Estado"><ps-status-badge entity="pago" status="registrado"></ps-status-badge></td>
+              <td data-label="Acciones"><a class="ps-button ps-button--ghost ps-button--sm" href="../comprobante/comprobante.html"><ps-icon name="download" size="sm"></ps-icon>Comprobante</a></td></tr>
+            <tr><td data-label="Fecha">03/08/2026</td><td data-label="Comprobante">N.º 000412</td><td data-label="Cobro">Agosto 2026</td><td data-label="Monto" class="ps-num">$&nbsp;380.000</td><td data-label="Medio">Transferencia</td>
+              <td data-label="Estado"><ps-status-badge entity="pago" status="registrado"></ps-status-badge></td>
+              <td data-label="Acciones"><a class="ps-button ps-button--ghost ps-button--sm" href="../comprobante/comprobante.html"><ps-icon name="download" size="sm"></ps-icon>Comprobante</a></td></tr>
+            <tr><td data-label="Fecha">05/07/2026</td><td data-label="Comprobante">N.º 000385</td><td data-label="Cobro">Julio 2026</td><td data-label="Monto" class="ps-num">$&nbsp;380.000</td><td data-label="Medio">Efectivo</td>
+              <td data-label="Estado"><ps-status-badge entity="pago" status="registrado"></ps-status-badge></td>
+              <td data-label="Acciones"><a class="ps-button ps-button--ghost ps-button--sm" href="../comprobante/comprobante.html"><ps-icon name="download" size="sm"></ps-icon>Comprobante</a></td></tr>
+          </tbody>
+        </table>
+      </ps-data-table>
+    </section>
 
-      <div class="note">
-        <strong>Notas:</strong> solo la ve el Patinador <em>mayor de edad</em> con un plan asignado; los datos de un menor los consulta su acudiente (RF-M5-17). Es de solo lectura.
-        El botón “Cambiar mi plan” abre el mismo flujo de <a href="../asignar-plan/asignar-plan.html#cambiar">cambio de plan</a>, limitado a sí mismo.
-      </div>
-    </main>
+    <aside class="ps-card ps-stack" aria-labelledby="notas">
+      <h2 id="notas" class="ps-text-heading-h5">Notas del wireframe</h2>
+      <p class="ps-text-caption">No forman parte de la interfaz.</p>
+      <div class="ps-text-body-sm"><ul>
+        <li>Solo la ve el Patinador mayor de edad con un plan asignado; los datos de un menor los consulta su acudiente (RF-M5-17). Es de solo lectura.</li>
+        <li>«Cambiar mi plan» abre el mismo flujo de cambio de plan, limitado a sí mismo.</li>
+      </ul></div>
+    </aside>
   </div>
+</ps-app-shell>
+<script type="module" src="../../../design-system/ps.js"></script>
+<script type="module" src="../assets/grupo-04.js"></script>
 </body>
 </html>

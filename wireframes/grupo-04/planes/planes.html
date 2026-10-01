@@ -1,304 +1,238 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Planes y tarifas — Grupo 04</title>
-  <link rel="stylesheet" href="../assets/wireframe.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planes y tarifas — Escuela de patinaje</title>
+<link rel="stylesheet" href="../../../design-system/ps.css">
+<link rel="stylesheet" href="../assets/grupo-04.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="logo"><div class="logo-box">LOGO</div> Escuela de Patinaje</div>
-    <div class="user-chip"><span class="role-tag">Administrador</span><span class="who">Andrea López</span><div class="avatar"></div></div>
-  </header>
-
-  <div class="layout">
-    <nav class="sidebar">
-      <h4>Pagos (Admin / Contador)</h4>
-      <a href="../planes/planes.html" class="active">Planes y tarifas</a>
-      <a href="../asignar-plan/asignar-plan.html">Asignar / cambiar plan</a>
-      <a href="../cartera/cartera.html">Cartera</a>
-      <a href="../registrar-pago/registrar-pago.html">Registrar pago</a>
-      <a href="../historial-pagos/historial-pagos.html">Historial de pagos</a>
-      <h4>Vistas de usuario</h4>
-      <a href="../oferta-planes/oferta-planes.html">Oferta de planes</a>
-      <a href="../mis-pagos/mis-pagos.html">Mis pagos (Acudiente)</a>
-      <a href="../mis-pagos/mis-pagos-patinador.html">Mis pagos (Patinador)</a>
-      <h4>Wireframes</h4>
-      <a href="../index.html">← Índice</a>
-    </nav>
-
-    <main class="main">
-      <div class="page-head">
-        <div>
-          <div class="breadcrumb">Pagos / Planes y tarifas</div>
-          <h1>Planes y tarifas</h1>
-          <p>Oferta de planes de la academia y su tarifa vigente. <span class="rf">RF-M5-05</span></p>
-        </div>
-        <a href="#nuevo-plan" class="btn primary">+ Nuevo plan</a>
-      </div>
-
-      <div class="card">
-        <div class="filters">
-          <label class="field">Buscar
-            <input class="input" type="search" placeholder="Nombre del plan">
-          </label>
-          <label class="field">Tipo
-            <select class="input">
-              <option>Todos</option>
-              <option>Día único</option>
-              <option>3 días/semana</option>
-              <option>6 días/semana</option>
-              <option>6 días/semana + gimnasio</option>
-            </select>
-          </label>
-          <label class="field">Estado
-            <select class="input">
-              <option>Activos</option>
-              <option>Inactivos</option>
-              <option>Todos</option>
-            </select>
-          </label>
-        </div>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Plan</th>
-                <th>Tipo</th>
-                <th>Facturación</th>
-                <th>Día límite</th>
-                <th class="num">Tarifa vigente</th>
-                <th>Vigente desde</th>
-                <th class="num">Patinadores</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Clase suelta</strong></td>
-                <td>Día único</td>
-                <td>Por sesión</td>
-                <td class="muted">—</td>
-                <td class="num">$35.000 / sesión</td>
-                <td>01/02/2026</td>
-                <td class="num">7</td>
-                <td><span class="badge ok">Activo</span></td>
-                <td class="actions">
-                  <a href="#editar-plan" class="btn sm">Editar</a>
-                  <a href="#nueva-tarifa" class="btn sm">Tarifa</a>
-                  <a href="#historial-tarifas" class="btn sm">Historial</a>
-                  <a href="#desactivar-plan" class="btn sm">Desactivar</a>
-                </td>
-              </tr>
-              <tr>
-                <td><strong>Formación 3 días</strong></td>
-                <td>3 días/semana</td>
-                <td>Mensual</td>
-                <td>Día 10</td>
-                <td class="num">$180.000</td>
-                <td>01/02/2026</td>
-                <td class="num">42</td>
-                <td><span class="badge ok">Activo</span></td>
-                <td class="actions">
-                  <a href="#editar-plan" class="btn sm">Editar</a>
-                  <a href="#nueva-tarifa" class="btn sm">Tarifa</a>
-                  <a href="#historial-tarifas" class="btn sm">Historial</a>
-                  <a href="#desactivar-plan" class="btn sm">Desactivar</a>
-                </td>
-              </tr>
-              <tr>
-                <td><strong>Competencia 6 días</strong></td>
-                <td>6 días/semana</td>
-                <td>Mensual</td>
-                <td>Día 10</td>
-                <td class="num">$300.000</td>
-                <td>01/02/2026</td>
-                <td class="num">25</td>
-                <td><span class="badge ok">Activo</span></td>
-                <td class="actions">
-                  <a href="#editar-plan" class="btn sm">Editar</a>
-                  <a href="#nueva-tarifa" class="btn sm">Tarifa</a>
-                  <a href="#historial-tarifas" class="btn sm">Historial</a>
-                  <a href="#desactivar-plan" class="btn sm">Desactivar</a>
-                </td>
-              </tr>
-              <tr>
-                <td><strong>Alto rendimiento</strong></td>
-                <td>6 días/semana + gimnasio</td>
-                <td>Mensual</td>
-                <td>Día 5</td>
-                <td class="num">$380.000</td>
-                <td>01/07/2026</td>
-                <td class="num">11</td>
-                <td><span class="badge ok">Activo</span></td>
-                <td class="actions">
-                  <a href="#editar-plan" class="btn sm">Editar</a>
-                  <a href="#nueva-tarifa" class="btn sm">Tarifa</a>
-                  <a href="#historial-tarifas" class="btn sm">Historial</a>
-                  <a href="#desactivar-plan" class="btn sm">Desactivar</a>
-                </td>
-              </tr>
-              <tr>
-                <td><strong>Formación 3 días (2025)</strong></td>
-                <td>3 días/semana</td>
-                <td>Mensual</td>
-                <td>Día 15</td>
-                <td class="num">$160.000</td>
-                <td>01/01/2025</td>
-                <td class="num">3</td>
-                <td><span class="badge off">Inactivo</span></td>
-                <td class="actions">
-                  <a href="#editar-plan" class="btn sm">Editar</a>
-                  <a href="#historial-tarifas" class="btn sm">Historial</a>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="note">
-          <strong>Notas:</strong> los planes inactivos solo los ve el Administrador (RF-M5-05); sus patinadores lo conservan, pero no se pueden asignar a nadie nuevo (RF-M5-03).
-          No hay botón <em>Eliminar</em>: un plan con patinadores o pagos solo se desactiva. El precio no se edita: se registra una nueva tarifa (RF-M5-02, RF-M5-04).
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <!-- Modal: nuevo plan -->
-  <div class="modal" id="nuevo-plan">
-    <div class="modal-box">
-      <a href="#" class="close" aria-label="Cerrar">×</a>
-      <h2>Nuevo plan de servicio</h2>
-      <p class="muted mt-0"><span class="rf">RF-M5-01</span></p>
-      <form class="form-grid">
-        <label class="field full">Nombre del plan *
-          <input class="input" value="Competencia 6 días">
-          <div class="error-text">Ya existe un plan activo con este nombre.</div>
-        </label>
-        <label class="field full">Tipo de plan *
-          <select class="input">
-            <option>Seleccione…</option>
-            <option>Día único</option>
-            <option>3 días/semana</option>
-            <option selected>6 días/semana</option>
-            <option>6 días/semana + gimnasio</option>
-          </select>
-        </label>
-        <label class="field">Periodicidad de facturación
-          <input class="input" value="Mensual" readonly>
-          <span class="hint">Se define por el tipo: día único = por sesión; los demás = mensual.</span>
-        </label>
-        <label class="field">Día límite de pago *
-          <select class="input">
-            <option>5</option><option selected>10</option><option>15</option><option>20</option>
-          </select>
-          <span class="hint">Solo en planes mensuales.</span>
-        </label>
-      </form>
-      <div class="note">Al guardar, el plan queda <strong>Activo</strong>, pero no se puede asignar hasta que tenga una tarifa vigente. Después de guardar se abre el formulario de tarifa.</div>
-      <div class="modal-foot">
-        <a href="#" class="btn">Cancelar</a>
-        <a href="#nueva-tarifa" class="btn primary">Guardar y registrar tarifa</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: editar plan -->
-  <div class="modal" id="editar-plan">
-    <div class="modal-box">
-      <a href="#" class="close" aria-label="Cerrar">×</a>
-      <h2>Editar plan: Formación 3 días</h2>
-      <p class="muted mt-0"><span class="rf">RF-M5-02</span></p>
-      <form class="form-grid">
-        <label class="field full">Nombre del plan *
-          <input class="input" value="Formación 3 días">
-        </label>
-        <label class="field">Tipo de plan
-          <input class="input" value="3 días/semana" readonly>
-        </label>
-        <label class="field">Periodicidad
-          <input class="input" value="Mensual" readonly>
-        </label>
-        <label class="field full">Día límite de pago *
-          <select class="input"><option>5</option><option selected>10</option><option>15</option></select>
-          <span class="hint">El cambio solo afecta a los cobros que se generen después.</span>
-        </label>
-      </form>
-      <div class="note">El tipo y la periodicidad no se pueden cambiar: para eso hay que crear un plan nuevo. Para cambiar el precio, use <a href="#nueva-tarifa">Registrar tarifa</a>.</div>
-      <p class="muted" style="font-size:13px">Última modificación: 02/09/2026 por Andrea López</p>
-      <div class="modal-foot">
-        <a href="#" class="btn">Cancelar</a>
-        <a href="#" class="btn primary">Guardar cambios</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: desactivar -->
-  <div class="modal" id="desactivar-plan">
-    <div class="modal-box">
-      <a href="#" class="close" aria-label="Cerrar">×</a>
-      <h2>¿Desactivar el plan «Competencia 6 días»?</h2>
-      <p class="muted mt-0"><span class="rf">RF-M5-03</span></p>
-      <ul>
-        <li>No aparecerá en la lista de planes para asignar ni para cambiar.</li>
-        <li>Los <strong>25 patinadores</strong> que lo tienen hoy lo conservan.</li>
-        <li>Los cobros y pagos históricos no cambian.</li>
+<ps-app-shell>
+  <span data-slot="brand" class="ps-text-label">Escuela de patinaje</span>
+  <span data-slot="user" class="ps-cluster g4-user">
+    <span class="ps-badge ps-badge--neutral g4-hide-mobile">Administrador</span>
+    <span class="ps-text-label g4-hide-mobile">Andrea López</span>
+    <ps-avatar name="Andrea López" size="sm"></ps-avatar>
+  </span>
+  <nav data-slot="nav" aria-label="Navegación principal">
+    <div class="g4-nav-group">
+      <p class="ps-text-caption">Pagos (Admin / Contador)</p>
+      <ul class="ps-stack">
+        <li><span class="ps-text-label" aria-current="page">Planes y tarifas</span></li>
+        <li><a class="ps-link" href="../asignar-plan/asignar-plan.html">Asignar o cambiar plan</a></li>
+        <li><a class="ps-link" href="../cartera/cartera.html">Cartera</a></li>
+        <li><a class="ps-link" href="../registrar-pago/registrar-pago.html">Registrar pago</a></li>
+        <li><a class="ps-link" href="../historial-pagos/historial-pagos.html">Historial de pagos</a></li>
       </ul>
-      <div class="modal-foot">
-        <a href="#" class="btn">Cancelar</a>
-        <a href="#" class="btn danger">Sí, desactivar</a>
-      </div>
     </div>
-  </div>
-
-  <!-- Modal: nueva tarifa -->
-  <div class="modal" id="nueva-tarifa">
-    <div class="modal-box">
-      <a href="#" class="close" aria-label="Cerrar">×</a>
-      <h2>Registrar tarifa: Formación 3 días</h2>
-      <p class="muted mt-0"><span class="rf">RF-M5-04</span></p>
-      <dl class="kv" style="margin-bottom:14px">
-        <dt>Tarifa vigente</dt><dd>$180.000 desde 01/02/2026</dd>
-      </dl>
-      <form class="form-grid">
-        <label class="field">Nuevo valor (COP) *
-          <input class="input" value="$195.000">
-          <span class="hint">Debe ser mayor a cero.</span>
-        </label>
-        <label class="field">Vigente desde *
-          <input class="input" type="date" value="2026-11-01">
-          <span class="hint">No puede ser anterior a hoy (30/09/2026).</span>
-        </label>
-      </form>
-      <div class="note">Los cobros ya generados conservan la tarifa con que se emitieron. La tarifa anterior pasa al historial.</div>
-      <div class="modal-foot">
-        <a href="#" class="btn">Cancelar</a>
-        <a href="#" class="btn primary">Registrar tarifa</a>
-      </div>
+    <div class="g4-nav-group">
+      <p class="ps-text-caption">Vistas de usuario</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="../oferta-planes/oferta-planes.html">Oferta de planes</a></li>
+        <li><a class="ps-link" href="../mis-pagos/mis-pagos.html">Mis pagos (Acudiente)</a></li>
+        <li><a class="ps-link" href="../mis-pagos/mis-pagos-patinador.html">Mis pagos (Patinador)</a></li>
+      </ul>
     </div>
-  </div>
+    <div class="g4-nav-group">
+      <p class="ps-text-caption">Wireframes</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="../index.html">Índice</a></li>
+      </ul>
+    </div>
+  </nav>
 
-  <!-- Modal: historial de tarifas -->
-  <div class="modal" id="historial-tarifas">
-    <div class="modal-box">
-      <a href="#" class="close" aria-label="Cerrar">×</a>
-      <h2>Historial de tarifas: Formación 3 días</h2>
-      <p class="muted mt-0"><span class="rf">RF-M5-04</span></p>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th class="num">Valor</th><th>Desde</th><th>Hasta</th><th>Registrada por</th></tr></thead>
+  <div data-slot="content" class="g4-page">
+    <header class="g4-head">
+      <div class="ps-stack">
+        <nav class="ps-breadcrumb" aria-label="Ruta">
+          <span>Pagos</span><span aria-hidden="true">/</span><span aria-current="page">Planes y tarifas</span>
+        </nav>
+        <h1>Planes y tarifas</h1>
+        <p class="ps-text-body-sm">Oferta de planes de la academia y su tarifa vigente.</p>
+        <p class="ps-text-caption">RF-M5-01 · RF-M5-02 · RF-M5-03 · RF-M5-04 · RF-M5-05</p>
+      </div>
+      <button class="ps-button ps-button--primary" type="button" data-open="dlg-nuevo">Crear plan</button>
+    </header>
+
+    <ps-filter-bar>
+      <ps-field label="Buscar"><input class="ps-input" type="search" name="q" placeholder="Nombre del plan"></ps-field>
+      <ps-field label="Tipo">
+        <select class="ps-select" name="tipo">
+          <option>Todos</option><option>Día único</option><option>3 días/semana</option><option>6 días/semana</option><option>6 días/semana + gimnasio</option>
+        </select>
+      </ps-field>
+      <ps-field label="Estado">
+        <select class="ps-select" name="estado"><option>Activos</option><option>Inactivos</option><option>Todos</option></select>
+      </ps-field>
+    </ps-filter-bar>
+
+    <ps-data-table>
+      <table class="ps-table">
+        <thead>
+          <tr><th data-sort="plan">Plan</th><th>Tipo</th><th>Facturación</th><th>Día límite</th><th class="ps-num">Tarifa vigente</th><th>Vigente desde</th><th class="ps-num">Patinadores</th><th>Estado</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-label="Plan">Clase suelta</td><td data-label="Tipo">Día único</td><td data-label="Facturación">Por sesión</td><td data-label="Día límite">—</td>
+            <td data-label="Tarifa vigente" class="ps-num">$&nbsp;35.000 / sesión</td><td data-label="Vigente desde">01/02/2026</td><td data-label="Patinadores" class="ps-num">7</td>
+            <td data-label="Estado"><ps-status-badge entity="plan" status="activo"></ps-status-badge></td>
+            <td data-label="Acciones"><span class="g4-row-menu">
+              <button class="ps-icon-button" type="button" aria-label="Acciones del plan" aria-haspopup="menu" aria-expanded="false" aria-controls="acciones-1"><ps-icon name="more-vertical"></ps-icon></button>
+              <ps-menu id="acciones-1" class="ps-menu__list g4-menu" hidden>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-editar">Editar</button>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-tarifa">Tarifa</button>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-historial">Historial</button>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-desactivar">Desactivar</button>
+              </ps-menu>
+            </span></td>
+          </tr>
+          <tr>
+            <td data-label="Plan">Formación 3 días</td><td data-label="Tipo">3 días/semana</td><td data-label="Facturación">Mensual</td><td data-label="Día límite">Día 10</td>
+            <td data-label="Tarifa vigente" class="ps-num">$&nbsp;180.000</td><td data-label="Vigente desde">01/02/2026</td><td data-label="Patinadores" class="ps-num">42</td>
+            <td data-label="Estado"><ps-status-badge entity="plan" status="activo"></ps-status-badge></td>
+            <td data-label="Acciones"><span class="g4-row-menu">
+              <button class="ps-icon-button" type="button" aria-label="Acciones del plan" aria-haspopup="menu" aria-expanded="false" aria-controls="acciones-2"><ps-icon name="more-vertical"></ps-icon></button>
+              <ps-menu id="acciones-2" class="ps-menu__list g4-menu" hidden>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-editar">Editar</button>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-tarifa">Tarifa</button>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-historial">Historial</button>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-desactivar">Desactivar</button>
+              </ps-menu>
+            </span></td>
+          </tr>
+          <tr>
+            <td data-label="Plan">Competencia 6 días</td><td data-label="Tipo">6 días/semana</td><td data-label="Facturación">Mensual</td><td data-label="Día límite">Día 10</td>
+            <td data-label="Tarifa vigente" class="ps-num">$&nbsp;300.000</td><td data-label="Vigente desde">01/02/2026</td><td data-label="Patinadores" class="ps-num">25</td>
+            <td data-label="Estado"><ps-status-badge entity="plan" status="activo"></ps-status-badge></td>
+            <td data-label="Acciones"><span class="g4-row-menu">
+              <button class="ps-icon-button" type="button" aria-label="Acciones del plan" aria-haspopup="menu" aria-expanded="false" aria-controls="acciones-3"><ps-icon name="more-vertical"></ps-icon></button>
+              <ps-menu id="acciones-3" class="ps-menu__list g4-menu" hidden>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-editar">Editar</button>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-tarifa">Tarifa</button>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-historial">Historial</button>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-desactivar">Desactivar</button>
+              </ps-menu>
+            </span></td>
+          </tr>
+          <tr>
+            <td data-label="Plan">Alto rendimiento</td><td data-label="Tipo">6 días/semana + gimnasio</td><td data-label="Facturación">Mensual</td><td data-label="Día límite">Día 5</td>
+            <td data-label="Tarifa vigente" class="ps-num">$&nbsp;380.000</td><td data-label="Vigente desde">01/07/2026</td><td data-label="Patinadores" class="ps-num">11</td>
+            <td data-label="Estado"><ps-status-badge entity="plan" status="activo"></ps-status-badge></td>
+            <td data-label="Acciones"><span class="g4-row-menu">
+              <button class="ps-icon-button" type="button" aria-label="Acciones del plan" aria-haspopup="menu" aria-expanded="false" aria-controls="acciones-4"><ps-icon name="more-vertical"></ps-icon></button>
+              <ps-menu id="acciones-4" class="ps-menu__list g4-menu" hidden>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-editar">Editar</button>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-tarifa">Tarifa</button>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-historial">Historial</button>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-desactivar">Desactivar</button>
+              </ps-menu>
+            </span></td>
+          </tr>
+          <tr>
+            <td data-label="Plan">Formación 3 días (2025)</td><td data-label="Tipo">3 días/semana</td><td data-label="Facturación">Mensual</td><td data-label="Día límite">Día 15</td>
+            <td data-label="Tarifa vigente" class="ps-num">$&nbsp;160.000</td><td data-label="Vigente desde">01/01/2025</td><td data-label="Patinadores" class="ps-num">3</td>
+            <td data-label="Estado"><ps-status-badge entity="plan" status="inactivo"></ps-status-badge></td>
+            <td data-label="Acciones"><span class="g4-row-menu">
+              <button class="ps-icon-button" type="button" aria-label="Acciones del plan" aria-haspopup="menu" aria-expanded="false" aria-controls="acciones-5"><ps-icon name="more-vertical"></ps-icon></button>
+              <ps-menu id="acciones-5" class="ps-menu__list g4-menu" hidden>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-editar">Editar</button>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-historial">Historial</button>
+              </ps-menu>
+            </span></td>
+          </tr>
+        </tbody>
+      </table>
+    </ps-data-table>
+
+    <aside class="ps-card ps-stack" aria-labelledby="notas">
+      <h2 id="notas" class="ps-text-heading-h5">Notas del wireframe</h2>
+      <p class="ps-text-caption">No forman parte de la interfaz.</p>
+      <div class="ps-text-body-sm"><ul>
+        <li>Los planes inactivos solo los ve el Administrador (RF-M5-05). Sus patinadores los conservan, pero no se pueden asignar a nadie nuevo (RF-M5-03).</li>
+        <li>No existe la acción de eliminar: un plan con patinadores o pagos solo se desactiva.</li>
+        <li>El precio no se edita en el plan: se registra una nueva tarifa con fecha de vigencia (RF-M5-02, RF-M5-04).</li>
+      </ul></div>
+    </aside>
+
+    <!-- Diálogo: crear plan (RF-M5-01) -->
+    <ps-dialog id="dlg-nuevo" variant="form" heading="Crear plan" confirm-label="Guardar y registrar tarifa" data-next="dlg-tarifa">
+      <div class="ps-stack">
+        <p class="ps-text-caption">RF-M5-01</p>
+        <ps-field label="Nombre del plan" required error="Ya existe un plan activo con este nombre. Usa otro nombre.">
+          <input class="ps-input" value="Competencia 6 días">
+        </ps-field>
+        <ps-field label="Tipo de plan" required>
+          <select class="ps-select"><option>Selecciona…</option><option>Día único</option><option>3 días/semana</option><option selected>6 días/semana</option><option>6 días/semana + gimnasio</option></select>
+        </ps-field>
+        <ps-field label="Periodicidad de facturación" help="Depende del tipo: día único se cobra por sesión; los demás, cada mes.">
+          <input class="ps-input" value="Mensual" readonly>
+        </ps-field>
+        <ps-field label="Día límite de pago" required help="Solo en planes mensuales.">
+          <select class="ps-select"><option>5</option><option selected>10</option><option>15</option><option>20</option></select>
+        </ps-field>
+        <div class="ps-alert ps-alert--info" role="status">
+          <ps-icon name="info"></ps-icon>
+          <p>El plan queda activo, pero no se puede asignar hasta que tenga una tarifa vigente. Al guardar se abre el registro de tarifa.</p>
+        </div>
+      </div>
+    </ps-dialog>
+
+    <!-- Diálogo: editar plan (RF-M5-02) -->
+    <ps-dialog id="dlg-editar" variant="form" heading="Editar plan: Formación 3 días" confirm-label="Guardar cambios">
+      <div class="ps-stack">
+        <p class="ps-text-caption">RF-M5-02</p>
+        <ps-field label="Nombre del plan" required><input class="ps-input" value="Formación 3 días"></ps-field>
+        <ps-field label="Tipo de plan"><input class="ps-input" value="3 días/semana" readonly></ps-field>
+        <ps-field label="Periodicidad"><input class="ps-input" value="Mensual" readonly></ps-field>
+        <ps-field label="Día límite de pago" required help="El cambio solo afecta a los cobros que se generen después.">
+          <select class="ps-select"><option>5</option><option selected>10</option><option>15</option></select>
+        </ps-field>
+        <p class="ps-text-body-sm">El tipo y la periodicidad no se cambian: para eso se crea un plan nuevo. Para cambiar el precio, usa «Tarifa».</p>
+        <p class="ps-audit-entry">Última modificación: Andrea López · 02/09/2026</p>
+      </div>
+    </ps-dialog>
+
+    <!-- Diálogo: desactivar plan (RF-M5-03) -->
+    <ps-dialog id="dlg-desactivar" variant="confirm" heading="¿Desactivar el plan Competencia 6 días?" confirm-label="Desactivar plan">
+      <div class="ps-text-body-sm"><ul>
+        <li>No aparecerá en la lista de planes para asignar ni para cambiar.</li>
+        <li>Los 25 patinadores que lo tienen hoy lo conservan.</li>
+        <li>Los cobros y pagos históricos no cambian.</li>
+      </ul></div>
+    </ps-dialog>
+
+    <!-- Diálogo: registrar tarifa (RF-M5-04) -->
+    <ps-dialog id="dlg-tarifa" variant="form" heading="Registrar tarifa: Formación 3 días" confirm-label="Registrar tarifa">
+      <div class="ps-stack">
+        <p class="ps-text-caption">RF-M5-04</p>
+        <dl class="ps-dl"><div><dt>Tarifa vigente</dt><dd>$&nbsp;180.000 desde 01/02/2026</dd></div></dl>
+        <ps-field label="Nuevo valor (COP)" required help="Debe ser mayor que cero.">
+          <ps-currency-input name="valor" value="195000"></ps-currency-input>
+        </ps-field>
+        <ps-field label="Vigente desde" required help="No puede ser anterior a hoy (30/09/2026).">
+          <ps-date-input name="vigencia" value="2026-11-01"></ps-date-input>
+        </ps-field>
+        <p class="ps-text-body-sm">Los cobros ya generados conservan la tarifa con que se emitieron. La tarifa anterior pasa al historial.</p>
+      </div>
+    </ps-dialog>
+
+    <!-- Diálogo: historial de tarifas (RF-M5-04) -->
+    <ps-dialog id="dlg-historial" variant="confirm" heading="Historial de tarifas: Formación 3 días" cancel-label="Cerrar" confirm-label="Registrar tarifa" data-next="dlg-tarifa">
+      <ps-data-table>
+        <table class="ps-table">
+          <thead><tr><th class="ps-num">Valor</th><th>Desde</th><th>Hasta</th><th>Registro</th></tr></thead>
           <tbody>
-            <tr><td class="num">$195.000</td><td>01/11/2026</td><td>—</td><td>Andrea López <span class="badge pending">Programada</span></td></tr>
-            <tr><td class="num">$180.000</td><td>01/02/2026</td><td>31/10/2026</td><td>Andrea López <span class="badge ok">Vigente</span></td></tr>
-            <tr><td class="num">$165.000</td><td>01/02/2025</td><td>31/01/2026</td><td>Andrea López</td></tr>
+            <tr><td data-label="Valor" class="ps-num">$&nbsp;195.000</td><td data-label="Desde">01/11/2026</td><td data-label="Hasta">— (programada)</td><td data-label="Registro"><span class="ps-audit-entry">Andrea López · 30/09/2026</span></td></tr>
+            <tr><td data-label="Valor" class="ps-num">$&nbsp;180.000</td><td data-label="Desde">01/02/2026</td><td data-label="Hasta">31/10/2026 (vigente)</td><td data-label="Registro"><span class="ps-audit-entry">Andrea López · 20/01/2026</span></td></tr>
+            <tr><td data-label="Valor" class="ps-num">$&nbsp;165.000</td><td data-label="Desde">01/02/2025</td><td data-label="Hasta">31/01/2026</td><td data-label="Registro"><span class="ps-audit-entry">Andrea López · 15/01/2025</span></td></tr>
           </tbody>
         </table>
-      </div>
-      <div class="modal-foot"><a href="#" class="btn">Cerrar</a></div>
-    </div>
+      </ps-data-table>
+    </ps-dialog>
   </div>
+</ps-app-shell>
+<script type="module" src="../../../design-system/ps.js"></script>
+<script type="module" src="../assets/grupo-04.js"></script>
 </body>
 </html>

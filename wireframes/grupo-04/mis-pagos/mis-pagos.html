@@ -1,138 +1,150 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pagos del acudiente — Grupo 04</title>
-  <link rel="stylesheet" href="../assets/wireframe.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pagos de mis patinadores — Escuela de patinaje</title>
+<link rel="stylesheet" href="../../../design-system/ps.css">
+<link rel="stylesheet" href="../assets/grupo-04.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="logo"><div class="logo-box">LOGO</div> Escuela de Patinaje</div>
-    <div class="user-chip"><span class="role-tag">Acudiente</span><span class="who">Carolina Torres</span><div class="avatar"></div></div>
-  </header>
+<ps-app-shell>
+  <span data-slot="brand" class="ps-text-label">Escuela de patinaje</span>
+  <span data-slot="user" class="ps-cluster g4-user">
+    <span class="ps-badge ps-badge--neutral g4-hide-mobile">Acudiente</span>
+    <span class="ps-text-label g4-hide-mobile">Carolina Torres</span>
+    <ps-avatar name="Carolina Torres" size="sm"></ps-avatar>
+  </span>
+  <nav data-slot="nav" aria-label="Navegación principal">
+    <div class="g4-nav-group">
+      <p class="ps-text-caption">Mi cuenta</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="#">Inicio</a></li>
+        <li><a class="ps-link" href="#">Mis patinadores</a></li>
+        <li><a class="ps-link" href="../oferta-planes/oferta-planes.html">Planes</a></li>
+        <li><span class="ps-text-label" aria-current="page">Pagos</span></li>
+      </ul>
+    </div>
+    <div class="g4-nav-group">
+      <p class="ps-text-caption">Wireframes</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="../index.html">Índice</a></li>
+      </ul>
+    </div>
+  </nav>
+  <ps-player-switcher data-slot="context" players='[{"id":"sofia","name":"Sofía Ramírez Torres","category":"Infantil B"},{"id":"mateo","name":"Mateo Ramírez Torres","category":"Infantil A"}]'></ps-player-switcher>
 
-  <div class="layout">
-    <nav class="sidebar">
-      <h4>Mi cuenta</h4>
-      <a href="#">Inicio</a>
-      <a href="#">Mis patinadores</a>
-      <a href="../oferta-planes/oferta-planes.html">Planes</a>
-      <a href="../mis-pagos/mis-pagos.html" class="active">Pagos</a>
-      <h4>Wireframes</h4>
-      <a href="../index.html">← Índice</a>
-    </nav>
+  <div data-slot="content" class="g4-page">
+    <header class="g4-head">
+      <div class="ps-stack">
+        <nav class="ps-breadcrumb" aria-label="Ruta"><span aria-current="page">Pagos</span></nav>
+        <h1>Pagos de mis patinadores</h1>
+        <p class="ps-text-body-sm">Cobros, pagos y estado de cuenta de cada patinador a tu cargo.</p>
+        <p class="ps-text-caption">RF-M5-15 · RF-M5-17</p>
+      </div>
+      <div class="ps-cluster">
+        <a class="ps-button ps-button--secondary" href="../oferta-planes/oferta-planes.html">Ver planes</a>
+        <a class="ps-button ps-button--secondary" href="../asignar-plan/asignar-plan.html#cambiar">Cambiar plan</a>
+      </div>
+    </header>
 
-    <main class="main">
-      <div class="page-head">
-        <div>
-          <div class="breadcrumb">Pagos</div>
-          <h1>Pagos de mis patinadores</h1>
-          <p>Cobros, pagos y estado de cuenta de cada patinador a tu cargo. <span class="rf">RF-M5-17</span></p>
-        </div>
+    <!-- ===== Sofía ===== -->
+    <section data-player="sofia" class="ps-stack" aria-label="Sofía Ramírez Torres">
+      <div class="ps-kpi-grid">
+        <div class="ps-kpi ps-stack"><p class="ps-kpi__label">Estado de cartera</p><ps-status-badge entity="cartera" status="vencido"></ps-status-badge><p class="ps-text-caption">Un cobro pasó su fecha límite</p></div>
+        <div class="ps-kpi"><p class="ps-kpi__label">Saldo pendiente</p><p class="ps-kpi__value">$&nbsp;80.000</p><p class="ps-text-caption">Septiembre 2026</p></div>
+        <div class="ps-kpi"><p class="ps-kpi__label">Plan</p><p class="ps-text-heading-h5">Formación 3 días</p><p class="ps-text-caption">$&nbsp;180.000 al mes · desde 01/02/2026</p></div>
       </div>
 
-      <div class="tabs">
-        <a href="#sofia" data-tab="sofia" class="active">Sofía Ramírez Torres <span class="badge overdue">Vencido</span></a>
-        <a href="#mateo" data-tab="mateo">Mateo Ramírez Torres <span class="badge pending">Pendiente</span></a>
-      </div>
-
-      <!-- ===== Mateo ===== -->
-      <section id="mateo" class="panel">
-        <div class="grid-3" style="margin-bottom:18px">
-          <div class="kpi"><div class="label">Estado</div><div class="value"><span class="badge pending">Pendiente</span></div><div class="sub">Tienes un cobro por pagar</div></div>
-          <div class="kpi"><div class="label">Saldo pendiente</div><div class="value">$180.000</div><div class="sub">Paga antes del 10/10/2026</div></div>
-          <div class="kpi"><div class="label">Plan</div><div class="value" style="font-size:18px">Formación 3 días</div><div class="sub">$180.000/mes · desde 01/10/2026</div></div>
-        </div>
-
-        <div class="card">
-          <h3>Cobros pendientes</h3>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Periodo</th><th class="num">Valor</th><th class="num">Saldo</th><th>Fecha límite</th><th>Estado</th></tr></thead>
-              <tbody>
-                <tr><td>Octubre 2026</td><td class="num">$180.000</td><td class="num">$180.000</td><td>10/10/2026</td><td><span class="badge pending">Pendiente</span></td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3>Pagos realizados</h3>
-          <div class="placeholder">Aún no hay pagos registrados para Mateo.</div>
-        </div>
-      </section>
-
-      <!-- ===== Sofía (por defecto) ===== -->
-      <section id="sofia" class="panel default">
-        <div class="grid-3" style="margin-bottom:18px">
-          <div class="kpi"><div class="label">Estado</div><div class="value"><span class="badge overdue">Vencido</span></div><div class="sub">Un cobro pasó su fecha límite</div></div>
-          <div class="kpi"><div class="label">Saldo pendiente</div><div class="value">$80.000</div><div class="sub">Septiembre 2026</div></div>
-          <div class="kpi"><div class="label">Plan</div><div class="value" style="font-size:18px">Formación 3 días</div><div class="sub">$180.000/mes · desde 01/02/2026</div></div>
-        </div>
-
-        <div class="card">
-          <div class="card-head">
-            <h3>Cobros pendientes</h3>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Periodo</th><th class="num">Valor</th><th class="num">Pagado</th><th class="num">Saldo</th><th>Fecha límite</th><th>Estado</th></tr></thead>
-              <tbody>
-                <tr><td>Septiembre 2026</td><td class="num">$180.000</td><td class="num">$100.000</td><td class="num">$80.000</td><td>10/09/2026</td><td><span class="badge overdue">Vencido</span></td></tr>
-              </tbody>
-            </table>
-          </div>
-          <p class="muted" style="font-size:13px">¿Cómo pagar? Acércate a la sede o haz una transferencia y envía el soporte a la administración. La academia registra el pago; no hay pagos en línea.</p>
-        </div>
-
-        <div class="card">
-          <div class="card-head">
-            <h3>Pagos realizados</h3>
-            <select class="input" style="width:auto;margin:0"><option>Últimos 6 meses</option><option>2026</option><option>Todo</option></select>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Fecha</th><th>Comprobante</th><th>Cobro</th><th class="num">Monto</th><th>Medio</th><th>Estado</th><th></th></tr></thead>
-              <tbody>
-                <tr><td>15/09/2026</td><td>N.º 000461</td><td>Septiembre 2026</td><td class="num">$100.000</td><td>Efectivo</td><td><span class="badge ok">Registrado</span></td><td><a href="../comprobante/comprobante.html" class="btn sm">PDF ↓</a></td></tr>
-                <tr><td>09/08/2026</td><td>N.º 000421</td><td>Agosto 2026</td><td class="num">$180.000</td><td>Transferencia</td><td><span class="badge ok">Registrado</span></td><td><a href="../comprobante/comprobante.html" class="btn sm">PDF ↓</a></td></tr>
-                <tr><td>07/07/2026</td><td>N.º 000389</td><td>Julio 2026</td><td class="num">$180.000</td><td>Transferencia</td><td><span class="badge ok">Registrado</span></td><td><a href="../comprobante/comprobante.html" class="btn sm">PDF ↓</a></td></tr>
-              </tbody>
-            </table>
+      <section class="ps-card ps-stack" aria-labelledby="s-cobros">
+        <h2 id="s-cobros" class="ps-text-heading-h4">Cobros pendientes</h2>
+        <ps-data-table>
+          <table class="ps-table">
+            <thead><tr><th>Periodo</th><th class="ps-num">Valor</th><th class="ps-num">Pagado</th><th class="ps-num">Saldo</th><th>Fecha límite</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr><td data-label="Periodo">Septiembre 2026</td><td data-label="Valor" class="ps-num">$&nbsp;180.000</td><td data-label="Pagado" class="ps-num">$&nbsp;100.000</td><td data-label="Saldo" class="ps-num">$&nbsp;80.000</td><td data-label="Fecha límite">10/09/2026</td>
+                <td data-label="Estado"><ps-status-badge entity="cobro" status="pendiente"></ps-status-badge> <span class="ps-text-caption">Vencido</span></td></tr>
+            </tbody>
+          </table>
+        </ps-data-table>
+        <div class="ps-alert ps-alert--info" role="note">
+          <ps-icon name="info"></ps-icon>
+          <div>
+            <p class="ps-alert__title">¿Cómo pagar?</p>
+            <p>Acércate a la sede o haz una transferencia y envía el soporte a la administración. La academia registra el pago; no hay pagos en línea.</p>
           </div>
         </div>
       </section>
 
-      <div class="actions" style="margin-bottom:12px">
-        <a href="../asignar-plan/asignar-plan.html#cambiar" class="btn">Cambiar plan</a>
-        <a href="../oferta-planes/oferta-planes.html" class="btn">Ver planes</a>
+      <section class="ps-card ps-stack" aria-labelledby="s-pagos">
+        <div class="g4-head">
+          <h2 id="s-pagos" class="ps-text-heading-h4">Pagos realizados</h2>
+          <ps-field label="Periodo">
+            <select class="ps-select"><option>Últimos 6 meses</option><option>2026</option><option>Todo</option></select>
+          </ps-field>
+        </div>
+        <ps-data-table>
+          <table class="ps-table">
+            <thead><tr><th>Fecha</th><th>Comprobante</th><th>Cobro</th><th class="ps-num">Monto</th><th>Medio</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody>
+              <tr><td data-label="Fecha">15/09/2026</td><td data-label="Comprobante">N.º 000461</td><td data-label="Cobro">Septiembre 2026</td><td data-label="Monto" class="ps-num">$&nbsp;100.000</td><td data-label="Medio">Efectivo</td>
+                <td data-label="Estado"><ps-status-badge entity="pago" status="registrado"></ps-status-badge></td>
+                <td data-label="Acciones"><a class="ps-button ps-button--ghost ps-button--sm" href="../comprobante/comprobante.html"><ps-icon name="download" size="sm"></ps-icon>Comprobante</a></td></tr>
+              <tr><td data-label="Fecha">09/08/2026</td><td data-label="Comprobante">N.º 000421</td><td data-label="Cobro">Agosto 2026</td><td data-label="Monto" class="ps-num">$&nbsp;180.000</td><td data-label="Medio">Transferencia</td>
+                <td data-label="Estado"><ps-status-badge entity="pago" status="registrado"></ps-status-badge></td>
+                <td data-label="Acciones"><a class="ps-button ps-button--ghost ps-button--sm" href="../comprobante/comprobante.html"><ps-icon name="download" size="sm"></ps-icon>Comprobante</a></td></tr>
+              <tr><td data-label="Fecha">07/07/2026</td><td data-label="Comprobante">N.º 000389</td><td data-label="Cobro">Julio 2026</td><td data-label="Monto" class="ps-num">$&nbsp;180.000</td><td data-label="Medio">Transferencia</td>
+                <td data-label="Estado"><ps-status-badge entity="pago" status="registrado"></ps-status-badge></td>
+                <td data-label="Acciones"><a class="ps-button ps-button--ghost ps-button--sm" href="../comprobante/comprobante.html"><ps-icon name="download" size="sm"></ps-icon>Comprobante</a></td></tr>
+            </tbody>
+          </table>
+        </ps-data-table>
+      </section>
+    </section>
+
+    <!-- ===== Mateo ===== -->
+    <section data-player="mateo" class="ps-stack" aria-label="Mateo Ramírez Torres" hidden>
+      <div class="ps-kpi-grid">
+        <div class="ps-kpi ps-stack"><p class="ps-kpi__label">Estado de cartera</p><ps-status-badge entity="cartera" status="pendiente"></ps-status-badge><p class="ps-text-caption">Tienes un cobro por pagar</p></div>
+        <div class="ps-kpi"><p class="ps-kpi__label">Saldo pendiente</p><p class="ps-kpi__value">$&nbsp;180.000</p><p class="ps-text-caption">Paga antes del 10/10/2026</p></div>
+        <div class="ps-kpi"><p class="ps-kpi__label">Plan</p><p class="ps-text-heading-h5">Formación 3 días</p><p class="ps-text-caption">$&nbsp;180.000 al mes · desde 01/10/2026</p></div>
       </div>
 
-      <div class="note">
-        <strong>Notas:</strong> solo lectura: el acudiente no registra, edita ni anula pagos. Solo ve a los patinadores asociados a su cuenta (con un solo patinador, las pestañas no aparecen).
-        El estado y el saldo coinciden con los que ve el Administrador en <a href="../cartera/cartera.html">Cartera</a>.
-      </div>
-    </main>
+      <section class="ps-card ps-stack" aria-labelledby="m-cobros">
+        <h2 id="m-cobros" class="ps-text-heading-h4">Cobros pendientes</h2>
+        <ps-data-table>
+          <table class="ps-table">
+            <thead><tr><th>Periodo</th><th class="ps-num">Valor</th><th class="ps-num">Saldo</th><th>Fecha límite</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr><td data-label="Periodo">Octubre 2026</td><td data-label="Valor" class="ps-num">$&nbsp;180.000</td><td data-label="Saldo" class="ps-num">$&nbsp;180.000</td><td data-label="Fecha límite">10/10/2026</td>
+                <td data-label="Estado"><ps-status-badge entity="cobro" status="pendiente"></ps-status-badge></td></tr>
+            </tbody>
+          </table>
+        </ps-data-table>
+      </section>
+
+      <section class="ps-card" aria-labelledby="m-pagos">
+        <h2 id="m-pagos" class="ps-text-heading-h4">Pagos realizados</h2>
+        <div class="ps-empty-state">
+          <ps-icon name="info" size="lg"></ps-icon>
+          <p class="ps-empty-state__title">Aún no hay pagos</p>
+          <p class="ps-empty-state__desc">Cuando la academia registre un pago de Mateo, aparecerá aquí con su comprobante.</p>
+        </div>
+      </section>
+    </section>
+
+    <aside class="ps-card ps-stack" aria-labelledby="notas">
+      <h2 id="notas" class="ps-text-heading-h5">Notas del wireframe</h2>
+      <p class="ps-text-caption">No forman parte de la interfaz.</p>
+      <div class="ps-text-body-sm"><ul>
+        <li>Solo lectura: el acudiente no registra, edita ni anula pagos. Solo ve a los patinadores asociados a su cuenta.</li>
+        <li>El selector «Viendo a» de la barra superior (PlayerContextSwitcher) cambia de patinador; con un solo patinador no aparece.</li>
+        <li>El estado y el saldo coinciden con los que ve el Administrador en Cartera.</li>
+      </ul></div>
+    </aside>
   </div>
-
-  <style>
-    .panel { display: none; }
-    .panel.default { display: block; }
-    .panel:target { display: block; }
-    .panel:target ~ .panel.default { display: none; }
-  </style>
-  <script>
-    // Marca la pestaña activa según el ancla de la URL
-    function syncTabs() {
-      var id = location.hash.slice(1);
-      if (id !== 'mateo') id = 'sofia';
-      document.querySelectorAll('.tabs a').forEach(function (a) {
-        a.classList.toggle('active', a.dataset.tab === id);
-      });
-    }
-    window.addEventListener('hashchange', syncTabs);
-    syncTabs();
-  </script>
+</ps-app-shell>
+<script type="module" src="../../../design-system/ps.js"></script>
+<script type="module" src="../assets/grupo-04.js"></script>
 </body>
 </html>

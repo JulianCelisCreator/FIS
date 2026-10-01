@@ -1,190 +1,159 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Historial de pagos — Grupo 04</title>
-  <link rel="stylesheet" href="../assets/wireframe.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Historial de pagos — Escuela de patinaje</title>
+<link rel="stylesheet" href="../../../design-system/ps.css">
+<link rel="stylesheet" href="../assets/grupo-04.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="logo"><div class="logo-box">LOGO</div> Escuela de Patinaje</div>
-    <div class="user-chip"><span class="role-tag">Administrador</span><span class="who">Andrea López</span><div class="avatar"></div></div>
-  </header>
-
-  <div class="layout">
-    <nav class="sidebar">
-      <h4>Pagos (Admin / Contador)</h4>
-      <a href="../planes/planes.html">Planes y tarifas</a>
-      <a href="../asignar-plan/asignar-plan.html">Asignar / cambiar plan</a>
-      <a href="../cartera/cartera.html">Cartera</a>
-      <a href="../registrar-pago/registrar-pago.html">Registrar pago</a>
-      <a href="../historial-pagos/historial-pagos.html" class="active">Historial de pagos</a>
-      <h4>Vistas de usuario</h4>
-      <a href="../oferta-planes/oferta-planes.html">Oferta de planes</a>
-      <a href="../mis-pagos/mis-pagos.html">Mis pagos (Acudiente)</a>
-      <a href="../mis-pagos/mis-pagos-patinador.html">Mis pagos (Patinador)</a>
-      <h4>Wireframes</h4>
-      <a href="../index.html">← Índice</a>
-    </nav>
-
-    <main class="main">
-      <div class="page-head">
-        <div>
-          <div class="breadcrumb">Pagos / Historial de pagos</div>
-          <h1>Historial de pagos</h1>
-          <p>Todos los pagos registrados. <span class="rf">RF-M5-16</span></p>
-        </div>
-        <a href="#" class="btn">Exportar <span class="rf">RF-M6-05</span></a>
-      </div>
-
-      <div class="card">
-        <div class="filters">
-          <label class="field">Patinador
-            <input class="input" type="search" placeholder="Nombre o documento">
-          </label>
-          <label class="field">Acudiente
-            <input class="input" type="search" value="Luis Herrera">
-          </label>
-          <label class="field">Desde
-            <input class="input" type="date" value="2026-07-01">
-          </label>
-          <label class="field">Hasta
-            <input class="input" type="date" value="2026-09-30">
-          </label>
-          <label class="field">Medio de pago
-            <select class="input"><option>Todos</option><option>Efectivo</option><option>Transferencia</option><option>Consignación</option></select>
-          </label>
-          <label class="field">Estado
-            <select class="input"><option>Todos</option><option>Registrado</option><option>Anulado</option></select>
-          </label>
-        </div>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Comprobante</th>
-                <th>Fecha</th>
-                <th>Patinador</th>
-                <th>Cobro aplicado</th>
-                <th class="num">Monto</th>
-                <th>Medio</th>
-                <th>Registró</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>N.º 000482</td>
-                <td>30/09/2026</td>
-                <td>Samuel Herrera Díaz</td>
-                <td>Agosto 2026</td>
-                <td class="num">$200.000</td>
-                <td>Transferencia</td>
-                <td>Jorge Méndez</td>
-                <td><span class="badge ok">Registrado</span></td>
-                <td class="actions">
-                  <a href="../comprobante/comprobante.html" class="btn sm">PDF ↓</a>
-                  <a href="#anular" class="btn sm">Anular</a>
-                </td>
-              </tr>
-              <tr>
-                <td>N.º 000455</td>
-                <td>12/09/2026</td>
-                <td>Samuel Herrera Díaz</td>
-                <td>Septiembre 2026</td>
-                <td class="num">$150.000</td>
-                <td>Efectivo</td>
-                <td>Andrea López</td>
-                <td><span class="badge ok">Registrado</span></td>
-                <td class="actions">
-                  <a href="../comprobante/comprobante.html" class="btn sm">PDF ↓</a>
-                  <a href="#anular" class="btn sm">Anular</a>
-                </td>
-              </tr>
-              <tr class="muted">
-                <td>N.º 000454</td>
-                <td>12/09/2026</td>
-                <td>Samuel Herrera Díaz</td>
-                <td>Septiembre 2026</td>
-                <td class="num">$15.000</td>
-                <td>Efectivo</td>
-                <td>Andrea López</td>
-                <td class="keep"><span class="badge void">Anulado</span></td>
-                <td class="actions keep">
-                  <a href="../comprobante/comprobante.html" class="btn sm">PDF ↓</a>
-                  <a href="#motivo" class="btn sm">Ver motivo</a>
-                </td>
-              </tr>
-              <tr>
-                <td>N.º 000398</td>
-                <td>08/07/2026</td>
-                <td>Samuel Herrera Díaz</td>
-                <td>Julio 2026</td>
-                <td class="num">$300.000</td>
-                <td>Consignación</td>
-                <td>Jorge Méndez</td>
-                <td><span class="badge ok">Registrado</span></td>
-                <td class="actions">
-                  <a href="../comprobante/comprobante.html" class="btn sm">PDF ↓</a>
-                  <a href="#anular" class="btn sm">Anular</a>
-                </td>
-              </tr>
-            </tbody>
-            <tfoot>
-              <tr><td colspan="4">Total (sin anulados) · 3 pagos</td><td class="num">$650.000</td><td colspan="4"></td></tr>
-            </tfoot>
-          </table>
-        </div>
-
-        <div class="note">
-          <strong>Notas:</strong> los pagos anulados siguen en la lista, tachados, y no suman al total.
-          El botón <em>Anular</em> solo lo ve el <strong>Administrador</strong>; el Contador ve la misma tabla sin esa acción (RF-M5-11).
-          Profesor, Fisioterapeuta y Visitante no tienen acceso a esta página.
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <!-- Modal: anular -->
-  <div class="modal" id="anular">
-    <div class="modal-box">
-      <a href="#" class="close" aria-label="Cerrar">×</a>
-      <h2>Anular pago N.º 000482</h2>
-      <p class="muted mt-0"><span class="rf">RF-M5-11</span></p>
-      <dl class="kv" style="margin-bottom:14px">
-        <dt>Patinador</dt><dd>Samuel Herrera Díaz</dd>
-        <dt>Cobro</dt><dd>Agosto 2026</dd>
-        <dt>Monto</dt><dd>$200.000 · Transferencia · 30/09/2026</dd>
-      </dl>
-      <label class="field">Motivo de la anulación *
-        <textarea class="input" placeholder="Ej.: monto digitado incorrectamente"></textarea>
-        <div class="error-text">El motivo es obligatorio.</div>
-      </label>
-      <div class="note">
-        El pago queda como <strong>Anulado</strong> (no se borra). Los $200.000 vuelven al saldo del cobro de Agosto 2026, el comprobante se marca como anulado y se recalcula la cartera. <strong>No se puede deshacer.</strong>
-      </div>
-      <div class="modal-foot">
-        <a href="#" class="btn">Cancelar</a>
-        <a href="#" class="btn danger">Anular pago</a>
-      </div>
+<ps-app-shell>
+  <span data-slot="brand" class="ps-text-label">Escuela de patinaje</span>
+  <span data-slot="user" class="ps-cluster g4-user">
+    <span class="ps-badge ps-badge--neutral g4-hide-mobile">Administrador</span>
+    <span class="ps-text-label g4-hide-mobile">Andrea López</span>
+    <ps-avatar name="Andrea López" size="sm"></ps-avatar>
+  </span>
+  <nav data-slot="nav" aria-label="Navegación principal">
+    <div class="g4-nav-group">
+      <p class="ps-text-caption">Pagos (Admin / Contador)</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="../planes/planes.html">Planes y tarifas</a></li>
+        <li><a class="ps-link" href="../asignar-plan/asignar-plan.html">Asignar o cambiar plan</a></li>
+        <li><a class="ps-link" href="../cartera/cartera.html">Cartera</a></li>
+        <li><a class="ps-link" href="../registrar-pago/registrar-pago.html">Registrar pago</a></li>
+        <li><span class="ps-text-label" aria-current="page">Historial de pagos</span></li>
+      </ul>
     </div>
-  </div>
-
-  <!-- Modal: motivo de anulación -->
-  <div class="modal" id="motivo">
-    <div class="modal-box">
-      <a href="#" class="close" aria-label="Cerrar">×</a>
-      <h2>Pago N.º 000454 anulado</h2>
-      <dl class="kv">
-        <dt>Anulado por</dt><dd>Andrea López</dd>
-        <dt>Fecha</dt><dd>12/09/2026 5:42 p. m.</dd>
-        <dt>Motivo</dt><dd>Se digitó $15.000 en vez de $150.000. Se registró de nuevo en el comprobante 000455.</dd>
-      </dl>
-      <div class="modal-foot"><a href="#" class="btn">Cerrar</a></div>
+    <div class="g4-nav-group">
+      <p class="ps-text-caption">Vistas de usuario</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="../oferta-planes/oferta-planes.html">Oferta de planes</a></li>
+        <li><a class="ps-link" href="../mis-pagos/mis-pagos.html">Mis pagos (Acudiente)</a></li>
+        <li><a class="ps-link" href="../mis-pagos/mis-pagos-patinador.html">Mis pagos (Patinador)</a></li>
+      </ul>
     </div>
+    <div class="g4-nav-group">
+      <p class="ps-text-caption">Wireframes</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="../index.html">Índice</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div data-slot="content" class="g4-page">
+    <header class="g4-head">
+      <div class="ps-stack">
+        <nav class="ps-breadcrumb" aria-label="Ruta">
+          <span>Pagos</span><span aria-hidden="true">/</span><span aria-current="page">Historial de pagos</span>
+        </nav>
+        <h1>Historial de pagos</h1>
+        <p class="ps-text-body-sm">Todos los pagos registrados.</p>
+        <p class="ps-text-caption">RF-M5-11 · RF-M5-15 · RF-M5-16 · RF-M6-05</p>
+      </div>
+      <ps-export-menu formats="pdf,xlsx"></ps-export-menu>
+    </header>
+
+    <ps-filter-bar>
+      <ps-field label="Patinador"><input class="ps-input" type="search" name="patinador" placeholder="Nombre o documento"></ps-field>
+      <ps-field label="Acudiente"><input class="ps-input" type="search" name="acudiente" value="Luis Herrera"></ps-field>
+      <ps-field label="Desde"><ps-date-input name="desde" value="2026-07-01"></ps-date-input></ps-field>
+      <ps-field label="Hasta"><ps-date-input name="hasta" value="2026-09-30"></ps-date-input></ps-field>
+      <ps-field label="Medio de pago">
+        <select class="ps-select" name="medio"><option>Todos</option><option>Efectivo</option><option>Transferencia</option><option>Consignación</option></select>
+      </ps-field>
+      <ps-field label="Estado">
+        <select class="ps-select" name="estado"><option>Todos</option><option>Registrado</option><option>Anulado</option></select>
+      </ps-field>
+      <span class="ps-chip">Acudiente: Luis Herrera</span>
+    </ps-filter-bar>
+
+    <ps-data-table>
+      <table class="ps-table">
+        <thead>
+          <tr><th>Comprobante</th><th data-sort="fecha">Fecha</th><th>Patinador</th><th>Cobro aplicado</th><th class="ps-num">Monto</th><th>Medio</th><th>Registró</th><th>Estado</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-label="Comprobante">N.º 000482</td><td data-label="Fecha">30/09/2026</td><td data-label="Patinador">Samuel Herrera Díaz</td><td data-label="Cobro aplicado">Agosto 2026</td>
+            <td data-label="Monto" class="ps-num">$&nbsp;200.000</td><td data-label="Medio">Transferencia</td><td data-label="Registró">Jorge Méndez</td>
+            <td data-label="Estado"><ps-status-badge entity="pago" status="registrado"></ps-status-badge></td>
+            <td data-label="Acciones"><span class="ps-cluster">
+              <a class="ps-button ps-button--ghost ps-button--sm" href="../comprobante/comprobante.html"><ps-icon name="download" size="sm"></ps-icon>Comprobante</a>
+              <button class="ps-button ps-button--destructive ps-button--sm" type="button" data-open="dlg-anular">Anular</button>
+            </span></td>
+          </tr>
+          <tr>
+            <td data-label="Comprobante">N.º 000455</td><td data-label="Fecha">12/09/2026</td><td data-label="Patinador">Samuel Herrera Díaz</td><td data-label="Cobro aplicado">Septiembre 2026</td>
+            <td data-label="Monto" class="ps-num">$&nbsp;150.000</td><td data-label="Medio">Efectivo</td><td data-label="Registró">Andrea López</td>
+            <td data-label="Estado"><ps-status-badge entity="pago" status="registrado"></ps-status-badge></td>
+            <td data-label="Acciones"><span class="ps-cluster">
+              <a class="ps-button ps-button--ghost ps-button--sm" href="../comprobante/comprobante.html"><ps-icon name="download" size="sm"></ps-icon>Comprobante</a>
+              <button class="ps-button ps-button--destructive ps-button--sm" type="button" data-open="dlg-anular">Anular</button>
+            </span></td>
+          </tr>
+          <tr>
+            <td data-label="Comprobante">N.º 000454</td><td data-label="Fecha">12/09/2026</td><td data-label="Patinador">Samuel Herrera Díaz</td><td data-label="Cobro aplicado">Septiembre 2026</td>
+            <td data-label="Monto" class="ps-num">$&nbsp;15.000</td><td data-label="Medio">Efectivo</td><td data-label="Registró">Andrea López</td>
+            <td data-label="Estado"><span class="ps-stack">
+              <ps-status-badge entity="pago" status="anulado"></ps-status-badge>
+              <span class="ps-audit-entry">Andrea López · 12/09/2026</span>
+            </span></td>
+            <td data-label="Acciones"><span class="ps-cluster">
+              <a class="ps-button ps-button--ghost ps-button--sm" href="../comprobante/comprobante.html"><ps-icon name="download" size="sm"></ps-icon>Comprobante</a>
+              <button class="ps-button ps-button--ghost ps-button--sm" type="button" data-open="dlg-motivo">Ver motivo</button>
+            </span></td>
+          </tr>
+          <tr>
+            <td data-label="Comprobante">N.º 000398</td><td data-label="Fecha">08/07/2026</td><td data-label="Patinador">Samuel Herrera Díaz</td><td data-label="Cobro aplicado">Julio 2026</td>
+            <td data-label="Monto" class="ps-num">$&nbsp;300.000</td><td data-label="Medio">Consignación</td><td data-label="Registró">Jorge Méndez</td>
+            <td data-label="Estado"><ps-status-badge entity="pago" status="registrado"></ps-status-badge></td>
+            <td data-label="Acciones"><span class="ps-cluster">
+              <a class="ps-button ps-button--ghost ps-button--sm" href="../comprobante/comprobante.html"><ps-icon name="download" size="sm"></ps-icon>Comprobante</a>
+              <button class="ps-button ps-button--destructive ps-button--sm" type="button" data-open="dlg-anular">Anular</button>
+            </span></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr><td data-label="Total">Total sin anulados · 3 pagos</td><td data-label=""></td><td data-label=""></td><td data-label=""></td><td data-label="Monto" class="ps-num">$&nbsp;650.000</td><td data-label=""></td><td data-label=""></td><td data-label=""></td><td data-label=""></td></tr>
+        </tfoot>
+      </table>
+    </ps-data-table>
+
+    <aside class="ps-card ps-stack" aria-labelledby="notas">
+      <h2 id="notas" class="ps-text-heading-h5">Notas del wireframe</h2>
+      <p class="ps-text-caption">No forman parte de la interfaz.</p>
+      <div class="ps-text-body-sm"><ul>
+        <li>Los pagos anulados siguen en la lista con su estado Anulado y no suman al total.</li>
+        <li>El botón «Anular» solo lo ve el Administrador; el Contador ve la misma tabla sin esa acción (RF-M5-11). Profesor, Fisioterapeuta y Visitante no tienen acceso.</li>
+        <li>Exportar ofrece PDF y XLSX (RF-M6-05).</li>
+      </ul></div>
+    </aside>
+
+    <!-- Diálogo: anular pago con motivo (RF-M5-11) -->
+    <ps-dialog id="dlg-anular" variant="reason" heading="Anular pago N.º 000482" confirm-label="Anular pago" reason-label="Motivo de la anulación">
+      <div class="ps-stack">
+        <dl class="ps-dl">
+          <div><dt>Patinador</dt><dd>Samuel Herrera Díaz</dd></div>
+          <div><dt>Cobro</dt><dd>Agosto 2026</dd></div>
+          <div><dt>Monto</dt><dd>$&nbsp;200.000 · Transferencia · 30/09/2026</dd></div>
+        </dl>
+        <p class="ps-text-body-sm">El pago queda como Anulado; no se borra. Los $&nbsp;200.000 vuelven al saldo del cobro de agosto 2026, el comprobante se marca como anulado y se recalcula la cartera. No se puede deshacer.</p>
+      </div>
+    </ps-dialog>
+
+    <!-- Diálogo: motivo de una anulación -->
+    <ps-dialog id="dlg-motivo" variant="confirm" heading="Pago N.º 000454 anulado" cancel-label="Cerrar" confirm-label="Ver comprobante" data-href="../comprobante/comprobante.html">
+      <div class="ps-stack">
+        <ps-status-badge entity="pago" status="anulado"></ps-status-badge>
+        <p>Se digitó $&nbsp;15.000 en vez de $&nbsp;150.000. Se registró de nuevo en el comprobante N.º 000455.</p>
+        <p class="ps-audit-entry">Anulado por Andrea López · 12/09/2026 5:42 p. m.</p>
+      </div>
+    </ps-dialog>
   </div>
+</ps-app-shell>
+<script type="module" src="../../../design-system/ps.js"></script>
+<script type="module" src="../assets/grupo-04.js"></script>
 </body>
 </html>

@@ -1,0 +1,44 @@
+/*
+  Disposición de las páginas del grupo 04 (Módulo 5).
+  Solo layout con tokens de capa 2 (docs/EXPLANATION.md §6): rejillas, gap y
+  alineación. Color, tipografía, bordes, radios y sombras vienen del Design System.
+  Los breakpoints van literales porque @media no admite variables (ADR-05).
+*/
+
+/* Barra superior: el bloque de usuario va a la derecha. */
+.g4-user { margin-inline-start: auto; }
+
+/* Contenido de página */
+.g4-page { padding-block: var(--spacing-lg) var(--spacing-2xl); }
+.g4-page > * + * { margin-top: var(--spacing-lg); }
+.g4-page > ps-filter-bar, .g4-page > ps-tabs { display: block; }
+
+/* Encabezado: título a la izquierda, acción principal a la derecha (abajo en móvil). */
+.g4-head { display: flex; flex-wrap: wrap; gap: var(--spacing-md); align-items: flex-end; justify-content: space-between; }
+
+/* Rejillas: una columna en móvil. */
+.g4-cols { display: grid; grid-template-columns: 1fr; gap: var(--spacing-md); align-items: start; }
+
+/* Fila de acciones */
+.g4-actions { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); justify-content: flex-end; }
+
+/* Navegación lateral agrupada */
+.g4-nav-group + .g4-nav-group { margin-top: var(--spacing-lg); }
+.g4-nav-group > * + * { margin-top: var(--spacing-xs); }
+
+/* Menú de acciones por fila (IconButton + Menu): solo posición. */
+.g4-row-menu { position: relative; display: inline-block; }
+.g4-menu { position: absolute; inset-block-start: 100%; inset-inline-end: 0; display: flex; flex-direction: column; min-width: max-content; }
+.g4-menu[hidden] { display: none; }
+.g4-menu > * { justify-content: flex-start; }
+
+@media (max-width: 767px) {
+  .g4-hide-mobile { display: none; }
+}
+@media (min-width: 768px) {
+  .g4-cols--4 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1024px) {
+  .g4-cols--2 { grid-template-columns: repeat(2, 1fr); }
+  .g4-cols--4 { grid-template-columns: repeat(4, 1fr); }
+}
