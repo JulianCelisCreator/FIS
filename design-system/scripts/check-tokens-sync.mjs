@@ -64,13 +64,14 @@ for (const [k, v] of EXPECTED) {
   if (norm(cssVars.get(k)) !== norm(v)) errors.push(`valor distinto ${k}: css=${cssVars.get(k)} esperado=${v}`);
 }
 // Casos especiales con derivación permitida (spec §6.2–6.3)
-for (const [k, must] of [
+const DERIVED = new Map([
   ["--surface-overlay", "color-mix(in srgb, var(--color-neutral-900) 50%, transparent)"],
-  ["--shadow-raised", "color-mix(in srgb, var(--color-neutral-900)"],
-  ["--shadow-overlay", "color-mix(in srgb, var(--color-neutral-900)"],
-]) {
+  ["--shadow-raised", "0 1px 2px color-mix(in srgb, var(--color-neutral-900) 8%, transparent)"],
+  ["--shadow-overlay", "0 8px 24px color-mix(in srgb, var(--color-neutral-900) 16%, transparent)"],
+]);
+for (const [k, expected] of DERIVED) {
   const got = cssVars.get(k) ?? "";
-  if (!norm(got).includes(norm(must).slice(0, 30))) errors.push(`derivado inválido ${k}: ${got}`);
+  if (norm(got) !== norm(expected)) errors.push(`derivado inválido ${k}: ${got}`);
 }
 // Viceversa: sin tokens extra fuera de alias responsivos (--control-height, --layout-columns/margin/gutter sin sufijo)
 const allowedExtra = new Set(["--control-height", "--layout-columns", "--layout-margin", "--layout-gutter"]);
