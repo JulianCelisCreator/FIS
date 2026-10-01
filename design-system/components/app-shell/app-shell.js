@@ -22,13 +22,23 @@ class PSAppShell extends HTMLElement {
     if (nav.children.length === 0 && nav.textContent.trim() === "") {
       menuBtn.style.display = "none";
     }
-    const isMobile = window.matchMedia("(max-width: 1023px)").matches;
-    nav.style.display = isMobile ? "none" : "";
-    menuBtn.setAttribute("aria-expanded", String(!isMobile));
+    this._mobileQuery = window.matchMedia("(max-width: 1023px)");
+    this._navOpen = !this._mobileQuery.matches;
+    const syncNav = () => {
+      if (nav.children.length === 0 && nav.textContent.trim() === "") return;
+      if (this._mobileQuery.matches !== this._wasMobile) {
+        this._navOpen = !this._mobileQuery.matches;
+        this._wasMobile = this._mobileQuery.matches;
+      }
+      nav.style.display = this._navOpen ? "" : "none";
+      menuBtn.setAttribute("aria-expanded", String(this._navOpen));
+    };
+    this._wasMobile = this._mobileQuery.matches;
+    syncNav();
+    this._mobileQuery.addEventListener("change", syncNav);
     menuBtn.addEventListener("click", () => {
-      const isHidden = nav.style.display === "none";
-      nav.style.display = isHidden ? "" : "none";
-      menuBtn.setAttribute("aria-expanded", String(isHidden));
+      this._navOpen = !this._navOpen;
+      syncNav();
     });
   }
 }

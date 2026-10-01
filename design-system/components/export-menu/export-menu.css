@@ -1,3 +1,6 @@
 @layer ps.components {
   ps-export-menu { display: inline-block; }
+  ps-export-menu .ps-export-menu__container { position: relative; display: inline-block; }
+  ps-export-menu ps-menu[role="menu"] { position: absolute; display: flex; flex-direction: column; background: var(--surface-primary); border: var(--stroke-sm) solid var(--border-primary); box-shadow: var(--shadow-overlay); }
+  ps-export-menu ps-menu[role="menu"][hidden] { display: none; }
 }

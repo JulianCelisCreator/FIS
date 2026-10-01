@@ -1,4 +1,14 @@
 @layer ps.components {
   ps-filter-bar .ps-filter-bar { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); background: var(--surface-subtle); padding: var(--spacing-md); border-radius: var(--radius-md); }
+  ps-filter-bar .ps-filter-bar__dialog { position: static; margin: 0; padding: 0; width: auto; max-width: none; overflow: visible; border: 0; background: transparent; }
+  ps-filter-bar .ps-filter-bar__trigger { display: none; }
+  ps-filter-bar .ps-filter-bar__cancel { display: none; }
   .ps-chip { display: inline-flex; gap: var(--spacing-2xs); align-items: center; background: var(--surface-primary); border: var(--stroke-sm) solid var(--border-primary); border-radius: var(--radius-full); padding-inline: var(--spacing-sm); min-height: var(--control-height-sm); font-size: var(--fontsize-sm); line-height: var(--lineheight-sm); font-weight: var(--type-font-weight-regular); }
+  @media (max-width: 768px) {
+    ps-filter-bar .ps-filter-bar__trigger { display: inline-flex; }
+    ps-filter-bar .ps-filter-bar__dialog { position: fixed; inset: auto 0 0; margin: 0; width: 100%; max-width: none; max-height: 80vh; padding: var(--spacing-lg); overflow: auto; box-sizing: border-box; border: var(--stroke-sm) solid var(--border-primary); border-radius: var(--radius-lg) var(--radius-lg) 0 0; background: var(--surface-primary); }
+    ps-filter-bar .ps-filter-bar__dialog::backdrop { background: var(--surface-overlay); }
+    ps-filter-bar .ps-filter-bar__dialog .ps-filter-bar { flex-direction: column; }
+    ps-filter-bar .ps-filter-bar__cancel { display: inline-flex; }
+  }
 }

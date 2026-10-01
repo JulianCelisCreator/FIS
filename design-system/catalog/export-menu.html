@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ExportMenu · ps</title><link rel="stylesheet" href="../ps.css"></head>
+<body><main class="ps-container ps-stack">
+  <a class="ps-link" href="./index.html">← Catálogo</a>
+  <h1>ExportMenu</h1><p class="ps-text-body-sm">RF de reportes. Abrir con teclado, elegir PDF/XLSX, observar carga y probar éxito o error con reintento.</p>
+  <ps-export-menu formats="pdf,xlsx"></ps-export-menu>
+</main><script type="module">
+import "../ps.js";
+document.querySelector("ps-export-menu").addEventListener("ps-export", (event) => {
+  const component = event.currentTarget;
+  setTimeout(() => {
+    component.removeAttribute("loading");
+    component.setAttribute("status", event.detail.format === "pdf" ? "success" : "error");
+  }, 700);
+});
+</script></body></html>

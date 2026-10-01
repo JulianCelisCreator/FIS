@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Toast · ps</title><link rel="stylesheet" href="../ps.css"></head>
+<body><main class="ps-container ps-stack">
+  <a class="ps-link" href="./index.html">← Catálogo</a>
+  <h1>Toast</h1><p class="ps-text-body-sm">RF transversal. Notificación temporal con título, mensaje y tono semántico.</p>
+  <ps-toast-region></ps-toast-region>
+  <button class="ps-button ps-button--primary" type="button" id="show-toast">Mostrar confirmación</button>
+</main><script type="module">
+import "../ps.js";
+document.getElementById("show-toast").addEventListener("click", () => {
+  window.PS.toast({ tone: "success", title: "Pago registrado", message: "La póliza de Sofía Ramírez quedó actualizada." });
+});
+</script></body></html>

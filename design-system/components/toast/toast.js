@@ -7,7 +7,13 @@ class PSToastRegion extends HTMLElement {
     const el = document.createElement("div");
     el.className = `ps-toast ps-toast--${tone}`;
     el.setAttribute("popover", "manual");
-    el.innerHTML = `<p class="ps-alert__title">${title}</p><p class="ps-text-body-sm">${message}</p>`;
+    const titleElement = document.createElement("p");
+    titleElement.className = "ps-alert__title";
+    titleElement.textContent = title;
+    const messageElement = document.createElement("p");
+    messageElement.className = "ps-text-body-sm";
+    messageElement.textContent = message;
+    el.append(titleElement, messageElement);
     this.append(el);
     el.showPopover?.();
     setTimeout(() => el.remove(), 5000);

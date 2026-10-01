@@ -12,7 +12,7 @@
 |---|---|---|---|---|
 | Clase | `ps-button--primary\|secondary\|ghost\|destructive` | — | `primary` | Variante |
 | Clase | `ps-button--sm\|md\|lg` | — | `md` | Tamaño |
-| Atributo | `disabled`, `aria-disabled`, `aria-busy`, `loading` | — | — | `loading` traduce a `aria-busy` + `aria-disabled` |
+| Atributo | `disabled`, `aria-disabled`, `aria-busy` | — | — | El consumidor aplica explícitamente `aria-busy` y `aria-disabled` durante carga |
 
 ## Estados
 | Estado | Cómo se expresa (selector) | Tokens |

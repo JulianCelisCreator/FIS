@@ -29,17 +29,21 @@ for (const f of files) {
   const raw = readFileSync(f, "utf8");
   const css = raw.replace(/\/\*[\s\S]*?\*\//g, "");
   const lines = css.split("\n");
-  const inMedia = /@(media|container)[^{]*640|@(media|container)[^{]*768|@(media|container)[^{]*1024|@(media|container)[^{]*1280/;
+  const breakpointRanges = [...css.matchAll(/@(media|container)\b[^{}]*\{/g)]
+    .flatMap((match) => [...match[0].matchAll(/(?:640|768|1024|1280)px\b/g)]
+      .map((length) => [match.index + length.index, match.index + length.index + length[0].length]));
   lines.forEach((line, i) => {
     const loc = `${f}:${i + 1}`;
     const code = line.split("/*")[0];
     // colores literales
     if (/(#[0-9a-fA-F]{3,8}|rgb\(|hsl\()/.test(code)) errors.push(`${loc} color literal: ${line.trim()}`);
     // longitudes
-    const lens = code.match(/(\d*\.?\d+)(px|r?em)\b/g) || [];
-    for (const l of lens) {
+    const lens = [...code.matchAll(/(\d*\.?\d+)(px|r?em)\b/g)];
+    for (const match of lens) {
+      const l = match[0];
       if (l === "0px" || l === "0em" || l === "0rem") continue;
-      if (ALLOWED_PX.has(l) && inMedia.test(css)) continue;
+      const offset = css.split("\n").slice(0, i).reduce((sum, part) => sum + part.length + 1, 0) + match.index;
+      if (ALLOWED_PX.has(l) && breakpointRanges.some(([start, end]) => offset >= start && offset < end)) continue;
       if (l === "2px" && /outline-offset/.test(code)) continue;
       // permitir 9999px de --radius-full ya está en tokens; aquí solo components/base
       errors.push(`${loc} longitud cruda ${l}: ${line.trim()}`);

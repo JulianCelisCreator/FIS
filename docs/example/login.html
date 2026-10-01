@@ -26,14 +26,14 @@
           <p class="ps-text-body-sm">Tu rol define qué verás al entrar.</p>
         </div>
 
-        <ps-tabs>
-          <div class="ps-tabs__list" role="tablist" aria-label="Ingresar o registrarse">
-            <button class="ps-tabs__tab" role="tab" aria-selected="true" data-panel="ingresar">Ingresar</button>
-            <button class="ps-tabs__tab" role="tab" aria-selected="false" data-panel="registro">Registrarse</button>
+        <ps-tabs aria-label="Ingresar o registrarse">
+          <div class="ps-tabs__list">
+            <button id="tab-ingresar" class="ps-tabs__tab" role="tab" aria-selected="true" aria-controls="panel-ingresar" data-panel="ingresar">Ingresar</button>
+            <button id="tab-registro" class="ps-tabs__tab" role="tab" aria-selected="false" aria-controls="panel-registro" data-panel="registro">Registrarse</button>
           </div>
         </ps-tabs>
 
-        <section id="panel-ingresar" class="ps-auth__form" role="tabpanel" aria-label="Ingresar">
+        <section id="panel-ingresar" class="ps-auth__form" role="tabpanel" aria-labelledby="tab-ingresar">
           <form class="ps-stack" novalidate>
             <ps-field label="Correo electrónico" required for="correo">
               <input id="correo" class="ps-input" type="email" autocomplete="email" placeholder="sofia@example.com">
@@ -54,7 +54,7 @@
           </form>
         </section>
 
-        <section id="panel-registro" class="ps-auth__form" role="tabpanel" aria-label="Registrarse" hidden>
+        <section id="panel-registro" class="ps-auth__form" role="tabpanel" aria-labelledby="tab-registro" hidden>
           <form class="ps-stack" novalidate>
             <ps-field label="Nombre completo" required for="nombre">
               <input id="nombre" class="ps-input" type="text" autocomplete="name" placeholder="Sofía Ramírez">
@@ -81,13 +81,11 @@
 </ps-app-shell>
 <script type="module">
 import "../../design-system/ps.js";
-const tabs = document.querySelectorAll('ps-tabs [role="tab"]');
 const panels = { ingresar: document.getElementById("panel-ingresar"), registro: document.getElementById("panel-registro") };
-tabs.forEach((t) => t.addEventListener("click", () => {
-  tabs.forEach((o) => o.setAttribute("aria-selected", String(o === t)));
-  panels.ingresar.hidden = t.dataset.panel !== "ingresar";
-  panels.registro.hidden = t.dataset.panel !== "registro";
-}));
+document.querySelector("ps-tabs").addEventListener("ps-tab-change", ({ detail }) => {
+  panels.ingresar.hidden = detail.panel !== "ingresar";
+  panels.registro.hidden = detail.panel !== "registro";
+});
 </script>
 </body>
 </html>

@@ -5,8 +5,20 @@ function masked(tag, format, parse) {
     connectedCallback() {
       const name = this.getAttribute("name") || "value";
       const val = this.getAttribute("value") || "";
-      this.innerHTML = `<span class="ps-masked-wrap"><input class="ps-input ps-input--numeric" inputmode="numeric" value="${val ? format(Number(val)) ?? val : ""}"><input type="hidden" name="${name}" value="${val}"></span>`;
-      const [vis, hid] = this.querySelectorAll("input");
+      const wrap = document.createElement("span");
+      wrap.className = "ps-masked-wrap";
+      const vis = document.createElement("input");
+      vis.className = "ps-input ps-input--numeric";
+      vis.inputMode = "numeric";
+      vis.value = val
+        ? tag === "ps-date-input" ? formatDate(val) : format(Number(val)) ?? val
+        : "";
+      const hid = document.createElement("input");
+      hid.type = "hidden";
+      hid.name = name;
+      hid.value = val;
+      wrap.append(vis, hid);
+      this.replaceChildren(wrap);
       vis.addEventListener("input", () => {
         const canonical = parse(vis.value);
         if (canonical === null || Number.isNaN(canonical)) { vis.setAttribute("aria-invalid", "true"); return; }

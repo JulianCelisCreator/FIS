@@ -3,7 +3,26 @@
   ps-dialog dialog::backdrop { background: var(--surface-overlay); }
   .ps-dialog__actions { display: flex; gap: var(--spacing-sm); justify-content: flex-end; margin-top: var(--spacing-lg); }
   @media (max-width: 768px) {
-    ps-dialog[variant="confirm"] dialog, ps-dialog[variant="reason"] dialog { border-radius: var(--radius-lg); }
-    ps-dialog[variant="form"] dialog { min-width: 100%; }
+    ps-dialog[variant="confirm"] dialog, ps-dialog[variant="reason"] dialog {
+      inset-inline: 0;
+      inset-block: auto 0;
+      margin: 0;
+      width: 100%;
+      max-width: none;
+      max-height: 90vh;
+      overflow: auto;
+      box-sizing: border-box;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+    ps-dialog[variant="form"] dialog {
+      inset: 0;
+      margin: 0;
+      width: 100%;
+      max-width: none;
+      height: 100dvh;
+      max-height: 100dvh;
+      box-sizing: border-box;
+      border-radius: 0;
+    }
   }
 }
