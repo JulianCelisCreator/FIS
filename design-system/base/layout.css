@@ -1,0 +1,14 @@
+@layer ps.base {
+  .ps-container {
+    max-width: var(--layout-max-width);
+    margin-inline: auto;
+    padding-inline: var(--layout-margin);
+  }
+  .ps-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--layout-columns), 1fr);
+    gap: var(--layout-gutter);
+  }
+  .ps-stack > * + * { margin-top: var(--spacing-md); }
+  .ps-cluster { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); align-items: center; }
+}

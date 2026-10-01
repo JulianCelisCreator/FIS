@@ -1,0 +1,6 @@
+@layer ps.components {
+  ps-time-display, .ps-time-display { font-size: var(--fontsize-md); line-height: var(--lineheight-md); font-weight: var(--type-font-weight-medium); font-variant-numeric: tabular-nums; color: var(--text-body); }
+  ps-time-display[size="lg"], .ps-time-display--lg { font-size: var(--fontsize-xl); line-height: var(--lineheight-xl); font-weight: var(--type-font-weight-semibold); color: var(--text-headings); }
+  .ps-time-delta--better { color: var(--text-success); }
+  .ps-time-delta--worse { color: var(--text-error); }
+}

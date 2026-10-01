@@ -1,0 +1,7 @@
+@layer ps.components {
+  .ps-select { width: 100%; min-height: var(--control-height); background: var(--surface-primary); }
+  .ps-select[aria-invalid="true"] { border-color: var(--border-error); }
+  ps-combobox { display: block; }
+  .ps-combobox__list { background: var(--surface-primary); border: var(--stroke-sm) solid var(--border-primary); border-radius: var(--radius-md); box-shadow: var(--shadow-overlay); }
+  .ps-combobox__option[aria-selected="true"] { background: var(--surface-selected); }
+}

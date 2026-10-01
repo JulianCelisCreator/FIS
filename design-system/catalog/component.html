@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Componente · ps</title><link rel="stylesheet" href="../ps.css"></head>
+<body><main class="ps-container ps-stack">
+  <a class="ps-link" href="./index.html">← Catálogo</a>
+  <div id="details" class="ps-stack" aria-live="polite"><p>Cargando contrato…</p></div>
+</main><script type="module">
+const name = new URLSearchParams(location.search).get("name");
+const details = document.getElementById("details");
+const source = await fetch("../../.agents/skills/DesignSystem/references/components.md");
+if (!source.ok || !name) {
+  details.textContent = "No se encontró el contrato del componente.";
+} else {
+  const lines = (await source.text()).split("\n");
+  const rowIndex = lines.findIndex((line) => line.startsWith("|") && line.split("|")[1]?.trim().replaceAll("`", "") === name);
+  const row = lines[rowIndex];
+  const cells = row?.split("|").slice(1, -1).map((cell) => cell.trim().replaceAll("`", "")) || [];
+  if (cells.length < 5) {
+    details.textContent = "No se encontró el contrato del componente.";
+  } else {
+    const section = lines.slice(0, rowIndex).reverse().find((line) => /^## [234]\./.test(line)) || "";
+    const isDomain = section.startsWith("## 4.");
+    document.title = `${name} · ps`;
+    const heading = document.createElement("h1");
+    heading.textContent = name;
+    const requirement = document.createElement("p");
+    requirement.className = "ps-text-body-sm";
+    requirement.textContent = `RF de origen: ${cells.at(-1)}`;
+    const table = document.createElement("table");
+    table.className = "ps-table";
+    const body = document.createElement("tbody");
+    for (const [label, value] of [
+      ["Variantes / contrato", cells[1]],
+      ["Estados requeridos", cells[2]],
+      ["Tokens / composición", isDomain ? "Composición de componentes del Design System" : cells[3]],
+      ["Comportamiento móvil", isDomain ? cells[3] : "Validar a 375, 768 y 1280 px"],
+    ]) {
+      const rowElement = document.createElement("tr");
+      const header = document.createElement("th");
+      header.scope = "row";
+      header.textContent = label;
+      const valueCell = document.createElement("td");
+      valueCell.textContent = value;
+      rowElement.append(header, valueCell);
+      body.append(rowElement);
+    }
+    table.append(body);
+    const testHeading = document.createElement("h2");
+    testHeading.textContent = "Pruebas manuales";
+    const tests = document.createElement("ul");
+    for (const text of [
+      `Probar cada variante y estado indicado arriba (${cells[2]}).`,
+      "Revisar foco visible, operación por teclado y nombre accesible.",
+      "Verificar el comportamiento responsive en 375, 768 y 1280 px sin desbordamiento.",
+    ]) {
+      const item = document.createElement("li");
+      item.textContent = text;
+      tests.append(item);
+    }
+    details.replaceChildren(heading, requirement, table, testHeading, tests);
+  }
+}
+</script></body></html>

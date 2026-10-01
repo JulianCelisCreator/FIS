@@ -1,0 +1,18 @@
+@layer ps.components {
+  .ps-badge {
+    display: inline-flex; align-items: center; gap: var(--spacing-2xs);
+    padding-inline: var(--spacing-xs); min-height: var(--control-height-sm);
+    border-radius: var(--radius-full);
+    border: var(--stroke-sm) solid var(--border-primary);
+    font-size: var(--fontsize-xs); line-height: var(--lineheight-xs); font-weight: var(--type-font-weight-medium);
+    background: var(--surface-subtle); color: var(--text-muted);
+  }
+  .ps-badge--sm { min-height: var(--control-height-sm); }
+  .ps-badge--md { min-height: var(--control-height-md); font-size: var(--fontsize-sm); line-height: var(--lineheight-sm); }
+  .ps-badge--success { background: var(--surface-success); color: var(--text-success); border-color: var(--border-success); }
+  .ps-badge--warning { background: var(--surface-warning); color: var(--text-warning); border-color: var(--border-warning); }
+  .ps-badge--error { background: var(--surface-error); color: var(--text-error); border-color: var(--border-error); }
+  .ps-badge--info { background: var(--surface-info); color: var(--text-info); border-color: var(--border-info); }
+  .ps-badge--neutral { background: var(--surface-subtle); color: var(--text-muted); border-color: var(--border-primary); }
+  .ps-badge svg { width: var(--icon-size-sm); height: var(--icon-size-sm); }
+}

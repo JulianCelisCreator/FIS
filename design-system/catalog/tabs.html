@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Tabs · ps</title><link rel="stylesheet" href="../ps.css"></head>
+<body><main class="ps-container ps-stack">
+  <a class="ps-link" href="./index.html">← Catálogo</a>
+  <h1>Tabs</h1><p class="ps-text-body-sm">RF transversal. Selección por clic o flechas; el evento <code>ps-tab-change</code> sincroniza los paneles.</p>
+  <ps-tabs>
+    <button id="tab-a" class="ps-tabs__tab" role="tab" aria-selected="true" aria-controls="panel-a">Ingresar</button>
+    <button id="tab-b" class="ps-tabs__tab" role="tab" aria-selected="false" aria-controls="panel-b">Registrarse</button>
+  </ps-tabs>
+  <section id="panel-a" role="tabpanel" aria-labelledby="tab-a">Sofía Ramírez · Ingresar</section>
+  <section id="panel-b" role="tabpanel" aria-labelledby="tab-b" hidden>Crear una cuenta · Registrarse</section>
+</main><script type="module">
+import "../ps.js";
+document.querySelector("ps-tabs").addEventListener("ps-tab-change", ({ detail }) => {
+  document.getElementById("panel-a").hidden = detail.tab.id !== "tab-a";
+  document.getElementById("panel-b").hidden = detail.tab.id !== "tab-b";
+});
+</script></body></html>

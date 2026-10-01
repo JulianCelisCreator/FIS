@@ -1,0 +1,5 @@
+@layer ps.components {
+  .ps-player-card { display: flex; gap: var(--spacing-md); align-items: center; background: var(--surface-primary); border: var(--stroke-sm) solid var(--border-primary); border-radius: var(--radius-md); padding: var(--spacing-md); }
+  .ps-player-card__name { font-size: var(--fontsize-md); line-height: var(--lineheight-md); font-weight: var(--type-font-weight-semibold); color: var(--text-headings); }
+  .ps-player-card__meta { font-size: var(--fontsize-sm); line-height: var(--lineheight-sm); font-weight: var(--type-font-weight-regular); color: var(--text-muted); }
+}

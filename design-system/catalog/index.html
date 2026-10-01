@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catálogo · Design System Patinaje (ps)</title>
+<link rel="stylesheet" href="../ps.css">
+<style>body{padding:var(--spacing-lg)}</style>
+</head>
+<body>
+<p class="ps-text-caption">Servir por HTTP local: <code>python3 -m http.server</code> desde la raíz. No funciona con <code>file://</code> (spec ADR-06).</p>
+<h1>Catálogo vivo · ps</h1>
+<p class="ps-text-body-sm">Fuente de verdad: skill <code>patinaje-design-system</code> (tokens.md, components.md, status-and-formats.md). Esta spec implementa <em>cómo</em> se construye, sin redefinir tokens ni componentes.</p>
+<nav aria-label="Componentes"><ul id="nav" class="ps-cluster"></ul></nav>
+<main id="main" class="ps-stack"></main>
+<script type="module">
+const pages = new Map([
+  ["Tokens", "./tokens.html"], ["Button", "./button.html"], ["Badge", "./badge.html"],
+  ["Inputs", "./inputs.html"], ["Dialog", "./dialog.html"], ["DataTable", "./data-table.html"],
+  ["CapacityMeter", "./capacity-meter.html"], ["Calendar", "./calendar.html"],
+  ["Tabs", "./tabs.html"], ["AppShell", "./app-shell.html"], ["Menu", "./menu.html"],
+  ["Toast", "./toast.html"], ["ExportMenu", "./export-menu.html"],
+]);
+const nav = document.getElementById("nav");
+function addLink(name, href) {
+  const li = document.createElement("li");
+  const link = document.createElement("a");
+  link.className = "ps-link";
+  link.href = href;
+  link.textContent = name;
+  li.append(link);
+  nav.append(li);
+}
+for (const [name, href] of pages) addLink(name, href);
+const source = await fetch("../../.agents/skills/DesignSystem/references/components.md");
+if (source.ok) {
+  const rows = (await source.text()).split("\n").filter((line) => /^\|\s*`[^`]+`\s*\|/.test(line));
+  for (const row of rows) {
+    const name = row.split("|")[1].trim().replaceAll("`", "");
+    if (!pages.has(name)) addLink(name, `./component.html?name=${encodeURIComponent(name)}`);
+  }
+}
+</script>
+</body>
+</html>

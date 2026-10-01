@@ -1,0 +1,6 @@
+@layer ps.components {
+  .ps-dl { display: grid; grid-template-columns: 1fr; gap: var(--spacing-sm); }
+  .ps-dl dt { font-size: var(--fontsize-sm); line-height: var(--lineheight-sm); font-weight: var(--type-font-weight-medium); color: var(--text-muted); }
+  .ps-dl dd { font-size: var(--fontsize-md); line-height: var(--lineheight-md); font-weight: var(--type-font-weight-regular); color: var(--text-body); }
+  @media (min-width: 1024px) { .ps-dl { grid-template-columns: 1fr 1fr; gap: var(--spacing-md); } }
+}

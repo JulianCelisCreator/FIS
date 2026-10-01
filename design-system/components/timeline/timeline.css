@@ -1,0 +1,4 @@
+@layer ps.components {
+  .ps-timeline { display: flex; flex-direction: column; gap: var(--spacing-md); border-left: var(--stroke-sm) solid var(--border-primary); padding-left: var(--spacing-md); }
+  .ps-timeline__date { font-size: var(--fontsize-xs); line-height: var(--lineheight-xs); font-weight: var(--type-font-weight-regular); color: var(--text-muted); }
+}

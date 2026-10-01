@@ -1,0 +1,28 @@
+@layer ps.components {
+  ps-dialog dialog { background: var(--surface-primary); border: var(--stroke-sm) solid var(--border-primary); border-radius: var(--radius-lg); box-shadow: var(--shadow-overlay); padding: var(--spacing-lg); }
+  ps-dialog dialog::backdrop { background: var(--surface-overlay); }
+  .ps-dialog__actions { display: flex; gap: var(--spacing-sm); justify-content: flex-end; margin-top: var(--spacing-lg); }
+  @media (max-width: 768px) {
+    ps-dialog[variant="confirm"] dialog, ps-dialog[variant="reason"] dialog {
+      inset-inline: 0;
+      inset-block: auto 0;
+      margin: 0;
+      width: 100%;
+      max-width: none;
+      max-height: 90vh;
+      overflow: auto;
+      box-sizing: border-box;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+    ps-dialog[variant="form"] dialog {
+      inset: 0;
+      margin: 0;
+      width: 100%;
+      max-width: none;
+      height: 100dvh;
+      max-height: 100dvh;
+      box-sizing: border-box;
+      border-radius: 0;
+    }
+  }
+}

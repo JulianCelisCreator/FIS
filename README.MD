@@ -105,7 +105,6 @@ Exportar capturas de la página de perfil
 - **Primero la estructura, después la estética.** Un wireframe muestra la distribución, el contenido y la navegación; los colores y las tipografías finales vienen después.
 - Incluir la versión de **escritorio y de móvil** cuando aplique (`inicio.png`, `inicio-movil.png`).
 - Si se hace en **HTML/CSS**, el prototipo debe abrirse directamente en el navegador, sin instalar nada. Usar rutas relativas (`../assets/logo.png`), nunca rutas de tu computador (`C:\Users\...`).
-- Si se hace en **Figma, Balsamiq, Excalidraw u otra herramienta**, subir la exportación en **PNG o PDF** y poner el enlace al archivo original en el `README.md` de la carpeta del grupo.
 - Usar texto de relleno realista (nombres, precios, fechas de ejemplo) en lugar de "texto texto texto", para que se entienda el contenido.
 - Indicar en el `README.md` de la carpeta del grupo:
   - Herramienta usada.
@@ -133,6 +132,6 @@ pull de main → crear rama → prototipar en la carpeta del grupo → commits �
 
 | Grupo    | Carpeta                | Integrantes |
 | -------- | ---------------------- | ----------- |
-| Grupo 01 | `wireframes/grupo-01/` |             |
+| Grupo 01 | `wireframes/grupo-01/` | Cristian Bonilla, Juan Diaz, Didier Torres, Daniel Martínez            |
 | Grupo 02 | `wireframes/grupo-02/` |             |
 | Grupo 03 | `wireframes/grupo-03/` |             |

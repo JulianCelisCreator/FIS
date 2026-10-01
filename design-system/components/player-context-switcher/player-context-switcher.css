@@ -1,0 +1,4 @@
+@layer ps.components {
+  ps-player-switcher { display: block; }
+  .ps-switcher { display: flex; gap: var(--spacing-sm); align-items: center; min-height: var(--control-height); }
+}

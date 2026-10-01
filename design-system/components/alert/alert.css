@@ -1,0 +1,8 @@
+@layer ps.components {
+  .ps-alert { display: flex; gap: var(--spacing-sm); padding: var(--spacing-md); border-radius: var(--radius-md); border: var(--stroke-sm) solid var(--border-primary); background: var(--surface-primary); }
+  .ps-alert--success { background: var(--surface-success); border-color: var(--border-success); color: var(--text-success); }
+  .ps-alert--warning { background: var(--surface-warning); border-color: var(--border-warning); color: var(--text-warning); }
+  .ps-alert--error { background: var(--surface-error); border-color: var(--border-error); color: var(--text-error); }
+  .ps-alert--info { background: var(--surface-info); border-color: var(--border-info); color: var(--text-info); }
+  .ps-alert__title { font-size: var(--fontsize-sm); line-height: var(--lineheight-sm); font-weight: var(--type-font-weight-semibold); }
+}

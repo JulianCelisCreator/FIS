@@ -1,0 +1,5 @@
+@layer ps.components {
+  ps-currency-input, ps-time-input, ps-date-input { display: block; }
+  .ps-masked-wrap { display: flex; align-items: center; gap: var(--spacing-xs); }
+  .ps-masked-prefix { color: var(--text-muted); font-size: var(--fontsize-md); line-height: var(--lineheight-md); font-weight: var(--type-font-weight-medium); }
+}

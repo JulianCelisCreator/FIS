@@ -1,0 +1,5 @@
+@layer ps.components {
+  .ps-breadcrumb { display: flex; gap: var(--spacing-xs); align-items: center; font-size: var(--fontsize-sm); line-height: var(--lineheight-sm); font-weight: var(--type-font-weight-regular); }
+  .ps-breadcrumb a { color: var(--text-link); }
+  .ps-breadcrumb [aria-current="page"] { color: var(--text-muted); }
+}

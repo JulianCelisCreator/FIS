@@ -1,0 +1,7 @@
+@layer ps.components {
+  ps-menu .ps-menu__list, .ps-menu__list { background: var(--surface-primary); border: var(--stroke-sm) solid var(--border-primary); border-radius: var(--radius-md); box-shadow: var(--shadow-overlay); padding: var(--spacing-xs); }
+  .ps-menu__item { display: flex; gap: var(--spacing-sm); align-items: center; min-height: var(--control-height-md); padding-inline: var(--spacing-sm); border-radius: var(--radius-sm); }
+  .ps-menu__item[aria-selected="true"] { background: var(--surface-selected); }
+  .ps-menu__item--destructive { color: var(--text-error); }
+  .ps-menu__item[aria-disabled="true"] { color: var(--text-disabled); }
+}

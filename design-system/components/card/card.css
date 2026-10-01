@@ -1,0 +1,6 @@
+@layer ps.components {
+  .ps-card { background: var(--surface-primary); border: var(--stroke-sm) solid var(--border-primary); border-radius: var(--radius-md); padding: var(--spacing-md); }
+  .ps-card--raised { box-shadow: var(--shadow-raised); }
+  .ps-card--selectable[aria-selected="true"] { border-color: var(--border-action); background: var(--surface-selected); }
+  .ps-card__header, .ps-card__footer { display: flex; gap: var(--spacing-sm); align-items: center; }
+}

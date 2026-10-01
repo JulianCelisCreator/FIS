@@ -1,0 +1,8 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Dialog · ps</title><link rel="stylesheet" href="../ps.css"></head>
+<body><div class="ps-container ps-stack">
+<a class="ps-link" href="./index.html">← Catálogo</a>
+<h1>Dialog / ConfirmWithReason</h1><p class="ps-text-body-sm">RF: M5-11, M4-12, M4-18, M6-08. Motivo obligatorio; auditoría visible.</p>
+<button class="ps-button ps-button--destructive" id="open">Anular pago</button>
+<ps-dialog id="dlg" variant="reason" heading="Anular pago" confirm-label="Anular pago"><p data-slot="body">Se anulará el pago de $ 85.000 del 21/09/2026.</p></ps-dialog>
+<pre class="ps-text-caption">&lt;ps-dialog variant="reason" heading="Anular pago"&gt;…&lt;/ps-dialog&gt;</pre>
+</div><script type="module">import "../ps.js"; document.getElementById("open").addEventListener("click", () => document.getElementById("dlg").show());</script></body></html>

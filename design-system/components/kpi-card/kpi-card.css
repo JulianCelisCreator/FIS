@@ -1,0 +1,7 @@
+@layer ps.components {
+  .ps-kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); }
+  @media (min-width: 1024px) { .ps-kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+  .ps-kpi { background: var(--surface-primary); border: var(--stroke-sm) solid var(--border-primary); border-radius: var(--radius-md); padding: var(--spacing-md); container-type: inline-size; }
+  .ps-kpi__value { font-size: var(--fontsize-xl); line-height: var(--lineheight-xl); font-weight: var(--type-font-weight-semibold); font-variant-numeric: tabular-nums; color: var(--text-headings); }
+  .ps-kpi__label { font-size: var(--fontsize-sm); line-height: var(--lineheight-sm); font-weight: var(--type-font-weight-regular); color: var(--text-muted); }
+}

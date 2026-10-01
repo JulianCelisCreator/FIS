@@ -1,0 +1,8 @@
+@layer ps.components {
+  .ps-skeleton {
+    display: block; background: var(--surface-loading); border-radius: var(--radius-md);
+    min-height: var(--spacing-md);
+  }
+  .ps-skeleton--circle { border-radius: var(--radius-full); width: var(--control-height-md); height: var(--control-height-md); }
+  .ps-skeleton--text { min-height: var(--spacing-md); }
+}

@@ -1,0 +1,10 @@
+@layer ps.reset {
+  *, *::before, *::after { box-sizing: border-box; }
+  * { margin: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { min-height: 100vh; }
+  img, svg, video { display: block; max-width: 100%; }
+  input, button, textarea, select { font: inherit; }
+  button { cursor: pointer; }
+  :where(ul, ol)[class] { list-style: none; padding: 0; }
+}

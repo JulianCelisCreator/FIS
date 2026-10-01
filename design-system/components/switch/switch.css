@@ -1,0 +1,4 @@
+@layer ps.components {
+  .ps-switch { display: inline-flex; align-items: center; gap: var(--spacing-sm); }
+  .ps-switch input { width: var(--control-height-lg); height: var(--control-height-sm); accent-color: var(--surface-action); }
+}

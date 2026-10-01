@@ -1,0 +1,10 @@
+/* @font-face de Inter (spec §6.6). Decisión pendiente §14.3: alojar woff2 local.
+   Mientras tanto se usa la pila del sistema definida en --type-font-family-base.
+   Para activar Inter local, colocar Inter-Regular.woff2 etc. en base/fonts/ y descomentar. */
+/*
+@font-face {
+  font-family: "Inter";
+  src: url("./fonts/Inter-Regular.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+*/

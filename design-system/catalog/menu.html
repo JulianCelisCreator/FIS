@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Menu · ps</title><link rel="stylesheet" href="../ps.css"></head>
+<body><main class="ps-container ps-stack">
+  <a class="ps-link" href="./index.html">← Catálogo</a>
+  <h1>Menu</h1><p class="ps-text-body-sm">RF transversal. Menú de acciones con navegación de foco por flechas y cierre con Escape.</p>
+  <button class="ps-button ps-button--secondary" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="account-menu">Acciones de cuenta</button>
+  <ps-menu id="account-menu" hidden><button role="menuitem" type="button">Ver perfil</button><button role="menuitem" type="button">Cerrar sesión</button></ps-menu>
+</main><script type="module">
+import "../ps.js";
+const trigger = document.querySelector('[aria-controls="account-menu"]');
+const menu = document.getElementById("account-menu");
+trigger.addEventListener("click", () => {
+  menu.hidden = !menu.hidden;
+  trigger.setAttribute("aria-expanded", String(!menu.hidden));
+  if (!menu.hidden) menu.querySelector('[role="menuitem"]').focus();
+});
+menu.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") { menu.hidden = true; trigger.setAttribute("aria-expanded", "false"); trigger.focus(); }
+});
+</script></body></html>
