@@ -5,7 +5,7 @@
 | Estado | Borrador v0.1 |
 | Fecha | 30/09/2026 |
 | Proyecto | Plataforma de gestión para escuela de patinaje (nombre pendiente) |
-| Fuente de verdad del diseño | Skill `patinaje-design-system` (`.agents/skills/patinaje-design-system/`) |
+| Fuente de verdad del diseño | Skill `patinaje-design-system` (`.agents/skills/DesignSystem/`) |
 | Esta spec define | **Cómo** se construye en código lo que la skill define. No redefine tokens ni componentes |
 
 ## Contenido
