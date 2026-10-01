@@ -10,6 +10,8 @@ const TONES = {
 };
 
 const TABLE = {
+  correo: { "pendiente-verificacion": ["Pendiente de verificación", "warning"], verificado: ["Verificado", "success"] },
+  cuenta: { activa: ["Activa", "success"], desactivada: ["Desactivada", "neutral"] },
   profesor: { "por-registrar": ["Por registrar", "neutral"], "cuenta-activa": ["Cuenta activa", "success"] },
   patinador: { bloqueado: ["Bloqueado", "error"], habilitado: ["Habilitado", "success"] },
   grupo: { "con-cupo": ["Con cupo", "success"], "alerta-90": ["Alerta al 90 %", "warning"], lleno: ["Lleno", "error"] },

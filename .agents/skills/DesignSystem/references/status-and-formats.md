@@ -46,6 +46,10 @@ Fuente: `REQUIREMENTS.md` §5.1. Los marcados *(derivado)* no están en el docum
 
 | Entidad | Estado | Tono | RF |
 |---|---|---|---|
+| Correo electrónico | Pendiente de verificación | `warning` | M1-04 |
+| | Verificado | `success` | M1-04 |
+| Cuenta de usuario | Activa | `success` | M1-05 |
+| | Desactivada | `neutral` | M1-05 |
 | Cuenta de profesor | Por registrar | `neutral` | M1-03 |
 | | Cuenta activa | `success` | M1-03 |
 | Perfil de patinador menor | Bloqueado (falta autorización o póliza) | `error` | M1-02 |

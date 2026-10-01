@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roles y acceso — Escuela de patinaje</title>
+<link rel="stylesheet" href="../../../design-system/ps.css">
+<link rel="stylesheet" href="../assets/grupo-01.css">
+</head>
+<body>
+<ps-app-shell>
+  <span data-slot="brand">Escuela de patinaje</span>
+  <span data-slot="user" class="ps-cluster g1-user">
+    <span class="ps-badge ps-badge--neutral g1-hide-mobile">Administradora</span>
+    <span class="ps-text-label g1-hide-mobile">Daniela Martínez</span>
+    <ps-avatar name="Daniela Martínez" size="sm"></ps-avatar>
+  </span>
+  <nav data-slot="nav" aria-label="Navegación principal">
+    <div class="g1-nav-group">
+      <p class="ps-text-caption">Usuarios y acceso (Adm)</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="../usuarios/usuarios.html">Usuarios</a></li>
+        <li><span class="ps-text-label" aria-current="page">Roles y acceso</span></li>
+        <li><a class="ps-link" href="../familia-menor/familia-menor.html">Familia del menor</a></li>
+        <li><a class="ps-link" href="../activacion-profesor/activacion-profesor.html">Activación de profesor</a></li>
+      </ul>
+    </div>
+    <div class="g1-nav-group">
+      <p class="ps-text-caption">Acceso público</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="../acceso/acceso.html">Acceso</a></li>
+        <li><a class="ps-link" href="../verificacion-recuperacion/verificacion-recuperacion.html">Verificación y recuperación</a></li>
+      </ul>
+    </div>
+    <div class="g1-nav-group">
+      <p class="ps-text-caption">Wireframes</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="../index.html">Índice</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div data-slot="content" class="g1-page">
+    <header class="g1-head">
+      <div class="ps-stack">
+        <nav class="ps-breadcrumb" aria-label="Ruta">
+          <span>Usuarios y acceso</span><span aria-hidden="true">/</span><span aria-current="page">Roles y acceso</span>
+        </nav>
+        <h1>Roles y acceso</h1>
+        <p class="ps-text-body-sm">Asignar el rol correcto a cada usuario y dejar visible qué puede ver cada rol.</p>
+        <p class="ps-text-caption">RF-M1-06 Gestión de roles de usuario · RF-M1-07 Control de acceso por rol</p>
+      </div>
+    </header>
+
+    <section class="ps-card ps-stack" aria-labelledby="t-asignar">
+      <h2 id="t-asignar" class="ps-text-heading-h4">Asignar rol</h2>
+      <form class="ps-stack" novalidate>
+        <ps-field label="Usuario" required for="a-usuario">
+          <select id="a-usuario" class="ps-select">
+            <option selected>Andrés Torres · andres.torres@example.com</option><option>Laura Cubillos · laura.cubillos@example.com</option><option>Carolina Ramírez · carolina.ramirez@example.com</option>
+          </select>
+        </ps-field>
+        <ps-field label="Rol" required for="a-rol">
+          <select id="a-rol" class="ps-select">
+            <option selected>Profesor</option><option>Patinador</option><option>Acudiente</option><option>Contador</option><option>Fisioterapeuta</option><option>Visitante</option><option>Administrador</option>
+          </select>
+        </ps-field>
+        <p class="g1-actions">
+          <button class="ps-button ps-button--secondary" type="submit">Asignar rol</button>
+          <button class="ps-button ps-button--ghost" type="button" data-open="dlg-quitar">Quitar rol</button>
+        </p>
+      </form>
+    </section>
+
+    <section class="ps-stack" aria-labelledby="t-roles">
+      <h2 id="t-roles" class="ps-text-heading-h4">Roles</h2>
+      <ps-data-table>
+        <table class="ps-table">
+          <thead>
+            <tr><th data-sort="rol">Rol</th><th class="ps-num">Usuarios</th><th>Descripción</th></tr>
+          </thead>
+          <tbody>
+            <tr><td data-label="Rol">Administrador</td><td data-label="Usuarios" class="ps-num">2</td><td data-label="Descripción">Gestiona toda la operación de la escuela.</td></tr>
+            <tr><td data-label="Rol">Profesor</td><td data-label="Usuarios" class="ps-num">6</td><td data-label="Descripción">Entrena, evalúa y propone cambios de categoría.</td></tr>
+            <tr><td data-label="Rol">Patinador</td><td data-label="Usuarios" class="ps-num">38</td><td data-label="Descripción">Consulta su progreso; gestiona solo si es mayor de edad.</td></tr>
+            <tr><td data-label="Rol">Acudiente</td><td data-label="Usuarios" class="ps-num">31</td><td data-label="Descripción">Actúa por el patinador menor de edad.</td></tr>
+            <tr><td data-label="Rol">Contador</td><td data-label="Usuarios" class="ps-num">1</td><td data-label="Descripción">Finanzas: consulta, registra pagos y reportes.</td></tr>
+            <tr><td data-label="Rol">Fisioterapeuta</td><td data-label="Usuarios" class="ps-num">1</td><td data-label="Descripción">Interviene en la validación de póliza médica.</td></tr>
+            <tr><td data-label="Rol">Visitante</td><td data-label="Usuarios" class="ps-num">12</td><td data-label="Descripción">Solo información general, sin datos de patinadores.</td></tr>
+          </tbody>
+        </table>
+      </ps-data-table>
+    </section>
+
+    <section class="ps-card ps-stack" aria-labelledby="t-matriz">
+      <h2 id="t-matriz" class="ps-text-heading-h4">Qué puede ver cada rol</h2>
+      <p class="ps-text-body-sm">Matriz de solo lectura: el wireframe no crea ni edita permisos.</p>
+      <dl class="ps-dl">
+        <div><dt>Administrador</dt><dd>Todo: usuarios, grupos, competencias, pagos e inventario.</dd></div>
+        <div><dt>Profesor</dt><dd>Sus grupos y sus patinadores. Sin gestión de usuarios ni pagos.</dd></div>
+        <div><dt>Patinador</dt><dd>Solo sus propios datos y sus pagos.</dd></div>
+        <div><dt>Acudiente</dt><dd>Solo sus patinadores asociados y sus pagos.</dd></div>
+        <div><dt>Contador</dt><dd>Pagos, cartera y reportes. Sin usuarios, grupos, horarios ni inventario.</dd></div>
+        <div><dt>Fisioterapeuta</dt><dd>Validación de póliza médica. Sin gestión de usuarios ni pagos.</dd></div>
+        <div><dt>Visitante</dt><dd>Información general de la escuela. Nada interno.</dd></div>
+      </dl>
+    </section>
+
+    <section class="ps-card ps-stack" aria-labelledby="t-denegado">
+      <h2 id="t-denegado" class="ps-text-heading-h4">Ejemplo: acceso denegado</h2>
+      <p class="ps-text-body-sm">Si Andrés Torres (Profesor) intenta abrir Gestión de usuarios, ve esto:</p>
+      <div class="ps-alert ps-alert--error" role="alert">
+        <ps-icon name="x-circle"></ps-icon>
+        <p>No tienes acceso a Gestión de usuarios. Esta sección es solo para la Administradora.</p>
+      </div>
+    </section>
+
+    <aside class="ps-card ps-stack" aria-labelledby="notas">
+      <h2 id="notas" class="ps-text-heading-h5">Notas del wireframe</h2>
+      <p class="ps-text-caption">No forman parte de la interfaz.</p>
+      <div class="ps-text-body-sm"><ul>
+        <li>Solo el Adm gestiona roles. M1-07 es automático: la UI solo muestra el resultado (lo de su rol o denegado).</li>
+        <li>Los roles no llevan tonos de estado: no se colorean ni usan badges de dominio.</li>
+        <li>El ejemplo denegado no tiene acción destructiva.</li>
+      </ul></div>
+    </aside>
+
+    <ps-dialog id="dlg-quitar" variant="confirm" heading="¿Quitar el rol Profesor a Andrés Torres?" confirm-label="Quitar rol">
+      <div class="ps-text-body-sm"><ul>
+        <li>Perderá el acceso de Profesor a sus grupos.</li>
+        <li>Sus datos y su historial no cambian.</li>
+        <li>Se le puede asignar otro rol después.</li>
+      </ul></div>
+    </ps-dialog>
+  </div>
+</ps-app-shell>
+<script type="module" src="../../../design-system/ps.js"></script>
+<script type="module" src="../assets/grupo-01.js"></script>
+</body>
+</html>

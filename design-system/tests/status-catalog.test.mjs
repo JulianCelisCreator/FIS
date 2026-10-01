@@ -21,4 +21,12 @@ describe("status-catalog (spec §10)", () => {
     assert.equal(resolveStatus("grupo", "alerta-90").tone, "warning");
     assert.equal(resolveStatus("grupo", "lleno").tone, "error");
   });
+  it("correo: resuelve etiqueta y tono (M1-04)", () => {
+    assert.deepEqual(resolveStatus("correo", "pendiente-verificacion"), { label: "Pendiente de verificación", tone: "warning", icon: "alert-triangle" });
+    assert.deepEqual(resolveStatus("correo", "verificado"), { label: "Verificado", tone: "success", icon: "check-circle" });
+  });
+  it("cuenta: resuelve etiqueta y tono (M1-05)", () => {
+    assert.deepEqual(resolveStatus("cuenta", "activa"), { label: "Activa", tone: "success", icon: "check-circle" });
+    assert.deepEqual(resolveStatus("cuenta", "desactivada"), { label: "Desactivada", tone: "neutral", icon: "minus-circle" });
+  });
 });

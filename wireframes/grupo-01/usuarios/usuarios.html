@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Usuarios — Escuela de patinaje</title>
+<link rel="stylesheet" href="../../../design-system/ps.css">
+<link rel="stylesheet" href="../assets/grupo-01.css">
+</head>
+<body>
+<ps-app-shell>
+  <span data-slot="brand">Escuela de patinaje</span>
+  <span data-slot="user" class="ps-cluster g1-user">
+    <span class="ps-badge ps-badge--neutral g1-hide-mobile">Administradora</span>
+    <span class="ps-text-label g1-hide-mobile">Daniela Martínez</span>
+    <ps-avatar name="Daniela Martínez" size="sm"></ps-avatar>
+  </span>
+  <nav data-slot="nav" aria-label="Navegación principal">
+    <div class="g1-nav-group">
+      <p class="ps-text-caption">Usuarios y acceso (Adm)</p>
+      <ul class="ps-stack">
+        <li><span class="ps-text-label" aria-current="page">Usuarios</span></li>
+        <li><a class="ps-link" href="../roles-acceso/roles-acceso.html">Roles y acceso</a></li>
+        <li><a class="ps-link" href="../familia-menor/familia-menor.html">Familia del menor</a></li>
+        <li><a class="ps-link" href="../activacion-profesor/activacion-profesor.html">Activación de profesor</a></li>
+      </ul>
+    </div>
+    <div class="g1-nav-group">
+      <p class="ps-text-caption">Acceso público</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="../acceso/acceso.html">Acceso</a></li>
+        <li><a class="ps-link" href="../verificacion-recuperacion/verificacion-recuperacion.html">Verificación y recuperación</a></li>
+      </ul>
+    </div>
+    <div class="g1-nav-group">
+      <p class="ps-text-caption">Wireframes</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="../index.html">Índice</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div data-slot="content" class="g1-page">
+    <header class="g1-head">
+      <div class="ps-stack">
+        <nav class="ps-breadcrumb" aria-label="Ruta">
+          <span>Usuarios y acceso</span><span aria-hidden="true">/</span><span aria-current="page">Usuarios</span>
+        </nav>
+        <h1>Usuarios</h1>
+        <p class="ps-text-body-sm">Cuentas de la escuela: crear, editar y desactivar sin borrar.</p>
+        <p class="ps-text-caption">RF-M1-05 Gestión de usuarios y cuentas · RF-M1-01 alta por Adm · RF-M1-04 badge de correo</p>
+      </div>
+      <button class="ps-button ps-button--primary" type="button" data-open="dlg-crear">Crear usuario</button>
+    </header>
+
+    <ps-filter-bar>
+      <ps-field label="Buscar"><input class="ps-input" type="search" name="q" placeholder="Nombre o correo"></ps-field>
+      <ps-field label="Rol">
+        <select class="ps-select" name="rol">
+          <option>Todos</option><option>Administradora</option><option>Profesor</option><option>Patinador</option><option>Acudiente</option><option>Contador</option><option>Fisioterapeuta</option><option>Visitante</option>
+        </select>
+      </ps-field>
+      <ps-field label="Estado">
+        <select class="ps-select" name="estado"><option>Todos</option><option>Activa</option><option>Desactivada</option><option>Por registrar</option></select>
+      </ps-field>
+    </ps-filter-bar>
+
+    <ps-data-table>
+      <table class="ps-table">
+        <thead>
+          <tr><th data-sort="usuario">Usuario</th><th>Correo</th><th>Rol</th><th>Cuenta</th><th>Correo</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-label="Usuario"><span class="ps-cluster"><ps-avatar name="Daniela Martínez" size="sm"></ps-avatar>Daniela Martínez</span></td><td data-label="Correo">admin@escuela.com</td><td data-label="Rol">Administradora</td>
+            <td data-label="Cuenta"><ps-status-badge entity="cuenta" status="activa"></ps-status-badge></td>
+            <td data-label="Correo"><ps-status-badge entity="correo" status="verificado"></ps-status-badge></td>
+            <td data-label="Acciones"><span class="g1-row-menu">
+              <button class="ps-icon-button" type="button" aria-label="Acciones de Daniela Martínez" aria-haspopup="menu" aria-expanded="false" aria-controls="acciones-1"><ps-icon name="more-vertical"></ps-icon></button>
+              <ps-menu id="acciones-1" class="ps-menu__list g1-menu" hidden>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-editar">Editar</button>
+              </ps-menu>
+            </span></td>
+          </tr>
+          <tr>
+            <td data-label="Usuario"><span class="ps-cluster"><ps-avatar name="Sofía Ramírez" size="sm"></ps-avatar>Sofía Ramírez</span></td><td data-label="Correo">sofia@example.com</td><td data-label="Rol">Patinadora</td>
+            <td data-label="Cuenta"><ps-status-badge entity="cuenta" status="activa"></ps-status-badge></td>
+            <td data-label="Correo"><ps-status-badge entity="correo" status="verificado"></ps-status-badge></td>
+            <td data-label="Acciones"><span class="g1-row-menu">
+              <button class="ps-icon-button" type="button" aria-label="Acciones de Sofía Ramírez" aria-haspopup="menu" aria-expanded="false" aria-controls="acciones-2"><ps-icon name="more-vertical"></ps-icon></button>
+              <ps-menu id="acciones-2" class="ps-menu__list g1-menu" hidden>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-editar">Editar</button>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-desactivar">Desactivar</button>
+              </ps-menu>
+            </span></td>
+          </tr>
+          <tr>
+            <td data-label="Usuario"><span class="ps-cluster"><ps-avatar name="Carolina Ramírez" size="sm"></ps-avatar>Carolina Ramírez</span></td><td data-label="Correo">carolina.ramirez@example.com</td><td data-label="Rol">Acudiente</td>
+            <td data-label="Cuenta"><ps-status-badge entity="cuenta" status="activa"></ps-status-badge></td>
+            <td data-label="Correo"><ps-status-badge entity="correo" status="pendiente-verificacion"></ps-status-badge></td>
+            <td data-label="Acciones"><span class="g1-row-menu">
+              <button class="ps-icon-button" type="button" aria-label="Acciones de Carolina Ramírez" aria-haspopup="menu" aria-expanded="false" aria-controls="acciones-3"><ps-icon name="more-vertical"></ps-icon></button>
+              <ps-menu id="acciones-3" class="ps-menu__list g1-menu" hidden>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-editar">Editar</button>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-desactivar">Desactivar</button>
+              </ps-menu>
+            </span></td>
+          </tr>
+          <tr>
+            <td data-label="Usuario"><span class="ps-cluster"><ps-avatar name="Andrés Torres" size="sm"></ps-avatar>Andrés Torres</span></td><td data-label="Correo">andres.torres@example.com</td><td data-label="Rol">Profesor</td>
+            <td data-label="Cuenta"><ps-status-badge entity="profesor" status="por-registrar"></ps-status-badge></td>
+            <td data-label="Correo"><ps-status-badge entity="correo" status="pendiente-verificacion"></ps-status-badge></td>
+            <td data-label="Acciones"><span class="g1-row-menu">
+              <button class="ps-icon-button" type="button" aria-label="Acciones de Andrés Torres" aria-haspopup="menu" aria-expanded="false" aria-controls="acciones-4"><ps-icon name="more-vertical"></ps-icon></button>
+              <ps-menu id="acciones-4" class="ps-menu__list g1-menu" hidden>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-editar">Editar</button>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-desactivar">Desactivar</button>
+              </ps-menu>
+            </span></td>
+          </tr>
+          <tr>
+            <td data-label="Usuario"><span class="ps-cluster"><ps-avatar name="Laura Cubillos" size="sm"></ps-avatar>Laura Cubillos</span></td><td data-label="Correo">laura.cubillos@example.com</td><td data-label="Rol">Profesor</td>
+            <td data-label="Cuenta"><ps-status-badge entity="cuenta" status="activa"></ps-status-badge></td>
+            <td data-label="Correo"><ps-status-badge entity="correo" status="verificado"></ps-status-badge></td>
+            <td data-label="Acciones"><span class="g1-row-menu">
+              <button class="ps-icon-button" type="button" aria-label="Acciones de Laura Cubillos" aria-haspopup="menu" aria-expanded="false" aria-controls="acciones-5"><ps-icon name="more-vertical"></ps-icon></button>
+              <ps-menu id="acciones-5" class="ps-menu__list g1-menu" hidden>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-editar">Editar</button>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-desactivar">Desactivar</button>
+              </ps-menu>
+            </span></td>
+          </tr>
+          <tr>
+            <td data-label="Usuario"><span class="ps-cluster"><ps-avatar name="Juan Pablo González" size="sm"></ps-avatar>Juan Pablo González</span></td><td data-label="Correo">juan.gonzalez@example.com</td><td data-label="Rol">Patinador</td>
+            <td data-label="Cuenta"><ps-status-badge entity="cuenta" status="desactivada"></ps-status-badge></td>
+            <td data-label="Correo"><ps-status-badge entity="correo" status="verificado"></ps-status-badge></td>
+            <td data-label="Acciones"><span class="g1-row-menu">
+              <button class="ps-icon-button" type="button" aria-label="Acciones de Juan Pablo González" aria-haspopup="menu" aria-expanded="false" aria-controls="acciones-6"><ps-icon name="more-vertical"></ps-icon></button>
+              <ps-menu id="acciones-6" class="ps-menu__list g1-menu" hidden>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-editar">Editar</button>
+                <button class="ps-button ps-button--ghost ps-button--sm" role="menuitem" type="button" data-open="dlg-activar">Activar</button>
+              </ps-menu>
+            </span></td>
+          </tr>
+        </tbody>
+      </table>
+    </ps-data-table>
+    <ps-pagination page="1" pages="2"></ps-pagination>
+
+    <aside class="ps-card ps-stack" aria-labelledby="notas">
+      <h2 id="notas" class="ps-text-heading-h5">Notas del wireframe</h2>
+      <p class="ps-text-caption">No forman parte de la interfaz.</p>
+      <div class="ps-text-body-sm"><ul>
+        <li>Solo el Adm ve esta pantalla. Los demás roles no la ven (el Contador no gestiona usuarios por M6-03).</li>
+        <li>No existe la acción de eliminar: una cuenta con historial solo se desactiva y se puede reactivar.</li>
+        <li>El correo es único: con duplicado, el campo muestra “Ya existe una cuenta con ese correo. Usa otro correo.”</li>
+        <li>La fila propia (Daniela Martínez) no ofrece Desactivar.</li>
+      </ul></div>
+    </aside>
+
+    <ps-dialog id="dlg-crear" variant="form" heading="Crear usuario" confirm-label="Guardar">
+      <div class="ps-stack">
+        <p class="ps-text-caption">RF-M1-01 · RF-M1-05</p>
+        <ps-field label="Nombre completo" required for="n-nombre">
+          <input id="n-nombre" class="ps-input" type="text" autocomplete="name" placeholder="Juan Pablo González">
+        </ps-field>
+        <ps-field label="Correo electrónico" required for="n-correo">
+          <input id="n-correo" class="ps-input" type="email" autocomplete="email" placeholder="juan.gonzalez@example.com">
+        </ps-field>
+        <ps-field label="Rol" required for="n-rol">
+          <select id="n-rol" class="ps-select">
+            <option>Patinador</option><option>Acudiente</option><option>Profesor</option><option>Visitante</option><option>Administrador</option><option>Contador</option><option>Fisioterapeuta</option>
+          </select>
+        </ps-field>
+        <ps-field label="Estado inicial" required help="El Profesor queda Por registrar hasta su primer ingreso." for="n-estado">
+          <select id="n-estado" class="ps-select"><option>Activa</option></select>
+        </ps-field>
+      </div>
+    </ps-dialog>
+
+    <ps-dialog id="dlg-editar" variant="form" heading="Editar usuario: Carolina Ramírez" confirm-label="Guardar cambios">
+      <div class="ps-stack">
+        <p class="ps-text-caption">RF-M1-05</p>
+        <ps-field label="Nombre completo" required for="e-nombre">
+          <input id="e-nombre" class="ps-input" type="text" value="Carolina Ramírez">
+        </ps-field>
+        <ps-field label="Correo electrónico" required for="e-correo">
+          <input id="e-correo" class="ps-input" type="email" value="carolina.ramirez@example.com">
+        </ps-field>
+        <ps-field label="Rol" required for="e-rol">
+          <select id="e-rol" class="ps-select"><option selected>Acudiente</option><option>Patinador</option><option>Profesor</option><option>Visitante</option></select>
+        </ps-field>
+        <ps-field label="Cuenta" required for="e-cuenta">
+          <select id="e-cuenta" class="ps-select"><option selected>Activa</option><option>Desactivada</option></select>
+        </ps-field>
+      </div>
+    </ps-dialog>
+
+    <ps-dialog id="dlg-desactivar" variant="confirm" heading="¿Desactivar a Carolina Ramírez?" confirm-label="Desactivar">
+      <div class="ps-text-body-sm"><ul>
+        <li>Perderá el acceso a la plataforma.</li>
+        <li>Sus datos y su historial no cambian.</li>
+        <li>Se puede reactivar después con “Activar”.</li>
+      </ul></div>
+    </ps-dialog>
+
+    <ps-dialog id="dlg-activar" variant="confirm" heading="¿Activar a Juan Pablo González?" confirm-label="Activar">
+      <div class="ps-text-body-sm"><ul>
+        <li>Recuperará el acceso con su rol de Patinador.</li>
+        <li>Sus datos y su historial no cambian.</li>
+      </ul></div>
+    </ps-dialog>
+  </div>
+</ps-app-shell>
+<script type="module" src="../../../design-system/ps.js"></script>
+<script type="module" src="../assets/grupo-01.js"></script>
+</body>
+</html>

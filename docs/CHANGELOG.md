@@ -20,6 +20,10 @@ Formato semántico. Cada entrada cita RF o decisión.
 - `ps-icon` y `ps-status-badge` resuelven `sprite.svg` relativo al módulo (`import.meta.url`), no al documento: los íconos ya cargan fuera de `catalog/` (p. ej. `docs/example/`).
 - Ejemplo M1-01 minimalista: columna centrada, sin breadcrumb ni alertas permanentes ni toast demo; la nota de menor bajó a ayuda del campo.
 
+## [0.1.4] — 2026-10-01
+- `status-catalog.js`: entidades `correo` (`pendiente-verificacion`→warning, `verificado`→success) y `cuenta` (`activa`→success, `desactivada`→neutral); estaban en REQUIREMENTS.md §5.1 (M1-04, M1-05) pero faltaban en la skill y en el código, y `StatusBadge` mostraba el slug crudo en neutro. Filas agregadas primero a `references/status-and-formats.md` §3 (orden skill→código) + 2 pruebas en `status-catalog.test.mjs` (17/17 en verde). Las 17 entidades de §5.1 ya resuelven etiqueta, tono e ícono.
+- Wireframes M1 (W01–W06 en `wireframes/grupo-01/`, spec `docs/specs/m1-usuarios-acceso.md`): acceso, verificación-recuperación, usuarios, roles-acceso, familia-menor y activación-profesor. Solo `ps-*` existente + tokens capa 2, sin `style=`; `assets/grupo-01.js` conecta diálogos y menús. Brechas aplicadas de la spec §9 (`Select` simple + nota Temporal en W05, `Stepper` en vez de `RequestTracker`).
+
 ## [0.1.3] — 2026-09-30
 - `Tabs`: resetea la apariencia nativa de `<button>` (fondo transparente, sin borde, indicador inferior); antes se veía el gris por defecto del navegador.
 - `AppShell`: oculta la hamburguesa cuando el slot `nav` está vacío (variante pública); la navegación aportada conserva la clase de layout.
