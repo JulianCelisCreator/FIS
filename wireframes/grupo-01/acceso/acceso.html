@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acceso — Escuela de patinaje</title>
+<link rel="stylesheet" href="../../../design-system/ps.css">
+<link rel="stylesheet" href="../assets/grupo-01.css">
+</head>
+<body>
+<ps-app-shell>
+  <span data-slot="brand">Escuela de patinaje</span>
+
+  <div data-slot="content">
+    <div class="ps-container">
+      <div class="ps-stack g1-page">
+        <div class="g1-auth ps-stack">
+          <div class="g1-auth__head ps-stack">
+            <h1>Acceso</h1>
+            <p class="ps-text-body-sm">Tu rol define qué verás al entrar. Si registras a un menor, luego necesitarás su autorización y su póliza.</p>
+            <p class="ps-text-caption">RF-M1-01 Registro de usuario · RF-M1-02 Inicio de sesión de usuario</p>
+          </div>
+
+          <ps-tabs aria-label="Ingresar o registrarse">
+            <div class="ps-tabs__list">
+              <button id="tab-ingresar" class="ps-tabs__tab" role="tab" aria-selected="true" aria-controls="panel-ingresar" data-panel="ingresar">Ingresar</button>
+              <button id="tab-registro" class="ps-tabs__tab" role="tab" aria-selected="false" aria-controls="panel-registro" data-panel="registro">Registrarse</button>
+            </div>
+          </ps-tabs>
+
+          <section id="panel-ingresar" role="tabpanel" aria-labelledby="tab-ingresar">
+            <form class="ps-stack" novalidate>
+              <ps-field label="Correo electrónico" required for="correo">
+                <input id="correo" class="ps-input" type="email" autocomplete="email" placeholder="sofia@example.com">
+              </ps-field>
+              <ps-field label="Contraseña" required for="clave">
+                <input id="clave" class="ps-input" type="password" autocomplete="current-password" placeholder="••••••••">
+              </ps-field>
+              <ps-field label="Soy" required for="rol">
+                <select id="rol" class="ps-select">
+                  <option value="patinador">Patinador</option>
+                  <option value="acudiente">Acudiente</option>
+                  <option value="profesor">Profesor</option>
+                  <option value="visitante">Visitante</option>
+                </select>
+              </ps-field>
+              <button class="ps-button ps-button--primary ps-button--lg g1-auth__submit" type="submit">Ingresar</button>
+              <p class="g1-auth__alt"><a class="ps-link" href="../verificacion-recuperacion/verificacion-recuperacion.html">¿Olvidaste tu contraseña?</a></p>
+            </form>
+          </section>
+
+          <section id="panel-registro" role="tabpanel" aria-labelledby="tab-registro" hidden>
+            <form class="ps-stack" novalidate>
+              <ps-field label="Nombre completo" required for="nombre">
+                <input id="nombre" class="ps-input" type="text" autocomplete="name" placeholder="Sofía Ramírez">
+              </ps-field>
+              <ps-field label="Correo electrónico" required for="correo-r">
+                <input id="correo-r" class="ps-input" type="email" autocomplete="email" placeholder="sofia@example.com">
+              </ps-field>
+              <ps-field label="Me registro como" required help="Si registras a un menor de edad, necesitarás su autorización y su póliza vigente." for="rol-r">
+                <select id="rol-r" class="ps-select">
+                  <option value="patinador">Patinador</option>
+                  <option value="acudiente">Acudiente</option>
+                  <option value="profesor">Profesor</option>
+                  <option value="visitante">Visitante</option>
+                </select>
+              </ps-field>
+              <button class="ps-button ps-button--primary ps-button--lg g1-auth__submit" type="submit">Crear cuenta</button>
+            </form>
+          </section>
+
+          <p class="ps-text-caption g1-auth__trace">W01 · AppShell pública, Tabs, FormField + TextInput + Select, Button primary, Link. Sin datos de patinadores.</p>
+        </div>
+
+        <aside class="ps-card ps-stack" aria-labelledby="notas">
+          <h2 id="notas" class="ps-text-heading-h5">Notas del wireframe</h2>
+          <p class="ps-text-caption">No forman parte de la interfaz.</p>
+          <div class="ps-text-body-sm"><ul>
+            <li>Actor: visitante / no autenticado (Patinador, Acudiente, Profesor, Visitante). AppShell pública sin navegación interna.</li>
+            <li>El <span class="ps-text-label">Select</span> de rol lista solo las 4 opciones con alta definida. Administrador, Contador y Fisioterapeuta los crea el Adm en W03.</li>
+            <li>Errores solo tras intento fallido, con <span class="ps-text-label">ps-field error</span> (“Ya existe una cuenta con ese correo. Usa otro correo.” / “Revisa tu correo y tu contraseña.”). Sin Alert permanente.</li>
+            <li>Visitante solo ve información general, nunca datos de patinadores. Al entrar, cada rol ve solo sus opciones (M1-07).</li>
+          </ul></div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</ps-app-shell>
+<script type="module" src="../../../design-system/ps.js"></script>
+<script type="module">
+const panels = { ingresar: document.getElementById("panel-ingresar"), registro: document.getElementById("panel-registro") };
+document.querySelector("ps-tabs").addEventListener("ps-tab-change", ({ detail }) => {
+  panels.ingresar.hidden = detail.panel !== "ingresar";
+  panels.registro.hidden = detail.panel !== "registro";
+});
+</script>
+</body>
+</html>

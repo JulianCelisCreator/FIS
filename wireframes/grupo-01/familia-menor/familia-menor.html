@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Familia del menor — Escuela de patinaje</title>
+<link rel="stylesheet" href="../../../design-system/ps.css">
+<link rel="stylesheet" href="../assets/grupo-01.css">
+</head>
+<body>
+<ps-app-shell>
+  <span data-slot="brand">Escuela de patinaje</span>
+  <span data-slot="user" class="ps-cluster g1-user">
+    <span class="ps-badge ps-badge--neutral g1-hide-mobile">Administradora</span>
+    <span class="ps-text-label g1-hide-mobile">Daniela Martínez</span>
+    <ps-avatar name="Daniela Martínez" size="sm"></ps-avatar>
+  </span>
+  <nav data-slot="nav" aria-label="Navegación principal">
+    <div class="g1-nav-group">
+      <p class="ps-text-caption">Usuarios y acceso (Adm)</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="../usuarios/usuarios.html">Usuarios</a></li>
+        <li><a class="ps-link" href="../roles-acceso/roles-acceso.html">Roles y acceso</a></li>
+        <li><span class="ps-text-label" aria-current="page">Familia del menor</span></li>
+        <li><a class="ps-link" href="../activacion-profesor/activacion-profesor.html">Activación de profesor</a></li>
+      </ul>
+    </div>
+    <div class="g1-nav-group">
+      <p class="ps-text-caption">Acceso público</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="../acceso/acceso.html">Acceso</a></li>
+        <li><a class="ps-link" href="../verificacion-recuperacion/verificacion-recuperacion.html">Verificación y recuperación</a></li>
+      </ul>
+    </div>
+    <div class="g1-nav-group">
+      <p class="ps-text-caption">Wireframes</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="../index.html">Índice</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div data-slot="content" class="g1-page">
+    <header class="g1-head">
+      <div class="ps-stack">
+        <nav class="ps-breadcrumb" aria-label="Ruta">
+          <span>Usuarios y acceso</span><span aria-hidden="true">/</span><span aria-current="page">Familia del menor</span>
+        </nav>
+        <h1>Familia del menor</h1>
+        <p class="ps-text-body-sm">Vincular a Sofía con Carolina, registrar su autorización y su póliza para desbloquear su perfil.</p>
+        <p class="ps-text-caption">RF-M1-11 Vinculación · RF-M1-09 Autorización del acudiente · RF-M1-10 Póliza del patinador</p>
+      </div>
+    </header>
+
+    <section class="ps-stack" aria-labelledby="t-progreso">
+      <h2 id="t-progreso" class="ps-text-heading-h4">Progreso de habilitación</h2>
+      <ol class="ps-stepper" aria-label="Pasos">
+        <li class="ps-stepper__step" data-state="completed"><span class="ps-stepper__dot"></span><span>1. Vinculado <span class="ps-text-caption">· Completado</span></span></li>
+        <li class="ps-stepper__step" data-state="current" aria-current="step"><span class="ps-stepper__dot"></span><span>2. Autorizado <span class="ps-text-caption">· Paso actual</span></span></li>
+        <li class="ps-stepper__step" data-state="upcoming"><span class="ps-stepper__dot"></span><span>3. Póliza</span></li>
+        <li class="ps-stepper__step" data-state="upcoming"><span class="ps-stepper__dot"></span><span>4. Habilitado</span></li>
+      </ol>
+    </section>
+
+    <section class="ps-player-card" aria-labelledby="t-sofia">
+      <ps-avatar name="Sofía Ramírez"></ps-avatar>
+      <div class="ps-stack">
+        <p id="t-sofia" class="ps-player-card__name">Sofía Ramírez</p>
+        <p class="ps-player-card__meta">9 años · Patinadora</p>
+        <p><ps-status-badge entity="patinador" status="bloqueado"></ps-status-badge></p>
+      </div>
+    </section>
+
+    <section class="ps-card ps-stack" aria-labelledby="t-vinculo">
+      <h2 id="t-vinculo" class="ps-text-heading-h4">Vinculación</h2>
+      <dl class="ps-dl">
+        <div><dt>Patinador</dt><dd>Sofía Ramírez · 9 años</dd></div>
+        <div><dt>Acudiente</dt><dd>Carolina Ramírez · madre · carolina.ramirez@example.com</dd></div>
+      </dl>
+      <form class="ps-stack" novalidate>
+        <ps-field label="Acudiente vinculado" required for="v-acudiente">
+          <select id="v-acudiente" class="ps-select">
+            <option selected>Carolina Ramírez · madre</option><option>Juan Pablo González · padre</option>
+          </select>
+        </ps-field>
+        <p class="ps-text-caption">Temporal, pendiente de componente oficial: el Select con búsqueda aún no existe en el catálogo; se usa Select simple.</p>
+        <p class="g1-actions">
+          <button class="ps-button ps-button--primary" type="submit">Vincular</button>
+          <button class="ps-button ps-button--ghost" type="button" data-open="dlg-desvincular">Desvincular</button>
+        </p>
+      </form>
+    </section>
+
+    <section class="ps-card ps-stack" aria-labelledby="t-autorizacion">
+      <h2 id="t-autorizacion" class="ps-text-heading-h4">Autorización del acudiente</h2>
+      <form class="ps-stack" novalidate>
+        <p class="ps-check-row">
+          <input id="autorizacion" class="ps-checkbox" type="checkbox">
+          <label class="ps-text-label" for="autorizacion">Autorizo la participación de Sofía Ramírez</label>
+        </p>
+        <ps-field label="Fecha de autorización" required>
+          <ps-date-input name="fecha-autorizacion" value="2026-09-21"></ps-date-input>
+        </ps-field>
+      </form>
+    </section>
+
+    <section class="ps-card ps-stack" aria-labelledby="t-poliza">
+      <h2 id="t-poliza" class="ps-text-heading-h4">Póliza del patinador</h2>
+      <form class="ps-stack" novalidate>
+        <ps-field label="Aseguradora" required for="p-aseguradora">
+          <input id="p-aseguradora" class="ps-input" type="text" placeholder="Sura">
+        </ps-field>
+        <ps-field label="Número de póliza" required for="p-numero">
+          <input id="p-numero" class="ps-input" type="text" placeholder="POL-882341">
+        </ps-field>
+        <ps-field label="Vigente desde" required>
+          <ps-date-input name="poliza-desde" value="2026-01-01"></ps-date-input>
+        </ps-field>
+        <ps-field label="Vigente hasta" required>
+          <ps-date-input name="poliza-hasta" value="2026-12-31"></ps-date-input>
+        </ps-field>
+        <dl class="ps-dl">
+          <div><dt>Adjunto</dt><dd>póliza.pdf</dd></div>
+        </dl>
+        <p class="g1-actions">
+          <button class="ps-button ps-button--ghost" type="button">Reemplazar póliza</button>
+        </p>
+      </form>
+    </section>
+
+    <p class="g1-actions">
+      <button class="ps-button ps-button--primary" type="button">Guardar</button>
+    </p>
+
+    <aside class="ps-card ps-stack" aria-labelledby="notas">
+      <h2 id="notas" class="ps-text-heading-h5">Notas del wireframe</h2>
+      <p class="ps-text-caption">No forman parte de la interfaz.</p>
+      <div class="ps-text-body-sm"><ul>
+        <li>Vista del Adm (gestiona todo). Carolina Ramírez solo ve a sus patinadores asociados; nunca ve otros menores ni gestión de usuarios.</li>
+        <li>El perfil sigue <span class="ps-text-label">Bloqueado</span> mientras falte autorización o póliza; con ambas pasa a <span class="ps-text-label">Habilitado</span>. El menor no confirma por sí mismo nada.</li>
+        <li>Sin borrado físico: Desvincular y Reemplazar póliza. La póliza mostrada (Sura POL-882341, 01/01/2026 a 31/12/2026) es el ejemplo de §3.</li>
+      </ul></div>
+    </aside>
+
+    <ps-dialog id="dlg-desvincular" variant="confirm" heading="¿Desvincular a Sofía Ramírez de Carolina Ramírez?" confirm-label="Desvincular">
+      <div class="ps-text-body-sm"><ul>
+        <li>El perfil de Sofía volverá a quedar sin acudiente asociado.</li>
+        <li>La autorización y la póliza registradas se conservan.</li>
+      </ul></div>
+    </ps-dialog>
+  </div>
+</ps-app-shell>
+<script type="module" src="../../../design-system/ps.js"></script>
+<script type="module" src="../assets/grupo-01.js"></script>
+</body>
+</html>

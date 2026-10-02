@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verificación y recuperación — Escuela de patinaje</title>
+<link rel="stylesheet" href="../../../design-system/ps.css">
+<link rel="stylesheet" href="../assets/grupo-01.css">
+</head>
+<body>
+<ps-app-shell>
+  <span data-slot="brand">Escuela de patinaje</span>
+
+  <div data-slot="content">
+    <div class="ps-container">
+      <div class="ps-stack g1-page">
+        <div class="g1-auth ps-stack">
+          <div class="g1-auth__head ps-stack">
+            <h1>Verificación y recuperación</h1>
+            <p class="ps-text-body-sm">Verifica tu correo pendiente y recupera tu contraseña si la olvidaste.</p>
+            <p class="ps-text-caption">RF-M1-04 Verificación de correo electrónico · RF-M1-08 Recuperación y cambio de contraseña</p>
+          </div>
+
+          <section class="ps-card ps-stack" aria-labelledby="t-verificar">
+            <h2 id="t-verificar" class="ps-text-heading-h4">Verifica tu correo</h2>
+            <p class="ps-text-body-sm"><span class="ps-text-label">carolina.ramirez@example.com</span>
+              <ps-status-badge entity="correo" status="pendiente-verificacion"></ps-status-badge>
+            </p>
+            <div class="ps-alert ps-alert--info" role="status">
+              <ps-icon name="info"></ps-icon>
+              <p>Te enviamos un enlace a carolina.ramirez@example.com el 21/09/2026. Revisa tu bandeja. El enlace es de un solo uso.</p>
+            </div>
+            <form class="ps-stack" novalidate>
+              <ps-field label="Código de verificación" required help="Ingresa el código de 6 dígitos que te enviamos." for="codigo">
+                <input id="codigo" class="ps-input" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="123456">
+              </ps-field>
+              <button class="ps-button ps-button--primary ps-button--lg g1-auth__submit" type="submit">Verificar correo</button>
+              <button class="ps-button ps-button--ghost g1-auth__submit" type="button">Reenviar enlace</button>
+            </form>
+            <div class="ps-alert ps-alert--success" role="status">
+              <ps-icon name="check-circle"></ps-icon>
+              <p>Correo verificado. Ya puedes ingresar con tu cuenta.</p>
+            </div>
+            <p class="ps-text-body-sm"><ps-status-badge entity="correo" status="verificado"></ps-status-badge></p>
+          </section>
+
+          <section class="ps-card ps-stack" aria-labelledby="t-recuperar">
+            <h2 id="t-recuperar" class="ps-text-heading-h4">Recupera tu contraseña</h2>
+            <div class="ps-alert ps-alert--info" role="status">
+              <ps-icon name="info"></ps-icon>
+              <p>Te enviaremos un enlace de un solo uso. La cuenta no verificada limita el acceso hasta verificarla.</p>
+            </div>
+            <form class="ps-stack" novalidate>
+              <ps-field label="Correo electrónico" required for="correo-rec">
+                <input id="correo-rec" class="ps-input" type="email" autocomplete="email" placeholder="carolina.ramirez@example.com">
+              </ps-field>
+              <ps-field label="Nueva contraseña" required help="Mínimo 8 caracteres." for="clave-nueva">
+                <input id="clave-nueva" class="ps-input" type="password" autocomplete="new-password" placeholder="••••••••">
+              </ps-field>
+              <ps-field label="Confirmar contraseña" required for="clave-conf">
+                <input id="clave-conf" class="ps-input" type="password" autocomplete="new-password" placeholder="••••••••">
+              </ps-field>
+              <button class="ps-button ps-button--primary ps-button--lg g1-auth__submit" type="submit">Guardar nueva contraseña</button>
+              <p class="g1-auth__alt"><a class="ps-link" href="../acceso/acceso.html">Volver al acceso</a></p>
+            </form>
+          </section>
+
+          <p class="ps-text-caption g1-auth__trace">W02 · AppShell pública, Card, FormField + TextInput, StatusBadge correo, Button primary, Alert contextual, Link.</p>
+        </div>
+
+        <aside class="ps-card ps-stack" aria-labelledby="notas">
+          <h2 id="notas" class="ps-text-heading-h5">Notas del wireframe</h2>
+          <p class="ps-text-caption">No forman parte de la interfaz.</p>
+          <div class="ps-text-body-sm"><ul>
+            <li>Actor: usuario registrado no autenticado (p. ej. Carolina Ramírez). Solo ve su propio flujo en AppShell pública.</li>
+            <li>El bloque superior muestra el estado actual (pendiente) y el resultado tras verificar (Alert success + Verificado), porque la página estática cubre ambos estados exigidos.</li>
+            <li>Errores con <span class="ps-text-label">ps-field error</span> (“El código no es válido. Revisa los 6 dígitos.” / “Las contraseñas no coinciden.”).</li>
+          </ul></div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</ps-app-shell>
+<script type="module" src="../../../design-system/ps.js"></script>
+</body>
+</html>

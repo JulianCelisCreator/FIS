@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframes grupo 01 — Módulo 1</title>
+<link rel="stylesheet" href="../../design-system/ps.css">
+<link rel="stylesheet" href="assets/grupo-01.css">
+</head>
+<body>
+<ps-app-shell>
+  <span data-slot="brand">Escuela de patinaje · Wireframes grupo 01</span>
+  <div data-slot="content" class="g1-page">
+    <div class="ps-container ps-stack">
+      <header class="ps-stack">
+        <h1>Módulo 1: Usuarios y acceso</h1>
+        <p class="ps-text-body-sm">Wireframes de la spec <span class="ps-text-label">docs/specs/m1-usuarios-acceso.md</span> (M1-01 a M1-12), construidos solo con el Design System del proyecto.</p>
+      </header>
+
+      <section class="ps-stack" aria-labelledby="paginas">
+        <h2 id="paginas" class="ps-text-heading-h4">Páginas</h2>
+        <ps-data-table>
+          <table class="ps-table">
+            <thead><tr><th>Página</th><th>Rol que la usa</th><th>Requisitos</th></tr></thead>
+            <tbody>
+              <tr><td data-label="Página"><a class="ps-link" href="acceso/acceso.html">Acceso</a></td><td data-label="Rol">Visitante / no autenticado</td><td data-label="Requisitos">M1-01, M1-02</td></tr>
+              <tr><td data-label="Página"><a class="ps-link" href="verificacion-recuperacion/verificacion-recuperacion.html">Verificación y recuperación</a></td><td data-label="Rol">Usuario registrado</td><td data-label="Requisitos">M1-04, M1-08</td></tr>
+              <tr><td data-label="Página"><a class="ps-link" href="usuarios/usuarios.html">Usuarios</a></td><td data-label="Rol">Administrador</td><td data-label="Requisitos">M1-05, M1-01, M1-04</td></tr>
+              <tr><td data-label="Página"><a class="ps-link" href="roles-acceso/roles-acceso.html">Roles y acceso</a></td><td data-label="Rol">Administrador</td><td data-label="Requisitos">M1-06, M1-07</td></tr>
+              <tr><td data-label="Página"><a class="ps-link" href="familia-menor/familia-menor.html">Familia del menor</a></td><td data-label="Rol">Administrador, Acudiente</td><td data-label="Requisitos">M1-11, M1-09, M1-10</td></tr>
+              <tr><td data-label="Página"><a class="ps-link" href="activacion-profesor/activacion-profesor.html">Activación de profesor</a></td><td data-label="Rol">Profesor, Administrador</td><td data-label="Requisitos">M1-12, M1-03, M1-07</td></tr>
+            </tbody>
+          </table>
+        </ps-data-table>
+      </section>
+
+      <section class="ps-card ps-stack" aria-labelledby="conv">
+        <h2 id="conv" class="ps-text-heading-h4">Convenciones</h2>
+        <div class="ps-text-body-sm"><ul>
+          <li>Todo se compone con <span class="ps-text-label">design-system/</span> (ps.css y ps.js); <span class="ps-text-label">assets/grupo-01.css</span> solo define la disposición, con tokens.</li>
+          <li>Las líneas «RF-M1-xx» y la tarjeta «Notas del wireframe» son anotaciones para la revisión, no forman parte de la interfaz.</li>
+          <li>Hay que abrirlo con un servidor local (los módulos ES no funcionan con <span class="ps-text-label">file://</span>).</li>
+          <li>Revisado en 375, 768 y 1280 px.</li>
+        </ul></div>
+      </section>
+    </div>
+  </div>
+</ps-app-shell>
+<script type="module" src="../../design-system/ps.js"></script>
+</body>
+</html>

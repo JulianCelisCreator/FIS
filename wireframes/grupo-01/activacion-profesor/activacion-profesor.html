@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Activación de profesor — Escuela de patinaje</title>
+<link rel="stylesheet" href="../../../design-system/ps.css">
+<link rel="stylesheet" href="../assets/grupo-01.css">
+</head>
+<body>
+<ps-app-shell>
+  <span data-slot="brand">Escuela de patinaje</span>
+  <span data-slot="user" class="ps-cluster g1-user">
+    <span class="ps-badge ps-badge--neutral g1-hide-mobile">Profesor</span>
+    <span class="ps-text-label g1-hide-mobile">Andrés Torres</span>
+    <ps-avatar name="Andrés Torres" size="sm"></ps-avatar>
+  </span>
+  <nav data-slot="nav" aria-label="Navegación principal">
+    <div class="g1-nav-group">
+      <p class="ps-text-caption">Profesor</p>
+      <ul class="ps-stack">
+        <li><span class="ps-text-label" aria-current="page">Activación de cuenta</span></li>
+        <li><a class="ps-link" href="../usuarios/usuarios.html">Usuarios</a></li>
+      </ul>
+    </div>
+    <div class="g1-nav-group">
+      <p class="ps-text-caption">Wireframes</p>
+      <ul class="ps-stack">
+        <li><a class="ps-link" href="../index.html">Índice</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div data-slot="content" class="g1-page">
+    <header class="g1-head">
+      <div class="ps-stack">
+        <nav class="ps-breadcrumb" aria-label="Ruta">
+          <span>Mi cuenta</span><span aria-hidden="true">/</span><span aria-current="page">Activación de cuenta</span>
+        </nav>
+        <h1>Activación de cuenta</h1>
+        <p class="ps-text-body-sm">Tu cuenta se activa sola al primer ingreso. Cerrar sesión siempre pide confirmación.</p>
+        <p class="ps-text-caption">RF-M1-12 Activación de cuenta de profesor · RF-M1-03 Cierre de sesión</p>
+      </div>
+    </header>
+
+    <section class="ps-stack" aria-labelledby="t-progreso">
+      <h2 id="t-progreso" class="ps-text-heading-h4">Progreso de activación</h2>
+      <ol class="ps-stepper" aria-label="Pasos">
+        <li class="ps-stepper__step" data-state="completed"><span class="ps-stepper__dot"></span><span>1. Creada por Adm <span class="ps-text-caption">· Completado</span></span></li>
+        <li class="ps-stepper__step" data-state="completed"><span class="ps-stepper__dot"></span><span>2. Por registrar <span class="ps-text-caption">· Completado</span></span></li>
+        <li class="ps-stepper__step" data-state="completed"><span class="ps-stepper__dot"></span><span>3. Primer ingreso <span class="ps-text-caption">· Completado</span></span></li>
+        <li class="ps-stepper__step" data-state="current" aria-current="step"><span class="ps-stepper__dot"></span><span>4. Cuenta activa <span class="ps-text-caption">· Paso actual</span></span></li>
+      </ol>
+    </section>
+
+    <section class="ps-card ps-stack" aria-labelledby="t-cuenta">
+      <h2 id="t-cuenta" class="ps-text-heading-h4">Tu cuenta</h2>
+      <p><ps-status-badge entity="profesor" status="por-registrar"></ps-status-badge></p>
+      <dl class="ps-dl">
+        <div><dt>Nombre</dt><dd>Andrés Torres</dd></div>
+        <div><dt>Rol</dt><dd>Profesor</dd></div>
+        <div><dt>Creada por</dt><dd>admin@escuela.com · 20/09/2026</dd></div>
+      </dl>
+    </section>
+
+    <section class="ps-card ps-stack" aria-labelledby="t-ingreso">
+      <h2 id="t-ingreso" class="ps-text-heading-h4">Primer ingreso</h2>
+      <p class="ps-text-body-sm">Ingresa con tu correo. La activación es automática: no hay ningún botón de activar.</p>
+      <form id="form-ingreso" class="ps-stack" novalidate>
+        <ps-field label="Correo electrónico">
+          <input class="ps-input" type="email" value="andres.torres@example.com" readonly>
+        </ps-field>
+        <ps-field label="Contraseña" required for="clave">
+          <input id="clave" class="ps-input" type="password" autocomplete="current-password" placeholder="••••••••">
+        </ps-field>
+        <button class="ps-button ps-button--primary ps-button--lg g1-auth__submit" type="submit">Ingresar</button>
+      </form>
+      <div class="ps-alert ps-alert--success" role="status">
+        <ps-icon name="check-circle"></ps-icon>
+        <p>Cuenta activada el 21/09/2026. Ya ves tus grupos y tus patinadores.</p>
+      </div>
+      <p><ps-status-badge entity="profesor" status="cuenta-activa"></ps-status-badge></p>
+    </section>
+
+    <section class="ps-card ps-stack" aria-labelledby="t-sesion">
+      <h2 id="t-sesion" class="ps-text-heading-h4">Sesión</h2>
+      <p class="ps-text-body-sm"><span class="ps-text-label">Andrés Torres · Profesor</span></p>
+      <p class="g1-actions">
+        <button class="ps-button ps-button--secondary" type="button" data-open="dlg-cerrar">Cerrar sesión</button>
+      </p>
+    </section>
+
+    <section class="ps-stack" aria-labelledby="t-por-activar">
+      <h2 id="t-por-activar" class="ps-text-heading-h4">Profesores por activar (vista Adm)</h2>
+      <p class="ps-text-body-sm">La Administradora creó estas cuentas y ve su estado. No hay activación manual.</p>
+      <ps-data-table>
+        <table class="ps-table">
+          <thead>
+            <tr><th data-sort="profesor">Profesor</th><th>Correo</th><th>Estado</th><th>Creado</th></tr>
+          </thead>
+          <tbody>
+            <tr><td data-label="Profesor"><span class="ps-cluster"><ps-avatar name="Andrés Torres" size="sm"></ps-avatar>Andrés Torres</span></td><td data-label="Correo">andres.torres@example.com</td><td data-label="Estado"><ps-status-badge entity="profesor" status="por-registrar"></ps-status-badge></td><td data-label="Creado">20/09/2026</td></tr>
+            <tr><td data-label="Profesor"><span class="ps-cluster"><ps-avatar name="Laura Cubillos" size="sm"></ps-avatar>Laura Cubillos</span></td><td data-label="Correo">laura.cubillos@example.com</td><td data-label="Estado"><ps-status-badge entity="profesor" status="cuenta-activa"></ps-status-badge></td><td data-label="Creado">15/08/2026</td></tr>
+          </tbody>
+        </table>
+      </ps-data-table>
+    </section>
+
+    <aside class="ps-card ps-stack" aria-labelledby="notas">
+      <h2 id="notas" class="ps-text-heading-h5">Notas del wireframe</h2>
+      <p class="ps-text-caption">No forman parte de la interfaz.</p>
+      <div class="ps-text-body-sm"><ul>
+        <li>El Prof <span class="ps-text-label">Por registrar</span> no ve gestión (usuarios, planes, resultados); tras activarse ve solo sus grupos y patinadores.</li>
+        <li>Al pulsar <span class="ps-text-label">Ingresar</span> aparece el Toast “Cuenta activada”; al confirmar el cierre, el Toast “Sesión cerrada”. El cierre no pide motivo.</li>
+        <li>M1-03 y M1-07 son transversales: el menú de usuario con Cerrar sesión existe en todas las pantallas privadas (W03–W06).</li>
+      </ul></div>
+    </aside>
+
+    <ps-dialog id="dlg-cerrar" variant="confirm" heading="¿Cerrar sesión, Andrés?" confirm-label="Cerrar sesión">
+      <p class="ps-text-body-sm">Volverás a la pantalla de acceso.</p>
+    </ps-dialog>
+
+    <ps-toast-region></ps-toast-region>
+  </div>
+</ps-app-shell>
+<script type="module" src="../assets/grupo-01.js"></script>
+<script type="module">
+document.getElementById("form-ingreso").addEventListener("submit", (event) => {
+  event.preventDefault();
+  window.PS.toast({ tone: "success", title: "Cuenta activada", message: "Bienvenido, Andrés Torres." });
+});
+document.addEventListener("ps-confirm", (event) => {
+  if (event.target.closest("#dlg-cerrar")) {
+    window.PS.toast({ tone: "success", title: "Sesión cerrada", message: "Volviste a la pantalla de acceso." });
+  }
+});
+</script>
+</body>
+</html>
