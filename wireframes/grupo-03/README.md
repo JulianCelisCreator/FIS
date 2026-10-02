@@ -2,7 +2,7 @@
 
 ## Integrantes
 
-- 
+- Laura Valentina Cubillos Acero
 - 
 - 
 
