@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Wireframes Módulo M4 - Portal Principal</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; margin-top: 20px; }
+        .card-menu { background: #ffffff; padding: 20px; border-radius: 8px; border: 1px solid #cbd5e1; text-decoration: none; color: inherit; transition: transform 0.2s, border-color 0.2s; }
+        .card-menu:hover { border-color: #0284c7; transform: translateY(-2px); }
+        .card-menu h3 { margin: 0 0 5px 0; font-size: 16px; color: #0369a1; }
+        .card-menu p { margin: 0; font-size: 13px; color: #64748b; }
+        .badge-hu { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; background: #e2e8f0; color: #475569; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+    <div style="max-width: 1000px; margin: 0 auto;">
+        <div class="card">
+            <h1>Módulo M4 – Competencias, Inscripciones y Resultados</h1>
+            <p><strong>Proyecto:</strong> Sistema de Gestión Deportiva | <strong>Grupo:</strong> #5</p>
+            <p>Accede a cualquiera de las 9 pantallas del prototipo navegable:</p>
+            
+            <div class="grid">
+                <a href="listado-competencias/listado-competencias.html" class="card-menu">
+                    <span class="badge-hu">HU-M4-01</span>
+                    <h3>1. Listado de Competencias</h3>
+                    <p>Calendario general y estado de eventos.</p>
+                </a>
+                <a href="gestion-competencia/gestion-competencia.html" class="card-menu">
+                    <span class="badge-hu">HU-M4-01</span>
+                    <h3>2. Gestión de Competencia</h3>
+                    <p>Creación, pruebas y fechas de inscripción.</p>
+                </a>
+                <a href="patinadores-elegibles/patinadores-elegibles.html" class="card-menu">
+                    <span class="badge-hu">HU-M4-02</span>
+                    <h3>3. Patinadores Elegibles</h3>
+                    <p>Preselección de deportistas por profesor.</p>
+                </a>
+                <a href="gestion-inscripciones/gestion-inscripciones.html" class="card-menu">
+                    <span class="badge-hu">HU-M4-02</span>
+                    <h3>4. Gestión de Inscripciones</h3>
+                    <p>Solicitud, póliza, cartera y firmas.</p>
+                </a>
+                <a href="registro-tiempos/registro-tiempos.html" class="card-menu">
+                    <span class="badge-hu">HU-M4-03</span>
+                    <h3>5. Registro de Tiempos</h3>
+                    <p>Captura cronometrada MM:SS.mmm y marcas DNF.</p>
+                </a>
+                <a href="tabla-resultados/tabla-resultados.html" class="card-menu">
+                    <span class="badge-hu">HU-M4-03 / 05</span>
+                    <h3>6. Tabla de Resultados</h3>
+                    <p>Clasificación oficial ordenada por tiempos.</p>
+                </a>
+                <a href="perfil-rendimiento/perfil-rendimiento.html" class="card-menu">
+                    <span class="badge-hu">HU-M4-04</span>
+                    <h3>7. Perfil de Rendimiento</h3>
+                    <p>Historial, récords personales y evoluciones.</p>
+                </a>
+                <a href="ranking-categoria/ranking-categoria.html" class="card-menu">
+                    <span class="badge-hu">HU-M4-04</span>
+                    <h3>8. Ranking por Categoría</h3>
+                    <p>Clasificación acumulada por nivel y género.</p>
+                </a>
+                <a href="administracion-resultados/administracion-resultados.html" class="card-menu">
+                    <span class="badge-hu">HU-M4-05</span>
+                    <h3>9. Administración y Auditoría</h3>
+                    <p>Corrección de tiempos, auditoría y exportación.</p>
+                </a>
+            </div>
+        </div>
+    </div>
+    <script src="assets/js/script.js"></script>
+</body>
+</html>
