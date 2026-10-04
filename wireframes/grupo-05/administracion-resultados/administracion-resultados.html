@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Wireframe - Administración y Auditoría</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+    <div class="nav-bar">
+        <a href="../index.html">← Menú Principal</a>
+        <a href="../listado-competencias/listado-competencias.html">Listado</a>
+        <a href="../gestion-competencia/gestion-competencia.html">Competencia</a>
+        <a href="../patinadores-elegibles/patinadores-elegibles.html">Elegibles</a>
+        <a href="../gestion-inscripciones/gestion-inscripciones.html">Inscripciones</a>
+        <a href="../registro-tiempos/registro-tiempos.html">Tiempos</a>
+        <a href="../tabla-resultados/tabla-resultados.html">Resultados</a>
+        <a href="../perfil-rendimiento/perfil-rendimiento.html">Rendimiento</a>
+        <a href="../ranking-categoria/ranking-categoria.html">Ranking</a>
+        <a href="../administracion-resultados/administracion-resultados.html" class="active">Auditoría</a>
+    </div>
+
+    <div class="card">
+        <h2>HU-M4-05: Modificación, Auditoría y Exportación de Resultados</h2>
+        
+        <h3>Corrección Exclusiva de Administrador</h3>
+        <p><strong>Patinador:</strong> Mateo Gómez | <strong>Tiempo Actual:</strong> 01:15.230</p>
+        
+        <label><strong>Nuevo Tiempo Oficial:</strong></label><br>
+        <input type="text" value="01:15.110" style="padding: 6px; margin: 5px 0 10px 0;"><br>
+
+        <label><strong>Motivo Obligatorio del Cambio:</strong></label><br>
+        <textarea style="height: 60px;" placeholder="Ej: Ajuste por revisión de foto-finish manual."></textarea><br><br>
+
+        <button class="btn">Guardar Corrección y Recalcular</button>
+    </div>
+
+    <div class="card">
+        <h3>Historial de Auditoría (Trazabilidad de Cambios)</h3>
+        <table>
+            <thead>
+                <tr><th>Fecha/Hora</th><th>Usuario</th><th>Valor Anterior</th><th>Valor Nuevo</th><th>Motivo</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>24/09/2026 10:30</td><td>Admin_General</td><td>01:15.230</td><td>01:15.110</td><td>Ajuste por revisión de foto-finish</td></tr>
+            </tbody>
+        </table>
+        <br>
+        <h3>Publicación y Exportación (RF-M4-19)</h3>
+        <button class="btn btn-success">Publicar Oficialmente</button>
+        <button class="btn btn-danger">Exportar a PDF</button>
+        <button class="btn btn-teal">Exportar a Excel / CSV</button>
+    </div>
+
+    <script src="../assets/js/script.js"></script>
+</body>
+</html>

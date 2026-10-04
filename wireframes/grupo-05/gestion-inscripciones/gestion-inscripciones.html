@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Wireframe - Gestión de Inscripciones</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+    <div class="nav-bar">
+        <a href="../index.html">← Menú Principal</a>
+        <a href="../listado-competencias/listado-competencias.html">Listado</a>
+        <a href="../gestion-competencia/gestion-competencia.html">Competencia</a>
+        <a href="../patinadores-elegibles/patinadores-elegibles.html">Elegibles</a>
+        <a href="../gestion-inscripciones/gestion-inscripciones.html" class="active">Inscripciones</a>
+        <a href="../registro-tiempos/registro-tiempos.html">Tiempos</a>
+        <a href="../tabla-resultados/tabla-resultados.html">Resultados</a>
+        <a href="../perfil-rendimiento/perfil-rendimiento.html">Rendimiento</a>
+        <a href="../ranking-categoria/ranking-categoria.html">Ranking</a>
+        <a href="../administracion-resultados/administracion-resultados.html">Auditoría</a>
+    </div>
+
+    <div class="card">
+        <h2>HU-M4-02: Solicitud, Validaciones y Resultado de Inscripción</h2>
+        <p><strong>Patinador:</strong> Mateo Gómez (Menor de Edad) | <strong>Acudiente:</strong> Carlos Gómez</p>
+        <p><strong>Competencia:</strong> V Copa Nacional - Prueba: 500m Eliminación</p>
+
+        <h3>Verificación de Validaciones del Sistema</h3>
+        <div class="val-item ok"><span>✓ Preselección por Profesor</span><span>Elegible</span></div>
+        <div class="val-item ok"><span>✓ Póliza Médica de Seguro (RF-M4-07)</span><span>Vigente hasta 31/12/2026</span></div>
+        <div class="val-item fail"><span>✗ Estado de Cartera (RF-M4-08)</span><span>Causal: Factura Vencida #1042 ($50.000)</span></div>
+        <div class="val-item ok"><span>✓ Régimen Disciplinario (RF-M4-10)</span><span>Sin Sanciones</span></div>
+    </div>
+
+    <div class="card">
+        <h3>Autorización Digital del Acudiente (RF-M4-09)</h3>
+        <label>
+            <input type="checkbox" checked> Yo, Carlos Gómez, en calidad de acudiente legal, autorizo la participación del menor.
+        </label>
+    </div>
+
+    <div style="display: flex; gap: 15px; align-items: center;">
+        <button class="btn" style="background: #94a3b8;" disabled>Solicitud Bloqueada por Cartera</button>
+        <span style="color: #dc2626; font-size: 14px;">El sistema no permite ratificar la inscripción hasta resolver la mora.</span>
+    </div>
+
+    <script src="../assets/js/script.js"></script>
+</body>
+</html>

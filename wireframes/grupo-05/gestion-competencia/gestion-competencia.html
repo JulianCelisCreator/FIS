@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Wireframe - Gestión de Competencia</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+    <div class="nav-bar">
+        <a href="../index.html">← Menú Principal</a>
+        <a href="../listado-competencias/listado-competencias.html">Listado</a>
+        <a href="../gestion-competencia/gestion-competencia.html" class="active">Competencia</a>
+        <a href="../patinadores-elegibles/patinadores-elegibles.html">Elegibles</a>
+        <a href="../gestion-inscripciones/gestion-inscripciones.html">Inscripciones</a>
+        <a href="../registro-tiempos/registro-tiempos.html">Tiempos</a>
+        <a href="../tabla-resultados/tabla-resultados.html">Resultados</a>
+        <a href="../perfil-rendimiento/perfil-rendimiento.html">Rendimiento</a>
+        <a href="../ranking-categoria/ranking-categoria.html">Ranking</a>
+        <a href="../administracion-resultados/administracion-resultados.html">Auditoría</a>
+    </div>
+
+    <h2>HU-M4-01: Creación, Pruebas y Publicación de Evento</h2>
+
+    <div class="card">
+        <h3>1. Información General del Evento</h3>
+        <div class="form-group">
+            <label>Nombre de la Competencia *</label>
+            <input type="text" value="V Copa Nacional de Velocidad">
+        </div>
+        <div class="row">
+            <div class="col form-group">
+                <label>Fecha y Hora *</label>
+                <input type="datetime-local" value="2026-11-15T08:00">
+            </div>
+            <div class="col form-group">
+                <label>Lugar / Escenario *</label>
+                <input type="text" value="Patinódromo Mayor">
+            </div>
+            <div class="col form-group">
+                <label>Tipo de Evento *</label>
+                <select><option>Interna</option><option selected>Federada</option><option>Festival</option></select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col form-group">
+                <label>Apertura Inscripciones *</label>
+                <input type="date" value="2026-10-01">
+            </div>
+            <div class="col form-group">
+                <label>Cierre Inscripciones *</label>
+                <input type="date" value="2026-11-10">
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>2. Configuración de Pruebas y Categorías</h3>
+        <div class="row">
+            <div class="col form-group">
+                <label>Modalidad</label>
+                <input type="text" placeholder="Ej: Eliminación">
+            </div>
+            <div class="col form-group">
+                <label>Distancia (Metros > 0)</label>
+                <input type="number" placeholder="500">
+            </div>
+            <div class="col form-group">
+                <label>Categoría Institucional</label>
+                <select><option>Juvenil A</option><option>Mayores</option></select>
+            </div>
+            <div class="col form-group">
+                <label>&nbsp;</label>
+                <button class="btn btn-success" style="width: 100%;">+ Agregar Prueba</button>
+            </div>
+        </div>
+
+        <table>
+            <thead><tr><th>Modalidad</th><th>Distancia</th><th>Categoría</th><th>Acción</th></tr></thead>
+            <tbody>
+                <tr><td>Eliminación</td><td>500 m</td><td>Juvenil A</td><td><button style="color:red; border:none; background:none; cursor:pointer;">Eliminar</button></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div style="text-align: right; margin-bottom: 30px;">
+        <a href="../listado-competencias/listado-competencias.html" style="margin-right: 15px; color: #64748b; text-decoration: none;">Cancelar</a>
+        <button class="btn">Guardar y Publicar Competencia</button>
+    </div>
+
+    <script src="../assets/js/script.js"></script>
+</body>
+</html>
