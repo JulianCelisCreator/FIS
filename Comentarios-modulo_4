@@ -1,0 +1,23 @@
+RF-M4-06 – Solicitud de inscripción: Se debe aclarar la diferencia entre solicitar y confirmar una inscripción, especialmente para los patinadores menores de edad y el papel del acudiente.
+
+RF-M4-07 – Validación de póliza: Los actores incluyen al Fisioterapeuta y al Administrador, pero la validación se plantea como automática. Se debe aclarar quién ejecuta realmente la validación.
+
+RF-M4-09 – Autorización del acudiente: Se debe especificar qué ocurre cuando un menor tiene más de un acudiente asociado y cuál de ellos está autorizado para aprobar la inscripción.
+
+RF-M4-10 – Bloqueo por sanción: Se menciona al Profesor como actor, aunque el bloqueo se realiza automáticamente. Se debe aclarar el actor responsable de la ejecución del bloqueo.
+
+RF-M4-11 – Ratificación o rechazo: El requisito define la ratificación como automática, pero incluye varios actores. Se debe diferenciar el Sistema como responsable de la decisión y los usuarios que solo reciben la notificación.
+
+RF-M4-12 – Modificación y cancelación: Se mezclan dos funcionalidades diferentes. Se recomienda separarlas en requisitos independientes.
+
+RF-M4-13 – Registro de tiempos: El título indica “en milisegundos”, mientras que la descripción utiliza el formato MM:SS.mmm. Se debe aclarar que el tiempo se almacena con precisión de milisegundos o ajustar el título.
+
+RF-M4-14 – Tabla de resultados: Se establece que deben existir al menos dos participantes para generar resultados. Se debería justificar esta condición o permitir la generación con un solo participante.
+
+RF-M4-15 – Ranking: No se define claramente el criterio utilizado para calcular la posición de cada patinador. Se debe establecer la fórmula o regla de puntuación.
+
+RF-M4-17 – Historial de participación: Se incluyen varios actores, pero no se especifican claramente los permisos de consulta de cada uno. Se debe indicar qué información puede visualizar cada rol.
+
+RF-M4-18 – Corrección de resultados: Existe una inconsistencia entre el Administrador, que realiza la corrección, y el Profesor, que debe solicitarla. Se debe definir claramente el flujo de solicitud y aprobación.
+
+RF-M4-19 – Exportación y publicación: El título menciona “publicación”, pero la descripción únicamente contempla la exportación. Se debe eliminar “publicación” del título o incluir esa funcionalidad en la descripción.
