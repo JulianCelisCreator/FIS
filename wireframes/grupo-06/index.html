@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframes grupo 06 · Módulo 6</title>
+<link rel="stylesheet" href="../../design-system/ps.css">
+<link rel="stylesheet" href="assets/grupo-06.css">
+</head>
+<body>
+<ps-app-shell>
+  <span data-slot="brand" class="ps-text-label">Escuela de patinaje · Wireframes grupo 06</span>
+  <div data-slot="content" class="g6-page">
+    <header class="ps-stack">
+      <p class="ps-text-caption">Sección 4.6 · RF-M6-01 a RF-M6-08</p>
+      <h1>Módulo 6: Administración, reportes, finanzas e inventario</h1>
+      <p class="ps-text-body-sm">Propuesta de pantallas administrativas basada en los requerimientos corregidos.</p>
+    </header>
+
+    <section class="ps-stack" aria-labelledby="pages-title">
+      <h2 id="pages-title" class="ps-text-heading-h4">Páginas</h2>
+      <ps-data-table>
+        <table class="ps-table">
+          <thead><tr><th>Página</th><th>Rol</th><th>Requisitos</th></tr></thead>
+          <tbody>
+            <tr><td data-label="Página"><a class="ps-link" href="panel/panel.html">Panel administrativo</a></td><td data-label="Rol">Administrador, Contador</td><td data-label="Requisitos">RF-M6-01</td></tr>
+            <tr><td data-label="Página"><a class="ps-link" href="personal/personal.html">Personal y permisos</a></td><td data-label="Rol">Administrador</td><td data-label="Requisitos">RF-M6-02, RF-M6-03</td></tr>
+            <tr><td data-label="Página"><a class="ps-link" href="reportes/reportes.html">Reportes</a></td><td data-label="Rol">Administrador, Contador</td><td data-label="Requisitos">RF-M6-04, RF-M6-05</td></tr>
+            <tr><td data-label="Página"><a class="ps-link" href="inventario/inventario.html">Inventario y proveedores</a></td><td data-label="Rol">Administrador</td><td data-label="Requisitos">RF-M6-06</td></tr>
+            <tr><td data-label="Página"><a class="ps-link" href="ventas/ventas.html">Venta de uniformes</a></td><td data-label="Rol">Administrador</td><td data-label="Requisitos">RF-M6-07</td></tr>
+            <tr><td data-label="Página"><a class="ps-link" href="prestamos/prestamos.html">Préstamos y devoluciones</a></td><td data-label="Rol">Administrador</td><td data-label="Requisitos">RF-M6-08</td></tr>
+          </tbody>
+        </table>
+      </ps-data-table>
+    </section>
+
+    <section class="g6-grid g6-grid--2">
+      <article class="ps-card ps-stack">
+        <h2 class="ps-text-heading-h4">Alcance del prototipo</h2>
+        <p class="ps-text-body-sm">Las seis vistas agrupan los ocho requisitos. El panel y los reportes adaptan su contenido al rol; M5 conserva el registro financiero y sus comprobantes.</p>
+      </article>
+      <article class="ps-card ps-stack">
+        <h2 class="ps-text-heading-h4">Documentos</h2>
+        <p><a class="ps-link" href="PLAN-COMPONENTES.md">Plan de componentes aprobado</a></p>
+        <p><a class="ps-link" href="TRAZABILIDAD.md">Trazabilidad, integraciones y decisiones abiertas</a></p>
+        <p><a class="ps-link" href="README.md">Guía del grupo</a></p>
+      </article>
+    </section>
+  </div>
+</ps-app-shell>
+<script type="module" src="../../design-system/ps.js"></script>
+</body>
+</html>
