@@ -3,8 +3,8 @@
 ## Integrantes
 
 - Laura Valentina Cubillos Acero
-- 
-- 
+- Kenneth Mark Garzon Olarte
+- Juan Pablo Gonzalez Castillo
 
 ## Herramienta usada
 
