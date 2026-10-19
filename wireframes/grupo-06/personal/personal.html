@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Personal y permisos · Grupo 06</title>
+<link rel="stylesheet" href="../../../design-system/ps.css">
+<link rel="stylesheet" href="../assets/grupo-06.css">
+</head>
+<body>
+<ps-app-shell>
+  <span data-slot="brand" class="ps-text-label">Escuela de patinaje</span>
+  <span data-slot="user" class="ps-cluster g6-user"><span class="ps-badge ps-badge--neutral g6-hide-mobile">Administrador</span><span class="ps-text-label g6-hide-mobile">Andrea López</span><ps-avatar name="Andrea López" size="sm"></ps-avatar></span>
+  <nav data-slot="nav" aria-label="Navegación principal">
+    <div class="g6-nav-group"><p class="ps-text-caption">Administración</p><ul class="ps-stack"><li><a class="ps-link" href="../panel/panel.html">Panel</a></li><li><span class="ps-text-label" aria-current="page">Personal y permisos</span></li><li><a class="ps-link" href="../reportes/reportes.html">Reportes</a></li></ul></div>
+    <div class="g6-nav-group"><p class="ps-text-caption">Uniformes</p><ul class="ps-stack"><li><a class="ps-link" href="../inventario/inventario.html">Inventario</a></li><li><a class="ps-link" href="../ventas/ventas.html">Ventas</a></li><li><a class="ps-link" href="../prestamos/prestamos.html">Préstamos</a></li></ul></div>
+    <div class="g6-nav-group"><p class="ps-text-caption">Wireframes</p><ul class="ps-stack"><li><a class="ps-link" href="../index.html">Índice M6</a></li></ul></div>
+  </nav>
+  <div data-slot="content" class="g6-page">
+    <header class="g6-head"><div class="ps-stack"><nav class="ps-breadcrumb" aria-label="Ruta"><span>Administración</span><span aria-hidden="true">/</span><span aria-current="page">Personal y permisos</span></nav><h1>Personal de la escuela</h1><p class="ps-text-body-sm">Datos laborales, contacto y acceso financiero del Contador.</p><p class="ps-text-caption">RF-M6-02 · RF-M6-03</p></div><div class="g6-actions"><button class="ps-button ps-button--primary" type="button" data-open="dlg-person">Registrar personal</button><button class="ps-button ps-button--secondary" type="button" data-open="dlg-deactivate">Desactivar personal</button></div></header>
+    <div class="ps-alert ps-alert--info" role="status"><ps-icon name="info"></ps-icon><p>La ficha laboral complementa la cuenta de usuario de M1. Las credenciales y los roles generales se administran allí.</p></div>
+    <ps-filter-bar>
+      <ps-field label="Buscar personal"><input class="ps-input" type="search" placeholder="Nombre, documento o correo"></ps-field>
+      <ps-field label="Estado laboral"><select class="ps-select"><option>Todos</option><option>Activo</option><option>Inactivo</option></select></ps-field>
+      <ps-field label="Cargo"><select class="ps-select"><option>Todos</option><option>Profesor</option><option>Contador</option><option>Fisioterapeuta</option></select></ps-field>
+    </ps-filter-bar>
+    <ps-data-table><table class="ps-table">
+      <thead><tr><th>Personal</th><th>Documento</th><th>Correo</th><th>Teléfono</th><th>Cargo</th><th>Estado</th><th>Rol del sistema</th><th>Acciones</th></tr></thead>
+      <tbody>
+        <tr><td data-label="Personal">Andrés Torres</td><td data-label="Documento">CC 1.023.456.789</td><td data-label="Correo">andres.torres@escuela.co</td><td data-label="Teléfono">310 555 0101</td><td data-label="Cargo">Profesor</td><td data-label="Estado"><ps-status-badge entity="personal" status="activo"></ps-status-badge></td><td data-label="Rol del sistema">Profesor</td><td data-label="Acciones"><button class="ps-button ps-button--ghost ps-button--sm" type="button" data-open="dlg-edit">Consultar / editar</button></td></tr>
+        <tr><td data-label="Personal">Laura Méndez</td><td data-label="Documento">CC 52.345.678</td><td data-label="Correo">laura.mendez@escuela.co</td><td data-label="Teléfono">315 555 0182</td><td data-label="Cargo">Contabilidad</td><td data-label="Estado"><ps-status-badge entity="personal" status="activo"></ps-status-badge></td><td data-label="Rol del sistema">Contador</td><td data-label="Acciones"><button class="ps-button ps-button--ghost ps-button--sm" type="button" data-open="dlg-permissions">Permisos</button></td></tr>
+        <tr><td data-label="Personal">Camilo Rojas</td><td data-label="Documento">CC 79.456.123</td><td data-label="Correo">camilo.rojas@escuela.co</td><td data-label="Teléfono">300 555 0130</td><td data-label="Cargo">Fisioterapeuta</td><td data-label="Estado"><ps-status-badge entity="personal" status="inactivo"></ps-status-badge></td><td data-label="Rol del sistema">Fisioterapeuta</td><td data-label="Acciones"><button class="ps-button ps-button--secondary ps-button--sm" type="button" data-open="dlg-reactivate">Reactivar</button></td></tr>
+      </tbody>
+    </table></ps-data-table>
+    <div class="g6-actions"><p class="ps-text-caption">Mostrando 3 trabajadores</p><ps-pagination page="1" pages="1"></ps-pagination></div>
+    <section class="ps-card ps-stack"><h2 class="ps-text-heading-h4">Permisos del Contador</h2><div class="g6-grid g6-grid--2"><div><h3 class="ps-text-label">Permitido</h3><ul class="ps-text-body-sm"><li>Registrar pagos manuales en M5.</li><li>Consultar comprobantes e historial de pagos.</li><li>Consultar y exportar reportes financieros.</li><li>Ver indicadores financieros del panel.</li></ul></div><div><h3 class="ps-text-label">Restringido</h3><ul class="ps-text-body-sm"><li>Anular pagos.</li><li>Gestionar usuarios, grupos, horarios o matrículas.</li><li>Gestionar inventario, ventas administrativas o préstamos.</li></ul></div></div></section>
+    <div class="ps-alert ps-alert--success" role="status" data-feedback hidden></div>
+
+    <ps-dialog id="dlg-person" variant="form" heading="Registrar personal" confirm-label="Guardar ficha" data-feedback="[data-feedback]" data-message="Ficha laboral guardada en esta demostración; no se creó una cuenta de usuario.">
+      <div class="ps-stack"><ps-field label="Tipo de documento" required><select class="ps-select"><option>CC</option><option>CE</option><option>Pasaporte</option></select></ps-field><ps-field label="Número de documento" required help="Debe ser único entre el personal registrado."><input class="ps-input" inputmode="numeric" value="1.012.345.678"></ps-field><div class="g6-grid g6-grid--2"><ps-field label="Nombres" required><input class="ps-input" value="María Fernanda"></ps-field><ps-field label="Apellidos" required><input class="ps-input" value="Pérez Gómez"></ps-field></div><div class="g6-grid g6-grid--2"><ps-field label="Correo institucional" required help="Debe ser único entre el personal registrado."><input class="ps-input" type="email" value="maria.perez@escuela.co"></ps-field><ps-field label="Teléfono" required><input class="ps-input" type="tel" value="320 555 0112"></ps-field></div><div class="g6-grid g6-grid--2"><ps-field label="Cargo" required><select class="ps-select"><option>Profesor</option><option>Contador</option><option>Fisioterapeuta</option><option>Otro</option></select></ps-field><ps-field label="Estado laboral" required><select class="ps-select"><option>Activo</option><option>Inactivo</option></select></ps-field></div><p class="ps-text-caption">La cuenta de acceso se registra o vincula en M1.</p></div>
+    </ps-dialog>
+    <ps-dialog id="dlg-edit" variant="form" heading="Ficha de Andrés Torres" confirm-label="Guardar cambios" data-feedback="[data-feedback]" data-message="Cambios laborales guardados en esta demostración."><div class="ps-stack"><ps-field label="Cargo" required><input class="ps-input" value="Profesor"></ps-field><ps-field label="Correo institucional" required><input class="ps-input" value="andres.torres@escuela.co"></ps-field><ps-field label="Estado laboral" required><select class="ps-select"><option selected>Activo</option><option>Inactivo</option></select></ps-field></div></ps-dialog>
+    <ps-dialog id="dlg-permissions" variant="confirm" heading="Asignar rol Contador a Laura Méndez" confirm-label="Asignar rol" data-feedback="[data-feedback]" data-message="El rol Contador quedó asignado en esta demostración."><p data-slot="body">La usuaria debe tener una cuenta activa en M1. El permiso no autoriza anular pagos ni gestionar inventario.</p></ps-dialog>
+    <ps-dialog id="dlg-reactivate" variant="confirm" heading="¿Reactivar a Camilo Rojas?" confirm-label="Reactivar personal" data-feedback="[data-feedback]" data-message="Estado laboral actualizado en esta demostración."><p data-slot="body">Se conserva el historial laboral y la actividad previa.</p></ps-dialog>
+    <ps-dialog id="dlg-deactivate" variant="confirm" heading="¿Desactivar a Andrés Torres?" confirm-label="Desactivar personal" data-feedback="[data-feedback]" data-message="Estado laboral actualizado en esta demostración; el historial se conserva."><p data-slot="body">La ficha laboral y la actividad previa no se eliminan.</p></ps-dialog>
+  </div>
+</ps-app-shell>
+<script type="module" src="../../../design-system/ps.js"></script><script type="module" src="../assets/grupo-06.js"></script>
+</body>
+</html>

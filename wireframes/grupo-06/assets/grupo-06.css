@@ -1,0 +1,30 @@
+/* Disposición compartida del grupo 06. No define apariencia visual del DS. */
+.g6-user { margin-inline-start: auto; }
+.g6-page { padding-block: var(--spacing-lg) var(--spacing-2xl); }
+.g6-page > * + * { margin-top: var(--spacing-lg); }
+.g6-page > ps-filter-bar { display: block; }
+.g6-page ps-data-table { display: block; width: 100%; max-width: 100%; min-width: 0; overflow-x: auto; }
+.g6-page ps-data-table > table { width: 100%; }
+.g6-head { display: flex; flex-wrap: wrap; gap: var(--spacing-md); align-items: flex-end; justify-content: space-between; }
+.g6-grid { display: grid; grid-template-columns: 1fr; gap: var(--spacing-md); align-items: start; }
+.g6-actions { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); justify-content: flex-end; }
+.g6-nav-group + .g6-nav-group { margin-top: var(--spacing-lg); }
+.g6-nav-group > * + * { margin-top: var(--spacing-xs); }
+.g6-report-summary { display: grid; grid-template-columns: 1fr; gap: var(--spacing-md); }
+
+@media (max-width: 767px) {
+  .g6-hide-mobile { display: none; }
+  .g6-actions > * { flex: 1 1 auto; }
+  .g6-page td[data-label="Acciones"] { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
+  .g6-page td[data-label="Acciones"] > button { flex: 1 1 100%; }
+}
+
+@media (min-width: 768px) {
+  .g6-grid--2, .g6-report-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1024px) {
+  .g6-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .g6-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .g6-report-summary { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
