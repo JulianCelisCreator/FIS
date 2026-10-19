@@ -56,7 +56,7 @@
         <p class="ps-text-caption">3 días/semana · mensual</p>
         <p><ps-currency-display value="180000" size="lg"></ps-currency-display> <span class="ps-text-body-sm">al mes</span></p>
         <div class="ps-text-body-sm"><ul>
-          <li>Pago hasta el día 10 de cada mes.</li>
+          <li>Pago del día 1 al 5 de cada mes; si queda saldo, pasa a «Vencido» desde el día 10.</li>
         </ul></div>
       </article>
       <article class="ps-card ps-stack">
@@ -64,7 +64,7 @@
         <p class="ps-text-caption">6 días/semana · mensual</p>
         <p><ps-currency-display value="300000" size="lg"></ps-currency-display> <span class="ps-text-body-sm">al mes</span></p>
         <div class="ps-text-body-sm"><ul>
-          <li>Pago hasta el día 10 de cada mes.</li>
+          <li>Pago del día 1 al 5 de cada mes; si queda saldo, pasa a «Vencido» desde el día 10.</li>
         </ul></div>
       </article>
       <article class="ps-card ps-stack">
@@ -73,9 +73,17 @@
         <p><ps-currency-display value="380000" size="lg"></ps-currency-display> <span class="ps-text-body-sm">al mes</span></p>
         <div class="ps-text-body-sm"><ul>
           <li>Incluye acceso al gimnasio.</li>
-          <li>Pago hasta el día 5 de cada mes.</li>
+          <li>Pago del día 1 al 5 de cada mes; si queda saldo, pasa a «Vencido» desde el día 10.</li>
         </ul></div>
       </article>
+    </div>
+
+    <div class="ps-alert ps-alert--info" role="note">
+      <ps-icon name="info"></ps-icon>
+      <div>
+        <p class="ps-alert__title">Ingreso a mitad de mes</p>
+        <p>Si ingresas el día 15, el primer cobro mensual se prorratea por los 15 días restantes (15/30 de la tarifa mensual). Desde el mes siguiente se cobra la tarifa completa, con fecha límite entre los días 1 y 5 y estado «Vencido» automático desde el día 10 si queda saldo.</p>
+      </div>
     </div>
 
     <section class="ps-card ps-stack" aria-labelledby="cta">

@@ -56,6 +56,7 @@
       <div class="ps-tabs__list">
         <button id="tab-cobro" class="ps-tabs__tab" role="tab" aria-selected="true" aria-controls="cobro" data-panel="cobro">Pago de un cobro mensual</button>
         <button id="tab-sesion" class="ps-tabs__tab" role="tab" aria-selected="false" aria-controls="sesion" data-panel="sesion">Pago por sesión</button>
+        <button id="tab-matricula" class="ps-tabs__tab" role="tab" aria-selected="false" aria-controls="matricula" data-panel="matricula">Matrícula y gastos administrativos</button>
       </div>
     </ps-tabs>
 
@@ -71,9 +72,9 @@
           <p id="c-cobro" class="ps-field__label">Cobro a pagar <span class="ps-field__req" aria-hidden="true">*</span><span class="ps-text-caption"> obligatorio</span></p>
           <div class="ps-radio-group" role="radiogroup" aria-labelledby="c-cobro">
             <label class="ps-check-row"><input class="ps-radio" type="radio" name="cobro" checked>
-              <span><span class="ps-text-label">Agosto 2026 · saldo $&nbsp;300.000</span><br><span class="ps-text-caption">Valor $&nbsp;300.000 · fecha límite 10/08/2026 · vencido</span></span></label>
+              <span><span class="ps-text-label">Agosto 2026 · saldo $&nbsp;300.000</span><br><span class="ps-text-caption">Valor $&nbsp;300.000 · fecha límite 05/08/2026 · vencido desde 10/08/2026</span></span></label>
             <label class="ps-check-row"><input class="ps-radio" type="radio" name="cobro">
-              <span><span class="ps-text-label">Septiembre 2026 · saldo $&nbsp;150.000</span><br><span class="ps-text-caption">Valor $&nbsp;300.000 · abonado $&nbsp;150.000 · fecha límite 10/09/2026 · vencido</span></span></label>
+              <span><span class="ps-text-label">Septiembre 2026 · saldo $&nbsp;150.000</span><br><span class="ps-text-caption">Valor $&nbsp;300.000 · abonado $&nbsp;150.000 · fecha límite 05/09/2026 · vencido desde 10/09/2026</span></span></label>
           </div>
           <p class="ps-text-caption">Solo aparecen los cobros con saldo pendiente.</p>
         </section>
@@ -153,6 +154,64 @@
       </div>
     </section>
 
+    <!-- ===== Matrícula y gastos administrativos obligatorios antes de activar el plan ===== -->
+    <section id="matricula" role="tabpanel" aria-labelledby="tab-matricula" class="ps-stack" hidden>
+      <div class="g4-cols g4-cols--2">
+        <section class="ps-card ps-stack" aria-labelledby="m-conceptos">
+          <h2 id="m-conceptos" class="ps-text-heading-h4">1. Patinador y conceptos</h2>
+          <ps-field label="Buscar patinador sin plan activo" required>
+            <input class="ps-input" type="search" value="Mateo Ramírez Torres">
+          </ps-field>
+          <div class="ps-player-card">
+            <ps-avatar name="Mateo Ramírez"></ps-avatar>
+            <div>
+              <p class="ps-player-card__name">Mateo Ramírez Torres</p>
+              <p class="ps-player-card__meta">Matrícula inicial · Plan por activar</p>
+            </div>
+          </div>
+          <ps-field label="Valor de matrícula (COP)" required help="Ingresa el valor aprobado por la academia.">
+            <input class="ps-input ps-input--numeric" id="valor-matricula" name="valor-matricula" type="number" min="1" step="1" required>
+          </ps-field>
+          <ps-field label="Gastos administrativos (COP)" required help="Se registra por separado de la matrícula.">
+            <input class="ps-input ps-input--numeric" id="valor-gastos-admin" name="valor-gastos-admin" type="number" min="1" step="1" required>
+          </ps-field>
+          <dl class="ps-dl">
+            <div><dt>Total matrícula + gastos administrativos</dt><dd id="total-matricula">$&nbsp;0</dd></div>
+          </dl>
+          <p id="error-matricula" class="ps-text-caption" role="alert" hidden>Ingresa un valor mayor que cero para la matrícula y otro para los gastos administrativos.</p>
+        </section>
+
+        <section class="ps-card ps-stack" aria-labelledby="m-datos">
+          <h2 id="m-datos" class="ps-text-heading-h4">2. Datos del pago</h2>
+          <div class="ps-transaction-fields">
+            <ps-field label="Monto total (COP)" required help="Se calcula con la suma de matrícula y gastos administrativos.">
+              <input class="ps-input ps-input--numeric" id="total-matricula-input" value="0" readonly>
+            </ps-field>
+            <ps-field label="Fecha de pago" required help="No puede ser posterior a hoy.">
+              <ps-date-input name="fecha-matricula" value="2026-10-15"></ps-date-input>
+            </ps-field>
+            <ps-field label="Medio de pago" required>
+              <select class="ps-select" name="medio-matricula"><option value="">Selecciona…</option><option>Efectivo</option><option selected>Transferencia</option><option>Consignación</option></select>
+            </ps-field>
+            <ps-field label="Referencia de la transacción" help="Opcional. N.º de transferencia o consignación.">
+              <input class="ps-input" name="referencia-matricula">
+            </ps-field>
+          </div>
+          <div class="ps-alert ps-alert--warning" role="status">
+            <ps-icon name="alert-triangle"></ps-icon>
+            <div>
+              <p class="ps-alert__title">Pago obligatorio para activar el plan</p>
+              <p>La matrícula y los gastos administrativos se deben registrar y pagar antes de activar el plan de entrenamiento. El primer cobro mensual, si el ingreso es a mitad de mes, se registra prorrateado por los días restantes.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+      <div class="g4-actions">
+        <a class="ps-button ps-button--secondary" href="../asignar-plan/asignar-plan.html">Volver a asignar plan</a>
+        <button id="btn-registra-matricula" class="ps-button ps-button--primary" type="button" data-open="dlg-matricula-registrada">Registrar matrícula y gastos</button>
+      </div>
+    </section>
+
     <aside class="ps-card ps-stack" aria-labelledby="notas">
       <h2 id="notas" class="ps-text-heading-h5">Notas del wireframe</h2>
       <p class="ps-text-caption">No forman parte de la interfaz.</p>
@@ -179,9 +238,62 @@
         </dl>
       </div>
     </ps-dialog>
+
+    <ps-dialog id="dlg-matricula-registrada" variant="confirm" heading="Matrícula y gastos registrados" cancel-label="Cerrar" confirm-label="Volver a asignar plan" data-href="../asignar-plan/asignar-plan.html">
+      <div class="ps-stack">
+        <div class="ps-alert ps-alert--success" role="status">
+          <ps-icon name="check-circle"></ps-icon>
+          <p>Se registró el pago de la matrícula y los gastos administrativos. Ya se puede completar la activación del plan.</p>
+        </div>
+        <dl class="ps-dl">
+          <div><dt>Matrícula</dt><dd id="comprobante-matricula">Pendiente de valor</dd></div>
+          <div><dt>Gastos administrativos</dt><dd id="comprobante-gastos-admin">Pendiente de valor</dd></div>
+          <div><dt>Total registrado</dt><dd id="comprobante-total-matricula">$&nbsp;0</dd></div>
+        </dl>
+      </div>
+    </ps-dialog>
   </div>
 </ps-app-shell>
 <script type="module" src="../../../design-system/ps.js"></script>
 <script type="module" src="../assets/grupo-04.js"></script>
+<script type="module">
+  const matricula = document.querySelector('#valor-matricula');
+  const gastos = document.querySelector('#valor-gastos-admin');
+  const totalLabel = document.querySelector('#total-matricula');
+  const totalInput = document.querySelector('#total-matricula-input');
+  const error = document.querySelector('#error-matricula');
+  const boton = document.querySelector('#btn-registra-matricula');
+  const formato = (valor) => '$\u00a0' + Math.round(valor).toLocaleString('es-CO');
+  const calcular = () => {
+    const valorMatricula = Number(matricula?.value || 0);
+    const valorGastos = Number(gastos?.value || 0);
+    const total = valorMatricula + valorGastos;
+    if (totalLabel) totalLabel.textContent = formato(total);
+    if (totalInput) totalInput.value = Math.round(total).toLocaleString('es-CO');
+    const comprobanteMatricula = document.querySelector('#comprobante-matricula');
+    const comprobanteGastos = document.querySelector('#comprobante-gastos-admin');
+    const comprobanteTotal = document.querySelector('#comprobante-total-matricula');
+    if (comprobanteMatricula) comprobanteMatricula.textContent = valorMatricula > 0 ? formato(valorMatricula) : 'Pendiente de valor';
+    if (comprobanteGastos) comprobanteGastos.textContent = valorGastos > 0 ? formato(valorGastos) : 'Pendiente de valor';
+    if (comprobanteTotal) comprobanteTotal.textContent = formato(total);
+  };
+  matricula?.addEventListener('input', calcular);
+  gastos?.addEventListener('input', calcular);
+  boton?.addEventListener('click', (event) => {
+    const valorMatricula = Number(matricula?.value || 0);
+    const valorGastos = Number(gastos?.value || 0);
+    if (!(valorMatricula > 0 && valorGastos > 0)) {
+      event.preventDefault();
+      event.stopPropagation();
+      error.hidden = false;
+      if (!(valorMatricula > 0)) matricula?.focus();
+      else gastos?.focus();
+      return;
+    }
+    error.hidden = true;
+    calcular();
+  });
+  calcular();
+</script>
 </body>
 </html>

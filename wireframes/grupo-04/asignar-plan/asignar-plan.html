@@ -89,19 +89,19 @@
         <section class="ps-card ps-stack" aria-labelledby="asig-plan">
           <h2 id="asig-plan" class="ps-text-heading-h4">Plan</h2>
           <div class="ps-radio-group" role="radiogroup" aria-labelledby="asig-plan">
-            <label class="ps-check-row"><input class="ps-radio" type="radio" name="plan">
+            <label class="ps-check-row"><input class="ps-radio" type="radio" name="plan" data-monthly-amount="0">
               <span><span class="ps-text-label">Clase suelta · $&nbsp;35.000 por sesión</span><br><span class="ps-text-caption">Día único. Se paga por sesión; no genera cobros mensuales.</span></span></label>
-            <label class="ps-check-row"><input class="ps-radio" type="radio" name="plan" checked>
-              <span><span class="ps-text-label">Formación 3 días · $&nbsp;180.000 al mes</span><br><span class="ps-text-caption">3 días/semana. Pago hasta el día 10.</span></span></label>
-            <label class="ps-check-row"><input class="ps-radio" type="radio" name="plan">
-              <span><span class="ps-text-label">Competencia 6 días · $&nbsp;300.000 al mes</span><br><span class="ps-text-caption">6 días/semana. Pago hasta el día 10.</span></span></label>
-            <label class="ps-check-row"><input class="ps-radio" type="radio" name="plan">
-              <span><span class="ps-text-label">Alto rendimiento · $&nbsp;380.000 al mes</span><br><span class="ps-text-caption">6 días/semana + gimnasio. Pago hasta el día 5.</span></span></label>
+            <label class="ps-check-row"><input class="ps-radio" type="radio" name="plan" data-monthly-amount="180000" checked>
+              <span><span class="ps-text-label">Formación 3 días · $&nbsp;180.000 al mes</span><br><span class="ps-text-caption">3 días/semana. Pago del día 1 al 5; mora desde el día 10.</span></span></label>
+            <label class="ps-check-row"><input class="ps-radio" type="radio" name="plan" data-monthly-amount="300000">
+              <span><span class="ps-text-label">Competencia 6 días · $&nbsp;300.000 al mes</span><br><span class="ps-text-caption">6 días/semana. Pago del día 1 al 5; mora desde el día 10.</span></span></label>
+            <label class="ps-check-row"><input class="ps-radio" type="radio" name="plan" data-monthly-amount="380000">
+              <span><span class="ps-text-label">Alto rendimiento · $&nbsp;380.000 al mes</span><br><span class="ps-text-caption">6 días/semana + gimnasio. Pago del día 1 al 5; mora desde el día 10.</span></span></label>
             <label class="ps-check-row"><input class="ps-radio" type="radio" name="plan" disabled>
               <span><span class="ps-text-label">Formación 3 días (2025)</span> <ps-status-badge entity="plan" status="inactivo"></ps-status-badge><br><span class="ps-text-caption">Un plan inactivo no se puede asignar.</span></span></label>
           </div>
           <ps-field label="Fecha de inicio" required help="DD/MM/AAAA">
-            <ps-date-input name="inicio" value="2026-10-01"></ps-date-input>
+            <ps-date-input id="asig-fecha-inicio" name="inicio" value="2026-10-15"></ps-date-input>
           </ps-field>
         </section>
       </div>
@@ -110,13 +110,15 @@
         <h2 id="asig-resumen" class="ps-text-heading-h4">Resumen</h2>
         <dl class="ps-dl">
           <div><dt>Patinador</dt><dd>Mateo Ramírez Torres</dd></div>
-          <div><dt>Plan</dt><dd>Formación 3 días · $&nbsp;180.000 al mes</dd></div>
-          <div><dt>Inicio</dt><dd>01/10/2026</dd></div>
-          <div><dt>Primer cobro (RF-M5-08)</dt><dd>Se genera al asignar: octubre 2026 · $&nbsp;180.000 · fecha límite 10/10/2026</dd></div>
+          <div><dt>Plan</dt><dd id="asig-plan-resumen">Formación 3 días · $&nbsp;180.000 al mes</dd></div>
+          <div><dt>Inicio</dt><dd id="asig-inicio-resumen">15/10/2026</dd></div>
+          <div><dt>Primer cobro mensual (prorrateado)</dt><dd id="asig-primer-cobro">Octubre 2026 · $&nbsp;90.000 (15/30 días). Se paga al ingresar, antes de activar el plan.</dd></div>
+          <div><dt>Mes siguiente</dt><dd id="asig-siguiente-cobro">Noviembre 2026 · $&nbsp;180.000 · pagar del 01/11 al 05/11; pasa a «Vencido» desde el 10/11 si queda saldo.</dd></div>
+          <div><dt>Matrícula y gastos administrativos</dt><dd>Ambos conceptos son obligatorios y deben registrarse y pagarse antes de activar el plan.</dd></div>
         </dl>
         <div class="g4-actions">
           <a class="ps-button ps-button--secondary" href="../planes/planes.html">Cancelar</a>
-          <button class="ps-button ps-button--primary" type="button" data-open="dlg-asignar">Asignar plan</button>
+          <button class="ps-button ps-button--primary" type="button" data-open="dlg-asignar">Continuar con matrícula y gastos</button>
         </div>
       </section>
     </section>
@@ -190,7 +192,7 @@
           <div><dt>Plan nuevo</dt><dd>Competencia 6 días · $&nbsp;300.000 al mes</dd></div>
           <div><dt>Rige desde</dt><dd>01/10/2026 (siguiente periodo de facturación)</dd></div>
           <div><dt>Cobro de septiembre</dt><dd>No cambia: $&nbsp;180.000 (Formación 3 días)</dd></div>
-          <div><dt>Próximo cobro</dt><dd>Octubre 2026 · $&nbsp;300.000 · fecha límite 10/10/2026</dd></div>
+          <div><dt>Próximo cobro</dt><dd>Octubre 2026 · $&nbsp;300.000 · fecha límite 05/10/2026; mora desde el día 10</dd></div>
         </dl>
         <div class="ps-alert ps-alert--warning" role="status">
           <ps-icon name="alert-triangle"></ps-icon>
@@ -216,8 +218,12 @@
       </ul></div>
     </aside>
 
-    <ps-dialog id="dlg-asignar" variant="confirm" heading="¿Asignar el plan Formación 3 días?" confirm-label="Asignar plan" data-href="../cartera/cartera.html">
-      <p>Mateo Ramírez Torres empieza el 01/10/2026. Se generará ahora el cobro de octubre por $&nbsp;180.000, con fecha límite 10/10/2026.</p>
+    <ps-dialog id="dlg-asignar" variant="confirm" heading="Antes de activar el plan" confirm-label="Registrar matrícula y gastos" data-href="../registrar-pago/registrar-pago.html#matricula">
+      <div class="ps-stack">
+        <p id="dlg-asig-prorrateo">Mateo Ramírez Torres inicia el 15/10/2026. El primer cobro mensual se prorratea: $&nbsp;90.000 por 15/30 días de octubre (ejemplo con tarifa de $&nbsp;180.000).</p>
+        <p>Antes de activar el plan, registra y paga obligatoriamente la matrícula y los gastos administrativos en el siguiente paso.</p>
+        <p class="ps-text-caption">Desde noviembre se cobra el valor mensual completo, con fecha límite del 1 al 5 y cambio automático a «Vencido» desde el día 10 si queda saldo.</p>
+      </div>
     </ps-dialog>
     <ps-dialog id="dlg-cambiar" variant="confirm" heading="¿Cambiar a Competencia 6 días?" confirm-label="Confirmar cambio">
       <p>Sofía Ramírez Torres pasará a $&nbsp;300.000 al mes desde el 01/10/2026. El cobro de septiembre no cambia.</p>
@@ -226,5 +232,52 @@
 </ps-app-shell>
 <script type="module" src="../../../design-system/ps.js"></script>
 <script type="module" src="../assets/grupo-04.js"></script>
+<script type="module">
+  const fechaInicio = document.querySelector('#asig-fecha-inicio');
+  const resumenInicio = document.querySelector('#asig-inicio-resumen');
+  const resumenPlan = document.querySelector('#asig-plan-resumen');
+  const dialogProrrateo = document.querySelector('#dlg-asig-prorrateo');
+  const primerCobro = document.querySelector('#asig-primer-cobro');
+  const siguienteCobro = document.querySelector('#asig-siguiente-cobro');
+  const money = (value) => '$\u00a0' + Math.round(value).toLocaleString('es-CO');
+  const fechaCorta = (date) => new Intl.DateTimeFormat('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' }).format(date);
+  const mesAnio = (date) => new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(date);
+  const leerFecha = () => {
+    const value = fechaInicio?.value || fechaInicio?.getAttribute('value') || '2026-10-15';
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+    return match ? new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]))) : new Date(Date.UTC(2026, 9, 15));
+  };
+  const actualizarProrrateo = () => {
+    if (!fechaInicio || !resumenInicio || !primerCobro || !siguienteCobro) return;
+    const inicio = leerFecha();
+    resumenInicio.textContent = fechaCorta(inicio);
+    const selected = document.querySelector('input[name="plan"]:checked');
+    const mensualidad = Number(selected?.dataset.monthlyAmount || 0);
+    const nombrePlan = selected?.closest('label')?.querySelector('.ps-text-label')?.textContent.trim() || 'Plan seleccionado';
+    if (resumenPlan) resumenPlan.textContent = nombrePlan;
+    if (!mensualidad) {
+      primerCobro.textContent = 'Clase suelta: no genera cobro mensual; se paga por sesión.';
+      siguienteCobro.textContent = 'No aplica para plan de día único.';
+      if (dialogProrrateo) dialogProrrateo.textContent = `Mateo Ramírez Torres inicia el ${fechaCorta(inicio)} con Clase suelta. No se genera cobro mensual; se paga por sesión.`;
+      return;
+    }
+    const dia = inicio.getUTCDate();
+    // Convención comercial de 30 días: ingresar el día 15 genera 15/30 de la mensualidad.
+    const diasCobro = dia === 1 ? 30 : Math.max(1, 30 - dia);
+    const prorrateo = Math.round((mensualidad * diasCobro) / 30);
+    primerCobro.textContent = `${mesAnio(inicio)} · ${money(prorrateo)} (${diasCobro}/30 días). Se paga al ingresar, antes de activar el plan.`;
+    if (dialogProrrateo) dialogProrrateo.textContent = `Mateo Ramírez Torres inicia el ${fechaCorta(inicio)} con ${nombrePlan}. El primer cobro mensual se prorratea: ${money(prorrateo)} por ${diasCobro}/30 días de ${mesAnio(inicio)}.`;
+    const siguiente = new Date(Date.UTC(inicio.getUTCFullYear(), inicio.getUTCMonth() + 1, 1));
+    const diaCinco = new Date(Date.UTC(siguiente.getUTCFullYear(), siguiente.getUTCMonth(), 5));
+    const diaDiez = new Date(Date.UTC(siguiente.getUTCFullYear(), siguiente.getUTCMonth(), 10));
+    const mesNumero = String(siguiente.getUTCMonth() + 1).padStart(2, '0');
+    const anio = siguiente.getUTCFullYear();
+    siguienteCobro.textContent = `${mesAnio(siguiente)} · ${money(mensualidad)} · pagar del 01/${mesNumero}/${anio} al 05/${mesNumero}/${anio}; pasa a «Vencido» desde el ${fechaCorta(diaDiez)} si queda saldo.`;
+  };
+  fechaInicio?.addEventListener('change', actualizarProrrateo);
+  fechaInicio?.addEventListener('input', actualizarProrrateo);
+  document.querySelectorAll('input[name="plan"]').forEach((input) => input.addEventListener('change', actualizarProrrateo));
+  actualizarProrrateo();
+</script>
 </body>
 </html>

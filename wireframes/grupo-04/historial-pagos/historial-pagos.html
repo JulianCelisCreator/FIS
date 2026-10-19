@@ -55,6 +55,14 @@
       <ps-export-menu formats="pdf,xlsx"></ps-export-menu>
     </header>
 
+    <div class="ps-alert ps-alert--info" role="note">
+      <ps-icon name="info"></ps-icon>
+      <div>
+        <p class="ps-alert__title">Fechas límite de los cobros</p>
+        <p>Los cobros mensuales se pagan hasta el día 5. Si el cobro conserva saldo pendiente, la cartera cambia automáticamente a «Vencido» desde el día 10. La tabla muestra la fecha límite del cobro asociado a cada pago.</p>
+      </div>
+    </div>
+
     <ps-filter-bar>
       <ps-field label="Patinador"><input class="ps-input" type="search" name="patinador" placeholder="Nombre o documento"></ps-field>
       <ps-field label="Acudiente"><input class="ps-input" type="search" name="acudiente" value="Luis Herrera"></ps-field>
@@ -72,11 +80,11 @@
     <ps-data-table>
       <table class="ps-table">
         <thead>
-          <tr><th>Comprobante</th><th data-sort="fecha">Fecha</th><th>Patinador</th><th>Cobro aplicado</th><th class="ps-num">Monto</th><th>Medio</th><th>Registró</th><th>Estado</th><th>Acciones</th></tr>
+          <tr><th>Comprobante</th><th data-sort="fecha">Fecha</th><th>Patinador</th><th>Cobro aplicado</th><th>Fecha límite</th><th class="ps-num">Monto</th><th>Medio</th><th>Registró</th><th>Estado</th><th>Acciones</th></tr>
         </thead>
         <tbody>
           <tr>
-            <td data-label="Comprobante">N.º 000482</td><td data-label="Fecha">30/09/2026</td><td data-label="Patinador">Samuel Herrera Díaz</td><td data-label="Cobro aplicado">Agosto 2026</td>
+            <td data-label="Comprobante">N.º 000482</td><td data-label="Fecha">30/09/2026</td><td data-label="Patinador">Samuel Herrera Díaz</td><td data-label="Cobro aplicado">Agosto 2026</td><td data-label="Fecha límite">05/08/2026</td>
             <td data-label="Monto" class="ps-num">$&nbsp;200.000</td><td data-label="Medio">Transferencia</td><td data-label="Registró">Jorge Méndez</td>
             <td data-label="Estado"><ps-status-badge entity="pago" status="registrado"></ps-status-badge></td>
             <td data-label="Acciones"><span class="ps-cluster">
@@ -85,7 +93,7 @@
             </span></td>
           </tr>
           <tr>
-            <td data-label="Comprobante">N.º 000455</td><td data-label="Fecha">12/09/2026</td><td data-label="Patinador">Samuel Herrera Díaz</td><td data-label="Cobro aplicado">Septiembre 2026</td>
+            <td data-label="Comprobante">N.º 000455</td><td data-label="Fecha">12/09/2026</td><td data-label="Patinador">Samuel Herrera Díaz</td><td data-label="Cobro aplicado">Septiembre 2026</td><td data-label="Fecha límite">05/09/2026</td>
             <td data-label="Monto" class="ps-num">$&nbsp;150.000</td><td data-label="Medio">Efectivo</td><td data-label="Registró">Andrea López</td>
             <td data-label="Estado"><ps-status-badge entity="pago" status="registrado"></ps-status-badge></td>
             <td data-label="Acciones"><span class="ps-cluster">
@@ -94,7 +102,7 @@
             </span></td>
           </tr>
           <tr>
-            <td data-label="Comprobante">N.º 000454</td><td data-label="Fecha">12/09/2026</td><td data-label="Patinador">Samuel Herrera Díaz</td><td data-label="Cobro aplicado">Septiembre 2026</td>
+            <td data-label="Comprobante">N.º 000454</td><td data-label="Fecha">12/09/2026</td><td data-label="Patinador">Samuel Herrera Díaz</td><td data-label="Cobro aplicado">Septiembre 2026</td><td data-label="Fecha límite">05/09/2026</td>
             <td data-label="Monto" class="ps-num">$&nbsp;15.000</td><td data-label="Medio">Efectivo</td><td data-label="Registró">Andrea López</td>
             <td data-label="Estado"><span class="ps-stack">
               <ps-status-badge entity="pago" status="anulado"></ps-status-badge>
@@ -106,7 +114,7 @@
             </span></td>
           </tr>
           <tr>
-            <td data-label="Comprobante">N.º 000398</td><td data-label="Fecha">08/07/2026</td><td data-label="Patinador">Samuel Herrera Díaz</td><td data-label="Cobro aplicado">Julio 2026</td>
+            <td data-label="Comprobante">N.º 000398</td><td data-label="Fecha">08/07/2026</td><td data-label="Patinador">Samuel Herrera Díaz</td><td data-label="Cobro aplicado">Julio 2026</td><td data-label="Fecha límite">05/07/2026</td>
             <td data-label="Monto" class="ps-num">$&nbsp;300.000</td><td data-label="Medio">Consignación</td><td data-label="Registró">Jorge Méndez</td>
             <td data-label="Estado"><ps-status-badge entity="pago" status="registrado"></ps-status-badge></td>
             <td data-label="Acciones"><span class="ps-cluster">
@@ -116,7 +124,7 @@
           </tr>
         </tbody>
         <tfoot>
-          <tr><td data-label="Total">Total sin anulados · 3 pagos</td><td data-label=""></td><td data-label=""></td><td data-label=""></td><td data-label="Monto" class="ps-num">$&nbsp;650.000</td><td data-label=""></td><td data-label=""></td><td data-label=""></td><td data-label=""></td></tr>
+          <tr><td data-label="Total">Total sin anulados · 3 pagos</td><td data-label=""></td><td data-label=""></td><td data-label=""></td><td data-label=""></td><td data-label="Monto" class="ps-num">$&nbsp;650.000</td><td data-label=""></td><td data-label=""></td><td data-label=""></td><td data-label=""></td></tr>
         </tfoot>
       </table>
     </ps-data-table>
