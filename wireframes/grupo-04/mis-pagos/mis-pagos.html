@@ -49,6 +49,14 @@
     </header>
 
     <!-- ===== Sofía ===== -->
+    <div class="ps-alert ps-alert--info" role="note">
+      <ps-icon name="info"></ps-icon>
+      <div>
+        <p class="ps-alert__title">Fecha límite de pago y alerta de mora</p>
+        <p>Los cobros mensuales se pagan hasta el día 5. Si queda saldo pendiente, el sistema marca la cartera como «Vencido» automáticamente desde el día 10.</p>
+      </div>
+    </div>
+
     <section data-player="sofia" class="ps-stack" aria-label="Sofía Ramírez Torres">
       <div class="ps-kpi-grid">
         <div class="ps-kpi ps-stack"><p class="ps-kpi__label">Estado de cartera</p><ps-status-badge entity="cartera" status="vencido"></ps-status-badge><p class="ps-text-caption">Un cobro pasó su fecha límite</p></div>
@@ -62,7 +70,7 @@
           <table class="ps-table">
             <thead><tr><th>Periodo</th><th class="ps-num">Valor</th><th class="ps-num">Pagado</th><th class="ps-num">Saldo</th><th>Fecha límite</th><th>Estado</th></tr></thead>
             <tbody>
-              <tr><td data-label="Periodo">Septiembre 2026</td><td data-label="Valor" class="ps-num">$&nbsp;180.000</td><td data-label="Pagado" class="ps-num">$&nbsp;100.000</td><td data-label="Saldo" class="ps-num">$&nbsp;80.000</td><td data-label="Fecha límite">10/09/2026</td>
+              <tr><td data-label="Periodo">Septiembre 2026</td><td data-label="Valor" class="ps-num">$&nbsp;180.000</td><td data-label="Pagado" class="ps-num">$&nbsp;100.000</td><td data-label="Saldo" class="ps-num">$&nbsp;80.000</td><td data-label="Fecha límite">05/09/2026</td>
                 <td data-label="Estado"><ps-status-badge entity="cobro" status="pendiente"></ps-status-badge> <span class="ps-text-caption">Vencido</span></td></tr>
             </tbody>
           </table>
@@ -106,7 +114,7 @@
     <section data-player="mateo" class="ps-stack" aria-label="Mateo Ramírez Torres" hidden>
       <div class="ps-kpi-grid">
         <div class="ps-kpi ps-stack"><p class="ps-kpi__label">Estado de cartera</p><ps-status-badge entity="cartera" status="pendiente"></ps-status-badge><p class="ps-text-caption">Tienes un cobro por pagar</p></div>
-        <div class="ps-kpi"><p class="ps-kpi__label">Saldo pendiente</p><p class="ps-kpi__value">$&nbsp;180.000</p><p class="ps-text-caption">Paga antes del 10/10/2026</p></div>
+        <div class="ps-kpi"><p class="ps-kpi__label">Saldo pendiente</p><p class="ps-kpi__value">$&nbsp;180.000</p><p class="ps-text-caption">Fecha límite: 05/10/2026</p></div>
         <div class="ps-kpi"><p class="ps-kpi__label">Plan</p><p class="ps-text-heading-h5">Formación 3 días</p><p class="ps-text-caption">$&nbsp;180.000 al mes · desde 01/10/2026</p></div>
       </div>
 
@@ -116,7 +124,7 @@
           <table class="ps-table">
             <thead><tr><th>Periodo</th><th class="ps-num">Valor</th><th class="ps-num">Saldo</th><th>Fecha límite</th><th>Estado</th></tr></thead>
             <tbody>
-              <tr><td data-label="Periodo">Octubre 2026</td><td data-label="Valor" class="ps-num">$&nbsp;180.000</td><td data-label="Saldo" class="ps-num">$&nbsp;180.000</td><td data-label="Fecha límite">10/10/2026</td>
+              <tr><td data-label="Periodo">Octubre 2026</td><td data-label="Valor" class="ps-num">$&nbsp;180.000</td><td data-label="Saldo" class="ps-num">$&nbsp;180.000</td><td data-label="Fecha límite">05/10/2026</td>
                 <td data-label="Estado"><ps-status-badge entity="cobro" status="pendiente"></ps-status-badge></td></tr>
             </tbody>
           </table>

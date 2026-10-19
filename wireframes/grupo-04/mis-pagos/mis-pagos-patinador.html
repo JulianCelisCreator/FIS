@@ -46,7 +46,7 @@
 
     <div class="ps-kpi-grid">
       <div class="ps-kpi ps-stack"><p class="ps-kpi__label">Estado de cartera</p><ps-status-badge entity="cartera" status="al-dia"></ps-status-badge><p class="ps-text-caption">No tienes saldos pendientes</p></div>
-      <div class="ps-kpi"><p class="ps-kpi__label">Saldo pendiente</p><p class="ps-kpi__value">$&nbsp;0</p><p class="ps-text-caption">Próximo cobro: 01/10/2026</p></div>
+      <div class="ps-kpi"><p class="ps-kpi__label">Saldo pendiente</p><p class="ps-kpi__value">$&nbsp;0</p><p class="ps-text-caption">Próximo cobro: 01/10/2026 · vence 05/10/2026</p></div>
       <div class="ps-kpi"><p class="ps-kpi__label">Mi plan</p><p class="ps-text-heading-h5">Alto rendimiento</p><p class="ps-text-caption">$&nbsp;380.000 al mes · pagas hasta el día 5</p></div>
     </div>
 
@@ -55,9 +55,17 @@
       <div class="ps-empty-state">
         <ps-icon name="check-circle" size="lg"></ps-icon>
         <p class="ps-empty-state__title">No tienes cobros pendientes</p>
-        <p class="ps-empty-state__desc">El cobro de octubre se genera el 01/10/2026.</p>
+        <p class="ps-empty-state__desc">El cobro de octubre se genera el 01/10/2026 y vence el 05/10/2026. Si queda saldo, se marca «Vencido» desde el 10/10/2026.</p>
       </div>
     </section>
+
+    <div class="ps-alert ps-alert--info" role="note">
+      <ps-icon name="info"></ps-icon>
+      <div>
+        <p class="ps-alert__title">Recuerda la fecha límite</p>
+        <p>Paga los cobros mensuales hasta el día 5. La mora se refleja automáticamente como «Vencido» a partir del día 10 si continúa existiendo saldo.</p>
+      </div>
+    </div>
 
     <section class="ps-card ps-stack" aria-labelledby="pagos">
       <div class="g4-head">

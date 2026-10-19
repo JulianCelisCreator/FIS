@@ -64,6 +64,14 @@
       <div class="ps-kpi"><p class="ps-kpi__label">Última revisión de vencidos</p><p class="ps-kpi__value">30/09/2026</p><p class="ps-text-caption">Corre una vez al día</p></div>
     </div>
 
+    <div class="ps-alert ps-alert--info" role="note">
+      <ps-icon name="info"></ps-icon>
+      <div>
+        <p class="ps-alert__title">Fechas límite y mora</p>
+        <p>Los cobros mensuales se pagan del día 1 al 5 de cada mes. Si queda saldo pendiente, el estado cambia automáticamente a «Vencido» a partir del día 10.</p>
+      </div>
+    </div>
+
     <ps-filter-bar>
       <ps-field label="Estado de cartera">
         <select class="ps-select" name="estado"><option>Todos</option><option>Al día</option><option>Pendiente</option><option selected>Vencido</option></select>
@@ -87,13 +95,13 @@
           <tr>
             <td data-label="Patinador">Samuel Herrera Díaz</td><td data-label="Acudiente">Luis Herrera</td><td data-label="Plan">Competencia 6 días</td>
             <td data-label="Estado"><ps-status-badge entity="cartera" status="vencido"></ps-status-badge></td>
-            <td data-label="Saldo pendiente" class="ps-num">$&nbsp;450.000</td><td data-label="Cobros vencidos" class="ps-num">2</td><td data-label="Vencimiento más antiguo">10/08/2026</td>
+            <td data-label="Saldo pendiente" class="ps-num">$&nbsp;450.000</td><td data-label="Cobros vencidos" class="ps-num">2</td><td data-label="Vencimiento más antiguo">05/08/2026</td>
             <td data-label="Acciones"><button class="ps-button ps-button--ghost ps-button--sm" type="button" data-open="dlg-cobros">Ver cobros</button></td>
           </tr>
           <tr>
             <td data-label="Patinador">Sofía Ramírez Torres</td><td data-label="Acudiente">Carolina Torres</td><td data-label="Plan">Formación 3 días</td>
             <td data-label="Estado"><ps-status-badge entity="cartera" status="vencido"></ps-status-badge></td>
-            <td data-label="Saldo pendiente" class="ps-num">$&nbsp;80.000</td><td data-label="Cobros vencidos" class="ps-num">1</td><td data-label="Vencimiento más antiguo">10/09/2026</td>
+            <td data-label="Saldo pendiente" class="ps-num">$&nbsp;80.000</td><td data-label="Cobros vencidos" class="ps-num">1</td><td data-label="Vencimiento más antiguo">05/09/2026</td>
             <td data-label="Acciones"><button class="ps-button ps-button--ghost ps-button--sm" type="button" data-open="dlg-cobros">Ver cobros</button></td>
           </tr>
           <tr>
@@ -105,7 +113,7 @@
           <tr>
             <td data-label="Patinador">Tomás Vargas Peña</td><td data-label="Acudiente">Paola Peña</td><td data-label="Plan">Formación 3 días</td>
             <td data-label="Estado"><ps-status-badge entity="cartera" status="vencido"></ps-status-badge></td>
-            <td data-label="Saldo pendiente" class="ps-num">$&nbsp;180.000</td><td data-label="Cobros vencidos" class="ps-num">1</td><td data-label="Vencimiento más antiguo">10/09/2026</td>
+            <td data-label="Saldo pendiente" class="ps-num">$&nbsp;180.000</td><td data-label="Cobros vencidos" class="ps-num">1</td><td data-label="Vencimiento más antiguo">05/09/2026</td>
             <td data-label="Acciones"><button class="ps-button ps-button--ghost ps-button--sm" type="button" data-open="dlg-cobros">Ver cobros</button></td>
           </tr>
         </tbody>
@@ -120,7 +128,7 @@
       <h2 id="notas" class="ps-text-heading-h5">Notas del wireframe</h2>
       <p class="ps-text-caption">No forman parte de la interfaz.</p>
       <div class="ps-text-body-sm"><ul>
-        <li>El sistema calcula el estado; nadie lo edita. Al día: sin cobros con saldo. Pendiente: tiene saldo, pero la fecha límite no ha pasado. Vencido: al menos un cobro con saldo ya pasó su fecha límite, y prevalece sobre Pendiente (RF-M5-12).</li>
+        <li>El sistema calcula el estado; nadie lo edita. Al día: sin cobros con saldo. Pendiente: tiene saldo antes del día 10 del mes. Vencido: tiene saldo pendiente a partir del día 10; el cambio se realiza automáticamente y prevalece sobre Pendiente (RF-M5-12).</li>
         <li>El Contador ve esta misma pantalla, de solo lectura.</li>
       </ul></div>
     </aside>
@@ -133,13 +141,13 @@
           <table class="ps-table">
             <thead><tr><th>Periodo</th><th class="ps-num">Valor</th><th class="ps-num">Pagado</th><th class="ps-num">Saldo</th><th>Fecha límite</th><th>Estado</th><th>Acciones</th></tr></thead>
             <tbody>
-              <tr><td data-label="Periodo">Septiembre 2026</td><td data-label="Valor" class="ps-num">$&nbsp;300.000</td><td data-label="Pagado" class="ps-num">$&nbsp;150.000</td><td data-label="Saldo" class="ps-num">$&nbsp;150.000</td><td data-label="Fecha límite">10/09/2026</td>
+              <tr><td data-label="Periodo">Septiembre 2026</td><td data-label="Valor" class="ps-num">$&nbsp;300.000</td><td data-label="Pagado" class="ps-num">$&nbsp;150.000</td><td data-label="Saldo" class="ps-num">$&nbsp;150.000</td><td data-label="Fecha límite">05/09/2026</td>
                 <td data-label="Estado"><ps-status-badge entity="cobro" status="pendiente"></ps-status-badge> <span class="ps-text-caption">Vencido</span></td>
                 <td data-label="Acciones"><a class="ps-button ps-button--ghost ps-button--sm" href="../registrar-pago/registrar-pago.html">Registrar pago</a></td></tr>
-              <tr><td data-label="Periodo">Agosto 2026</td><td data-label="Valor" class="ps-num">$&nbsp;300.000</td><td data-label="Pagado" class="ps-num">$&nbsp;0</td><td data-label="Saldo" class="ps-num">$&nbsp;300.000</td><td data-label="Fecha límite">10/08/2026</td>
+              <tr><td data-label="Periodo">Agosto 2026</td><td data-label="Valor" class="ps-num">$&nbsp;300.000</td><td data-label="Pagado" class="ps-num">$&nbsp;0</td><td data-label="Saldo" class="ps-num">$&nbsp;300.000</td><td data-label="Fecha límite">05/08/2026</td>
                 <td data-label="Estado"><ps-status-badge entity="cobro" status="pendiente"></ps-status-badge> <span class="ps-text-caption">Vencido</span></td>
                 <td data-label="Acciones"><a class="ps-button ps-button--ghost ps-button--sm" href="../registrar-pago/registrar-pago.html">Registrar pago</a></td></tr>
-              <tr><td data-label="Periodo">Julio 2026</td><td data-label="Valor" class="ps-num">$&nbsp;300.000</td><td data-label="Pagado" class="ps-num">$&nbsp;300.000</td><td data-label="Saldo" class="ps-num">$&nbsp;0</td><td data-label="Fecha límite">10/07/2026</td>
+              <tr><td data-label="Periodo">Julio 2026</td><td data-label="Valor" class="ps-num">$&nbsp;300.000</td><td data-label="Pagado" class="ps-num">$&nbsp;300.000</td><td data-label="Saldo" class="ps-num">$&nbsp;0</td><td data-label="Fecha límite">05/07/2026</td>
                 <td data-label="Estado"><ps-status-badge entity="cobro" status="pagado"></ps-status-badge></td>
                 <td data-label="Acciones">—</td></tr>
             </tbody>
