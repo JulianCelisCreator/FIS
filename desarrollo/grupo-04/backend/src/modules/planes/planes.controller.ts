@@ -11,7 +11,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { DevAuthGuard } from './auth/dev-auth.guard';
 import { Request } from 'express';
 import { Roles } from './auth/roles.decorator';
 import { RolesGuard } from './auth/roles.guard';
@@ -26,7 +26,7 @@ interface AuthenticatedRequest extends Request {
 }
 
 @Controller('planes')
-@UseGuards(AuthGuard('jwt'), RolesGuard)
+@UseGuards(DevAuthGuard, RolesGuard)
 @Roles('Administrador')
 export class PlanesController {
   constructor(private readonly planesService: PlanesService) {}

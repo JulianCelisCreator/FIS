@@ -1,0 +1,24 @@
+﻿services:
+  postgres:
+    image: postgres:16
+    container_name: grupo04-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: grupo04_planes
+      POSTGRES_USER: grupo04_app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en el archivo .env}
+      TZ: America/Bogota
+    ports:
+      - "5434:5432"
+    volumes:
+      - grupo04_postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U grupo04_app -d grupo04_planes"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  grupo04_postgres_data:
+    name: grupo04_postgres_data
