@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel administrativo · Grupo 06</title>
+<link rel="stylesheet" href="../../../design-system/ps.css">
+<link rel="stylesheet" href="../assets/grupo-06.css">
+</head>
+<body>
+<ps-app-shell>
+  <span data-slot="brand" class="ps-text-label">Escuela de patinaje</span>
+  <span data-slot="user" class="ps-cluster g6-user"><span class="ps-badge ps-badge--neutral g6-hide-mobile">Administrador</span><span class="ps-text-label g6-hide-mobile">Andrea López</span><ps-avatar name="Andrea López" size="sm"></ps-avatar></span>
+  <nav data-slot="nav" aria-label="Navegación principal">
+    <div class="g6-nav-group"><p class="ps-text-caption">Administración</p><ul class="ps-stack">
+      <li><span class="ps-text-label" aria-current="page">Panel</span></li><li><a class="ps-link" href="../personal/personal.html">Personal y permisos</a></li><li><a class="ps-link" href="../reportes/reportes.html">Reportes</a></li>
+    </ul></div>
+    <div class="g6-nav-group"><p class="ps-text-caption">Uniformes</p><ul class="ps-stack">
+      <li><a class="ps-link" href="../inventario/inventario.html">Inventario</a></li><li><a class="ps-link" href="../ventas/ventas.html">Ventas</a></li><li><a class="ps-link" href="../prestamos/prestamos.html">Préstamos</a></li>
+    </ul></div>
+    <div class="g6-nav-group"><p class="ps-text-caption">Wireframes</p><ul class="ps-stack"><li><a class="ps-link" href="../index.html">Índice M6</a></li></ul></div>
+  </nav>
+  <div data-slot="content" class="g6-page">
+    <header class="g6-head">
+      <div class="ps-stack"><nav class="ps-breadcrumb" aria-label="Ruta"><span>Administración</span><span aria-hidden="true">/</span><span aria-current="page">Panel</span></nav><h1>Panel administrativo</h1><p class="ps-text-body-sm">Resumen de operación · actualizado al 04/10/2026</p><p class="ps-text-caption">RF-M6-01</p></div>
+      <ps-field label="Vista de rol" for="role-view"><select id="role-view" class="ps-select" data-role-view><option value="admin">Administrador</option><option value="contador">Contador</option></select></ps-field>
+    </header>
+
+    <section data-role-content="admin" aria-labelledby="admin-kpis">
+      <h2 id="admin-kpis" class="ps-text-heading-h4">Operación general</h2>
+      <div class="ps-kpi-grid">
+        <div class="ps-kpi"><p class="ps-kpi__label">Patinadores activos</p><p class="ps-kpi__value">86</p><ps-status-badge entity="personal" status="activo"></ps-status-badge></div>
+        <div class="ps-kpi"><p class="ps-kpi__label">Grupos activos</p><p class="ps-kpi__value">8</p><p class="ps-text-caption">3 sedes</p></div>
+        <div class="ps-kpi"><p class="ps-kpi__label">Profesores activos</p><p class="ps-kpi__value">6</p><p class="ps-text-caption">2 con grupos por cubrir</p></div>
+        <div class="ps-kpi"><p class="ps-kpi__label">Cartera pendiente</p><p class="ps-kpi__value">$ 4.860.000</p><ps-status-badge entity="cartera" status="pendiente"></ps-status-badge></div>
+        <div class="ps-kpi"><p class="ps-kpi__label">Ingresos del período</p><p class="ps-kpi__value">$ 18.420.000</p><p class="ps-text-caption">Septiembre 2026</p></div>
+        <div class="ps-kpi"><p class="ps-kpi__label">Uniformes disponibles</p><p class="ps-kpi__value">42</p><p class="ps-text-caption">5 referencias en mínimo</p></div>
+      </div>
+      <div class="g6-grid g6-grid--2">
+        <section class="ps-card ps-stack"><h2 class="ps-text-heading-h4">Atención requerida</h2><div class="ps-alert ps-alert--warning" role="status"><ps-icon name="alert-triangle"></ps-icon><p>5 referencias de uniforme están en la cantidad mínima o por debajo.</p></div><div class="ps-alert ps-alert--info" role="status"><ps-icon name="info"></ps-icon><p>7 préstamos están vencidos y requieren seguimiento.</p></div></section>
+        <section class="ps-card ps-stack"><h2 class="ps-text-heading-h4">Accesos directos</h2><p><a class="ps-link" href="../reportes/reportes.html">Consultar reportes</a></p><p><a class="ps-link" href="../inventario/inventario.html">Revisar inventario</a></p><p><a class="ps-link" href="../prestamos/prestamos.html">Ver préstamos vencidos</a></p></section>
+      </div>
+    </section>
+
+    <section data-role-content="contador" aria-labelledby="accountant-kpis" hidden>
+      <h2 id="accountant-kpis" class="ps-text-heading-h4">Resumen financiero</h2>
+      <div class="ps-kpi-grid">
+        <div class="ps-kpi"><p class="ps-kpi__label">Cartera pendiente</p><p class="ps-kpi__value">$ 4.860.000</p><ps-status-badge entity="cartera" status="pendiente"></ps-status-badge></div>
+        <div class="ps-kpi"><p class="ps-kpi__label">Ingresos del período</p><p class="ps-kpi__value">$ 18.420.000</p><p class="ps-text-caption">Septiembre 2026</p></div>
+        <div class="ps-kpi"><p class="ps-kpi__label">Ventas de uniformes</p><p class="ps-kpi__value">$ 960.000</p><p class="ps-text-caption">Septiembre 2026</p></div>
+      </div>
+      <div class="ps-alert ps-alert--info" role="status"><ps-icon name="info"></ps-icon><p>Vista de solo lectura financiera. No se muestran personal, grupos, patinadores ni existencias.</p></div>
+      <p><a class="ps-button ps-button--secondary" href="../reportes/reportes.html">Ir a reportes financieros</a></p>
+    </section>
+
+    <aside class="ps-card ps-stack" aria-labelledby="notes"><h2 id="notes" class="ps-text-heading-h5">Notas del wireframe</h2><p class="ps-text-caption">Anotaciones de revisión, no son controles de la aplicación.</p><p class="ps-text-body-sm">El selector de rol es demostrativo. Los permisos reales se deben validar en cada endpoint y no depender de ocultar secciones en pantalla.</p></aside>
+  </div>
+</ps-app-shell>
+<script type="module" src="../../../design-system/ps.js"></script>
+<script type="module" src="../assets/grupo-06.js"></script>
+</body>
+</html>
