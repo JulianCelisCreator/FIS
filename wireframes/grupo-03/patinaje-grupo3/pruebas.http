@@ -1,0 +1,55 @@
+@base = http://localhost:3000/api
+@clave = REEMPLAZAR_CON_ADMIN_API_KEY
+@estudianteId = REEMPLAZAR_UUID_ESTUDIANTE
+@acudienteId = REEMPLAZAR_UUID_ACUDIENTE
+@nivelId = REEMPLAZAR_UUID_NIVEL
+
+### 1. Registrar estudiante; copiar el id de la respuesta arriba
+POST {{base}}/estudiantes
+x-admin-key: {{clave}}
+Content-Type: application/json
+
+{"documento":"TI-10001","nombres":"Ana","apellidos":"Ejemplo","fechaNacimiento":"2012-03-15","telefono":"3001234567","direccion":"Calle de ejemplo 10"}
+
+### 2. Actualizar parcialmente
+PATCH {{base}}/estudiantes/{{estudianteId}}
+x-admin-key: {{clave}}
+Content-Type: application/json
+
+{"direccion":"Carrera de ejemplo 20"}
+
+### 3. Registrar acudiente; copiar id
+POST {{base}}/acudientes
+x-admin-key: {{clave}}
+Content-Type: application/json
+
+{"documento":"CC-20001","nombres":"Luis","apellidos":"Ejemplo","telefono":"3007654321","correo":"luis@example.com"}
+
+### 4. Asociar perfiles
+POST {{base}}/estudiantes/{{estudianteId}}/acudientes
+x-admin-key: {{clave}}
+Content-Type: application/json
+
+{"acudienteId":"{{acudienteId}}"}
+
+### 5. Ver perfil actualizado con acudientes
+GET {{base}}/estudiantes/{{estudianteId}}
+x-admin-key: {{clave}}
+
+### 6. Crear nivel; copiar id
+POST {{base}}/niveles
+x-admin-key: {{clave}}
+Content-Type: application/json
+
+{"nombre":"Iniciación","descripcion":"Equilibrio, postura y frenado básico","orden":1}
+
+### 7. Actualizar nivel
+PATCH {{base}}/niveles/{{nivelId}}
+x-admin-key: {{clave}}
+Content-Type: application/json
+
+{"descripcion":"Equilibrio, postura, frenado y desplazamiento"}
+
+### 8. Consultar niveles
+GET {{base}}/niveles
+x-admin-key: {{clave}}

@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER:-patinaje}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Configura DB_PASSWORD en .env}
+      POSTGRES_DB: ${DB_NAME:-patinaje}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - datos-patinaje:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+  api:
+    build: .
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-patinaje}
+      DB_PASSWORD: ${DB_PASSWORD:?Configura DB_PASSWORD en .env}
+      DB_NAME: ${DB_NAME:-patinaje}
+      ADMIN_API_KEY: ${ADMIN_API_KEY:?Configura ADMIN_API_KEY en .env}
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  datos-patinaje:
