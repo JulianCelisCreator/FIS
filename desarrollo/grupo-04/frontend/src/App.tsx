@@ -1,5 +1,3 @@
-
-
 import { useCallback, useEffect, useState } from 'react'
 import './App.css'
 
@@ -138,9 +136,7 @@ function App() {
       ...actual,
       type: tipo,
       billingPeriod: tipo === 'SINGLE_DAY' ? 'SESSION' : 'MONTHLY',
-      paymentDueDay: tipo === 'SINGLE_DAY'
-        ? ''
-        : actual.paymentDueDay || '5',
+      paymentDueDay: tipo === 'SINGLE_DAY' ? '' : actual.paymentDueDay || '5',
     }))
   }
 
@@ -165,20 +161,23 @@ function App() {
         datos.paymentDueDay = Number(formulario.paymentDueDay)
       }
 
-      await api(
-        editando ? `/planes/${editando.id}` : '/planes',
-        {
-          method: editando ? 'PATCH' : 'POST',
-          body: JSON.stringify(datos),
-        },
-      )
+      await api(editando ? `/planes/${editando.id}` : '/planes', {
+        method: editando ? 'PATCH' : 'POST',
+        body: JSON.stringify(datos),
+      })
 
       setMostrarFormulario(false)
       setEditando(null)
-      setMensaje(editando ? 'Plan actualizado correctamente.' : 'Plan creado correctamente.')
+      setMensaje(
+        editando
+          ? 'Plan actualizado correctamente.'
+          : 'Plan creado correctamente.',
+      )
       await cargarPlanes()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'No fue posible guardar el plan.')
+      setError(
+        e instanceof Error ? e.message : 'No fue posible guardar el plan.',
+      )
     } finally {
       setGuardando(false)
     }
@@ -211,13 +210,18 @@ function App() {
       setPlanTarifa(null)
       await cargarPlanes()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'No fue posible registrar la tarifa.')
+      setError(
+        e instanceof Error ? e.message : 'No fue posible registrar la tarifa.',
+      )
     } finally {
       setGuardando(false)
     }
   }
 
-  const consultarDetalle = async (plan: Plan, tipo: 'tarifas' | 'auditoria') => {
+  const consultarDetalle = async (
+    plan: Plan,
+    tipo: 'tarifas' | 'auditoria',
+  ) => {
     limpiarMensajes()
     setDetalle(null)
     setDetalleTitulo(
@@ -228,12 +232,14 @@ function App() {
     setCargandoDetalle(true)
 
     try {
-      const resultado = await api(
-        `/planes/${plan.id}/${tipo}`,
-      )
+      const resultado = await api(`/planes/${plan.id}/${tipo}`)
       setDetalle(resultado)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'No fue posible consultar el historial.')
+      setError(
+        e instanceof Error
+          ? e.message
+          : 'No fue posible consultar el historial.',
+      )
       setDetalleTitulo('')
     } finally {
       setCargandoDetalle(false)
@@ -241,7 +247,11 @@ function App() {
   }
 
   const desactivarPlan = async (plan: Plan) => {
-    if (!window.confirm(`¿Deseas desactivar el plan "${plan.name}"? El historial se conservará.`)) {
+    if (
+      !window.confirm(
+        `¿Deseas desactivar el plan "${plan.name}"? El historial se conservará.`,
+      )
+    ) {
       return
     }
 
@@ -252,37 +262,49 @@ function App() {
       setMensaje('Plan desactivado correctamente.')
       await cargarPlanes()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'No fue posible desactivar el plan.')
+      setError(
+        e instanceof Error ? e.message : 'No fue posible desactivar el plan.',
+      )
     }
   }
 
   return (
-    <main>
-      <h1>Planes disponibles</h1>
-      <p>Consulta y administra los planes y sus tarifas.</p>
+    <main className="admin-container">
+      <header className="admin-header">
+        <div>
+          <h1 style={{ margin: 0 }}>Planes disponibles</h1>
+          <p style={{ margin: '4px 0 0 0', opacity: 0.8 }}>
+            Consulta y administra los planes y sus tarifas.
+          </p>
+        </div>
+      </header>
 
-      <p>
-        <button type="button" onClick={abrirCrear}>
-          Crear plan
-        </button>{' '}
-        <button type="button" onClick={() => void cargarPlanes()}>
+      <div className="admin-toolbar">
+        <button type="button" className="btn btn-primary" onClick={abrirCrear}>
+          + Crear plan
+        </button>
+        <button
+          type="button"
+          className="btn"
+          onClick={() => void cargarPlanes()}
+        >
           Actualizar lista
         </button>
-      </p>
+      </div>
 
       {mensaje && <p role="status">{mensaje}</p>}
       {error && <p role="alert">{error}</p>}
       {cargando && <p>Cargando planes...</p>}
 
+      {/* DIÁLOGO MODAL 1: Crear o Editar Plan */}
       {mostrarFormulario && (
-        <section>
-          <h2>{editando ? 'Editar plan' : 'Crear plan'}</h2>
+        <div className="modal-overlay">
+          <div className="modal-dialog">
+            <h2>{editando ? 'Editar plan' : 'Crear plan'}</h2>
 
-          <form onSubmit={guardarPlan}>
-            <p>
-              <label>
-                Nombre del plan
-                <br />
+            <form onSubmit={guardarPlan}>
+              <div className="form-group">
+                <label>Nombre del plan</label>
                 <input
                   required
                   maxLength={100}
@@ -291,15 +313,12 @@ function App() {
                     setFormulario({ ...formulario, name: e.target.value })
                   }
                 />
-              </label>
-            </p>
+              </div>
 
-            {!editando && (
-              <>
-                <p>
-                  <label>
-                    Tipo de plan
-                    <br />
+              {!editando && (
+                <>
+                  <div className="form-group">
+                    <label>Tipo de plan</label>
                     <select
                       value={formulario.type}
                       onChange={(e) => cambiarTipo(e.target.value)}
@@ -310,27 +329,21 @@ function App() {
                         </option>
                       ))}
                     </select>
-                  </label>
-                </p>
+                  </div>
 
-                <p>
-                  <label>
-                    Periodicidad
-                    <br />
+                  <div className="form-group">
+                    <label>Periodicidad</label>
                     <select value={formulario.billingPeriod} disabled>
                       <option value="SESSION">Por sesión</option>
                       <option value="MONTHLY">Mensual</option>
                     </select>
-                  </label>
-                </p>
-              </>
-            )}
+                  </div>
+                </>
+              )}
 
-            {formulario.billingPeriod === 'MONTHLY' && (
-              <p>
-                <label>
-                  Día de pago (del 1 al 5)
-                  <br />
+              {formulario.billingPeriod === 'MONTHLY' && (
+                <div className="form-group">
+                  <label>Día de pago (del 1 al 5)</label>
                   <input
                     required
                     type="number"
@@ -344,33 +357,40 @@ function App() {
                       })
                     }
                   />
-                </label>
-              </p>
-            )}
+                </div>
+              )}
 
-            <button type="submit" disabled={guardando}>
-              {guardando ? 'Guardando...' : 'Guardar'}
-            </button>{' '}
-            <button
-              type="button"
-              onClick={() => setMostrarFormulario(false)}
-              disabled={guardando}
-            >
-              Cancelar
-            </button>
-          </form>
-        </section>
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => setMostrarFormulario(false)}
+                  disabled={guardando}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={guardando}
+                >
+                  {guardando ? 'Guardando...' : 'Guardar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
+      {/* DIÁLOGO MODAL 2: Registrar Tarifa */}
       {planTarifa && (
-        <section>
-          <h2>Registrar tarifa: {planTarifa.name}</h2>
+        <div className="modal-overlay">
+          <div className="modal-dialog">
+            <h2>Registrar tarifa: {planTarifa.name}</h2>
 
-          <form onSubmit={guardarTarifa}>
-            <p>
-              <label>
-                Valor en pesos colombianos
-                <br />
+            <form onSubmit={guardarTarifa}>
+              <div className="form-group">
+                <label>Valor en pesos colombianos (COP)</label>
                 <input
                   required
                   type="number"
@@ -379,13 +399,10 @@ function App() {
                   value={importe}
                   onChange={(e) => setImporte(e.target.value)}
                 />
-              </label>
-            </p>
+              </div>
 
-            <p>
-              <label>
-                Fecha de vigencia
-                <br />
+              <div className="form-group">
+                <label>Fecha de vigencia</label>
                 <input
                   required
                   type="date"
@@ -395,110 +412,175 @@ function App() {
                   value={vigencia}
                   onChange={(e) => setVigencia(e.target.value)}
                 />
-              </label>
-            </p>
+              </div>
 
-            <button type="submit" disabled={guardando}>
-              {guardando ? 'Guardando...' : 'Registrar tarifa'}
-            </button>{' '}
-            <button type="button" onClick={() => setPlanTarifa(null)}>
-              Cancelar
-            </button>
-          </form>
-        </section>
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => setPlanTarifa(null)}
+                  disabled={guardando}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={guardando}
+                >
+                  {guardando ? 'Guardando...' : 'Registrar tarifa'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
       {!cargando && !error && planes.length === 0 && (
         <p>No hay planes registrados.</p>
       )}
 
-      {!cargando && planes.map((plan) => (
-        <article key={plan.id}>
-          <h2>{plan.name}</h2>
+      {/* Lista / Tarjetas de Planes */}
+      <div className="planes-grid">
+        {!cargando &&
+          planes.map((plan) => (
+            <article key={plan.id} className="plan-card">
+              <div>
+                <div className="plan-card-header">
+                  <h2>{plan.name}</h2>
+                  <span
+                    className={`badge ${
+                      plan.status === 'ACTIVE'
+                        ? 'badge-active'
+                        : 'badge-inactive'
+                    }`}
+                  >
+                    {plan.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
+                  </span>
+                </div>
 
-          <p>
-            Tipo:{' '}
-            {TIPOS.find((tipo) => tipo.value === plan.type)?.label ?? plan.type}
-          </p>
+                <p style={{ margin: '4px 0' }}>
+                  <strong>Tipo:</strong>{' '}
+                  {TIPOS.find((tipo) => tipo.value === plan.type)?.label ??
+                    plan.type}
+                </p>
 
-          <p>
-            Periodicidad:{' '}
-            {plan.billingPeriod === 'MONTHLY' ? 'Mensual' : 'Por sesión'}
-          </p>
+                <p style={{ margin: '4px 0' }}>
+                  <strong>Periodicidad:</strong>{' '}
+                  {plan.billingPeriod === 'MONTHLY' ? 'Mensual' : 'Por sesión'}
+                </p>
 
-          {plan.paymentDueDay !== null && (
-            <p>Día de pago: {plan.paymentDueDay}</p>
-          )}
+                {plan.paymentDueDay !== null && (
+                  <p style={{ margin: '4px 0' }}>
+                    <strong>Día de pago:</strong> Día {plan.paymentDueDay}
+                  </p>
+                )}
 
-          <p>
-            Tarifa:{' '}
-            {plan.currentTariff
-              ? formatoPrecio(plan.currentTariff.amountCop)
-              : 'Sin tarifa'}
-          </p>
+                <div className="plan-price-box">
+                  <span style={{ fontSize: '12px', opacity: 0.7 }}>
+                    Tarifa Vigente:
+                  </span>
+                  <div className="plan-price-amount">
+                    {plan.currentTariff
+                      ? formatoPrecio(plan.currentTariff.amountCop)
+                      : 'Sin tarifa'}
+                  </div>
+                  {plan.currentTariff && (
+                    <span style={{ fontSize: '11px', opacity: 0.7 }}>
+                      Desde: {plan.currentTariff.effectiveFrom}
+                    </span>
+                  )}
+                </div>
+              </div>
 
-          {plan.currentTariff && (
-            <p>Vigente desde: {plan.currentTariff.effectiveFrom}</p>
-          )}
+              <div className="plan-card-actions">
+                <div className="plan-card-actions-row">
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={() => abrirEditar(plan)}
+                    disabled={plan.status !== 'ACTIVE'}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={() => abrirTarifa(plan)}
+                    disabled={plan.status !== 'ACTIVE'}
+                  >
+                    + Tarifa
+                  </button>
+                </div>
 
-          <p>
-            Estado:{' '}
-            {plan.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
-          </p>
+                <div className="plan-card-actions-row">
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={() => void consultarDetalle(plan, 'tarifas')}
+                  >
+                    Historial
+                  </button>
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={() => void consultarDetalle(plan, 'auditoria')}
+                  >
+                    Auditoría
+                  </button>
+                </div>
 
-          <p>
-            <button type="button" onClick={() => abrirEditar(plan)} disabled={plan.status !== 'ACTIVE'}>
-              Editar
-            </button>{' '}
-            <button type="button" onClick={() => abrirTarifa(plan)} disabled={plan.status !== 'ACTIVE'}>
-              Registrar tarifa
-            </button>
-          </p>
+                {plan.status === 'ACTIVE' && (
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={() => void desactivarPlan(plan)}
+                    style={{ color: '#ef4444', borderColor: '#ef4444' }}
+                  >
+                    Desactivar plan
+                  </button>
+                )}
+              </div>
+            </article>
+          ))}
+      </div>
 
-          <p>
-            <button
-              type="button"
-              onClick={() => void consultarDetalle(plan, 'tarifas')}
-            >
-              Historial de tarifas
-            </button>{' '}
-            <button
-              type="button"
-              onClick={() => void consultarDetalle(plan, 'auditoria')}
-            >
-              Ver auditoría
-            </button>
-          </p>
-
-          {plan.status === 'ACTIVE' && (
-            <p>
-              <button type="button" onClick={() => void desactivarPlan(plan)}>
-                Desactivar plan
-              </button>
-            </p>
-          )}
-        </article>
-      ))}
-
+      {/* DIÁLOGO MODAL 3 y 4: Historial de Tarifas / Auditoría */}
       {(detalleTitulo || cargandoDetalle) && (
-        <section>
-          <h2>{detalleTitulo}</h2>
-          {cargandoDetalle && <p>Cargando historial...</p>}
-          {detalle !== null && (
-            <pre style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
-              {JSON.stringify(detalle, null, 2)}
-            </pre>
-          )}
-          <button
-            type="button"
-            onClick={() => {
-              setDetalle(null)
-              setDetalleTitulo('')
-            }}
-          >
-            Cerrar historial
-          </button>
-        </section>
+        <div className="modal-overlay">
+          <div className="modal-dialog">
+            <h2>{detalleTitulo}</h2>
+            {cargandoDetalle && <p>Cargando información...</p>}
+            {detalle !== null && (
+              <pre
+                style={{
+                  maxHeight: '300px',
+                  overflowY: 'auto',
+                  whiteSpace: 'pre-wrap',
+                  overflowWrap: 'anywhere',
+                  background: 'var(--code-bg)',
+                  padding: '12px',
+                  borderRadius: '6px',
+                  border: '1px solid var(--border)',
+                }}
+              >
+                {JSON.stringify(detalle, null, 2)}
+              </pre>
+            )}
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="btn"
+                onClick={() => {
+                  setDetalle(null)
+                  setDetalleTitulo('')
+                }}
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   )
