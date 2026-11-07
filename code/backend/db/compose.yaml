@@ -1,0 +1,27 @@
+# Base de datos PostgreSQL de desarrollo.
+# Uso (desde code/backend):  docker compose -f db/compose.yaml up -d
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: patinaje-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-patinaje}
+      POSTGRES_USER: ${DB_USER:-patinaje}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-patinaje_dev}
+      TZ: America/Bogota
+      PGTZ: America/Bogota
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      # Postgres ejecuta este script solo la primera vez, cuando el volumen está vacío.
+      - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - patinaje-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  patinaje-db-data:
