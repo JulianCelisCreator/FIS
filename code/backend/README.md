@@ -1,132 +1,121 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API de la plataforma de gestión de la escuela de patinaje, desarrollada con NestJS y TypeScript. Su arquitectura objetivo es **modular por dominio**: cada módulo agrupa las capacidades y reglas de negocio que le corresponden y expone únicamente lo que otros módulos necesitan.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+> **Estado actual:** el proyecto contiene la base inicial de NestJS (`AppModule`, `AppController`, `AppService` y `main.ts`). Los módulos, carpetas y ejemplos de esta guía son la estructura acordada para el desarrollo futuro; no se deben interpretar como funcionalidad ya implementada.
 
-## Description
+## Puesta en marcha
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
+Requisitos: Node.js 22.12 o superior y pnpm 10 o superior. Desde `code/backend`:
 
 ```bash
-$ pnpm install
+pnpm install
+pnpm start:dev
 ```
 
-## Compile and run the project
+El servidor usa la variable `PORT` o, si no está definida, el puerto `3000`. Otros comandos disponibles:
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+pnpm start       # Iniciar sin modo observación
+pnpm build       # Compilar
+pnpm start:prod  # Ejecutar la compilación
+pnpm lint        # Analizar el código
+pnpm test        # Pruebas unitarias
+pnpm test:watch  # Pruebas en modo observación
+pnpm test:cov    # Cobertura
+pnpm test:e2e    # Pruebas de extremo a extremo
 ```
 
-## Run tests
+Ejecuta `pnpm build` antes de `pnpm start:prod`.
 
-```bash
-# unit tests
-$ pnpm run test
+## Organización por módulos
 
-# e2e tests
-$ pnpm run test:e2e
+La carpeta `src/modules/` contendrá un directorio por módulo funcional. Usa el mismo identificador y nombre en ambos frentes para facilitar la trazabilidad con los requisitos:
 
-# test coverage
-$ pnpm run test:cov
+| Dominio | Carpeta |
+| --- | --- |
+| M1: Usuarios y Acceso | `m1-usuarios-acceso` |
+| M2: Gestión deportiva de patinadores | `m2-gestion-deportiva` |
+| M3: Grupos, horarios y programación | `m3-grupos-horarios` |
+| M4: Competencias y Resultados | `m4-competencias-resultados` |
+| M5: Planes, Tarifas y Pagos | `m5-planes-tarifas-pagos` |
+| M6: Administración, Reportes, Finanzas e Inventario | `m6-administracion-reportes-finanzas-inventario` |
+
+El identificador `m1` a `m6` identifica el dominio, no una historia de usuario ni un rol. Las capacidades relacionadas se organizan dentro de ese dominio; no se crea un módulo de primer nivel por cada pantalla o HU. Consulta [el contexto del proyecto](../../docs/CONTEXT.md) y [los requisitos](../../docs/REQUIREMENTS.md) para delimitar responsabilidades y dependencias.
+
+### Estructura objetivo
+
+Ejemplo ilustrativo para M1; las carpetas se agregan cuando sean necesarias:
+
+```text
+src/
+├── main.ts                          # Arranque de NestJS
+├── app.module.ts                    # Composición de módulos de la aplicación
+├── modules/
+│   └── m1-usuarios-acceso/
+│       ├── controllers/
+│       │   └── usuarios.controller.ts
+│       ├── dto/
+│       │   ├── crear-usuario.dto.ts
+│       │   └── actualizar-usuario.dto.ts
+│       ├── entities/
+│       │   └── usuario.entity.ts
+│       ├── enums/
+│       │   └── rol-usuario.enum.ts
+│       ├── services/
+│       │   ├── usuarios.service.ts
+│       │   └── usuarios.service.spec.ts
+│       ├── validators/
+│       │   └── documento-unico.validator.ts
+│       └── m1-usuarios-acceso.module.ts
+└── common/                          # Solo elementos realmente transversales
+test/
+└── ...                              # Pruebas e2e
 ```
 
-## Deployment
+Los nombres del ejemplo ilustran la convención, no definen campos, endpoints, reglas ni funcionalidades ya disponibles. `common/` también es una ubicación propuesta: no debe convertirse en un depósito de código de un solo dominio.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### Responsabilidades
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+| Elemento | Responsabilidad |
+| --- | --- |
+| `controllers/` | Recibir solicitudes HTTP, declarar rutas, delegar en servicios y devolver respuestas. No concentrar reglas de negocio ni acceso a datos. |
+| `dto/` | Definir los contratos de entrada y salida de los casos de uso. Separar, por ejemplo, creación, actualización y respuesta cuando sus datos difieran. Un DTO no sustituye la validación en ejecución. |
+| `entities/` | Representar conceptos y datos del dominio. No exponer automáticamente una entidad persistida como respuesta pública ni asumir un ORM que aún no está configurado. |
+| `enums/` | Definir conjuntos cerrados de valores propios del módulo, con nombres expresivos. Evitar duplicar catálogos compartidos entre dominios. |
+| `services/` | Implementar casos de uso, orquestar reglas de negocio y colaborar con los componentes de acceso a datos o integraciones necesarios. No depender de detalles de presentación HTTP. |
+| `validators/` | Reunir validaciones específicas y reutilizables del dominio. La validación de datos externos debe ejecutarse realmente en la frontera de entrada; definir un tipo o DTO por sí solo no valida una solicitud. |
+| `<nombre-modulo>.module.ts` | Declarar el módulo NestJS con `@Module`: registrar controladores y proveedores, importar dependencias y exportar solo los proveedores que otros módulos deban utilizar. |
 
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
-```
+Si una capacidad necesita repositorios, políticas u otras carpetas, agrégalas dentro del módulo con una responsabilidad clara. No se requiere crear archivos vacíos para completar el árbol. Si se introduce una biblioteca de persistencia o validación, debe configurarse y documentarse al implementarla; actualmente el proyecto no incluye una solución de ORM ni de validación de DTO.
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Flujo y dependencias
 
-## Observability
+1. Una solicitud llega al controlador del dominio; se comprueba y transforma la entrada en la frontera correspondiente.
+2. El controlador delega el caso de uso al servicio, que aplica las reglas y accede a los colaboradores necesarios.
+3. El resultado se adapta al contrato de respuesta; los errores se comunican con una respuesta apropiada, sin ocultarlos.
+4. `AppModule` importa cada módulo de dominio que deba formar parte de la aplicación.
 
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
+Un módulo que necesita a otro importa su módulo NestJS y utiliza los proveedores que este exporta, en lugar de acceder directamente a sus detalles internos. Evita las dependencias circulares; cuando dos dominios se necesiten mutuamente, acuerda una interfaz o una reorganización de responsabilidades en vez de acoplar sus implementaciones. El código transversal solo se extrae a `common/` cuando realmente se comparte y no pertenece a un dominio específico.
 
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
+## Nomenclatura
 
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
+| Elemento | Convención | Ejemplo |
+| --- | --- | --- |
+| Carpetas de dominio | `m<numero>-<dominio>` en `kebab-case`, minúsculas y sin tildes | `m1-usuarios-acceso/` |
+| Archivos TypeScript | `kebab-case` y sufijo según responsabilidad | `usuarios.controller.ts` |
+| Módulo NestJS | Nombre de carpeta seguido de `.module.ts` | `m1-usuarios-acceso.module.ts` |
+| Clases | `PascalCase` y sufijo descriptivo | `UsuariosController`, `UsuariosService`, `M1UsuariosAccesoModule` |
+| DTO, entidad, enum y validador | Nombre de concepto o acción más su tipo | `CrearUsuarioDto`, `Usuario`, `RolUsuario`, `DocumentoUnicoValidator` |
+| Variables, funciones y métodos | `camelCase`, descriptivo | `buscarUsuario`, `usuarioActivo` |
+| Constantes | `UPPER_SNAKE_CASE` para valores constantes compartidos | `MAX_INTENTOS` |
+| Pruebas unitarias | Archivo probado con `.spec.ts` | `usuarios.service.spec.ts` |
+| Pruebas e2e | En `test/`, con `.e2e-spec.ts` | `usuarios.e2e-spec.ts` |
 
-To add it to this project, run this and approve the code it prints at [observe.nestjs.com/link](https://observe.nestjs.com/link) - signing up for free if you have no account:
+Usa nombres de dominio en español de forma consistente y conserva los términos técnicos de NestJS (`controller`, `service`, `module`, etc.). Los identificadores y nombres de archivo no llevan tildes ni `ñ`; los textos visibles y la documentación pueden emplearlas. En los imports relativos del backend conserva la extensión `.js`, como hace el código existente, por su configuración de módulos ES.
 
-```bash
-$ npx @nestjs/observe link
-```
+## Desarrollo y pruebas
 
-It installs `@nestjs/observe`, wires it into `AppModule` and `main.ts`, and writes the app key and secret into `.env`, which every `nest start` script (`start`, `start:dev`, `start:debug`) then loads. In production, set `OBSERVE_APP_KEY` and `OBSERVE_APP_SECRET` in the environment instead.
+Para una nueva funcionalidad: identifica el dominio y la HU, crea solo las piezas necesarias dentro de su módulo, registra controladores y proveedores en el archivo de módulo y conecta el módulo con `AppModule` cuando corresponda. Documenta el contrato HTTP y las decisiones relevantes junto con su implementación.
 
-Or do it by hand:
-
-```bash
-$ pnpm install @nestjs/observe
-```
-
-Then follow the [setup guide](https://docs.nestjs.com/observability/sdk) - it takes a single import and an app key.
-
-The free plan needs no payment details and covers 300,000 events a month. You can also browse the [live demo](https://www.observe-demo.nestjs.com/dashboard) first - the whole dashboard over a busy service's data, with nothing to install.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observe](https://observe.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Prueba los servicios y validadores con casos exitosos y de error; verifica los controladores y contratos HTTP con pruebas e2e cuando corresponda. Antes de integrar cambios ejecuta `pnpm lint`, `pnpm build`, `pnpm test` y, si aplica, `pnpm test:e2e`. Consulta también la [guía del frontend](../frontend/README.md) y el [README general](../../README.MD).
