@@ -1,137 +1,305 @@
 # Repositorio FIS
 
-Repositorio compartido de los grupos de la materia **FIS**. En esta primera etapa se suben los **wireframes**: cada **grupo** prototipa su propio diseño de las páginas del proyecto, para luego compararlos y elegir o combinar las mejores ideas.
+Repositorio compartido de los grupos de **Fundamentos de Ingeniería de Software** para la plataforma de gestión de una escuela de patinaje de velocidad. Reúne los requisitos, el design system, los wireframes y el código de la aplicación.
+
+| Rama | Propósito |
+| ---- | --------- |
+| `main` | Versión estable. Solo recibe merges desde `develop` o `hotfix/*`. |
+| `develop` | Rama de integración. Recibe las historias de usuario mediante Pull Request. |
+
+> Si `develop` todavía no existe en el remoto, créala una sola vez desde `main`:
+>
+> ```bash
+> git checkout main
+> git pull origin main
+> git checkout -b develop
+> git push -u origin develop
+> ```
 
 ---
 
-## Estructura del repositorio
+## Contenido del repositorio
 
 ```text
-repo_fis/
-├── README.MD
-├── wireframes/
-│   ├── grupo-01/
-│   │   ├── README.md          # descripción del diseño y decisiones tomadas
-│   │   ├── inicio/
-│   │   │   ├── inicio.html    # prototipo (si se hace en código)
-│   │   │   └── inicio.png     # captura o exportación (Figma, Balsamiq, etc.)
-│   │   ├── login/
-│   │   └── assets/            # imágenes, íconos y estilos compartidos
-│   ├── grupo-02/
-│   └── ...
-└── entregables/               # versión final elegida y documentos para el docente
+.
+├── .agents/skills/              # Skills e instrucciones para agentes de IA
+├── .github/
+│   ├── pull_request_template.md # Plantilla por defecto para PR mixtas
+│   ├── workflows/               # Pipelines de CI (frontend.yml, backend.yml)
+│   └── PULL_REQUEST_TEMPLATE/   # Plantillas de PR para frontend y backend
+├── code/
+│   ├── backend/                 # API NestJS + TypeScript (pnpm)
+│   └── frontend/                # React + TypeScript + Vite (pnpm)
+├── design-system/               # Tokens, componentes y pruebas del design system
+├── docs/                        # Contexto, requisitos, specs y changelog
+├── wireframes/                  # Prototipos por grupo
+└── README.MD
 ```
 
-- Cada grupo trabaja **solo dentro de su carpeta** `wireframes/grupo-XX/` (número con dos dígitos: `grupo-01`, `grupo-02`, …). Así ningún grupo pisa el trabajo de otro.
-- Dentro de su carpeta, **una subcarpeta por página** (`inicio/`, `login/`, `perfil/`, …).
-- Usar **los mismos nombres de página** que los demás grupos, para poder comparar los diseños página por página (ver la lista de páginas más abajo).
-- Cada grupo incluye un `README.md` en su carpeta que explique su propuesta.
+- **`code/backend/`**: API construida con NestJS. Se administra con pnpm.
+- **`code/frontend/`**: aplicación React con Vite y TypeScript. Se administra con pnpm.
+- **`design-system/`**: tokens y componentes compartidos. La guía de uso está en `docs/EXPLANATION.md`.
+- **`docs/`**: `CONTEXT.md` (contexto y reglas de negocio), `REQUIREMENTS.md` (trazabilidad de requisitos), `specs/` (especificaciones) y `CHANGELOG.md`.
+- **`wireframes/`**: una carpeta por grupo (`grupo-01`, `grupo-03`, …).
+- **`.agents/`**: skills para que los agentes de IA sigan las convenciones del proyecto.
 
 ---
 
-## Páginas a prototipar
+## Requisitos previos
 
-Lista acordada entre los grupos. Todos usan estos nombres de carpeta:
+- Git
+- Node.js 22.12 o superior
+- pnpm 10 o superior
 
-| Página | Carpeta | Descripción |
-| ------ | ------- | ----------- |
-| Inicio | `inicio/` | _por definir_ |
-| Inicio de sesión | `login/` | _por definir_ |
-| _…_ | _…_ | _…_ |
+## Puesta en marcha
 
-> Si se necesita una página nueva, se agrega primero a esta tabla (con un PR) y luego cada grupo la prototipa.
-
----
-
-## Cómo empezar
+### Backend
 
 ```bash
-# 1. Clonar el repositorio
-git clone <url-del-repositorio>
-cd repo_fis
+cd code/backend
+pnpm install
+pnpm start:dev
+```
 
-# 2. Traer siempre lo último antes de trabajar
-git checkout main
-git pull origin main
+Comandos útiles:
 
-# 3. Crear una rama para tu trabajo
-git checkout -b wireframe/grupo-XX-<pagina>
+```bash
+pnpm lint
+pnpm build
+pnpm test
+pnpm test:e2e
+```
+
+### Frontend
+
+```bash
+cd code/frontend
+pnpm install
+pnpm dev
+```
+
+Comandos útiles:
+
+```bash
+pnpm lint
+pnpm build
+pnpm preview
 ```
 
 ---
 
-## Buenas prácticas
+## Flujo de desarrollo
 
-### 1. Ramas
+El trabajo se organiza por **historias de usuario (HU)**. Cada HU se desarrolla en una rama propia y se integra a `develop` mediante una Pull Request revisada por el equipo de Product Owners.
 
-- **No trabajar directamente sobre `main`.** `main` solo tiene contenido revisado.
-- Una rama por tarea, con nombre descriptivo en minúsculas y con guiones:
-
-| Tipo | Formato | Ejemplo |
-| ---- | ------- | ------- |
-| Wireframe nuevo o cambios | `wireframe/grupo-XX-<pagina>` | `wireframe/grupo-01-login` |
-| Corrección | `fix/<descripcion>` | `fix/enlaces-rotos-inicio` |
-| Documentación general | `docs/<descripcion>` | `docs/actualizar-readme` |
-
-### 2. Commits
-
-- Commits **pequeños y frecuentes**, cada uno con un cambio coherente.
-- Mensaje en español, en imperativo y claro:
-
-```text
-Agregar wireframe de la página de inicio
-Ajustar distribución del formulario de login
-Exportar capturas de la página de perfil
+```mermaid
+flowchart LR
+    A[develop actualizado] --> B[Crear rama hu/...]
+    B --> C[Desarrollar y hacer commits]
+    C --> D[Push y abrir PR a develop]
+    D --> E[CI: lint + build]
+    E --> F{ProductOwner aprueba}
+    F -->|Cambios solicitados| C
+    F -->|Aprobada y CI en verde| G[Merge a develop]
+    G --> H[Release: PR develop -> main]
+    H --> I[main]
 ```
 
-- Evitar mensajes como `cambios`, `asdf`, `final`, `final2`.
+1. Actualiza `develop`:
 
-### 3. Pull Requests
+   ```bash
+   git checkout develop
+   git pull origin develop
+   ```
 
-1. Sube tu rama: `git push origin wireframe/grupo-XX-<pagina>`.
-2. Abre un **Pull Request** hacia `main`.
-3. En la descripción indica qué páginas agregaste y **adjunta una captura** del diseño, para que se pueda revisar sin descargar nada.
-4. Al menos **un integrante de otro grupo debe revisar y aprobar** antes de hacer el merge.
-5. Solo modifica archivos de **la carpeta de tu grupo**. Si quieres sugerir un cambio en el diseño de otro grupo, déjalo como comentario en su PR.
-6. Después del merge, borra la rama.
+2. Crea una rama para la HU:
 
-### 4. Nombres de archivos
+   ```bash
+   git checkout -b hu/HU-M1-01-registro-usuario
+   ```
 
-- Minúsculas, sin tildes, sin `ñ` y sin espacios; usar guiones: `inicio.html`, `login-movil.png`.
-- **No versionar con el nombre** (`inicio_final_v3_ahora_si.png`). Para eso está Git.
+3. Desarrolla el cambio y haz commits pequeños siguiendo la [nomenclatura de commits](#commits).
+4. Sube la rama y abre una Pull Request hacia `develop` usando la plantilla de frontend o de backend.
+5. Espera a que el pipeline de CI termine en verde.
+6. Solicita revisión a un integrante del equipo de Product Owners.
+7. Corrige los comentarios, vuelve a subir los cambios y espera la aprobación.
+8. Haz merge a `develop` y borra la rama.
+9. Cuando `develop` esté estable, abre una PR de `develop` hacia `main` para publicar una versión.
 
-### 5. Sobre los wireframes
+> Los cambios urgentes sobre producción se hacen en una rama `hotfix/*` creada desde `main`, se integran a `main` mediante PR y luego se llevan de vuelta a `develop`.
 
-- **Primero la estructura, después la estética.** Un wireframe muestra la distribución, el contenido y la navegación; los colores y las tipografías finales vienen después.
-- Incluir la versión de **escritorio y de móvil** cuando aplique (`inicio.png`, `inicio-movil.png`).
-- Si se hace en **HTML/CSS**, el prototipo debe abrirse directamente en el navegador, sin instalar nada. Usar rutas relativas (`../assets/logo.png`), nunca rutas de tu computador (`C:\Users\...`).
-- Usar texto de relleno realista (nombres, precios, fechas de ejemplo) en lugar de "texto texto texto", para que se entienda el contenido.
-- Indicar en el `README.md` de la carpeta del grupo:
-  - Herramienta usada.
-  - Enlace al archivo original (si aplica).
-  - Decisiones de diseño importantes y por qué se tomaron.
+### Ramas
 
-### 6. Qué **no** subir
+| Tipo | Formato | Se crea desde | PR hacia | Ejemplo |
+| ---- | ------- | ------------- | -------- | ------- |
+| Historia de usuario | `hu/<HU-id>-<descripcion>` | `develop` | `develop` | `hu/HU-M1-01-registro-usuario` |
+| Corrección | `fix/<descripcion>` | `develop` | `develop` | `fix/validacion-cartera-vencida` |
+| Documentación | `docs/<descripcion>` | `develop` | `develop` | `docs/reglas-ramas-commits` |
+| CI e infraestructura | `ci/<descripcion>` | `develop` | `develop` | `ci/pipelines-frontend-backend` |
+| Urgencia en producción | `hotfix/<descripcion>` | `main` | `main` | `hotfix/enlaces-rotos-inicio` |
+
+Reglas:
+
+- Una rama por historia de usuario o tarea. No mezclar varias HU en una misma rama.
+- El ID de la HU se escribe tal como está en el backlog (`HU-M1-01`); la descripción va en minúsculas, sin tildes, sin `ñ` y sin espacios. Usa guiones para separar palabras.
+- No trabajar directamente sobre `main` ni sobre `develop`.
+- Las ramas existentes que no siguen este formato se consideran legadas: no se renombran si ya están en revisión, pero las ramas nuevas deben seguir la tabla.
+- Después del merge, elimina la rama.
+
+### Commits
+
+Se usa el formato de **Conventional Commits**:
+
+```text
+<tipo>(<alcance>): <descripción>
+```
+
+El alcance es opcional. La descripción va en español, en imperativo, sin punto final y con máximo 72 caracteres.
+
+| Tipo | Cuándo usarlo |
+| ---- | ------------- |
+| `feat` | Nueva funcionalidad |
+| `fix` | Corrección de un error |
+| `docs` | Cambios en documentación |
+| `style` | Formato o estilo sin cambio de lógica |
+| `refactor` | Reestructuración sin cambio funcional |
+| `perf` | Mejora de rendimiento |
+| `test` | Pruebas nuevas o corregidas |
+| `build` | Build o dependencias |
+| `ci` | Pipelines y configuración de integración continua |
+| `chore` | Mantenimiento general |
+| `revert` | Revertir un commit anterior |
+
+Alcances sugeridos: `frontend`, `backend`, `docs`, `wireframes`, `design-system`, `ci`.
+
+Ejemplos:
+
+```text
+feat(frontend): agregar formulario de inicio de sesión
+fix(backend): impedir inscripción con cartera vencida
+docs(repo): documentar flujo de ramas y commits
+ci: agregar pipelines de lint y build
+refactor(backend): extraer validación de póliza
+test(frontend): cubrir estados del formulario de acceso
+chore(frontend): actualizar dependencias
+```
+
+Reglas:
+
+- Commits pequeños y frecuentes: un cambio coherente por commit.
+- No mezclar cambios de frontend y backend en el mismo commit si se pueden separar.
+- Si el commit necesita contexto, agrega un cuerpo después de una línea en blanco y explica **por qué**, no qué.
+- Referencia la HU o el requisito en el pie del commit:
+
+```text
+feat(backend): validar cartera vencida en inscripción
+
+La inscripción se rechaza cuando el patinador tiene cartera vencida,
+según RF-M4-08.
+
+Refs: HU-M4-06, RF-M4-08
+```
+
+- Para cambios incompatibles, usa `!` después del tipo o del alcance (`feat(api)!: ...`) y explica el cambio en el cuerpo.
+- Evita mensajes como `cambios`, `asdf`, `final`, `final2`, `wip` o `add`.
+
+### Pull Requests
+
+- La PR debe apuntar a `develop`, salvo las PR de release (`develop` → `main`) y los `hotfix/*` (`hotfix/*` → `main`).
+- El título debe seguir el mismo formato que un commit, por ejemplo `feat(frontend): agregar formulario de inicio de sesión`.
+- Usa la plantilla según el frente del cambio:
+  - PR mixta (frontend + backend): [`.github/pull_request_template.md`](.github/pull_request_template.md), que se carga por defecto.
+  - Solo frontend: [`.github/PULL_REQUEST_TEMPLATE/frontend.md`](.github/PULL_REQUEST_TEMPLATE/frontend.md). Al crear la PR, agrega `?template=frontend.md` a la URL de comparación.
+  - Solo backend: [`.github/PULL_REQUEST_TEMPLATE/backend.md`](.github/PULL_REQUEST_TEMPLATE/backend.md). Al crear la PR, agrega `?template=backend.md` a la URL de comparación.
+- Si usas la plantilla por defecto, completa solo las secciones de los frentes que modificaste.
+- Los dos pipelines se ejecutan siempre, aunque la PR solo modifique uno de los frentes.
+- La PR debe ser revisada y aprobada por al menos una persona del equipo de Product Owners.
+- No hacer merge con el CI en rojo, con conflictos sin resolver o sin la aprobación requerida.
+- No hacer merge de una PR propia sin revisión.
+- Después del merge, elimina la rama.
+
+---
+
+## Integración continua
+
+Cada Pull Request hacia `develop` o `main` ejecuta automáticamente dos pipelines de GitHub Actions:
+
+| Pipeline | Archivo | Directorio | Qué valida |
+| -------- | ------- | ---------- | ---------- |
+| Frontend CI | `.github/workflows/frontend.yml` | `code/frontend` | `pnpm lint` y `pnpm build` |
+| Backend CI | `.github/workflows/backend.yml` | `code/backend` | `pnpm lint` y `pnpm build` |
+
+Los dos pipelines se ejecutan siempre, aunque la PR solo modifique uno de los frentes. Lo que cambia es el directorio en el que corre cada uno.
+
+Para reproducir la validación en local:
+
+```bash
+# Frontend
+cd code/frontend
+pnpm install --frozen-lockfile
+pnpm lint
+pnpm build
+
+# Backend
+cd code/backend
+pnpm install --frozen-lockfile
+pnpm lint
+pnpm build
+```
+
+Configuración recomendada en GitHub:
+
+- Proteger `develop` y `main`.
+- Exigir los checks `Frontend CI / Lint y build` y `Backend CI / Lint y build` antes del merge.
+- Exigir al menos una aprobación del equipo de Product Owners.
+
+---
+
+## Wireframes
+
+Los wireframes son la propuesta de diseño de cada grupo y se construyen con el design system compartido.
+
+- Cada grupo trabaja **solo dentro de su carpeta** `wireframes/grupo-XX/`.
+- Dentro de su carpeta, una subcarpeta por página.
+- Usar nombres en minúsculas, sin tildes, sin `ñ` y sin espacios; separar con guiones (`registro-tiempos/`, `perfil-acudiente/`).
+- Cada grupo incluye un `README.md` con la herramienta usada, las decisiones de diseño y las brechas encontradas.
+- No versionar archivos con nombres como `inicio_final_v3_ahora_si.png`; para eso está Git.
+- Para abrir los prototipos que usan módulos ES, sirve el repositorio por HTTP desde la raíz:
+
+```bash
+python3 -m http.server 8000
+# http://localhost:8000/wireframes/grupo-01/
+```
+
+Grupos con wireframes en el repositorio:
+
+| Grupo | Carpeta | Módulo |
+| ----- | ------- | ------ |
+| Grupo 01 | `wireframes/grupo-01/` | M1 · Usuarios y Acceso |
+| Grupo 03 | `wireframes/grupo-03/` | M2 · Gestión deportiva de patinadores |
+| Grupo 04 | `wireframes/grupo-04/` | M5 · Planes, Tarifas y Pagos |
+| Grupo 05 | `wireframes/grupo-05/` | M4 · Competencias y Resultados |
+| Grupo 06 | `wireframes/grupo-06/` | M6 · Administración, Reportes, Finanzas e Inventario |
+
+> La numeración de los grupos no coincide con la numeración de los módulos. Las carpetas se agregan cuando el grupo publica su propuesta.
+
+---
+
+## Qué no subir
 
 - Archivos temporales o del sistema (`.DS_Store`, `Thumbs.db`, `~$archivo`).
-- Archivos muy pesados (videos, imágenes sin comprimir de varios MB); mejor comprimir o dejar el enlace.
-- Carpetas de dependencias (`node_modules/`) si alguien usa algún framework.
-- Información personal o credenciales.
+- Dependencias y builds (`node_modules/`, `dist/`, `build/`).
+- Archivos pesados (videos, imágenes sin comprimir de varios MB).
+- Variables de entorno, credenciales o información personal.
+
+El `.gitignore` de la raíz ya cubre la mayoría de estos casos. Aun así, revisa `git status` antes de hacer commit.
 
 ---
 
-## Flujo de trabajo resumido
+## Documentación
 
-```text
-pull de main → crear rama → prototipar en la carpeta del grupo → commits → push → Pull Request con captura → revisión → merge → borrar rama
-```
-
----
-
-## Grupos
-
-| Grupo    | Carpeta                | Integrantes |
-| -------- | ---------------------- | ----------- |
-| Grupo 01 | `wireframes/grupo-01/` | Cristian Bonilla, Juan Diaz, Didier Torres, Daniel Martínez            |
-| Grupo 02 | `wireframes/grupo-02/` |             |
-| Grupo 03 | `wireframes/grupo-03/` |             |
+- [`docs/CONTEXT.md`](docs/CONTEXT.md): contexto del proyecto, actores, módulos y reglas de negocio.
+- [`docs/REQUIREMENTS.md`](docs/REQUIREMENTS.md): trazabilidad de requisitos funcionales.
+- [`docs/specs/`](docs/specs/): especificaciones por módulo y del design system.
+- [`docs/EXPLANATION.md`](docs/EXPLANATION.md): guía para construir wireframes con el design system.
+- [`docs/CHANGELOG.md`](docs/CHANGELOG.md): cambios del design system.
