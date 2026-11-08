@@ -5,7 +5,7 @@ import {
   Insignia,
   ListaDatos,
   Pestanas,
-} from '../../../shared/design-system/componentes.tsx'
+} from '../../../shared/ui/componentes.tsx'
 import { useSesion } from '../../../shared/sesion/use-sesion.ts'
 import { formatoCop, formatoFecha, formatoMesAnio, hoyEnClub, leerPesos } from '../../../shared/utils/formato.ts'
 import { enlace } from '../../../shared/utils/use-ruta.ts'
@@ -84,14 +84,14 @@ export function RegistrarPago({
 
   return (
     <div className="app-page">
-      <header className="ps-stack">
-        <nav className="ps-breadcrumb" aria-label="Ruta">
+      <header className="vl-stack">
+        <nav className="vl-breadcrumb" aria-label="Ruta">
           <span>Pagos</span>
           <span aria-hidden="true">/</span>
           <span aria-current="page">Registrar pago</span>
         </nav>
         <h1>Registrar pago</h1>
-        <p className="ps-text-body-sm">Registro manual de un pago recibido en la sede: efectivo, transferencia o consignación.</p>
+        <p className="vl-text-body-sm">Registro manual de un pago recibido en la sede: efectivo, transferencia o consignación.</p>
       </header>
 
       <Pestanas
@@ -105,8 +105,8 @@ export function RegistrarPago({
       />
 
       <section id={`panel-${pestana}`} role="tabpanel" aria-labelledby={`pestana-${pestana}`} className="app-cols app-cols--2">
-        <section className="ps-card ps-stack" aria-labelledby="titulo-patinador">
-          <h2 id="titulo-patinador" className="ps-text-heading-h4">1. Patinador</h2>
+        <section className="vl-card vl-stack" aria-labelledby="titulo-patinador">
+          <h2 id="titulo-patinador" className="vl-text-heading-h4">1. Patinador</h2>
           <SelectorPatinador
             id="buscar-patinador"
             etiqueta={pestana === 'sesion' ? 'Buscar patinador con plan de día único' : 'Buscar patinador o acudiente'}
@@ -126,7 +126,7 @@ export function RegistrarPago({
           {patinador && (
             <>
               <DatosPatinador patinador={patinador} />
-              <p className="ps-text-body-sm">
+              <p className="vl-text-body-sm">
                 Estado de cartera: <Insignia entidad="cartera" estado={ESTADO_CARTERA_DS[patinador.estadoCartera]} />
               </p>
             </>
@@ -134,9 +134,9 @@ export function RegistrarPago({
         </section>
 
         {!patinador && (
-          <section className="ps-card ps-stack">
-            <h2 className="ps-text-heading-h4">2. Datos del pago</h2>
-            <p className="ps-text-body-sm">Elige primero al patinador.</p>
+          <section className="vl-card vl-stack">
+            <h2 className="vl-text-heading-h4">2. Datos del pago</h2>
+            <p className="vl-text-body-sm">Elige primero al patinador.</p>
           </section>
         )}
         {patinador && pestana === 'cobro' && <PagoCobro key={patinador.id} patinador={patinador} alTerminar={reiniciar} />}
@@ -166,8 +166,8 @@ function PagoRegistrado({
   children?: ReactNode
 }) {
   return (
-    <section className="ps-card ps-stack" aria-labelledby="titulo-registrado">
-      <h2 id="titulo-registrado" className="ps-text-heading-h4">Pago registrado</h2>
+    <section className="vl-card vl-stack" aria-labelledby="titulo-registrado">
+      <h2 id="titulo-registrado" className="vl-text-heading-h4">Pago registrado</h2>
       <Alerta tono="success" titulo={mensaje}>
         <p>Se generó el comprobante N.º {comprobante}.</p>
       </Alerta>
@@ -179,7 +179,7 @@ function PagoRegistrado({
       />
       {children}
       <div className="app-actions">
-        <button className="ps-button ps-button--secondary" type="button" onClick={alTerminar}>
+        <button className="vl-button vl-button--secondary" type="button" onClick={alTerminar}>
           Registrar otro pago
         </button>
       </div>
@@ -259,31 +259,31 @@ function PagoCobro({ patinador, alTerminar }: { patinador: PatinadorM5; alTermin
   }
 
   return (
-    <form className="ps-card ps-stack" aria-labelledby="titulo-datos" onSubmit={enviar} noValidate>
-      <h2 id="titulo-datos" className="ps-text-heading-h4">2. Cobro y datos del pago</h2>
-      {cobros === null && !error && <p className="ps-text-caption" role="status">Cargando cobros…</p>}
+    <form className="vl-card vl-stack" aria-labelledby="titulo-datos" onSubmit={enviar} noValidate>
+      <h2 id="titulo-datos" className="vl-text-heading-h4">2. Cobro y datos del pago</h2>
+      {cobros === null && !error && <p className="vl-text-caption" role="status">Cargando cobros…</p>}
       {cobros?.length === 0 && (
         <Alerta tono="success" titulo="Sin cobros pendientes">
           <p>{patinador.nombre} no tiene cobros con saldo.</p>
         </Alerta>
       )}
       {cobros && cobros.length > 0 && (
-        <fieldset className="ps-stack">
-          <legend className="ps-field__label">
-            Cobro a pagar <span className="ps-field__req" aria-hidden="true">*</span>
-            <span className="ps-text-caption"> obligatorio</span>
+        <fieldset className="vl-stack">
+          <legend className="vl-field__label">
+            Cobro a pagar <span className="vl-field__req" aria-hidden="true">*</span>
+            <span className="vl-text-caption"> obligatorio</span>
           </legend>
-          <div className="ps-radio-group" role="radiogroup">
+          <div className="vl-radio-group" role="radiogroup">
             {cobros.map((c) => (
-              <label key={c.id} className="ps-check-row">
-                <input className="ps-radio" type="radio" name="cobro" checked={c.id === cobroId} onChange={() => setCobroId(c.id)} />
+              <label key={c.id} className="vl-check-row">
+                <input className="vl-radio" type="radio" name="cobro" checked={c.id === cobroId} onChange={() => setCobroId(c.id)} />
                 <span>
-                  <span className="ps-text-label">
+                  <span className="vl-text-label">
                     {textoCobro(c)} · saldo {formatoCop(c.saldo)}
                   </span>{' '}
                   {c.vencido && <Insignia entidad="cartera" estado="vencido" />}
                   <br />
-                  <span className="ps-text-caption">
+                  <span className="vl-text-caption">
                     Valor {formatoCop(c.valor)}
                     {c.pagado > 0 && ` · abonado ${formatoCop(c.pagado)}`} · fecha límite {formatoFecha(c.fechaLimite)} · vencido
                     desde {formatoFecha(c.vencidoDesde)}
@@ -292,7 +292,7 @@ function PagoCobro({ patinador, alTerminar }: { patinador: PatinadorM5; alTermin
               </label>
             ))}
           </div>
-          <p className="ps-text-caption">Solo aparecen los cobros con saldo pendiente.</p>
+          <p className="vl-text-caption">Solo aparecen los cobros con saldo pendiente.</p>
         </fieldset>
       )}
 
@@ -301,7 +301,7 @@ function PagoCobro({ patinador, alTerminar }: { patinador: PatinadorM5; alTermin
           <Campo etiqueta="Monto (COP)" id="monto" obligatorio error={intentado ? errorMonto : null}>
             <input
               id="monto"
-              className="ps-input ps-input--numeric"
+              className="vl-input vl-input--numeric"
               inputMode="numeric"
               placeholder="$ 0"
               value={montoTexto}
@@ -326,7 +326,7 @@ function PagoCobro({ patinador, alTerminar }: { patinador: PatinadorM5; alTermin
 
       {error && <Alerta tono="error" titulo="No se pudo registrar el pago">{error}</Alerta>}
       <div className="app-actions">
-        <button className="ps-button ps-button--primary" type="submit" disabled={!cobro || enviando}>
+        <button className="vl-button vl-button--primary" type="submit" disabled={!cobro || enviando}>
           {enviando ? 'Registrando…' : 'Registrar pago'}
         </button>
       </div>
@@ -388,8 +388,8 @@ function PagoSesion({ patinador, alTerminar }: { patinador: PatinadorM5; alTermi
   }
 
   return (
-    <form className="ps-card ps-stack" aria-labelledby="titulo-sesion" onSubmit={enviar} noValidate>
-      <h2 id="titulo-sesion" className="ps-text-heading-h4">2. Datos del pago</h2>
+    <form className="vl-card vl-stack" aria-labelledby="titulo-sesion" onSubmit={enviar} noValidate>
+      <h2 id="titulo-sesion" className="vl-text-heading-h4">2. Datos del pago</h2>
       <ListaDatos
         filas={[
           ['Plan', `${plan?.nombre ?? '—'} (día único)`],
@@ -399,7 +399,7 @@ function PagoSesion({ patinador, alTerminar }: { patinador: PatinadorM5; alTermi
       <Campo etiqueta="Número de sesiones" id="sesiones" obligatorio error={intentado ? errorSesiones : null}>
         <input
           id="sesiones"
-          className="ps-input ps-input--numeric"
+          className="vl-input vl-input--numeric"
           type="number"
           min={1}
           max={31}
@@ -409,14 +409,14 @@ function PagoSesion({ patinador, alTerminar }: { patinador: PatinadorM5; alTermi
       </Campo>
       <CamposTransaccion valores={transaccion} alCambiar={setTransaccion} hoy={hoy} errores={intentado ? errores : {}} />
       {tarifa !== null && errorSesiones === null && (
-        <p className="ps-text-body-sm">
+        <p className="vl-text-body-sm">
           Se crea un cobro por <strong>{formatoCop(tarifa * sesiones)}</strong> que queda pagado de una vez, sin saldo, y se genera el
           comprobante.
         </p>
       )}
       {error && <Alerta tono="error" titulo="No se pudo registrar el pago">{error}</Alerta>}
       <div className="app-actions">
-        <button className="ps-button ps-button--primary" type="submit" disabled={enviando}>
+        <button className="vl-button vl-button--primary" type="submit" disabled={enviando}>
           {enviando ? 'Registrando…' : 'Registrar pago'}
         </button>
       </div>
@@ -477,10 +477,10 @@ function PagoMatricula({ patinador, alTerminar }: { patinador: PatinadorM5; alTe
           ['Total registrado', `${formatoCop(resultado.monto)} · ${textoMedio(transaccion.medioPago)}`],
         ]}
       >
-        <p className="ps-text-body-sm">
+        <p className="vl-text-body-sm">
           Ya se puede completar la activación del plan.{' '}
           {tienePermiso(PERMISOS_M5.planAsignar) && (
-            <a className="ps-link" href={enlace('asignar-plan')}>Ir a asignar plan</a>
+            <a className="vl-link" href={enlace('asignar-plan')}>Ir a asignar plan</a>
           )}
         </p>
       </PagoRegistrado>
@@ -488,15 +488,15 @@ function PagoMatricula({ patinador, alTerminar }: { patinador: PatinadorM5; alTe
   }
 
   return (
-    <form className="ps-card ps-stack" aria-labelledby="titulo-matricula" onSubmit={enviar} noValidate>
-      <h2 id="titulo-matricula" className="ps-text-heading-h4">2. Conceptos y datos del pago</h2>
+    <form className="vl-card vl-stack" aria-labelledby="titulo-matricula" onSubmit={enviar} noValidate>
+      <h2 id="titulo-matricula" className="vl-text-heading-h4">2. Conceptos y datos del pago</h2>
       <Alerta tono="info" titulo="Pago obligatorio para activar el plan">
         <p>La matrícula y los gastos administrativos se deben registrar y pagar antes de activar el primer plan de entrenamiento.</p>
       </Alerta>
       <Campo etiqueta="Valor de matrícula (COP)" id="valor-matricula" obligatorio error={intentado ? errorMatricula : null}>
         <input
           id="valor-matricula"
-          className="ps-input ps-input--numeric"
+          className="vl-input vl-input--numeric"
           inputMode="numeric"
           placeholder="$ 0"
           value={matriculaTexto}
@@ -507,7 +507,7 @@ function PagoMatricula({ patinador, alTerminar }: { patinador: PatinadorM5; alTe
       <Campo etiqueta="Gastos administrativos (COP)" id="valor-gastos" obligatorio error={intentado ? errorGastos : null}>
         <input
           id="valor-gastos"
-          className="ps-input ps-input--numeric"
+          className="vl-input vl-input--numeric"
           inputMode="numeric"
           placeholder="$ 0"
           value={gastosTexto}
@@ -520,9 +520,9 @@ function PagoMatricula({ patinador, alTerminar }: { patinador: PatinadorM5; alTe
       {error && <Alerta tono="error" titulo="No se pudo registrar el pago">{error}</Alerta>}
       <div className="app-actions">
         {tienePermiso(PERMISOS_M5.planAsignar) && (
-          <a className="ps-button ps-button--secondary" href={enlace('asignar-plan')}>Volver a asignar plan</a>
+          <a className="vl-button vl-button--secondary" href={enlace('asignar-plan')}>Volver a asignar plan</a>
         )}
-        <button className="ps-button ps-button--primary" type="submit" disabled={enviando}>
+        <button className="vl-button vl-button--primary" type="submit" disabled={enviando}>
           {enviando ? 'Registrando…' : 'Registrar matrícula y gastos'}
         </button>
       </div>

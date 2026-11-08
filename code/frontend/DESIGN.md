@@ -1,6 +1,6 @@
 ---
 name: Velora
-description: Landing pública de Velora, plataforma de gestión para escuelas y clubes de patinaje de velocidad. Torre de cronometraje sobre pista azul.
+description: Landing pública y aplicación interna de Velora, plataforma de gestión para escuelas y clubes de patinaje de velocidad. Torre de cronometraje sobre pista azul.
 colors:
   rink: "#0a2f8f"
   rink-deep: "#061b52"
@@ -48,6 +48,59 @@ typography:
     fontWeight: 500
     lineHeight: 1.2
     letterSpacing: "0.1em"
+  app-heading:
+    fontFamily: "Archivo, Arial Narrow, sans-serif"
+    fontSize: "2.25rem"
+    fontWeight: 800
+    lineHeight: 1.05
+  app-heading-compact:
+    fontFamily: "Archivo, Arial Narrow, sans-serif"
+    fontSize: "1.85rem"
+    fontWeight: 800
+    lineHeight: 1.05
+  app-subheading:
+    fontFamily: "Archivo, Arial Narrow, sans-serif"
+    fontSize: "1.35rem"
+    fontWeight: 800
+    lineHeight: 1.2
+  app-title:
+    fontFamily: "Archivo, Arial Narrow, sans-serif"
+    fontSize: "1.2rem"
+    fontWeight: 700
+    lineHeight: 1.25
+  app-body:
+    fontFamily: "Archivo, system-ui, sans-serif"
+    fontSize: "1rem"
+    fontWeight: 400
+    lineHeight: 1.5
+  app-small:
+    fontFamily: "Archivo, system-ui, sans-serif"
+    fontSize: "0.92rem"
+    fontWeight: 400
+    lineHeight: 1.5
+  app-caption:
+    fontFamily: "Archivo, system-ui, sans-serif"
+    fontSize: "0.82rem"
+    fontWeight: 400
+    lineHeight: 1.4
+  app-label:
+    fontFamily: "Archivo, Arial Narrow, sans-serif"
+    fontSize: "0.72rem"
+    fontWeight: 700
+    lineHeight: 1.2
+    letterSpacing: "0.1em"
+  app-tag:
+    fontFamily: "Spline Sans Mono, ui-monospace, Consolas, monospace"
+    fontSize: "0.66rem"
+    fontWeight: 500
+    lineHeight: 1.2
+    letterSpacing: "0.1em"
+  app-micro:
+    fontFamily: "Spline Sans Mono, ui-monospace, Consolas, monospace"
+    fontSize: "0.56rem"
+    fontWeight: 400
+    lineHeight: 1
+    letterSpacing: "0.14em"
 rounded:
   sm: "2px"
 spacing:
@@ -179,6 +232,18 @@ Radio casi nulo: `2px` para botones y controles. Los bordes son líneas de 1–2
 
 ### Navigation
 - **Style:** cabecera de 72 px, marca en Archivo 800 provisional. En móvil, el menú es un panel lateral que se desliza en 0.22 s.
+
+## Aplicación interna (`/app/`)
+
+Las pantallas de los módulos heredan este mundo y lo llevan a un uso de trabajo diario: el mundo aporta tipografía, paleta, densidad y la marca de carril; los controles son los estándar (botones, campos, pestañas, tablas, diálogos). Código: `src/styles/app.css` y componentes en `src/shared/ui/`.
+
+- **Marco:** riel lateral de 16 rem en `rink` con la marca, la navegación del rol y el usuario; área de trabajo sobre `ice` con contenido de hasta `page-max`. Por debajo de 980 px el riel pasa a ser una barra superior con menú desplegable.
+- **Superficies:** paneles en `chalk` con línea de 1 px `line` y radio de 2 px, sin sombra. Solo los diálogos usan `--shadow-panel`.
+- **Marca de carril:** una barra interior de 3 px en `signal` señala el elemento actual del riel, la fila de tabla bajo el cursor y la opción seleccionable bajo el cursor. Es el gesto propio de la aplicación; no se usa como decoración.
+- **Botones sobre fondo claro:** primario en `signal` (pasa a `rink-black` con texto `signal` en hover), secundario con borde `ink-soft`, fantasma sin borde. Un solo primario por vista.
+- **Tablas:** encabezados en mono mayúscula (`app-tag`), cifras y fechas en mono tabular alineadas a la derecha, filas alternas en `ice`. Por debajo de 860 px de contenedor cada fila pasa a bloque con sus etiquetas.
+- **Estados:** insignias con ícono y texto, nunca solo color: correcto en `ok-ink`, pendiente sobre `signal`, error en `alert-ink`, neutro en `ink-soft`. Los avisos usan los mismos tonos con borde de 1 px, sin borde lateral grueso.
+- **Tipografía:** escala fija en rem de `app-heading` a `app-micro` (ver tokens `--app-fs-*`); Archivo para títulos, texto y botones; Spline Sans Mono para etiquetas de datos, cifras, documentos y fechas.
 
 ## Do's and Don'ts
 

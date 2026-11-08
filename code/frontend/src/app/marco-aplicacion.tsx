@@ -1,4 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
+import { Avatar } from '../shared/ui/componentes.tsx'
+import { Icono } from '../shared/ui/icono.tsx'
+import { MarcaVelora } from '../shared/ui/marca-velora.tsx'
 import { useSesion } from '../shared/sesion/use-sesion.ts'
 import { NOMBRE_ROL } from '../shared/sesion/sesion.types.ts'
 
@@ -7,11 +10,12 @@ export interface EnlaceNavegacion {
   texto: string
 }
 
-const CONSULTA_MOVIL = '(max-width: 1023px)'
+const CONSULTA_MOVIL = '(max-width: 979px)'
 
 /**
- * Marco con el marcado de ps-app-shell (barra superior, navegación por rol y
- * contenido). En móvil la navegación se abre con el botón de menú.
+ * Marco de la aplicación: riel de pista con la marca, la navegación del rol y
+ * el usuario; a la derecha, el área de trabajo. En pantallas angostas el riel
+ * pasa a ser una barra superior y la navegación se abre con el botón de menú.
  */
 export function MarcoAplicacion({
   navegacion,
@@ -24,54 +28,84 @@ export function MarcoAplicacion({
 }) {
   const { sesion, usuarios, cambiarUsuario } = useSesion()
   const [esMovil, setEsMovil] = useState(() => window.matchMedia(CONSULTA_MOVIL).matches)
-  const [menuAbierto, setMenuAbierto] = useState(!esMovil)
+  const [menuAbierto, setMenuAbierto] = useState(false)
 
   useEffect(() => {
     const consulta = window.matchMedia(CONSULTA_MOVIL)
     const alCambiar = () => {
       setEsMovil(consulta.matches)
-      setMenuAbierto(!consulta.matches)
+      setMenuAbierto(false)
     }
     consulta.addEventListener('change', alCambiar)
     return () => consulta.removeEventListener('change', alCambiar)
   }, [])
 
-  const hayNavegacion = navegacion.some((grupo) => grupo.enlaces.length > 0)
+  const grupos = navegacion.filter((grupo) => grupo.enlaces.length > 0)
+  const rolesTexto = sesion?.roles.map((rol) => NOMBRE_ROL[rol]).join(' · ')
 
   return (
-    <ps-app-shell>
-      <div className="ps-shell">
-        <header className="ps-shell__top">
-          {hayNavegacion && (
-            <button
-              className="ps-icon-button"
-              type="button"
-              aria-label="Abrir menú"
-              aria-expanded={menuAbierto}
-              aria-controls="navegacion-principal"
-              onClick={() => setMenuAbierto((abierto) => !abierto)}
-            >
-              ☰
-            </button>
+    <div className="vl-shell">
+      <aside className="vl-rail">
+        <div className="vl-rail__top">
+          <a className="vl-brand" href="#/" aria-label="Velora, ir al inicio de la aplicación">
+            <span className="vl-brand__mark">
+              <MarcaVelora />
+            </span>
+            <span className="vl-brand__type">
+              <span className="vl-brand__word">VELORA</span>
+              <span className="vl-brand__tag">Escuela de patinaje</span>
+            </span>
+          </a>
+          <button
+            className="vl-icon-button vl-rail__toggle"
+            type="button"
+            aria-label={menuAbierto ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={menuAbierto}
+            aria-controls="riel-contenido"
+            onClick={() => setMenuAbierto((abierto) => !abierto)}
+          >
+            <Icono nombre={menuAbierto ? 'cerrar' : 'menu'} />
+          </button>
+        </div>
+
+        <div id="riel-contenido" className="vl-rail__body" hidden={esMovil && !menuAbierto}>
+          {grupos.length > 0 && (
+            <nav className="vl-nav" aria-label="Navegación principal">
+              {grupos.map((grupo) => (
+                <div key={grupo.grupo} className="vl-nav__group">
+                  <p className="vl-nav__heading">{grupo.grupo}</p>
+                  <ul>
+                    {grupo.enlaces.map((enlace) => (
+                      <li key={enlace.pagina}>
+                        {enlace.pagina === paginaActual ? (
+                          <span aria-current="page">{enlace.texto}</span>
+                        ) : (
+                          <a href={`#/${enlace.pagina}`} onClick={() => setMenuAbierto(false)}>
+                            {enlace.texto}
+                          </a>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </nav>
           )}
-          <span className="ps-text-label">Escuela de patinaje</span>
-          <span className="ps-cluster app-user">
+
+          <div className="vl-user">
             {sesion && (
-              <>
-                <span className="ps-badge ps-badge--neutral app-hide-mobile">
-                  {sesion.roles.map((rol) => NOMBRE_ROL[rol]).join(' · ')}
-                </span>
-                <span className="ps-text-label app-hide-mobile">{sesion.nombre}</span>
-                <ps-avatar name={sesion.nombre} size="sm" className="app-hide-mobile" />
-              </>
+              <div className="vl-user__who">
+                <Avatar nombre={sesion.nombre} tamano="sm" />
+                <div>
+                  <p className="vl-user__name">{sesion.nombre}</p>
+                  <p className="vl-user__role">{rolesTexto}</p>
+                </div>
+              </div>
             )}
-            <label className="ps-text-caption app-hide-mobile" htmlFor="usuario-prueba">
-              Usuario de prueba
-            </label>
+            <label htmlFor="usuario-prueba">Usuario de prueba</label>
             <select
               id="usuario-prueba"
-              className="ps-select"
-              aria-label="Usuario de prueba"
+              className="vl-select"
               value={sesion?.id ?? ''}
               onChange={(evento) => cambiarUsuario(evento.target.value ? Number(evento.target.value) : null)}
             >
@@ -82,45 +116,11 @@ export function MarcoAplicacion({
                 </option>
               ))}
             </select>
-          </span>
-        </header>
-        <div className="ps-shell__body">
-          {hayNavegacion && (
-            <nav
-              id="navegacion-principal"
-              className="ps-shell__nav"
-              aria-label="Navegación principal"
-              hidden={esMovil && !menuAbierto}
-            >
-              {navegacion
-                .filter((grupo) => grupo.enlaces.length > 0)
-                .map((grupo) => (
-                  <div key={grupo.grupo} className="app-nav-group">
-                    <p className="ps-text-caption">{grupo.grupo}</p>
-                    <ul className="ps-stack">
-                      {grupo.enlaces.map((enlace) => (
-                        <li key={enlace.pagina}>
-                          {enlace.pagina === paginaActual ? (
-                            <span className="ps-text-label" aria-current="page">{enlace.texto}</span>
-                          ) : (
-                            <a
-                              className="ps-link"
-                              href={`#/${enlace.pagina}`}
-                              onClick={() => esMovil && setMenuAbierto(false)}
-                            >
-                              {enlace.texto}
-                            </a>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-            </nav>
-          )}
-          <main className="ps-container">{children}</main>
+          </div>
         </div>
-      </div>
-    </ps-app-shell>
+      </aside>
+
+      <main className="vl-main">{children}</main>
+    </div>
   )
 }

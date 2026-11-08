@@ -4,7 +4,7 @@ import {
   Campo,
   DialogoConfirmacion,
   ListaDatos,
-} from '../../../shared/design-system/componentes.tsx'
+} from '../../../shared/ui/componentes.tsx'
 import {
   formatoCop,
   formatoFecha,
@@ -114,7 +114,7 @@ export function DialogoPlan({
       <Campo etiqueta="Nombre del plan" id="plan-nombre" obligatorio error={intentado ? errorNombre : null}>
         <input
           id="plan-nombre"
-          className="ps-input"
+          className="vl-input"
           maxLength={80}
           value={nombre}
           onChange={(evento) => setNombre(evento.target.value)}
@@ -124,10 +124,10 @@ export function DialogoPlan({
       {editando ? (
         <>
           <Campo etiqueta="Tipo de plan" id="plan-tipo">
-            <input id="plan-tipo" className="ps-input" value={textoTipo(plan.tipo)} readOnly />
+            <input id="plan-tipo" className="vl-input" value={textoTipo(plan.tipo)} readOnly />
           </Campo>
           <Campo etiqueta="Periodicidad" id="plan-periodicidad">
-            <input id="plan-periodicidad" className="ps-input" value={textoFacturacion(plan.periodicidad)} readOnly />
+            <input id="plan-periodicidad" className="vl-input" value={textoFacturacion(plan.periodicidad)} readOnly />
           </Campo>
         </>
       ) : (
@@ -135,7 +135,7 @@ export function DialogoPlan({
           <Campo etiqueta="Tipo de plan" id="plan-tipo" obligatorio error={intentado ? errorTipo : null}>
             <select
               id="plan-tipo"
-              className="ps-select"
+              className="vl-select"
               value={tipo}
               onChange={(evento) => setTipo(evento.target.value as TipoPlan | '')}
               aria-invalid={intentado && errorTipo ? true : undefined}
@@ -153,7 +153,7 @@ export function DialogoPlan({
           >
             <input
               id="plan-periodicidad"
-              className="ps-input"
+              className="vl-input"
               value={periodicidad ? textoFacturacion(periodicidad) : '—'}
               readOnly
             />
@@ -169,7 +169,7 @@ export function DialogoPlan({
         >
           <select
             id="plan-dia-limite"
-            className="ps-select"
+            className="vl-select"
             value={diaLimite}
             onChange={(evento) => setDiaLimite(Number(evento.target.value))}
           >
@@ -182,7 +182,7 @@ export function DialogoPlan({
       <Campo etiqueta="Descripción" id="plan-descripcion" ayuda="Opcional. Se muestra en la oferta de planes.">
         <textarea
           id="plan-descripcion"
-          className="ps-textarea"
+          className="vl-textarea"
           rows={2}
           maxLength={500}
           value={descripcion}
@@ -191,11 +191,11 @@ export function DialogoPlan({
       </Campo>
       {editando ? (
         <>
-          <p className="ps-text-body-sm">
+          <p className="vl-text-body-sm">
             El tipo y la periodicidad no se cambian: para eso se crea un plan nuevo. Para cambiar el precio, usa «Tarifa».
           </p>
           {plan.ultimaModificacion && (
-            <p className="ps-audit-entry">
+            <p className="vl-audit-entry">
               Última modificación: {plan.ultimaModificacion.por} · {formatoFechaDeMarca(plan.ultimaModificacion.en)}
             </p>
           )}
@@ -255,7 +255,7 @@ export function DialogoTarifa({
       <Campo etiqueta="Nuevo valor (COP)" id="tarifa-valor" obligatorio ayuda="Debe ser mayor que cero." error={intentado ? errorValor : null}>
         <input
           id="tarifa-valor"
-          className="ps-input ps-input--numeric"
+          className="vl-input vl-input--numeric"
           inputMode="numeric"
           placeholder="$ 0"
           value={valorTexto}
@@ -273,7 +273,7 @@ export function DialogoTarifa({
       >
         <input
           id="tarifa-desde"
-          className="ps-input"
+          className="vl-input"
           type="date"
           min={hoy}
           value={vigenteDesde}
@@ -281,7 +281,7 @@ export function DialogoTarifa({
           aria-invalid={intentado && errorFecha ? true : undefined}
         />
       </Campo>
-      <p className="ps-text-body-sm">
+      <p className="vl-text-body-sm">
         Los cobros ya generados conservan la tarifa con que se emitieron. La tarifa anterior pasa al historial.
       </p>
       {error && <Alerta tono="error" titulo="No se pudo registrar la tarifa">{error}</Alerta>}
@@ -320,18 +320,18 @@ export function DialogoHistorial({
       alCancelar={alCerrar}
     >
       {error && <Alerta tono="error">{error}</Alerta>}
-      {!detalle && !error && <p className="ps-text-caption" role="status">Cargando historial…</p>}
-      {detalle && detalle.tarifas.length === 0 && <p className="ps-text-body-sm">El plan aún no tiene tarifas.</p>}
+      {!detalle && !error && <p className="vl-text-caption" role="status">Cargando historial…</p>}
+      {detalle && detalle.tarifas.length === 0 && <p className="vl-text-body-sm">El plan aún no tiene tarifas.</p>}
       {detalle && detalle.tarifas.length > 0 && (
-        <ps-data-table>
-          <table className="ps-table">
+        <div className="vl-table-wrap">
+          <table className="vl-table">
             <thead>
-              <tr><th className="ps-num">Valor</th><th>Desde</th><th>Hasta</th><th>Registro</th></tr>
+              <tr><th className="vl-num">Valor</th><th>Desde</th><th>Hasta</th><th>Registro</th></tr>
             </thead>
             <tbody>
               {detalle.tarifas.map((tarifa) => (
                 <tr key={tarifa.id}>
-                  <td data-label="Valor" className="ps-num">{formatoCop(tarifa.valor)}</td>
+                  <td data-label="Valor" className="vl-num">{formatoCop(tarifa.valor)}</td>
                   <td data-label="Desde">{formatoFecha(tarifa.vigenteDesde)}</td>
                   <td data-label="Hasta">
                     {tarifa.vigenteHasta ? formatoFecha(tarifa.vigenteHasta) : '—'}
@@ -342,7 +342,7 @@ export function DialogoHistorial({
               ))}
             </tbody>
           </table>
-        </ps-data-table>
+        </div>
       )}
     </DialogoConfirmacion>
   )
@@ -366,7 +366,7 @@ export function DialogoDesactivar({
       alConfirmar={() => void enviar(() => desactivarPlan(plan.id, motivo.trim() || undefined), alGuardar)}
       alCancelar={alCerrar}
     >
-      <div className="ps-text-body-sm">
+      <div className="vl-text-body-sm">
         <ul>
           <li>No aparecerá en la lista de planes para asignar ni para cambiar.</li>
           <li>
@@ -380,7 +380,7 @@ export function DialogoDesactivar({
       <Campo etiqueta="Motivo" id="desactivar-motivo" ayuda="Opcional. Queda en la auditoría.">
         <textarea
           id="desactivar-motivo"
-          className="ps-textarea"
+          className="vl-textarea"
           rows={2}
           maxLength={500}
           value={motivo}

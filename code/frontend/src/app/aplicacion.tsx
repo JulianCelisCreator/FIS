@@ -1,4 +1,4 @@
-import { Alerta } from '../shared/design-system/componentes.tsx'
+import { Alerta } from '../shared/ui/componentes.tsx'
 import { useSesion } from '../shared/sesion/use-sesion.ts'
 import { useRuta } from '../shared/utils/use-ruta.ts'
 import { AsignarCambiarPlan } from '../modules/m5-planes-tarifas-pagos/components/asignar-cambiar-plan.tsx'
@@ -30,7 +30,7 @@ export function Aplicacion() {
 
   let contenido
   if (cargando) {
-    contenido = <p className="ps-text-body-sm" role="status">Cargando…</p>
+    contenido = <p className="vl-text-body-sm" role="status">Cargando…</p>
   } else if (!sesion) {
     contenido = (
       <div className="app-page">

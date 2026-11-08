@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { MouseEvent } from 'react'
+import { MarcaVelora } from './shared/ui/marca-velora.tsx'
 
 const navLinks = [
   { href: '#pista', label: 'Módulos' },
@@ -271,27 +272,6 @@ const faqs = [
   },
 ]
 
-function BrandMark() {
-  return (
-    <svg viewBox="0 0 40 40" aria-hidden="true" focusable="false">
-      <rect x="5" y="9" width="30" height="22" rx="11" fill="none" stroke="currentColor" strokeWidth="2.4" />
-      <rect
-        x="10"
-        y="14"
-        width="20"
-        height="12"
-        rx="6"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        opacity=".45"
-      />
-      <path d="M20 9v22" stroke="var(--signal)" strokeWidth="2.2" />
-      <path d="M5 20h30" stroke="currentColor" strokeWidth="1" opacity=".35" />
-    </svg>
-  )
-}
-
 function TrackField() {
   return (
     <svg
@@ -545,7 +525,7 @@ function App() {
           <div className="masthead__inner">
             <a className="brand" href="#inicio" aria-label="Velora, volver al inicio" onClick={closeMenu}>
               <span className="brand__mark">
-                <BrandMark />
+                <MarcaVelora />
               </span>
               <span className="brand__type">
                 <span className="brand__word">VELORA</span>
@@ -974,7 +954,7 @@ function App() {
             <div className="footer__brand">
               <a className="brand" href="#inicio" aria-label="Velora, volver al inicio">
                 <span className="brand__mark">
-                  <BrandMark />
+                  <MarcaVelora />
                 </span>
                 <span className="brand__type">
                   <span className="brand__word">VELORA</span>

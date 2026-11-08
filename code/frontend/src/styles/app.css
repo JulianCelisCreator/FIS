@@ -1,0 +1,1035 @@
+/*
+  Aplicación interna de Velora (/app/). Usa los tokens de tokens.css y las
+  reglas de DESIGN.md llevadas a pantallas de trabajo: riel de pista en azul,
+  área de trabajo clara, superficies planas con líneas de 1 px, radio de 2 px,
+  cifras en mono tabular y el amarillo de señal solo en la acción principal y
+  en la marca de carril (fila activa o elemento actual).
+*/
+
+/* --------------------------------------------------------------------------
+   Escala tipográfica de la aplicación (documentada en DESIGN.md, «Aplicación
+   interna»): fija en rem y compacta, como corresponde a pantallas de trabajo.
+   -------------------------------------------------------------------------- */
+
+:root {
+  --app-fs-micro: 0.56rem;
+  --app-fs-tag: 0.66rem;
+  --app-fs-label: 0.72rem;
+  --app-fs-caption: 0.82rem;
+  --app-fs-small: 0.92rem;
+  --app-fs-body: 1rem;
+  --app-fs-title: 1.2rem;
+  --app-fs-subheading: 1.35rem;
+  --app-fs-heading-compact: 1.85rem;
+  --app-fs-heading: 2.25rem;
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+
+body {
+  background: var(--ice);
+  font-size: var(--app-fs-body);
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+.vl-icono {
+  width: 1.15em;
+  height: 1.15em;
+  flex-shrink: 0;
+}
+
+.vl-stack > * + * {
+  margin-top: 1rem;
+}
+
+.vl-text-label {
+  font-weight: 600;
+}
+
+.vl-text-caption {
+  color: var(--muted);
+  font-size: var(--app-fs-caption);
+}
+
+.vl-text-body-sm {
+  color: var(--ink-soft);
+  font-size: var(--app-fs-small);
+}
+
+.vl-text-heading-h4 {
+  font-family: var(--font-display);
+  font-size: var(--app-fs-title);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.vl-text-heading-h5 {
+  font-family: var(--font-display);
+  font-size: var(--app-fs-body);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.vl-link {
+  color: var(--rink-bright);
+  text-underline-offset: 0.2em;
+}
+
+.vl-link:hover {
+  color: var(--ink);
+}
+
+.vl-audit-entry {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-label);
+}
+
+/* Texto solo para lectores de pantalla. */
+.app-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Dentro de un <label> solo caben <span>: los que deben ir en su propia línea. */
+.app-bloque {
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   Marco: riel de pista y área de trabajo
+   -------------------------------------------------------------------------- */
+
+.vl-shell {
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.vl-rail {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  height: 100vh;
+  padding: 1.5rem 1.25rem;
+  overflow-y: auto;
+  color: var(--white);
+  background: var(--rink);
+  border-right: 1px solid var(--rink-deep);
+}
+
+.vl-rail__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.vl-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--white);
+  text-decoration: none;
+}
+
+.vl-brand__mark {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line-strong);
+  background: var(--rink-deep);
+}
+
+.vl-brand__mark svg {
+  width: 26px;
+  height: 26px;
+}
+
+.vl-brand__type {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  line-height: 1;
+}
+
+.vl-brand__word {
+  font-family: var(--font-display);
+  font-size: var(--app-fs-title);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.vl-brand__tag {
+  color: var(--muted-on-dark);
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-micro);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.vl-icon-button.vl-rail__toggle {
+  display: none;
+  color: var(--white);
+  border-color: var(--line-strong);
+}
+
+.vl-icon-button.vl-rail__toggle:hover,
+.vl-icon-button.vl-rail__toggle[aria-expanded='true'] {
+  background: rgba(247, 249, 255, 0.1);
+  border-color: var(--white);
+}
+
+.vl-rail__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.vl-nav__group + .vl-nav__group {
+  margin-top: 1.5rem;
+}
+
+.vl-nav__heading {
+  margin-bottom: 0.5rem;
+  color: var(--muted-on-dark);
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-tag);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.vl-nav ul {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vl-nav a,
+.vl-nav [aria-current='page'] {
+  position: relative;
+  display: block;
+  padding: 0.6rem 0.75rem;
+  color: var(--muted-on-dark);
+  font-size: var(--app-fs-small);
+  text-decoration: none;
+  border-radius: var(--radius);
+  transition:
+    color 0.18s var(--ease),
+    background-color 0.18s var(--ease);
+}
+
+.vl-nav a:hover {
+  color: var(--white);
+  background: rgba(247, 249, 255, 0.06);
+}
+
+/* Elemento actual: la marca de carril en amarillo de señal. */
+.vl-nav [aria-current='page'] {
+  color: var(--white);
+  font-weight: 600;
+  background: rgba(247, 249, 255, 0.1);
+  box-shadow: inset 3px 0 0 var(--signal);
+}
+
+.vl-user {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line-dark);
+}
+
+.vl-user__who {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.vl-user__name {
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.vl-user__role {
+  color: var(--muted-on-dark);
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-tag);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.vl-user label {
+  color: var(--muted-on-dark);
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-tag);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.vl-user .vl-select {
+  color: var(--white);
+  background: var(--rink-deep);
+  border-color: var(--line-strong);
+}
+
+.vl-main {
+  min-width: 0;
+  padding-inline: clamp(1.25rem, 3vw, 2.5rem);
+}
+
+.app-page {
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding-block: 2rem 4rem;
+}
+
+.app-page > * + * {
+  margin-top: 1.5rem;
+}
+
+/* Encabezado: título a la izquierda, acción principal a la derecha (abajo en móvil). */
+.app-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.app-page h1 {
+  margin-top: 0.4rem;
+  font-size: var(--app-fs-heading);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+.app-page header .vl-text-body-sm {
+  margin-top: 0.5rem;
+}
+
+.vl-breadcrumb {
+  display: flex;
+  gap: 0.5rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-tag);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Rejillas: una columna en móvil. */
+.app-cols {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.app-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+/* --------------------------------------------------------------------------
+   Paneles y listas
+   -------------------------------------------------------------------------- */
+
+.vl-card {
+  padding: 1.5rem;
+  background: var(--chalk);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.vl-card--selectable {
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition:
+    background-color 0.18s var(--ease),
+    border-color 0.18s var(--ease),
+    box-shadow 0.18s var(--ease);
+}
+
+.vl-card--selectable:hover {
+  border-color: var(--ink-soft);
+  box-shadow: inset 3px 0 0 var(--signal);
+}
+
+.vl-card--selectable[aria-selected='true'],
+.vl-card--selectable:has(input:checked) {
+  background: var(--ice-deep);
+  border-color: var(--rink);
+  box-shadow: inset 0 0 0 1px var(--rink);
+}
+
+.app-lista-opciones {
+  margin-block-end: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-opcion {
+  display: block;
+  width: 100%;
+  padding: 0.85rem 1rem;
+}
+
+.app-boton-inicio {
+  align-self: flex-start;
+}
+
+.vl-person {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.vl-person__name {
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.vl-person__meta {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.vl-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: var(--white);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background: var(--rink-bright);
+  border-radius: var(--radius);
+}
+
+.vl-avatar--md {
+  width: 40px;
+  height: 40px;
+  font-size: var(--app-fs-caption);
+}
+
+.vl-avatar--sm {
+  width: 32px;
+  height: 32px;
+  font-size: var(--app-fs-label);
+}
+
+.vl-dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1rem 1.5rem;
+  margin-block-end: 0;
+}
+
+.vl-dl dt {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-tag);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.vl-dl dd {
+  margin: 0.25rem 0 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   Controles
+   -------------------------------------------------------------------------- */
+
+.vl-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 44px;
+  padding: 0.72rem 1.25rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-family: var(--font-display);
+  font-size: var(--app-fs-label);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color 0.18s var(--ease),
+    background-color 0.18s var(--ease),
+    border-color 0.18s var(--ease);
+}
+
+.vl-button--primary {
+  color: var(--rink-black);
+  background: var(--signal);
+  border-color: var(--signal);
+}
+
+.vl-button--primary:hover {
+  color: var(--signal);
+  background: var(--rink-black);
+  border-color: var(--rink-black);
+}
+
+.vl-button--secondary {
+  color: var(--ink);
+  background: transparent;
+  border-color: var(--ink-soft);
+}
+
+.vl-button--secondary:hover {
+  background: var(--ice-deep);
+  border-color: var(--ink);
+}
+
+.vl-button--ghost {
+  color: var(--ink-soft);
+  background: transparent;
+}
+
+.vl-button--ghost:hover {
+  color: var(--ink);
+  background: var(--ice-deep);
+}
+
+.vl-button--sm {
+  min-height: 36px;
+  padding: 0.5rem 0.85rem;
+}
+
+.vl-button:disabled,
+.vl-button[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.vl-button--primary:disabled:hover,
+.vl-button--primary[aria-disabled='true']:hover {
+  color: var(--rink-black);
+  background: var(--signal);
+  border-color: var(--signal);
+}
+
+.vl-icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.vl-icon-button:hover,
+.vl-icon-button[aria-expanded='true'] {
+  background: var(--ice-deep);
+  border-color: var(--line);
+}
+
+.vl-icon-button .vl-icono {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+.vl-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.vl-field__label {
+  font-size: var(--app-fs-small);
+  font-weight: 600;
+}
+
+.vl-field__req {
+  margin-left: 0.2rem;
+  color: var(--alert-ink);
+}
+
+.vl-field__help {
+  color: var(--muted);
+  font-size: var(--app-fs-caption);
+}
+
+.vl-field__error {
+  color: var(--alert-ink);
+  font-size: var(--app-fs-caption);
+  font-weight: 600;
+}
+
+.vl-input,
+.vl-select,
+.vl-textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.6rem 0.75rem;
+  color: var(--ink);
+  background: var(--white);
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
+}
+
+.vl-textarea {
+  resize: vertical;
+}
+
+.vl-input::placeholder,
+.vl-textarea::placeholder {
+  color: var(--muted);
+}
+
+.vl-input--numeric {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.vl-input[readonly] {
+  color: var(--ink-soft);
+  background: var(--ice);
+  border-style: dashed;
+}
+
+[aria-invalid='true'].vl-input,
+[aria-invalid='true'].vl-select,
+[aria-invalid='true'].vl-textarea {
+  border-color: var(--alert-ink);
+  box-shadow: inset 0 0 0 1px var(--alert-ink);
+}
+
+.vl-radio-group {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.vl-check-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding-block: 0.45rem;
+  cursor: pointer;
+}
+
+.vl-radio {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: 0.15rem;
+  accent-color: var(--rink);
+  flex-shrink: 0;
+}
+
+.vl-radio:disabled + span {
+  color: var(--muted);
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* Pestañas: subrayado de pista bajo la activa. */
+.vl-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--line);
+}
+
+.vl-tabs__tab {
+  padding: 0.9rem 1rem;
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: var(--app-fs-label);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.vl-tabs__tab:hover {
+  color: var(--ink);
+}
+
+.vl-tabs__tab[aria-selected='true'] {
+  color: var(--ink);
+  box-shadow: inset 0 -3px 0 var(--rink);
+}
+
+/* Barra de filtros. */
+.vl-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--chalk);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.vl-filter-bar > .vl-field {
+  flex: 1 1 12rem;
+}
+
+/* --------------------------------------------------------------------------
+   Estados y avisos
+   -------------------------------------------------------------------------- */
+
+.vl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.5rem;
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-tag);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border: 1px solid;
+  border-radius: var(--radius);
+}
+
+.vl-badge .vl-icono {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.vl-badge--success {
+  color: var(--ok-ink);
+  background: rgba(111, 242, 178, 0.22);
+  border-color: var(--ok-ink);
+}
+
+.vl-badge--warning {
+  color: var(--ink);
+  background: rgba(255, 210, 30, 0.3);
+  border-color: var(--signal-deep);
+}
+
+.vl-badge--error {
+  color: var(--alert-ink);
+  background: rgba(255, 106, 92, 0.14);
+  border-color: var(--alert-ink);
+}
+
+.vl-badge--neutral,
+.vl-badge--info {
+  color: var(--ink-soft);
+  background: var(--ice-deep);
+  border-color: var(--line);
+}
+
+.vl-alert {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  color: var(--ink);
+  font-size: var(--app-fs-small);
+  border: 1px solid;
+  border-radius: var(--radius);
+}
+
+.vl-alert > .vl-icono {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.1rem;
+}
+
+.vl-alert > div > * + * {
+  margin-top: 0.35rem;
+}
+
+.vl-alert__title {
+  font-weight: 700;
+}
+
+.vl-alert--info {
+  background: var(--chalk);
+  border-color: var(--rink-bright);
+}
+
+.vl-alert--info > .vl-icono {
+  color: var(--rink-bright);
+}
+
+.vl-alert--success {
+  background: rgba(111, 242, 178, 0.16);
+  border-color: var(--ok-ink);
+}
+
+.vl-alert--success > .vl-icono {
+  color: var(--ok-ink);
+}
+
+.vl-alert--warning {
+  background: rgba(255, 210, 30, 0.18);
+  border-color: var(--signal-deep);
+}
+
+.vl-alert--error {
+  background: rgba(255, 106, 92, 0.1);
+  border-color: var(--alert-ink);
+}
+
+.vl-alert--error > .vl-icono,
+.vl-alert--error .vl-alert__title {
+  color: var(--alert-ink);
+}
+
+/* --------------------------------------------------------------------------
+   Tablas: carriles con la marca de señal en la fila bajo el cursor
+   -------------------------------------------------------------------------- */
+
+.vl-table-wrap {
+  container-type: inline-size;
+  background: var(--chalk);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.vl-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--app-fs-small);
+}
+
+.vl-table th {
+  padding: 0.75rem 0.85rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-tag);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-align: left;
+  text-transform: uppercase;
+  background: var(--ice);
+}
+
+.vl-table td {
+  padding: 0.85rem;
+  border-top: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.vl-table tbody tr:nth-child(even) td {
+  background: rgba(237, 243, 255, 0.55);
+}
+
+.vl-table tbody tr:hover td:first-child {
+  box-shadow: inset 3px 0 0 var(--signal);
+}
+
+.vl-table .vl-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* En contenedores angostos cada fila pasa a ser un bloque con sus etiquetas. */
+@container (max-width: 859px) {
+  .vl-table thead {
+    display: none;
+  }
+
+  .vl-table tr {
+    display: block;
+    padding-block: 0.25rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .vl-table tbody tr:first-child {
+    border-top: 0;
+  }
+
+  .vl-table td {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 0.45rem;
+    border-top: 0;
+    text-align: right;
+  }
+
+  .vl-table td::before {
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: var(--app-fs-tag);
+    letter-spacing: 0.1em;
+    text-align: left;
+    text-transform: uppercase;
+    content: attr(data-label);
+  }
+
+  .vl-table .vl-num {
+    text-align: right;
+  }
+}
+
+/* Menú de acciones por fila. */
+.app-row-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.app-menu {
+  position: absolute;
+  inset-block-start: calc(100% + 4px);
+  inset-inline-end: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  min-width: max-content;
+}
+
+.app-menu[hidden] {
+  display: none;
+}
+
+.app-menu > * {
+  justify-content: flex-start;
+}
+
+.vl-menu__list {
+  padding: 0.3rem;
+  background: var(--chalk);
+  border: 1px solid var(--ink-soft);
+  border-radius: var(--radius);
+}
+
+/* --------------------------------------------------------------------------
+   Diálogos: la única superficie elevada junto al tablero (DESIGN.md)
+   -------------------------------------------------------------------------- */
+
+.vl-dialog {
+  width: min(36rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  padding: 1.75rem;
+  color: var(--ink);
+  background: var(--chalk);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-panel);
+}
+
+.vl-dialog::backdrop {
+  background: rgba(3, 13, 40, 0.62);
+}
+
+.vl-dialog__title {
+  margin-bottom: 1.25rem;
+  font-size: var(--app-fs-subheading);
+  line-height: 1.2;
+}
+
+.vl-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.vl-dialog ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 768px) {
+  .app-cols--4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1100px) {
+  .app-cols--2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .app-cols--4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Por debajo de 980 px el riel pasa a ser una barra superior con menú desplegable. */
+@media (max-width: 979px) {
+  .vl-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .vl-rail {
+    z-index: 3;
+    gap: 0;
+    height: auto;
+    padding: 0.75rem clamp(1.25rem, 4vw, 2rem);
+    overflow: visible;
+    border-right: 0;
+    border-bottom: 1px solid var(--rink-deep);
+  }
+
+  .vl-icon-button.vl-rail__toggle {
+    display: inline-grid;
+  }
+
+  .vl-rail__body {
+    padding-block: 1.5rem 0.75rem;
+  }
+
+  .vl-rail__body[hidden] {
+    display: none;
+  }
+
+  .app-page h1 {
+    font-size: var(--app-fs-heading-compact);
+  }
+
+  .vl-card {
+    padding: 1.15rem;
+  }
+
+  .vl-dialog {
+    padding: 1.25rem;
+  }
+}

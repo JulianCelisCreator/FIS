@@ -1,7 +1,16 @@
-// Formatos colombianos: se reutilizan los del design system para no duplicarlos.
-import { formatCOP, formatDate } from '@ds/js/format.js'
+// Formatos colombianos de la aplicación (pesos COP y fechas DD/MM/AAAA).
 
-export { formatCOP as formatoCop, formatDate as formatoFecha }
+/** 180000 → «$ 180.000» (pesos, sin decimales). */
+export function formatoCop(valor: number): string {
+  if (!Number.isFinite(valor)) return '—'
+  return `$ ${Math.trunc(valor).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`
+}
+
+/** 'AAAA-MM-DD' → 'DD/MM/AAAA'. */
+export function formatoFecha(iso: string): string {
+  const partes = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso)
+  return partes ? `${partes[3]}/${partes[2]}/${partes[1]}` : '—'
+}
 
 const mesAnioFormato = new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric', timeZone: 'UTC' })
 

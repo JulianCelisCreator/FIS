@@ -1,4 +1,4 @@
-import { Campo } from '../../../shared/design-system/componentes.tsx'
+import { Campo } from '../../../shared/ui/componentes.tsx'
 import { MEDIOS_PAGO, type MedioPago, type ValoresTransaccion } from '../types/m5.types.ts'
 
 /**
@@ -22,7 +22,7 @@ export function CamposTransaccion({
       <Campo etiqueta="Fecha de pago" id="fecha-pago" obligatorio ayuda="No puede ser posterior a hoy." error={errores.fechaPago}>
         <input
           id="fecha-pago"
-          className="ps-input"
+          className="vl-input"
           type="date"
           max={hoy}
           value={valores.fechaPago}
@@ -33,7 +33,7 @@ export function CamposTransaccion({
       <Campo etiqueta="Medio de pago" id="medio-pago" obligatorio error={errores.medioPago}>
         <select
           id="medio-pago"
-          className="ps-select"
+          className="vl-select"
           value={valores.medioPago}
           onChange={(evento) => alCambiar({ ...valores, medioPago: evento.target.value as MedioPago | '' })}
           aria-invalid={errores.medioPago ? true : undefined}
@@ -53,7 +53,7 @@ export function CamposTransaccion({
       >
         <input
           id="referencia"
-          className="ps-input"
+          className="vl-input"
           maxLength={100}
           value={valores.referencia}
           onChange={(evento) => alCambiar({ ...valores, referencia: evento.target.value })}

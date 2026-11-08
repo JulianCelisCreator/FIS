@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { Alerta, Campo, Insignia } from '../../../shared/design-system/componentes.tsx'
+import { Alerta, Campo, Insignia } from '../../../shared/ui/componentes.tsx'
+import { Icono } from '../../../shared/ui/icono.tsx'
 import { formatoFecha } from '../../../shared/utils/formato.ts'
 import { listarPlanes } from '../services/m5.service.ts'
 import { TIPOS_PLAN, type PlanAdministrado, type PlanDetalle, type TipoPlan } from '../types/m5.types.ts'
@@ -55,26 +56,25 @@ export function PlanesTarifas() {
   return (
     <div className="app-page">
       <header className="app-head">
-        <div className="ps-stack">
-          <nav className="ps-breadcrumb" aria-label="Ruta">
+        <div className="vl-stack">
+          <nav className="vl-breadcrumb" aria-label="Ruta">
             <span>Pagos</span>
             <span aria-hidden="true">/</span>
             <span aria-current="page">Planes y tarifas</span>
           </nav>
           <h1>Planes y tarifas</h1>
-          <p className="ps-text-body-sm">Oferta de planes de la academia y su tarifa vigente.</p>
+          <p className="vl-text-body-sm">Oferta de planes de la academia y su tarifa vigente.</p>
         </div>
-        <button className="ps-button ps-button--primary" type="button" onClick={() => setDialogo({ tipo: 'crear' })}>
+        <button className="vl-button vl-button--primary" type="button" onClick={() => setDialogo({ tipo: 'crear' })}>
           Crear plan
         </button>
       </header>
 
-      <ps-filter-bar>
-        <form className="ps-filter-bar" role="search" aria-label="Filtrar planes" onSubmit={(evento) => evento.preventDefault()}>
+        <form className="vl-filter-bar" role="search" aria-label="Filtrar planes" onSubmit={(evento) => evento.preventDefault()}>
           <Campo etiqueta="Buscar" id="filtro-buscar">
             <input
               id="filtro-buscar"
-              className="ps-input"
+              className="vl-input"
               type="search"
               placeholder="Nombre del plan"
               value={buscar}
@@ -82,7 +82,7 @@ export function PlanesTarifas() {
             />
           </Campo>
           <Campo etiqueta="Tipo" id="filtro-tipo">
-            <select id="filtro-tipo" className="ps-select" value={tipo} onChange={(evento) => setTipo(evento.target.value as TipoPlan | '')}>
+            <select id="filtro-tipo" className="vl-select" value={tipo} onChange={(evento) => setTipo(evento.target.value as TipoPlan | '')}>
               <option value="">Todos</option>
               {TIPOS_PLAN.map((opcion) => (
                 <option key={opcion.valor} value={opcion.valor}>{opcion.texto}</option>
@@ -90,36 +90,35 @@ export function PlanesTarifas() {
             </select>
           </Campo>
           <Campo etiqueta="Estado" id="filtro-estado">
-            <select id="filtro-estado" className="ps-select" value={estado} onChange={(evento) => setEstado(evento.target.value as FiltroEstado)}>
+            <select id="filtro-estado" className="vl-select" value={estado} onChange={(evento) => setEstado(evento.target.value as FiltroEstado)}>
               <option value="ACTIVO">Activos</option>
               <option value="INACTIVO">Inactivos</option>
               <option value="">Todos</option>
             </select>
           </Campo>
         </form>
-      </ps-filter-bar>
 
       {aviso && <Alerta tono="success"><p>{aviso}</p></Alerta>}
       {error && <Alerta tono="error" titulo="No se pudieron cargar los planes">{error}</Alerta>}
-      {planes === null && !error && <p className="ps-text-caption" role="status">Cargando planes…</p>}
+      {planes === null && !error && <p className="vl-text-caption" role="status">Cargando planes…</p>}
       {planes?.length === 0 && (
-        <div className="ps-card ps-stack">
-          <p className="ps-text-heading-h5">No hay planes con esos filtros</p>
-          <p className="ps-text-body-sm">Cambia los filtros o crea un plan nuevo.</p>
+        <div className="vl-card vl-stack">
+          <p className="vl-text-heading-h5">No hay planes con esos filtros</p>
+          <p className="vl-text-body-sm">Cambia los filtros o crea un plan nuevo.</p>
         </div>
       )}
       {planes && planes.length > 0 && (
-        <ps-data-table>
-          <table className="ps-table">
+        <div className="vl-table-wrap">
+          <table className="vl-table">
             <thead>
               <tr>
                 <th>Plan</th>
                 <th>Tipo</th>
                 <th>Facturación</th>
                 <th>Día límite</th>
-                <th className="ps-num">Tarifa vigente</th>
+                <th className="vl-num">Tarifa vigente</th>
                 <th>Vigente desde</th>
-                <th className="ps-num">Patinadores</th>
+                <th className="vl-num">Patinadores</th>
                 <th>Estado</th>
                 <th><span className="app-oculto">Acciones</span></th>
               </tr>
@@ -131,16 +130,16 @@ export function PlanesTarifas() {
                   <td data-label="Tipo">{textoTipo(plan.tipo)}</td>
                   <td data-label="Facturación">{textoFacturacion(plan.periodicidad)}</td>
                   <td data-label="Día límite">{plan.diaLimitePago ? `Día ${plan.diaLimitePago}` : '—'}</td>
-                  <td data-label="Tarifa vigente" className="ps-num">
+                  <td data-label="Tarifa vigente" className="vl-num">
                     {plan.tarifaVigente ? textoTarifa(plan.tarifaVigente.valor, plan.periodicidad) : 'Sin tarifa'}
                     {plan.tarifaProgramada && (
-                      <span className="ps-text-caption app-bloque">
+                      <span className="vl-text-caption app-bloque">
                         {textoTarifa(plan.tarifaProgramada.valor, plan.periodicidad)} desde {formatoFecha(plan.tarifaProgramada.vigenteDesde)}
                       </span>
                     )}
                   </td>
                   <td data-label="Vigente desde">{plan.tarifaVigente ? formatoFecha(plan.tarifaVigente.vigenteDesde) : '—'}</td>
-                  <td data-label="Patinadores" className="ps-num">{plan.patinadores}</td>
+                  <td data-label="Patinadores" className="vl-num">{plan.patinadores}</td>
                   <td data-label="Estado">
                     <Insignia entidad="plan" estado={plan.estado === 'ACTIVO' ? 'activo' : 'inactivo'} />
                   </td>
@@ -151,7 +150,7 @@ export function PlanesTarifas() {
               ))}
             </tbody>
           </table>
-        </ps-data-table>
+        </div>
       )}
 
       {dialogo?.tipo === 'crear' && (
@@ -242,7 +241,7 @@ function MenuAcciones({ plan, alElegir }: { plan: PlanAdministrado; alElegir: (a
   return (
     <span className="app-row-menu" ref={contenedor}>
       <button
-        className="ps-icon-button"
+        className="vl-icon-button"
         type="button"
         aria-label={`Acciones del plan ${plan.nombre}`}
         aria-haspopup="menu"
@@ -250,13 +249,13 @@ function MenuAcciones({ plan, alElegir }: { plan: PlanAdministrado; alElegir: (a
         aria-controls={idMenu}
         onClick={() => setAbierto((a) => !a)}
       >
-        <ps-icon name="more-vertical" />
+        <Icono nombre="mas" />
       </button>
-      <div id={idMenu} className="ps-menu__list app-menu" role="menu" hidden={!abierto}>
+      <div id={idMenu} className="vl-menu__list app-menu" role="menu" hidden={!abierto}>
         {acciones.map((accion) => (
           <button
             key={accion.id}
-            className="ps-button ps-button--ghost ps-button--sm"
+            className="vl-button vl-button--ghost vl-button--sm"
             role="menuitem"
             type="button"
             onClick={() => {
