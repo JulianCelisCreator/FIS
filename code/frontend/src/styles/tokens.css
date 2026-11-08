@@ -1,0 +1,132 @@
+:root {
+  --rink: #0a2f8f;
+  --rink-deep: #061b52;
+  --rink-black: #030d28;
+  --rink-bright: #1f5cff;
+  --ice: #edf3ff;
+  --ice-deep: #dbe6ff;
+  --chalk: #f8faff;
+  --ink: #071433;
+  --ink-soft: #33456e;
+  --muted: #526489;
+  --muted-on-dark: #bac9ee;
+  --line: #b8c7e8;
+  --line-dark: rgba(244, 248, 255, 0.24);
+  --line-strong: rgba(244, 248, 255, 0.58);
+  --signal: #ffd21e;
+  --signal-deep: #d9a900;
+  --alert: #ff6a5c;
+  --alert-ink: #b3261e;
+  --ok: #6ff2b2;
+  --ok-ink: #0a6b4d;
+  --white: #f7f9ff;
+  --font-display: 'Archivo', 'Arial Narrow', sans-serif;
+  --font-body: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Spline Sans Mono', ui-monospace, Consolas, monospace;
+  --header-h: 72px;
+  --page-max: 1320px;
+  --page-pad: clamp(1.25rem, 4vw, 4.5rem);
+  --section-pad: clamp(4.5rem, 9vw, 8.5rem);
+  --radius: 2px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --shadow-panel: 0 30px 70px rgba(3, 13, 40, 0.35);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-color: var(--signal) var(--rink-deep);
+  scrollbar-width: thin;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background-color: var(--rink-black);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.6;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@supports selector(::-webkit-scrollbar) {
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--rink-deep);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--signal);
+    border: 3px solid var(--rink-deep);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--white);
+  }
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-wrap: balance;
+}
+
+::selection {
+  color: var(--rink-black);
+  background: var(--signal);
+}
+
+:focus-visible {
+  outline: 3px solid var(--signal);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px var(--rink-black);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
