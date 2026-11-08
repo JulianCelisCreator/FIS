@@ -2,7 +2,7 @@
 
 Aplicación de la plataforma de gestión de la escuela de patinaje. El cliente actual usa React, TypeScript y Vite. El desarrollo se organizará **por módulos de dominio** y seguirá una arquitectura objetivo **BFF (Backend for Frontend)**.
 
-> **Estado actual:** existe únicamente la aplicación inicial de React/Vite. Todavía no hay módulos de dominio, capa BFF de servidor, rutas de API propias ni integración con el backend. Los árboles y nombres siguientes son una guía para el código futuro, no una descripción de funcionalidades ya implementadas.
+> **Estado actual:** hay dos páginas. La landing pública (`/`) y la aplicación interna por roles (`/app/`), que por ahora tiene las pantallas de M5 «Asignar o cambiar plan» y «Registrar pago» y llama directo a la API NestJS (sin BFF todavía). Ver [Aplicación interna](#aplicación-interna-app).
 
 ## Puesta en marcha
 
@@ -22,6 +22,25 @@ pnpm preview  # Previsualizar una compilación existente
 ```
 
 Ejecuta `pnpm build` antes de `pnpm preview`. Actualmente no hay un comando de pruebas configurado en este proyecto.
+
+## Aplicación interna (`/app/`)
+
+Para usarla hace falta la API y su base de datos (ver [la guía del backend](../backend/README.md)). Desde `code/backend`:
+
+```bash
+docker compose -f db/compose.yaml up -d --wait
+docker exec -i patinaje-db psql -U patinaje -d patinaje < db/datos-demo.sql   # datos de prueba, opcional
+pnpm start:dev
+```
+
+Después, `pnpm dev` en `code/frontend` y abre `http://localhost:5173/app/`. Vite redirige `/api/*` a `http://localhost:3000` (cámbialo con la variable `API_URL`). Mientras M1 implementa el inicio de sesión, en la barra superior se elige un **usuario de prueba**: el menú y las pantallas cambian según sus permisos.
+
+Decisiones:
+
+- **Dos entradas de Vite.** La landing (`index.html`) y la aplicación (`app/index.html`) se compilan por separado (`vite.config.ts`), así sus estilos no se mezclan.
+- **Design system del repositorio.** La aplicación importa `design-system/ps.css` con el alias `@ds`. De los web components carga solo los «hoja» (`ps-status-badge`, `ps-avatar`, `ps-icon`). Los contenedores (shell, campos, pestañas, diálogos) se generan como componentes React en `src/shared/design-system/componentes.tsx`, con el mismo marcado y las mismas clases, porque sus scripts originales mueven los nodos que maneja React.
+- **Navegación por hash** (`#/registrar-pago?pestana=matricula`): funciona en desarrollo y en cualquier hosting estático sin configurar redirecciones.
+- **Cliente HTTP único** en `src/shared/services/cliente-api.ts`: cuando exista el BFF, solo cambia ahí.
 
 ## Arquitectura objetivo: cliente + BFF
 
