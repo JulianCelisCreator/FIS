@@ -2,7 +2,7 @@
 
 Aplicación de la plataforma de gestión de la escuela de patinaje. El cliente actual usa React, TypeScript y Vite. El desarrollo se organizará **por módulos de dominio** y seguirá una arquitectura objetivo **BFF (Backend for Frontend)**.
 
-> **Estado actual:** hay dos páginas. La landing pública (`/`) y la aplicación interna por roles (`/app/`), que por ahora tiene las pantallas de M5 «Asignar o cambiar plan» y «Registrar pago» y llama directo a la API NestJS (sin BFF todavía). Ver [Aplicación interna](#aplicación-interna-app).
+> **Estado actual:** hay dos páginas. La landing pública (`/`) y la aplicación interna por roles (`/app/`), que por ahora tiene las pantallas de M5 «Planes y tarifas», «Asignar o cambiar plan» y «Registrar pago» y llama directo a la API NestJS (sin BFF todavía). Ver [Aplicación interna](#aplicación-interna-app).
 
 ## Puesta en marcha
 
@@ -39,7 +39,7 @@ Después, `pnpm dev` en `code/frontend` y abre `http://localhost:5173/app/`. Vit
 Decisiones:
 
 - **Dos entradas de Vite.** La landing (`index.html`) y la aplicación (`app/index.html`) se compilan por separado (`vite.config.ts`), así sus estilos no se mezclan.
-- **Design system del repositorio.** La aplicación importa `design-system/ps.css` con el alias `@ds`. De los web components carga solo los «hoja» (`ps-status-badge`, `ps-avatar`, `ps-icon`). Los contenedores (shell, campos, pestañas, diálogos) se generan como componentes React en `src/shared/design-system/componentes.tsx`, con el mismo marcado y las mismas clases, porque sus scripts originales mueven los nodos que maneja React.
+- **Identidad Velora.** La aplicación usa los mismos tokens (`src/styles/tokens.css`), fuentes y marca que la landing, con las reglas de `DESIGN.md` («Aplicación interna»). Sus estilos están en `src/styles/app.css` y los componentes base (campo, alerta, insignia de estado, pestañas, diálogo, ícono, marca) en `src/shared/ui/`; reutilízalos en las pantallas de otros módulos en vez de crear estilos nuevos. Ya no se usa el design system `ps-*` de los wireframes.
 - **Navegación por hash** (`#/registrar-pago?pestana=matricula`): funciona en desarrollo y en cualquier hosting estático sin configurar redirecciones.
 - **Cliente HTTP único** en `src/shared/services/cliente-api.ts`: cuando exista el BFF, solo cambia ahí.
 

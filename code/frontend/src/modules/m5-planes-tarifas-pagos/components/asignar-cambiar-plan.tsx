@@ -6,7 +6,7 @@ import {
   Insignia,
   ListaDatos,
   Pestanas,
-} from '../../../shared/design-system/componentes.tsx'
+} from '../../../shared/ui/componentes.tsx'
 import { useSesion } from '../../../shared/sesion/use-sesion.ts'
 import { formatoCop, formatoFecha, formatoMesAnio, hoyEnClub } from '../../../shared/utils/formato.ts'
 import { enlace } from '../../../shared/utils/use-ruta.ts'
@@ -78,14 +78,14 @@ export function AsignarCambiarPlan({ pestanaInicial }: { pestanaInicial: Pestana
 
   return (
     <div className="app-page">
-      <header className="ps-stack">
-        <nav className="ps-breadcrumb" aria-label="Ruta">
+      <header className="vl-stack">
+        <nav className="vl-breadcrumb" aria-label="Ruta">
           <span>Pagos</span>
           <span aria-hidden="true">/</span>
           <span aria-current="page">Asignar o cambiar plan</span>
         </nav>
         <h1>Asignar o cambiar plan</h1>
-        <p className="ps-text-body-sm">Vincula a un patinador con un plan activo o cambia el que tiene.</p>
+        <p className="vl-text-body-sm">Vincula a un patinador con un plan activo o cambia el que tiene.</p>
       </header>
 
       <Pestanas
@@ -100,10 +100,10 @@ export function AsignarCambiarPlan({ pestanaInicial }: { pestanaInicial: Pestana
 
       {errorPlanes && <Alerta tono="error" titulo="No se pudieron cargar los planes">{errorPlanes}</Alerta>}
 
-      <section id={`panel-${pestana}`} role="tabpanel" aria-labelledby={`pestana-${pestana}`} className="ps-stack">
+      <section id={`panel-${pestana}`} role="tabpanel" aria-labelledby={`pestana-${pestana}`} className="vl-stack">
         <div className="app-cols app-cols--2">
-          <section className="ps-card ps-stack" aria-labelledby="titulo-patinador">
-            <h2 id="titulo-patinador" className="ps-text-heading-h4">
+          <section className="vl-card vl-stack" aria-labelledby="titulo-patinador">
+            <h2 id="titulo-patinador" className="vl-text-heading-h4">
               {pestana === 'asignar' ? 'Patinador' : '1. Patinador'}
             </h2>
             <SelectorPatinador
@@ -196,20 +196,20 @@ function FormularioAsignar({
   }
 
   return (
-    <section className="ps-card ps-stack" aria-labelledby="titulo-plan">
-      <h2 id="titulo-plan" className="ps-text-heading-h4">Plan</h2>
+    <section className="vl-card vl-stack" aria-labelledby="titulo-plan">
+      <h2 id="titulo-plan" className="vl-text-heading-h4">Plan</h2>
       {sinAcudiente && (
         <Alerta tono="error" titulo="Asocia un acudiente antes de asignar un plan">
           <p>El patinador es menor de edad y no tiene acudiente asociado (RF-M2-04).</p>
         </Alerta>
       )}
-      <div className="ps-radio-group" role="radiogroup" aria-labelledby="titulo-plan">
+      <div className="vl-radio-group" role="radiogroup" aria-labelledby="titulo-plan">
         {planes.map((opcion) => {
           const deshabilitado = !opcion.asignable || opcion.tarifa === null
           return (
-            <label key={opcion.id} className="ps-check-row">
+            <label key={opcion.id} className="vl-check-row">
               <input
-                className="ps-radio"
+                className="vl-radio"
                 type="radio"
                 name="plan"
                 disabled={deshabilitado || !patinador || sinAcudiente}
@@ -217,10 +217,10 @@ function FormularioAsignar({
                 onChange={() => setPlanId(opcion.id)}
               />
               <span>
-                <span className="ps-text-label">{opcion.nombre} · {precioPlan(opcion)}</span>{' '}
+                <span className="vl-text-label">{opcion.nombre} · {precioPlan(opcion)}</span>{' '}
                 {!opcion.asignable && <Insignia entidad="plan" estado="inactivo" />}
                 <br />
-                <span className="ps-text-caption">
+                <span className="vl-text-caption">
                   {deshabilitado ? 'Un plan inactivo o sin tarifa vigente no se puede asignar.' : descripcionPlan(opcion)}
                 </span>
               </span>
@@ -236,7 +236,7 @@ function FormularioAsignar({
       >
         <input
           id="fecha-inicio"
-          className="ps-input"
+          className="vl-input"
           type="date"
           min={primerDiaDelMes(hoy)}
           value={fechaInicio}
@@ -246,7 +246,7 @@ function FormularioAsignar({
 
       {patinador && plan && plan.tarifa && (
         <>
-          <h3 className="ps-text-heading-h5">Resumen</h3>
+          <h3 className="vl-text-heading-h5">Resumen</h3>
           <ListaDatos
             filas={[
               ['Patinador', patinador.nombre],
@@ -260,7 +260,7 @@ function FormularioAsignar({
               <p>Ambos conceptos son obligatorios y deben registrarse y pagarse antes de activar el primer plan.</p>
               {puedeCobrar ? (
                 <p>
-                  <a className="ps-link" href={enlace('registrar-pago', { pestana: 'matricula', patinador: patinador.id })}>
+                  <a className="vl-link" href={enlace('registrar-pago', { pestana: 'matricula', patinador: patinador.id })}>
                     Registrar matrícula y gastos
                   </a>
                 </p>
@@ -274,7 +274,7 @@ function FormularioAsignar({
 
       {error && <Alerta tono="error" titulo="No se pudo asignar el plan">{error}</Alerta>}
       <div className="app-actions">
-        <button className="ps-button ps-button--primary" type="button" disabled={!listo} onClick={() => setDialogo(true)}>
+        <button className="vl-button vl-button--primary" type="button" disabled={!listo} onClick={() => setDialogo(true)}>
           Asignar plan
         </button>
       </div>
@@ -329,8 +329,8 @@ function ResultadoAsignado({
 }) {
   const { primerCobro, siguienteCobro } = resultado
   return (
-    <section className="ps-card ps-stack" aria-labelledby="titulo-asignado">
-      <h2 id="titulo-asignado" className="ps-text-heading-h4">Plan asignado</h2>
+    <section className="vl-card vl-stack" aria-labelledby="titulo-asignado">
+      <h2 id="titulo-asignado" className="vl-text-heading-h4">Plan asignado</h2>
       <Alerta tono="success" titulo={`${nombre} tiene el plan ${resultado.plan.nombre}`}>
         <p>Desde el {formatoFecha(resultado.fechaInicio)}.</p>
       </Alerta>
@@ -358,7 +358,7 @@ function ResultadoAsignado({
         ]}
       />
       <div className="app-actions">
-        <button className="ps-button ps-button--secondary" type="button" onClick={alContinuar}>
+        <button className="vl-button vl-button--secondary" type="button" onClick={alContinuar}>
           Asignar a otro patinador
         </button>
       </div>
@@ -383,13 +383,13 @@ function HistorialPlanes({ patinador }: { patinador: PatinadorM5 | null }) {
   }, [patinador])
 
   return (
-    <section className="ps-card ps-stack" aria-labelledby="titulo-historial">
-      <h2 id="titulo-historial" className="ps-text-heading-h4">Historial de planes</h2>
-      {!patinador && <p className="ps-text-body-sm">Elige un patinador para ver su historial.</p>}
+    <section className="vl-card vl-stack" aria-labelledby="titulo-historial">
+      <h2 id="titulo-historial" className="vl-text-heading-h4">Historial de planes</h2>
+      {!patinador && <p className="vl-text-body-sm">Elige un patinador para ver su historial.</p>}
       {error && <Alerta tono="error">{error}</Alerta>}
       {patinador && datos && (
-        <ps-data-table>
-          <table className="ps-table">
+        <div className="vl-table-wrap">
+          <table className="vl-table">
             <thead>
               <tr><th>Plan</th><th>Desde</th><th>Hasta</th></tr>
             </thead>
@@ -403,7 +403,7 @@ function HistorialPlanes({ patinador }: { patinador: PatinadorM5 | null }) {
               ))}
             </tbody>
           </table>
-        </ps-data-table>
+        </div>
       )}
     </section>
   )
@@ -451,8 +451,8 @@ function FormularioCambiar({
 
   if (resultado) {
     return (
-      <section className="ps-card ps-stack" aria-labelledby="titulo-cambio">
-        <h2 id="titulo-cambio" className="ps-text-heading-h4">Cambio programado</h2>
+      <section className="vl-card vl-stack" aria-labelledby="titulo-cambio">
+        <h2 id="titulo-cambio" className="vl-text-heading-h4">Cambio programado</h2>
         <Alerta tono="success" titulo={`${patinador.nombre} pasará a ${resultado.planNuevo.nombre}`}>
           <p>Desde el {formatoFecha(resultado.rigeDesde)}. El cobro de {formatoMesAnio(hoy)} no cambia.</p>
         </Alerta>
@@ -482,38 +482,38 @@ function FormularioCambiar({
 
   return (
     <>
-      <section className="ps-card ps-stack" aria-labelledby="titulo-nuevo">
-        <h2 id="titulo-nuevo" className="ps-text-heading-h4">2. Nuevo plan</h2>
+      <section className="vl-card vl-stack" aria-labelledby="titulo-nuevo">
+        <h2 id="titulo-nuevo" className="vl-text-heading-h4">2. Nuevo plan</h2>
         <div className="app-cols app-cols--4" role="radiogroup" aria-labelledby="titulo-nuevo">
           {opciones.map((opcion) =>
             opcion.id === actual?.planId ? (
-              <div key={opcion.id} className="ps-card ps-stack">
-                <p className="ps-text-heading-h5">{opcion.nombre}</p>
-                <p className="ps-text-caption">Plan actual</p>
-                <p className="ps-text-label">{precioPlan(opcion)}</p>
+              <div key={opcion.id} className="vl-card vl-stack">
+                <p className="vl-text-heading-h5">{opcion.nombre}</p>
+                <p className="vl-text-caption">Plan actual</p>
+                <p className="vl-text-label">{precioPlan(opcion)}</p>
               </div>
             ) : (
-              <label key={opcion.id} className="ps-card ps-card--selectable ps-stack" aria-selected={opcion.id === planId}>
-                <span className="ps-check-row">
+              <label key={opcion.id} className="vl-card vl-card--selectable vl-stack" aria-selected={opcion.id === planId}>
+                <span className="vl-check-row">
                   <input
-                    className="ps-radio"
+                    className="vl-radio"
                     type="radio"
                     name="nuevo-plan"
                     checked={opcion.id === planId}
                     onChange={() => setPlanId(opcion.id)}
                   />
-                  <span className="ps-text-heading-h5">{opcion.nombre}</span>
+                  <span className="vl-text-heading-h5">{opcion.nombre}</span>
                 </span>
-                <span className="ps-text-caption app-bloque">{descripcionPlan(opcion)}</span>
-                <span className="ps-text-label app-bloque">{precioPlan(opcion)}</span>
+                <span className="vl-text-caption app-bloque">{descripcionPlan(opcion)}</span>
+                <span className="vl-text-label app-bloque">{precioPlan(opcion)}</span>
               </label>
             ),
           )}
         </div>
       </section>
 
-      <section className="ps-card ps-stack" aria-labelledby="titulo-resumen-cambio">
-        <h2 id="titulo-resumen-cambio" className="ps-text-heading-h4">3. Resumen del cambio</h2>
+      <section className="vl-card vl-stack" aria-labelledby="titulo-resumen-cambio">
+        <h2 id="titulo-resumen-cambio" className="vl-text-heading-h4">3. Resumen del cambio</h2>
         {plan && plan.tarifa ? (
           <ListaDatos
             filas={[
@@ -529,7 +529,7 @@ function FormularioCambiar({
             ]}
           />
         ) : (
-          <p className="ps-text-body-sm">Elige el nuevo plan.</p>
+          <p className="vl-text-body-sm">Elige el nuevo plan.</p>
         )}
         {ajustarGrupo && (
           <Alerta tono="warning" titulo="Hay que ajustar el grupo">
@@ -542,7 +542,7 @@ function FormularioCambiar({
         <Campo etiqueta="Motivo del cambio" id="motivo-cambio" ayuda="Opcional. Queda en la auditoría.">
           <textarea
             id="motivo-cambio"
-            className="ps-textarea"
+            className="vl-textarea"
             rows={2}
             maxLength={500}
             value={motivo}
@@ -551,7 +551,7 @@ function FormularioCambiar({
         </Campo>
         {error && <Alerta tono="error" titulo="No se pudo cambiar el plan">{error}</Alerta>}
         <div className="app-actions">
-          <button className="ps-button ps-button--primary" type="button" disabled={!plan} onClick={() => setDialogo(true)}>
+          <button className="vl-button vl-button--primary" type="button" disabled={!plan} onClick={() => setDialogo(true)}>
             Confirmar cambio
           </button>
         </div>

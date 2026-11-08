@@ -1,4 +1,4 @@
-import { Alerta, Campo, ListaDatos, TarjetaPersona } from '../../../shared/design-system/componentes.tsx'
+import { Alerta, Campo, ListaDatos, TarjetaPersona } from '../../../shared/ui/componentes.tsx'
 import type { PatinadorM5 } from '../types/m5.types.ts'
 import { acudientesDe, detallePatinador } from '../utils/patinador.ts'
 
@@ -35,9 +35,9 @@ export function SelectorPatinador({
 }) {
   if (seleccionado) {
     return (
-      <div className="ps-stack">
+      <div className="vl-stack">
         <TarjetaPersona nombre={seleccionado.nombre} detalle={detallePatinador(seleccionado)} />
-        <button className="ps-button ps-button--ghost ps-button--sm app-boton-inicio" type="button" onClick={() => alSeleccionar(null)}>
+        <button className="vl-button vl-button--ghost vl-button--sm app-boton-inicio" type="button" onClick={() => alSeleccionar(null)}>
           Elegir otro patinador
         </button>
       </div>
@@ -45,12 +45,12 @@ export function SelectorPatinador({
   }
 
   return (
-    <div className="ps-stack">
+    <div className="vl-stack">
       {puedeBuscar && (
         <Campo etiqueta={etiqueta} id={id} ayuda={ayuda}>
           <input
             id={id}
-            className="ps-input"
+            className="vl-input"
             type="search"
             placeholder="Nombre o número de documento"
             value={texto}
@@ -60,13 +60,13 @@ export function SelectorPatinador({
         </Campo>
       )}
       {error && <Alerta tono="error">{error}</Alerta>}
-      {cargando && <p className="ps-text-caption" role="status">Buscando patinadores…</p>}
-      {!cargando && !error && candidatos.length === 0 && <p className="ps-text-body-sm">{sinResultados}</p>}
+      {cargando && <p className="vl-text-caption" role="status">Buscando patinadores…</p>}
+      {!cargando && !error && candidatos.length === 0 && <p className="vl-text-body-sm">{sinResultados}</p>}
       {!cargando && candidatos.length > 0 && (
-        <ul className="ps-stack app-lista-opciones" aria-label="Patinadores">
+        <ul className="vl-stack app-lista-opciones" aria-label="Patinadores">
           {candidatos.map((patinador) => (
             <li key={patinador.id}>
-              <button className="ps-card ps-card--selectable app-opcion" type="button" onClick={() => alSeleccionar(patinador)}>
+              <button className="vl-card vl-card--selectable app-opcion" type="button" onClick={() => alSeleccionar(patinador)}>
                 <TarjetaPersona nombre={patinador.nombre} detalle={detallePatinador(patinador)} />
               </button>
             </li>

@@ -4,6 +4,19 @@ export type Periodicidad = 'MENSUAL' | 'POR_SESION'
 export type EstadoCartera = 'AL_DIA' | 'PENDIENTE' | 'VENCIDO'
 export type MedioPago = 'EFECTIVO' | 'TRANSFERENCIA' | 'CONSIGNACION'
 
+export type TipoPlan = 'DIA_UNICO' | 'TRES_DIAS' | 'SEIS_DIAS' | 'SEIS_DIAS_GIMNASIO'
+
+/** Tipos de plan y su texto (el tipo fija periodicidad, días y gimnasio). */
+export const TIPOS_PLAN: { valor: TipoPlan; texto: string; periodicidad: Periodicidad }[] = [
+  { valor: 'DIA_UNICO', texto: 'Día único', periodicidad: 'POR_SESION' },
+  { valor: 'TRES_DIAS', texto: '3 días/semana', periodicidad: 'MENSUAL' },
+  { valor: 'SEIS_DIAS', texto: '6 días/semana', periodicidad: 'MENSUAL' },
+  { valor: 'SEIS_DIAS_GIMNASIO', texto: '6 días/semana + gimnasio', periodicidad: 'MENSUAL' },
+]
+
+/** Días límite de pago que acepta la API para los planes mensuales. */
+export const DIAS_LIMITE_PAGO = [5, 10, 15, 20]
+
 export const PERMISOS_M5 = {
   planGestionar: 'M5_PLAN_GESTIONAR',
   planAsignar: 'M5_PLAN_ASIGNAR',
@@ -59,6 +72,39 @@ export interface PlanOfertado {
   tarifa: { valor: number; vigenteDesde: string } | null
   /** Solo en el listado del Administrador: un plan inactivo se muestra deshabilitado. */
   asignable: boolean
+}
+
+/** GET /m5/planes (Administrador): plan con tarifas, uso y última modificación. */
+export interface PlanAdministrado {
+  id: number
+  nombre: string
+  tipo: TipoPlan
+  periodicidad: Periodicidad
+  diasPorSemana: number | null
+  incluyeGimnasio: boolean
+  diaLimitePago: number | null
+  descripcion: string | null
+  estado: 'ACTIVO' | 'INACTIVO'
+  tarifaVigente: { valor: number; vigenteDesde: string } | null
+  tarifaProgramada: { valor: number; vigenteDesde: string } | null
+  patinadores: number
+  asignable: boolean
+  ultimaModificacion: { por: string; en: string } | null
+}
+
+export interface TarifaEnHistorial {
+  id: number
+  valor: number
+  vigenteDesde: string
+  vigenteHasta: string | null
+  estado: 'PROGRAMADA' | 'VIGENTE' | 'HISTORICA'
+  registradoPor: string
+  registradoEn: string
+}
+
+/** GET /m5/planes/:id y respuesta de crear, editar, desactivar y registrar tarifa. */
+export interface PlanDetalle extends PlanAdministrado {
+  tarifas: TarifaEnHistorial[]
 }
 
 /** GET /m5/patinadores/:id/plan */

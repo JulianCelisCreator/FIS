@@ -1,7 +1,8 @@
-import { Alerta } from '../shared/design-system/componentes.tsx'
+import { Alerta } from '../shared/ui/componentes.tsx'
 import { useSesion } from '../shared/sesion/use-sesion.ts'
 import { useRuta } from '../shared/utils/use-ruta.ts'
 import { AsignarCambiarPlan } from '../modules/m5-planes-tarifas-pagos/components/asignar-cambiar-plan.tsx'
+import { PlanesTarifas } from '../modules/m5-planes-tarifas-pagos/components/planes-tarifas.tsx'
 import {
   RegistrarPago,
   type PestanaPago,
@@ -11,6 +12,7 @@ import { MarcoAplicacion } from './marco-aplicacion.tsx'
 
 /** Pantallas disponibles y el permiso que exige cada una. */
 const PANTALLAS = [
+  { pagina: 'planes', texto: 'Planes y tarifas', permiso: PERMISOS_M5.planGestionar },
   { pagina: 'asignar-plan', texto: 'Asignar o cambiar plan', permiso: PERMISOS_M5.planAsignar },
   { pagina: 'registrar-pago', texto: 'Registrar pago', permiso: PERMISOS_M5.pagoRegistrar },
 ]
@@ -28,7 +30,7 @@ export function Aplicacion() {
 
   let contenido
   if (cargando) {
-    contenido = <p className="ps-text-body-sm" role="status">Cargando…</p>
+    contenido = <p className="vl-text-body-sm" role="status">Cargando…</p>
   } else if (!sesion) {
     contenido = (
       <div className="app-page">
@@ -55,6 +57,8 @@ export function Aplicacion() {
         </Alerta>
       </div>
     )
+  } else if (actual === 'planes') {
+    contenido = <PlanesTarifas key={sesion.id} />
   } else if (actual === 'asignar-plan') {
     contenido = (
       <AsignarCambiarPlan
