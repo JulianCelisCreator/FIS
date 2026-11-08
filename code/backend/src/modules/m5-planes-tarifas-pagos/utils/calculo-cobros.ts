@@ -44,17 +44,23 @@ export function fechaLimiteMensualidad(periodo: string, diaLimitePago: number): 
 }
 
 /**
- * Días cobrados en el mes de ingreso, sobre un mes comercial de 30 días e
- * incluyendo el día de inicio. Quien empieza el día 1 paga el mes completo; los
- * días 30 y 31 cuentan como un día.
+ * Días cobrados en el mes de ingreso, sobre un mes comercial de 30 días, según
+ * la convención de los wireframes del grupo 04: quien empieza el día 1 paga el
+ * mes completo y quien empieza el día 15 paga 15/30. Como mínimo se cobra un día.
  */
 export function diasCobradosPrimerMes(fechaInicio: string): number {
-  return DIAS_MES_COMERCIAL - Math.min(diaDelMes(fechaInicio), DIAS_MES_COMERCIAL) + 1;
+  const dia = diaDelMes(fechaInicio);
+  return dia === 1 ? DIAS_MES_COMERCIAL : Math.max(1, DIAS_MES_COMERCIAL - dia);
 }
 
 /** Primera mensualidad prorrateada, redondeada al peso. */
 export function valorPrimeraMensualidad(tarifaMensual: number, fechaInicio: string): number {
   return Math.round((tarifaMensual * diasCobradosPrimerMes(fechaInicio)) / DIAS_MES_COMERCIAL);
+}
+
+/** Primer día en mora: el siguiente a la fecha límite más los días de gracia. */
+export function vencidoDesde(fechaLimite: string, diasGracia: number): string {
+  return sumarDias(fechaLimite, diasGracia + 1);
 }
 
 /**

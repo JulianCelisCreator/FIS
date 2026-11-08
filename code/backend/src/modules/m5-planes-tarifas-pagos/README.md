@@ -30,6 +30,7 @@ Todos exigen la cabecera `x-usuario-id` (ver [Autenticación temporal](#autentic
 | `PATCH /m5/planes/:id` | `M5_PLAN_GESTIONAR` | Administrador |
 | `POST /m5/planes/:id/desactivar` | `M5_PLAN_GESTIONAR` | Administrador |
 | `POST /m5/planes/:id/tarifas` | `M5_PLAN_GESTIONAR` | Administrador |
+| `GET /m5/patinadores?buscar=&patinadorId=` | `M5_PLAN_CONSULTAR` | Administrador y Contador (todos), Acudiente (los suyos), Patinador mayor (a sí mismo) |
 | `POST /m5/asignaciones` | `M5_PLAN_ASIGNAR` | Administrador, acudiente (sus patinadores), patinador mayor (a sí mismo) |
 | `POST /m5/asignaciones/cambios` | `M5_PLAN_ASIGNAR` | Igual que la asignación |
 | `GET /m5/patinadores/:id/plan` | — | Administrador, Contador, acudiente propio, patinador mayor |
@@ -38,6 +39,8 @@ Todos exigen la cabecera `x-usuario-id` (ver [Autenticación temporal](#autentic
 | `POST /m5/pagos/cobro` | `M5_PAGO_REGISTRAR` | Administrador, Contador |
 | `POST /m5/pagos/sesion` | `M5_PAGO_REGISTRAR` | Administrador, Contador |
 | `POST /m5/pagos/matricula` | `M5_PAGO_REGISTRAR` | Administrador, Contador |
+
+Además, `GET /sesion` (usuario actual con roles y permisos) y `GET /sesion/usuarios` (usuarios de prueba, solo en desarrollo) sirven a la aplicación mientras M1 no tenga inicio de sesión.
 
 Los permisos de cada rol están en `rol_permiso` (sembrados en `db/schema.sql`). El permiso habilita la acción; el rol define sobre qué patinadores (`validators/acceso-patinador.validator.ts`).
 
@@ -90,8 +93,9 @@ Los permisos de cada rol están en `rol_permiso` (sembrados en `db/schema.sql`).
 
   El detalle y las escrituras agregan `tarifas`, el historial de la más nueva a la más antigua, con `estado` (`PROGRAMADA`, `VIGENTE` o `HISTORICA`) y `vigenteHasta`.
 - **Oferta:** `fecha` y `planes`, solo los activos con tarifa vigente, cada uno con su `tarifa`. No incluye datos internos como el número de patinadores.
-- **Asignación:** `asignacionId`, `plan`, `fechaInicio`, `tarifa` y `primerCobro` (`valor`, `diasCobrados`, `fechaLimite`), o `null` en el plan de día único.
-- **Cambio:** `planAnterior`, `planNuevo`, `rigeDesde`, `proximoCobro`, `requiereAjusteGrupo` y `aviso`.
+- **Patinador (buscador):** documento, edad, `esMenor`, `acudientes`, `planActual`, `tieneCambioProgramado`, `matriculaPagada` y `estadoCartera`.
+- **Asignación:** `asignacionId`, `plan`, `fechaInicio`, `tarifa`, `primerCobro` (`valor`, `diasCobrados`, `fechaLimite`, `vencidoDesde`) y `siguienteCobro`; ambos son `null` en el plan de día único.
+- **Cambio:** `planAnterior`, `planNuevo`, `rigeDesde`, `proximoCobro` (con `vencidoDesde`), `requiereAjusteGrupo` y `aviso`.
 - **Pago de cobro:** `comprobante` (`numero` `CP-000123`), `saldoAnterior`, `saldoRestante`, `pagoParcial`, `cobro.estado` y `estadoCartera`.
 - **Pago por sesión:** `numeroSesiones`, `valorSesion`, `monto`, `comprobante` y `estadoCartera`.
 
@@ -125,7 +129,7 @@ Errores: `400` datos inválidos, `401` sin usuario, `403` sin permiso o patinado
 - El plan debe estar activo y tener una tarifa vigente en la fecha de inicio.
 - La fecha de inicio no puede ser anterior al mes actual ni solaparse con el plan anterior.
 - **Primer plan:** exige la matrícula y los gastos administrativos pagados (`POST /m5/pagos/matricula`).
-- **Plan mensual:** crea la primera mensualidad. Si empieza después del día 1 se prorratea sobre un mes de 30 días, incluyendo el día de inicio. Vence en la fecha de inicio, pero nunca antes del día límite del plan.
+- **Plan mensual:** crea la primera mensualidad. Si empieza después del día 1 se prorratea sobre un mes comercial de 30 días, como en el wireframe: el día 15 paga 15/30 (30 − día, mínimo un día). Vence en la fecha de inicio, pero nunca antes del día límite del plan.
 
 ### Cambio (RF-M5-07)
 
@@ -139,6 +143,11 @@ Errores: `400` datos inválidos, `401` sin usuario, `403` sin permiso o patinado
 - Usa la tarifa vigente ese día, y la fecha límite es el día límite del plan.
 - Es idempotente: el índice `cobro_mensualidad_uk` impide duplicar el mes. Por eso puede correr a diario y recuperar meses en los que el servidor estuvo apagado.
 - La respuesta informa las asignaciones omitidas por no tener tarifa vigente.
+
+### Mora (RF-M5-12)
+
+- Un cobro se paga hasta su fecha límite y pasa a «Vencido» después de `parametro_sistema.dias_gracia_mora` días (4 por defecto): con límite el día 5, queda vencido desde el día 10, como dicen los wireframes.
+- La vista `v_saldo_cobro` expone `vencido_desde`, y la usan `v_estado_cartera`, los cobros pendientes y las respuestas de asignación y cambio.
 
 ### Pagos (RF-M5-09, RF-M5-10)
 
@@ -158,8 +167,6 @@ M1 todavía no implementa el inicio de sesión (M1-02). Mientras tanto, `common/
 
 | Tema | Supuesto | Por qué |
 | --- | --- | --- |
-| Prorrateo | Mes comercial de 30 días, incluyendo el día de inicio (día 15 → 16/30). | El wireframe dice «15/30 días» para el día 15, que equivale a excluir el día de inicio. |
-| Mora | El cobro aparece vencido al día siguiente de la fecha límite (vista `v_estado_cartera`). | El wireframe dice «pagar del 1 al 5; vencido desde el día 10». Si se quieren días de gracia, hay que agregarlos a la vista (RF-M5-12). |
 | Matrícula | Se exige antes del primer plan de cualquier tipo, incluido el de día único. | El wireframe la pide «antes de activar el plan» sin excepciones. |
 | Cambio desde o hacia día único | También rige desde el mes siguiente. | Así se mantiene una sola regla para todos los cambios. |
 | Día límite | Se acepta 5, 10, 15 o 20, al crear y al editar. | El diálogo de edición del wireframe solo ofrece 5, 10 y 15; se asume un descuido. |

@@ -32,20 +32,22 @@ describe('calculo-cobros', () => {
       expect(valorPrimeraMensualidad(180000, '2026-10-01')).toBe(180000);
     });
 
-    it('prorratea sobre un mes de 30 días incluyendo el día de inicio', () => {
-      expect(diasCobradosPrimerMes('2026-10-15')).toBe(16);
-      expect(valorPrimeraMensualidad(180000, '2026-10-15')).toBe(96000);
+    it('prorratea como el wireframe: el día 15 paga 15/30', () => {
+      expect(diasCobradosPrimerMes('2026-10-15')).toBe(15);
+      expect(valorPrimeraMensualidad(180000, '2026-10-15')).toBe(90000);
+      expect(diasCobradosPrimerMes('2026-10-02')).toBe(28);
     });
 
-    it('cuenta los días 30 y 31 como un día', () => {
+    it('cobra al menos un día a quien entra el 29, 30 o 31', () => {
+      expect(diasCobradosPrimerMes('2026-10-29')).toBe(1);
       expect(diasCobradosPrimerMes('2026-10-30')).toBe(1);
       expect(diasCobradosPrimerMes('2026-10-31')).toBe(1);
       expect(valorPrimeraMensualidad(180000, '2026-10-31')).toBe(6000);
     });
 
     it('redondea al peso', () => {
-      expect(valorPrimeraMensualidad(100000, '2026-10-10')).toBe(70000);
-      expect(valorPrimeraMensualidad(35500, '2026-10-20')).toBe(13017);
+      expect(valorPrimeraMensualidad(100000, '2026-10-10')).toBe(66667);
+      expect(valorPrimeraMensualidad(35500, '2026-10-20')).toBe(11833);
     });
 
     it('vence al ingresar, pero no antes del día límite normal', () => {
