@@ -15,7 +15,8 @@ import {
 describe.skipIf(!process.env.DB_HOST)('M5 planes y tarifas (e2e)', () => {
   let app: INestApplication<App>;
   let baseDatos: BaseDatosService;
-  const sufijo = String(Date.now());
+  // Único por archivo y ejecución: los archivos e2e corren en paralelo sobre la misma base.
+  const sufijo = `pt${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
   const hoy = hoyEnClub();
   const ids: Record<string, number> = {};
 

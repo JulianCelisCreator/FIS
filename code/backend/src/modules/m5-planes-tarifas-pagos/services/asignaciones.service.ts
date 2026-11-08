@@ -30,6 +30,7 @@ import {
   primerDiaMesSiguiente,
   sumarDias,
   valorPrimeraMensualidad,
+  vencidoDesde,
 } from '../utils/calculo-cobros.js';
 import {
   validarConsultaDePagos,
@@ -98,6 +99,7 @@ export class AsignacionesService {
         asignadoPor: usuario.id,
       });
 
+      const diasGracia = await this.cobros.diasGraciaMora(tx);
       const primerCobro =
         plan.periodicidad === 'MENSUAL'
           ? await this.crearPrimeraMensualidad(tx, {
@@ -107,7 +109,17 @@ export class AsignacionesService {
               tarifa,
               fechaInicio: dto.fechaInicio,
               usuarioId: usuario.id,
+              diasGracia,
             })
+          : null;
+      const siguienteCobro =
+        plan.periodicidad === 'MENSUAL'
+          ? await this.describirMensualidad(
+              tx,
+              plan,
+              primerDiaMesSiguiente(dto.fechaInicio),
+              diasGracia,
+            )
           : null;
 
       await this.auditoria.registrar(tx, {
@@ -126,6 +138,7 @@ export class AsignacionesService {
         fechaInicio: dto.fechaInicio,
         tarifa: tarifa.valor,
         primerCobro,
+        siguienteCobro,
       };
     });
   }
@@ -192,11 +205,7 @@ export class AsignacionesService {
         tarifa: tarifa.valor,
         proximoCobro:
           plan.periodicidad === 'MENSUAL'
-            ? {
-                periodo: rigeDesde,
-                valor: tarifa.valor,
-                fechaLimite: fechaLimiteMensualidad(rigeDesde, diaLimiteDe(plan)),
-              }
+            ? await this.describirMensualidad(tx, plan, rigeDesde, await this.cobros.diasGraciaMora(tx))
             : null,
         requiereAjusteGrupo,
         aviso: requiereAjusteGrupo
@@ -249,6 +258,7 @@ export class AsignacionesService {
       tarifa: Tarifa;
       fechaInicio: string;
       usuarioId: number;
+      diasGracia: number;
     },
   ) {
     const periodo = primerDiaDelMes(datos.fechaInicio);
@@ -270,7 +280,26 @@ export class AsignacionesService {
       estado: 'PENDIENTE',
       creadoPor: datos.usuarioId,
     });
-    return { id, periodo, diasCobrados, valor, fechaLimite };
+    return {
+      id,
+      periodo,
+      diasCobrados,
+      valor,
+      fechaLimite,
+      vencidoDesde: vencidoDesde(fechaLimite, datos.diasGracia),
+    };
+  }
+
+  /** Mensualidad completa que se generará el día 1 de `periodo`, con la tarifa vigente ese día. */
+  private async describirMensualidad(tx: Consultor, plan: Plan, periodo: string, diasGracia: number) {
+    const tarifa = await this.obtenerTarifa(tx, plan, periodo);
+    const fechaLimite = fechaLimiteMensualidad(periodo, diaLimiteDe(plan));
+    return {
+      periodo,
+      valor: tarifa.valor,
+      fechaLimite,
+      vencidoDesde: vencidoDesde(fechaLimite, diasGracia),
+    };
   }
 }
 

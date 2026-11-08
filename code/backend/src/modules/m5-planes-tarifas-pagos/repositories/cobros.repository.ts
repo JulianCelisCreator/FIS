@@ -40,6 +40,8 @@ export interface CobroPendiente {
   pagado: number;
   saldo: number;
   fechaLimite: string;
+  /** Primer día en mora (fecha límite + días de gracia + 1). */
+  vencidoDesde: string;
   vencido: boolean;
 }
 
@@ -98,13 +100,22 @@ export class CobrosRepository {
     const { rows } = await consultor.query<CobroPendiente>(
       `SELECT s.cobro_id AS id, s.concepto, s.periodo, c.descripcion, s.valor, s.pagado, s.saldo,
               s.fecha_limite AS "fechaLimite",
-              s.fecha_limite < current_date AS vencido
+              s.vencido_desde AS "vencidoDesde",
+              s.vencido_desde <= current_date AS vencido
        FROM v_saldo_cobro s JOIN cobro c ON c.id = s.cobro_id
        WHERE s.patinador_id = $1 AND s.estado <> 'ANULADO' AND s.saldo > 0
        ORDER BY s.fecha_limite, s.cobro_id`,
       [patinadorId],
     );
     return rows;
+  }
+
+  /** Días de gracia tras la fecha límite antes de pasar a Vencido (parametro_sistema). */
+  async diasGraciaMora(consultor: Consultor): Promise<number> {
+    const { rows } = await consultor.query<{ dias: number }>(
+      `SELECT COALESCE((SELECT valor::int FROM parametro_sistema WHERE clave = 'dias_gracia_mora'), 0) AS dias`,
+    );
+    return rows[0].dias;
   }
 
   /** ¿Pagó ya la matrícula y los gastos administrativos? */

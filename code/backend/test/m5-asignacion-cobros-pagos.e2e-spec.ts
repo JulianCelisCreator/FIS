@@ -17,7 +17,8 @@ import {
 describe.skipIf(!process.env.DB_HOST)('M5 asignación, cobros y pagos (e2e)', () => {
   let app: INestApplication<App>;
   let baseDatos: BaseDatosService;
-  const sufijo = String(Date.now());
+  // Único por archivo y ejecución: los archivos e2e corren en paralelo sobre la misma base.
+  const sufijo = `acp${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
   const hoy = hoyEnClub();
   const ids: Record<string, number> = {};
 
@@ -185,6 +186,15 @@ describe.skipIf(!process.env.DB_HOST)('M5 asignación, cobros y pagos (e2e)', ()
       expect(res.body.primerCobro.valor).toBe(valorPrimeraMensualidad(180000, hoy));
       expect(res.body.primerCobro.periodo).toBe(primerDiaDelMes(hoy));
       expect(res.body.primerCobro.fechaLimite >= hoy).toBe(true);
+      expect(res.body.primerCobro.vencidoDesde).toBe(sumarDias(res.body.primerCobro.fechaLimite, 5));
+      // Mes siguiente completo: se paga hasta el día 5 y pasa a «Vencido» desde el día 10.
+      const siguiente = primerDiaMesSiguiente(hoy);
+      expect(res.body.siguienteCobro).toEqual({
+        periodo: siguiente,
+        valor: 180000,
+        fechaLimite: sumarDias(siguiente, 4),
+        vencidoDesde: sumarDias(siguiente, 9),
+      });
       ids.cobroMayor = res.body.primerCobro.id;
     });
 
@@ -430,6 +440,78 @@ describe.skipIf(!process.env.DB_HOST)('M5 asignación, cobros y pagos (e2e)', ()
         .expect(201);
       expect(res.body).toMatchObject({ numeroSesiones: 4, valorSesion: 35000, monto: 140000 });
       expect(res.body.estadoCartera.estado).toBe('AL_DIA');
+    });
+  });
+
+  describe('mora con días de gracia (RF-M5-12)', () => {
+    it('el cobro pasa a vencido cuando se cumplen los días de gracia tras la fecha límite', async () => {
+      const patinador = await crearPatinador('mora', '1995-03-01');
+      for (const diasAtras of [4, 5]) {
+        await baseDatos.consultar(
+          `INSERT INTO cobro (patinador_id, concepto, descripcion, valor, fecha_limite)
+           VALUES ($1, 'SESION', $2, 10000, $3)`,
+          [patinador, `Vence hace ${diasAtras} días`, sumarDias(hoy, -diasAtras)],
+        );
+      }
+      const res = await http()
+        .get(`/m5/patinadores/${patinador}/cobros-pendientes`)
+        .set(como('contador'))
+        .expect(200);
+      expect(
+        res.body.cobros.map((c: { descripcion: string; vencido: boolean }) => [c.descripcion, c.vencido]),
+      ).toEqual([
+        ['Vence hace 5 días', true],
+        ['Vence hace 4 días', false],
+      ]);
+    });
+  });
+
+  describe('buscador de patinadores', () => {
+    const buscar = (usuario: string, texto = sufijo) =>
+      http().get('/m5/patinadores').query({ buscar: texto }).set(como(usuario)).expect(200);
+
+    it('el administrador encuentra por nombre o documento, con plan, matrícula y cartera', async () => {
+      const porDocumento = await buscar('admin', `menor-${sufijo}`);
+      expect(porDocumento.body).toHaveLength(1);
+      expect(porDocumento.body[0]).toMatchObject({
+        id: ids.menor,
+        esMenor: true,
+        matriculaPagada: true,
+        tieneCambioProgramado: true,
+        planActual: { planId: ids.tresDias, periodicidad: 'MENSUAL' },
+        acudientes: [{ id: ids.acudiente, parentesco: 'madre' }],
+      });
+      expect(['PENDIENTE', 'VENCIDO']).toContain(porDocumento.body[0].estadoCartera);
+    });
+
+    it('el acudiente solo ve a sus patinadores y el patinador mayor solo a sí mismo', async () => {
+      const acudiente = await buscar('acudiente', '');
+      expect(acudiente.body.map((p: { id: number }) => p.id)).toEqual([ids.menor]);
+
+      const mayor = await buscar('usuarioMayor', '');
+      expect(mayor.body.map((p: { id: number }) => p.id)).toEqual([ids.mayor]);
+
+      const menor = await buscar('usuarioMenor', '');
+      expect(menor.body).toEqual([]);
+    });
+
+    it('el contador ve a todos', async () => {
+      const res = await buscar('contador', `-${sufijo}`);
+      expect(res.body.length).toBeGreaterThanOrEqual(5);
+    });
+  });
+
+  describe('sesión temporal', () => {
+    it('devuelve el usuario actual con nombre, roles y permisos', async () => {
+      const res = await http().get('/sesion').set(como('contador')).expect(200);
+      expect(res.body).toMatchObject({ id: ids.contador, nombre: 'contador Prueba', roles: ['CONTADOR'] });
+      expect(res.body.permisos).toContain('M5_PAGO_REGISTRAR');
+      expect(res.body.permisos).not.toContain('M5_PAGO_ANULAR');
+    });
+
+    it('lista los usuarios de prueba sin autenticación (solo desarrollo)', async () => {
+      const res = await http().get('/sesion/usuarios').expect(200);
+      expect(res.body.map((u: { id: number }) => u.id)).toContain(ids.admin);
     });
   });
 
