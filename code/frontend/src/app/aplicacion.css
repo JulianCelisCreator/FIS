@@ -12,10 +12,30 @@
 /* Dentro de un <label> solo caben <span>: los que deben ir en su propia línea. */
 .app-bloque { display: block; }
 
+/*
+  El contenido ocupa todo el ancho disponible (hasta --layout-max-width). Sin
+  esto, .ps-container se encoge al ancho de su contenido dentro de la grilla del
+  shell, y las tablas (container-type: inline-size) quedan en formato tarjeta.
+*/
+.ps-shell__body > .ps-container { width: 100%; min-width: 0; }
+
 /* Contenido de página */
 .app-page { padding-block: var(--spacing-lg) var(--spacing-2xl); }
 .app-page > * + * { margin-top: var(--spacing-lg); }
 .app-page > ps-tabs { display: block; }
+
+/* Encabezado: título a la izquierda, acción principal a la derecha (abajo en móvil). */
+.app-head { display: flex; flex-wrap: wrap; gap: var(--spacing-md); align-items: flex-end; justify-content: space-between; }
+.app-page > ps-filter-bar { display: block; }
+
+/* Menú de acciones por fila (IconButton + Menu): solo posición. */
+.app-row-menu { position: relative; display: inline-block; }
+.app-menu { position: absolute; inset-block-start: 100%; inset-inline-end: 0; z-index: 1; display: flex; flex-direction: column; min-width: max-content; }
+.app-menu[hidden] { display: none; }
+.app-menu > * { justify-content: flex-start; }
+
+/* Texto solo para lectores de pantalla. */
+.app-oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 /* Rejillas: una columna en móvil. */
 .app-cols { display: grid; grid-template-columns: 1fr; gap: var(--spacing-md); align-items: start; }
