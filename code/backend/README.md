@@ -2,18 +2,19 @@
 
 API de la plataforma de gestión de la escuela de patinaje, desarrollada con NestJS y TypeScript. Su arquitectura objetivo es **modular por dominio**: cada módulo agrupa las capacidades y reglas de negocio que le corresponden y expone únicamente lo que otros módulos necesitan.
 
-> **Estado actual:** el proyecto contiene la base inicial de NestJS (`AppModule`, `AppController`, `AppService` y `main.ts`). Los módulos, carpetas y ejemplos de esta guía son la estructura acordada para el desarrollo futuro; no se deben interpretar como funcionalidad ya implementada.
+> **Estado actual:** está implementada una parte de M5 (asignación y cambio de plan, generación de mensualidades y registro de pagos; ver [su README](src/modules/m5-planes-tarifas-pagos/README.md)) y la infraestructura transversal que usa: conexión a PostgreSQL, auditoría y una autenticación temporal hasta que M1 implemente la real. Los demás módulos de esta guía son la estructura acordada para el desarrollo futuro.
 
 ## Puesta en marcha
 
 Requisitos: Node.js 22.12 o superior y pnpm 10 o superior. Desde `code/backend`:
 
 ```bash
+docker compose -f db/compose.yaml up -d --wait   # base de datos (ver db/README.md)
 pnpm install
 pnpm start:dev
 ```
 
-El servidor usa la variable `PORT` o, si no está definida, el puerto `3000`. Otros comandos disponibles:
+El servidor usa la variable `PORT` o, si no está definida, el puerto `3000`. Para la base usa `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y `DB_PASSWORD`, que por defecto coinciden con el contenedor de `db/compose.yaml`. Otros comandos disponibles:
 
 ```bash
 pnpm start       # Iniciar sin modo observación
@@ -87,7 +88,15 @@ Los nombres del ejemplo ilustran la convención, no definen campos, endpoints, r
 | `validators/` | Reunir validaciones específicas y reutilizables del dominio. La validación de datos externos debe ejecutarse realmente en la frontera de entrada; definir un tipo o DTO por sí solo no valida una solicitud. |
 | `<nombre-modulo>.module.ts` | Declarar el módulo NestJS con `@Module`: registrar controladores y proveedores, importar dependencias y exportar solo los proveedores que otros módulos deban utilizar. |
 
-Si una capacidad necesita repositorios, políticas u otras carpetas, agrégalas dentro del módulo con una responsabilidad clara. No se requiere crear archivos vacíos para completar el árbol. Si se introduce una biblioteca de persistencia o validación, debe configurarse y documentarse al implementarla; actualmente el proyecto no incluye una solución de ORM ni de validación de DTO.
+Si una capacidad necesita repositorios, políticas u otras carpetas, agrégalas dentro del módulo con una responsabilidad clara. No se requiere crear archivos vacíos para completar el árbol. Si se introduce una biblioteca de persistencia o validación, debe configurarse y documentarse al implementarla.
+
+### Persistencia y validación
+
+- **Base de datos:** PostgreSQL con el esquema de [`db/schema.sql`](db/schema.sql), sin ORM. `common/database/BaseDatosService` expone el pool (`consultor`) y `transaccion()`. Cada módulo escribe su SQL en `repositories/`, con parámetros (`$1`, `$2`…) y nunca concatenando datos del usuario. Las fechas `DATE` llegan como texto `AAAA-MM-DD`, y `BIGINT` y `NUMERIC` como `number`.
+- **Validación:** `class-validator` en los DTO, con un `ValidationPipe` global (`src/configurar-aplicacion.ts`) que rechaza campos no declarados y devuelve un mensaje por campo.
+- **Autenticación:** temporal, por la cabecera `x-usuario-id`, solo en desarrollo (`common/auth/`). Los controladores usan `@UseGuards(AutenticacionTemporalGuard, PermisosGuard)`, `@RequierePermiso(...)` y `@UsuarioActual()`.
+- **Auditoría:** `common/auditoria/AuditoriaRepository.registrar()` dentro de la misma transacción del cambio.
+- **Tareas programadas:** `@nestjs/schedule`, con la zona horaria del club (`America/Bogota`).
 
 ### Flujo y dependencias
 
