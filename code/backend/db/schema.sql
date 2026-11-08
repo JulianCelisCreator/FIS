@@ -1065,6 +1065,7 @@ INSERT INTO permiso (codigo, modulo, descripcion) VALUES
   ('M5_CARTERA_CONSULTAR',     'M5', 'Consultar la cartera de todos los patinadores (M5-13)'),
   ('M5_PAGO_HISTORIAL',        'M5', 'Consultar el historial de pagos (M5-16)'),
   ('M5_COMPROBANTE_DESCARGAR', 'M5', 'Descargar comprobantes de pago (M5-15)'),
+  ('M5_COBRO_GENERAR',         'M5', 'Lanzar o recuperar la generación de mensualidades (M5-08)'),
   ('M6_REPORTE_FINANCIERO',    'M6', 'Generar y exportar reportes financieros (M6-04, M6-05)'),
   ('M6_PERSONAL_GESTIONAR',    'M6', 'Registrar y administrar personal (M6-02, M6-03)'),
   ('M6_INVENTARIO_GESTIONAR',  'M6', 'Inventario, ventas y préstamos de uniformes (M6-06 a M6-08)');
