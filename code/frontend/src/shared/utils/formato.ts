@@ -26,3 +26,15 @@ export function leerPesos(texto: string): number | null {
   const digitos = texto.replace(/[^0-9]/g, '')
   return digitos === '' ? null : Number(digitos)
 }
+
+const fechaDeMarca = new Intl.DateTimeFormat('es-CO', {
+  timeZone: 'America/Bogota',
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+})
+
+/** Marca de tiempo ISO de la API (registrado, modificado) → 'DD/MM/AAAA' en hora del club. */
+export function formatoFechaDeMarca(iso: string): string {
+  return fechaDeMarca.format(new Date(iso))
+}

@@ -3,19 +3,53 @@ import type {
   CobroPendiente,
   DatosTransaccion,
   PatinadorM5,
+  PlanAdministrado,
   PlanDelPatinador,
+  PlanDetalle,
   PlanOfertado,
   ResultadoAsignacion,
   ResultadoCambio,
   ResultadoMatricula,
   ResultadoPagoCobro,
   ResultadoPagoSesion,
+  TipoPlan,
 } from '../types/m5.types.ts'
 
-interface PlanAdministrado extends Omit<PlanOfertado, 'tarifa'> {
-  tarifaVigente: { valor: number; vigenteDesde: string } | null
-  estado: 'ACTIVO' | 'INACTIVO'
+// --- Planes y tarifas (RF-M5-01 a RF-M5-05) ---
+
+export function listarPlanes(filtros: { tipo?: TipoPlan; estado?: 'ACTIVO' | 'INACTIVO'; buscar?: string } = {}): Promise<PlanAdministrado[]> {
+  return pedir('/m5/planes', { consulta: filtros })
 }
+
+export function detallePlan(planId: number): Promise<PlanDetalle> {
+  return pedir(`/m5/planes/${planId}`)
+}
+
+export function crearPlan(datos: {
+  nombre: string
+  tipo: TipoPlan
+  diaLimitePago?: number
+  descripcion?: string
+}): Promise<PlanDetalle> {
+  return pedir('/m5/planes', { metodo: 'POST', cuerpo: datos })
+}
+
+export function editarPlan(
+  planId: number,
+  cambios: { nombre?: string; diaLimitePago?: number; descripcion?: string },
+): Promise<PlanDetalle> {
+  return pedir(`/m5/planes/${planId}`, { metodo: 'PATCH', cuerpo: cambios })
+}
+
+export function desactivarPlan(planId: number, motivo?: string): Promise<PlanDetalle> {
+  return pedir(`/m5/planes/${planId}/desactivar`, { metodo: 'POST', cuerpo: { motivo } })
+}
+
+export function registrarTarifa(planId: number, datos: { valor: number; vigenteDesde: string }): Promise<PlanDetalle> {
+  return pedir(`/m5/planes/${planId}/tarifas`, { metodo: 'POST', cuerpo: datos })
+}
+
+// --- Asignación, cobros y pagos ---
 
 export function buscarPatinadores(texto?: string, patinadorId?: number): Promise<PatinadorM5[]> {
   return pedir('/m5/patinadores', {

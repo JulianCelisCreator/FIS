@@ -2,7 +2,7 @@
 
 Aplicación de la plataforma de gestión de la escuela de patinaje. El cliente actual usa React, TypeScript y Vite. El desarrollo se organizará **por módulos de dominio** y seguirá una arquitectura objetivo **BFF (Backend for Frontend)**.
 
-> **Estado actual:** hay dos páginas. La landing pública (`/`) y la aplicación interna por roles (`/app/`), que por ahora tiene las pantallas de M5 «Asignar o cambiar plan» y «Registrar pago» y llama directo a la API NestJS (sin BFF todavía). Ver [Aplicación interna](#aplicación-interna-app).
+> **Estado actual:** hay dos páginas. La landing pública (`/`) y la aplicación interna por roles (`/app/`), que por ahora tiene las pantallas de M5 «Planes y tarifas», «Asignar o cambiar plan» y «Registrar pago» y llama directo a la API NestJS (sin BFF todavía). Ver [Aplicación interna](#aplicación-interna-app).
 
 ## Puesta en marcha
 

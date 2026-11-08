@@ -1,7 +1,7 @@
 // Componentes React con el marcado y las clases del design system (design-system/).
 // Los contenedores (shell, campo, pestañas, diálogo) se generan aquí porque sus
 // web components moverían los nodos que maneja React; el aspecto es el mismo.
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useId, useRef, type ReactNode } from 'react'
 
 /** Campo de formulario con etiqueta, ayuda y error (FormField). */
 export function Campo({
@@ -105,13 +105,16 @@ export function Pestanas<T extends string>({
 }
 
 /**
- * Diálogo de confirmación (Dialog/Confirm) sobre <dialog> nativo. Se abre
- * cuando `abierto` es true; Escape o «Cancelar» llaman a `alCancelar`.
+ * Diálogo (Dialog/Confirm o Dialog/Form) sobre <dialog> nativo. Se abre cuando
+ * `abierto` es true; Escape o el botón secundario llaman a `alCancelar`. Sin
+ * `textoConfirmar` solo muestra el botón secundario (p. ej. «Cerrar»).
  */
 export function DialogoConfirmacion({
   abierto,
   titulo,
   textoConfirmar,
+  textoCancelar = 'Cancelar',
+  variante = 'confirm',
   ocupado = false,
   alConfirmar,
   alCancelar,
@@ -119,13 +122,16 @@ export function DialogoConfirmacion({
 }: {
   abierto: boolean
   titulo: string
-  textoConfirmar: string
+  textoConfirmar?: string
+  textoCancelar?: string
+  variante?: 'confirm' | 'form'
   ocupado?: boolean
-  alConfirmar: () => void
+  alConfirmar?: () => void
   alCancelar: () => void
   children: ReactNode
 }) {
   const dialogo = useRef<HTMLDialogElement>(null)
+  const idTitulo = useId()
 
   useEffect(() => {
     const nodo = dialogo.current
@@ -135,29 +141,31 @@ export function DialogoConfirmacion({
   }, [abierto])
 
   return (
-    <ps-dialog variant="confirm">
+    <ps-dialog variant={variante}>
       <dialog
         ref={dialogo}
-        aria-labelledby="dialogo-titulo"
+        aria-labelledby={idTitulo}
         onCancel={(evento) => {
           evento.preventDefault()
           if (!ocupado) alCancelar()
         }}
       >
-        <h3 id="dialogo-titulo" className="ps-text-heading-h4">{titulo}</h3>
+        <h3 id={idTitulo} className="ps-text-heading-h4">{titulo}</h3>
         <div className="ps-stack">{children}</div>
         <div className="ps-dialog__actions">
           <button className="ps-button ps-button--secondary" type="button" disabled={ocupado} onClick={alCancelar}>
-            Cancelar
+            {textoCancelar}
           </button>
-          <button
-            className="ps-button ps-button--primary"
-            type="button"
-            aria-disabled={ocupado || undefined}
-            onClick={() => !ocupado && alConfirmar()}
-          >
-            {ocupado ? 'Guardando…' : textoConfirmar}
-          </button>
+          {textoConfirmar && (
+            <button
+              className="ps-button ps-button--primary"
+              type="button"
+              aria-disabled={ocupado || undefined}
+              onClick={() => !ocupado && alConfirmar?.()}
+            >
+              {ocupado ? 'Guardando…' : textoConfirmar}
+            </button>
+          )}
         </div>
       </dialog>
     </ps-dialog>

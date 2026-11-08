@@ -17,6 +17,7 @@ declare module 'react' {
       'ps-tabs': ElementoDS
       'ps-dialog': ElementoDS<{ variant?: 'confirm' | 'form' | 'reason' }>
       'ps-data-table': ElementoDS
+      'ps-filter-bar': ElementoDS
     }
   }
 }
