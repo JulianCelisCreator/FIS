@@ -9,12 +9,13 @@ API de la plataforma de gestión de la escuela de patinaje, desarrollada con Nes
 Requisitos: Node.js 22.12 o superior y pnpm 10 o superior. Desde `code/backend`:
 
 ```bash
-docker compose -f db/compose.yaml up -d --wait   # base de datos (ver db/README.md)
+cp .env.example .env                                              # configuración local (git la ignora)
+docker compose --env-file .env -f db/compose.yaml up -d --wait    # base de datos (ver db/README.md)
 pnpm install
 pnpm start:dev
 ```
 
-El servidor usa la variable `PORT` o, si no está definida, el puerto `3000`. Para la base usa `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y `DB_PASSWORD`, que por defecto coinciden con el contenedor de `db/compose.yaml`. Otros comandos disponibles:
+La API carga `.env` al arrancar. Toma el puerto de `PORT` (3000 por defecto) y la base de `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y `DB_PASSWORD`, que por defecto coinciden con el contenedor de `db/compose.yaml`. Si ya tienes un PostgreSQL local en el 5432, cambia `DB_PORT` (p. ej. a `5433`) en `.env`: el contenedor y la API usan el mismo valor. Otros comandos disponibles:
 
 ```bash
 pnpm start       # Iniciar sin modo observación

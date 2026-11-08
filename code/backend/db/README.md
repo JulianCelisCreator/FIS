@@ -23,7 +23,7 @@ docker compose -f db/compose.yaml up -d --wait
 | Usuario | `patinaje` | `DB_USER` |
 | Contraseña | `patinaje_dev` | `DB_PASSWORD` |
 
-Las credenciales son solo para desarrollo local. Para cambiarlas, defínelas en `db/.env` (git ya lo ignora) o directamente en el comando, por ejemplo `DB_PORT=55432 docker compose -f db/compose.yaml up -d`.
+Las credenciales son solo para desarrollo local. Para cambiarlas, defínelas en `code/backend/.env` (copia de `.env.example`; git la ignora) y levanta el contenedor con `docker compose --env-file .env -f db/compose.yaml up -d`: así la API y el contenedor usan los mismos valores.
 
 ```bash
 psql -h localhost -U patinaje -d patinaje   # conectarse

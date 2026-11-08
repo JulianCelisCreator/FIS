@@ -28,7 +28,8 @@ Ejecuta `pnpm build` antes de `pnpm preview`. Actualmente no hay un comando de p
 Para usarla hace falta la API y su base de datos (ver [la guía del backend](../backend/README.md)). Desde `code/backend`:
 
 ```bash
-docker compose -f db/compose.yaml up -d --wait
+cp .env.example .env
+docker compose --env-file .env -f db/compose.yaml up -d --wait
 docker exec -i patinaje-db psql -U patinaje -d patinaje < db/datos-demo.sql   # datos de prueba, opcional
 pnpm start:dev
 ```
