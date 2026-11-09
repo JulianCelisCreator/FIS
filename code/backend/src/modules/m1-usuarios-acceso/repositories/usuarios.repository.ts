@@ -7,8 +7,9 @@ export interface NuevoUsuario {
   apellidos: string;
   correo: string;
   contrasenaHash: string;
-  /** null = autorregistro (RF-M1-01). */
-  creadoPor: number | null;
+  estado: 'POR_REGISTRAR' | 'ACTIVA';
+  /** Administrador que crea la cuenta (HU-M1-01). */
+  creadoPor: number;
 }
 
 export interface UsuarioCreado {
@@ -30,7 +31,7 @@ export class CorreoDuplicadoError extends Error {
   }
 }
 
-/** Cuentas de acceso (tabla usuario y usuario_rol, RF-M1-01). */
+/** Cuentas de acceso (tablas usuario y usuario_rol, HU-M1-01). */
 @Injectable()
 export class UsuariosRepository {
   async existeCorreo(consultor: Consultor, correo: string): Promise<boolean> {
@@ -50,9 +51,9 @@ export class UsuariosRepository {
     try {
       const { rows } = await consultor.query<UsuarioCreado>(
         `INSERT INTO usuario (nombres, apellidos, correo, contrasena_hash, estado, creado_por)
-         VALUES ($1, $2, $3, $4, 'ACTIVA', $5)
+         VALUES ($1, $2, $3, $4, $5, $6)
          RETURNING id, nombres, apellidos, correo, estado`,
-        [nuevo.nombres, nuevo.apellidos, nuevo.correo, nuevo.contrasenaHash, nuevo.creadoPor],
+        [nuevo.nombres, nuevo.apellidos, nuevo.correo, nuevo.contrasenaHash, nuevo.estado, nuevo.creadoPor],
       );
       return rows[0];
     } catch (error) {
@@ -61,7 +62,7 @@ export class UsuariosRepository {
     }
   }
 
-  async asignarRol(consultor: Consultor, usuarioId: number, rol: Rol, asignadoPor: number | null): Promise<void> {
+  async asignarRol(consultor: Consultor, usuarioId: number, rol: Rol, asignadoPor: number): Promise<void> {
     await consultor.query(
       `INSERT INTO usuario_rol (usuario_id, rol_id, asignado_por)
        SELECT $1, r.id, $3 FROM rol r WHERE r.codigo = $2`,
