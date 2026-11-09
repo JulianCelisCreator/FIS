@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Asignación de profesores · Módulo 3 · Grupo 02</title><link rel="stylesheet" href="../assets/styles.css"></head><body>
+<div class="top"><h1>Módulo 3 · Asignación de profesores</h1><p class="meta">Wireframe · Grupo 02 · design system FIS</p></div>
+<nav class="pnav" aria-label="Páginas del módulo 3"><a href="../index.html">Índice</a><a href="../grupos/grupos.html">HU-3.1 Configuración de grupos</a><a href="../asignacion-profesores/asignacion-profesores.html" aria-current="page">HU-3.2 Asignación de profesores</a><a href="../horarios/horarios.html">HU-3.3 Programación de horarios de clase</a><a href="../cambio-grupo/cambio-grupo.html">HU-3.4 Selección y cambio de grupo</a><a href="../calendario/calendario.html">HU-3.5 Calendario interactivo</a></nav>
+<main>
+<p class="meta">HU-3.2 · Administrador · Alta · 3 SP · RF2.2, RF1.3 · Escenario 3</p>
+<div class="shell"><div class="bar"><span>☰</span><b>Escuela de patinaje</b><span>Admin</span></div>
+<div class="body"><div class="nav"><div>Inicio</div><div>Grupos</div><div class="a">Profesores</div><div>Horarios</div><div>Calendario</div></div>
+<div class="cnt"><div><p class="crumb">Inicio / Grupos / Intermedio Sur B</p><h2>Asignación de profesores</h2></div>
+<div class="two"><div class="card"><div class="fld"><label>Grupo</label><div class="in">Intermedio Sur B · Mar y Jue 14:00 <span>▾</span></div></div>
+<div class="fld"><label>Buscar profesor</label><div class="in">🔍 Escriba un nombre… <span>▾</span></div></div>
+<div class="tw"><table style="min-width:0"><thead><tr><th></th><th>Profesor</th><th>Disponibilidad</th></tr></thead><tbody>
+<tr><td>☐</td><td>Profesor Person</td><td><span class="badge error">✕ Conflicto</span></td></tr>
+<tr class="sel"><td>☑</td><td>Ana Gómez</td><td><span class="badge success">✓ Libre</span></td></tr>
+<tr><td>☐</td><td>Luis Rojas</td><td><span class="badge success">✓ Libre</span></td></tr></tbody></table></div>
+<div class="acts"><span class="btn">Asignar seleccionados</span><span class="btn sec">Cancelar</span></div></div>
+<div style="display:flex;flex-direction:column;gap:var(--sp4)"><div class="card"><h3>Profesores del grupo</h3><div class="acts" style="justify-content:space-between"><span>Ana Gómez</span><span class="badge success">✓ Activo</span></div><div class="acts" style="justify-content:space-between"><span>Carlos Díaz</span><span class="btn gh s">Quitar</span></div></div>
+<div class="al error"><span>✕</span><div><b>Conflicto de horario</b>Profesor Person ya tiene clase los lunes a las 14:00. Seleccione otro docente o franja.</div></div></div></div>
+<div class="ann"><b>Notas:</b> validación en tiempo real: el traslape bloquea «Asignar» (Escenario 3). Al asignar, se actualiza el perfil del profesor y aparece un Toast de confirmación. Selector = Combobox con buscador; errores en Alert/Tooltip.</div>
+</div></div></div>
+</main></body></html>
