@@ -15,17 +15,19 @@ import {
   DialogoEstadoUniforme,
   DialogoProveedor,
   DialogoUniforme,
+  DialogoMovimientos,
   DialogoAjustarStock,
 } from './dialogos-inventario.tsx'
 
 type FiltroStock = '' | 'STOCK_NORMAL' | 'ALERTA_MINIMO'
 type FiltroEstado = '' | 'ACTIVO' | 'INACTIVO'
-type Accion = 'editar' | 'ajustar-stock' | 'activar' | 'desactivar'
+type Accion = 'editar' | 'ajustar-stock' | 'movimientos' | 'activar' | 'desactivar'
 
 type Dialogo =
   | { tipo: 'crear-uniforme' }
   | { tipo: 'editar-uniforme'; uniforme: UniformeInventario }
   | { tipo: 'ajustar-stock'; uniforme: UniformeInventario }
+  | { tipo: 'movimientos'; uniforme: UniformeInventario }
   | { tipo: 'crear-proveedor' }
   | { tipo: 'estado-uniforme'; uniforme: UniformeInventario; activar: boolean }
   | { tipo: 'estado-proveedor'; proveedor: Proveedor; activar: boolean }
@@ -144,6 +146,8 @@ export function InventarioUniformes() {
       setDialogo({ tipo: 'editar-uniforme', uniforme })
     } else if (accion === 'ajustar-stock') {
       setDialogo({ tipo: 'ajustar-stock', uniforme })
+    } else if (accion === 'movimientos') {
+      setDialogo({ tipo: 'movimientos', uniforme })
     } else {
       setDialogo({ tipo: 'estado-uniforme', uniforme, activar: accion === 'activar' })
     }
@@ -170,6 +174,10 @@ export function InventarioUniformes() {
           Registrar referencia
         </button>
       </header>
+
+      <Alerta tono="info" titulo="Inventario de demostración local">
+        <p>Los cambios son temporales, no modifican la base de datos y se reinician al recargar el navegador.</p>
+      </Alerta>
 
       {aviso && (
         <Alerta tono="success">
@@ -442,7 +450,18 @@ export function InventarioUniformes() {
                     {visibles.map((uniforme) => (
                       <tr key={uniforme.id}>
                         <td data-label="Referencia">
-                          <span className="app-referencia">{uniforme.referencia}</span>
+                          <span className="app-producto">
+                            {uniforme.fotoUrl ? (
+                              <img
+                                className="app-producto__foto"
+                                src={uniforme.fotoUrl}
+                                alt={`Foto de ${uniforme.referencia}`}
+                              />
+                            ) : (
+                              <span className="app-producto__sin-foto" aria-label="Sin fotografía">Sin foto</span>
+                            )}
+                            <span className="app-referencia">{uniforme.referencia}</span>
+                          </span>
                         </td>
                         <td data-label="Tipo">{textoTipoUniforme(uniforme.tipo)}</td>
                         <td data-label="Talla">{uniforme.talla}</td>
@@ -543,6 +562,12 @@ export function InventarioUniformes() {
           }
         />
       )}
+      {dialogo?.tipo === 'movimientos' && (
+        <DialogoMovimientos
+          uniforme={dialogo.uniforme}
+          alCerrar={cerrar}
+        />
+      )}
 
       {dialogo?.tipo === 'crear-uniforme' && (
         <DialogoUniforme
@@ -638,6 +663,7 @@ function MenuAcciones({
   const acciones: { id: Accion; texto: string }[] = [
     { id: 'editar', texto: 'Consultar / editar' },
     ...(uniforme.activo ? [{ id: 'ajustar-stock' as Accion, texto: 'Ajustar stock' }] : []),
+    { id: 'movimientos', texto: 'Consultar movimientos' },
     uniforme.activo
       ? { id: 'desactivar', texto: 'Desactivar' }
       : { id: 'activar', texto: 'Reactivar' },

@@ -34,6 +34,18 @@ export class UniformesController {
     return this.uniformes.listar(filtros);
   }
 
+  @Get('movimientos')
+  @RequierePermiso(PermisoM6.INVENTARIO_GESTIONAR)
+  movimientos() {
+    return this.uniformes.movimientos();
+  }
+
+  @Get(':uniformeId/movimientos')
+  @RequierePermiso(PermisoM6.INVENTARIO_GESTIONAR)
+  movimientosPorUniforme(@Param('uniformeId', ParseIntPipe) uniformeId: number) {
+    return this.uniformes.movimientos(uniformeId);
+  }
+
   @Get(':uniformeId')
   @RequierePermiso(PermisoM6.INVENTARIO_GESTIONAR)
   detalle(@Param('uniformeId', ParseIntPipe) uniformeId: number) {

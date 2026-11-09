@@ -3,12 +3,14 @@ import { useSesion } from '../shared/sesion/use-sesion.ts'
 import { useRuta } from '../shared/utils/use-ruta.ts'
 import { AsignarCambiarPlan } from '../modules/m5-planes-tarifas-pagos/components/asignar-cambiar-plan.tsx'
 import { PlanesTarifas } from '../modules/m5-planes-tarifas-pagos/components/planes-tarifas.tsx'
+import { HistorialPagos } from '../modules/m5-planes-tarifas-pagos/components/historial-pagos.tsx'
 import {
   RegistrarPago,
   type PestanaPago,
 } from '../modules/m5-planes-tarifas-pagos/components/registrar-pago.tsx'
 import { PERMISOS_M5 } from '../modules/m5-planes-tarifas-pagos/types/m5.types.ts'
 import { InventarioUniformes } from '../modules/m6-inventario-uniformes/components/inventario-uniformes.tsx'
+import { PrestamosUniformes } from '../modules/m6-inventario-uniformes/components/prestamos-uniformes.tsx'
 import { PERMISOS_M6 } from '../modules/m6-inventario-uniformes/types/inventario.types.ts'
 import { MarcoAplicacion } from './marco-aplicacion.tsx'
 
@@ -18,7 +20,7 @@ const PANTALLAS = [
     pagina: 'planes',
     texto: 'Planes y tarifas',
     grupo: 'Planes y pagos',
-    permiso: PERMISOS_M5.planGestionar,
+    permiso: PERMISOS_M5.planConsultar,
   },
   {
     pagina: 'asignar-plan',
@@ -33,8 +35,20 @@ const PANTALLAS = [
     permiso: PERMISOS_M5.pagoRegistrar,
   },
   {
+    pagina: 'historial-pagos',
+    texto: 'Historial de pagos',
+    grupo: 'Planes y pagos',
+    permiso: PERMISOS_M5.pagoRegistrar,
+  },
+  {
     pagina: 'inventario',
     texto: 'Inventario de uniformes',
+    grupo: 'Uniformes',
+    permiso: PERMISOS_M6.inventarioGestionar,
+  },
+  {
+    pagina: 'prestamos',
+    texto: 'Préstamos de implementos',
     grupo: 'Uniformes',
     permiso: PERMISOS_M6.inventarioGestionar,
   },
@@ -87,6 +101,16 @@ export function Aplicacion() {
     contenido = <PlanesTarifas key={sesion.id} />
   } else if (actual === 'inventario') {
     contenido = <InventarioUniformes key={sesion.id} />
+  } else if (actual === 'prestamos') {
+    contenido = <PrestamosUniformes key={sesion.id} />
+  } else if (actual === 'historial-pagos') {
+    const patinador = Number(parametros.get('patinador'))
+    contenido = (
+      <HistorialPagos
+        key={`${sesion.id}-${parametros}`}
+        patinadorInicial={Number.isInteger(patinador) && patinador > 0 ? patinador : undefined}
+      />
+    )
   } else if (actual === 'asignar-plan') {
     contenido = (
       <AsignarCambiarPlan
@@ -97,11 +121,13 @@ export function Aplicacion() {
   } else {
     const pestana = parametros.get('pestana') as PestanaPago | null
     const patinador = Number(parametros.get('patinador'))
+    const cobro = Number(parametros.get('cobro'))
     contenido = (
       <RegistrarPago
         key={`${sesion.id}-${parametros}`}
         pestanaInicial={pestana && PESTANAS_PAGO.includes(pestana) ? pestana : 'cobro'}
         patinadorInicial={Number.isInteger(patinador) && patinador > 0 ? patinador : undefined}
+        cobroInicial={Number.isInteger(cobro) && cobro > 0 ? cobro : undefined}
       />
     )
   }

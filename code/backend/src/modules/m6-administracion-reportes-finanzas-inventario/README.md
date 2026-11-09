@@ -6,6 +6,17 @@ La primera implementación backend cubre `HU-M6-06`, inventario y control de
 uniformes. Las tablas, restricciones y vista de stock ya existen en
 `code/backend/db/schema.sql`.
 
+## Adelanto del Sprint 2: préstamos de implementos
+
+- `GET /m6/prestamos`
+- `GET /m6/prestamos/patinadores`
+- `POST /m6/prestamos`
+- `PATCH /m6/prestamos/:prestamoId/recibir`
+
+La pantalla del adelanto Sprint 2 usa datos ficticios en memoria del navegador
+para poder registrar préstamos, devoluciones y pérdidas sin depender de datos de
+la base compartida. Los cambios se reinician al recargar la página.
+
 ## Endpoint
 
 - `GET /m6/uniformes`

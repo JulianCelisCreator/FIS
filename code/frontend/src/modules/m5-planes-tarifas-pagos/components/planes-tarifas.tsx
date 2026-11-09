@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { Alerta, Campo, Insignia } from '../../../shared/ui/componentes.tsx'
 import { Icono } from '../../../shared/ui/icono.tsx'
 import { formatoFecha } from '../../../shared/utils/formato.ts'
+import { useSesion } from '../../../shared/sesion/use-sesion.ts'
 import { listarPlanes } from '../services/m5.service.ts'
-import { TIPOS_PLAN, type PlanAdministrado, type PlanDetalle, type TipoPlan } from '../types/m5.types.ts'
+import { PERMISOS_M5, TIPOS_PLAN, type PlanAdministrado, type PlanDetalle, type TipoPlan } from '../types/m5.types.ts'
 import { textoFacturacion, textoTarifa, textoTipo } from '../utils/textos-plan.ts'
 import { DialogoDesactivar, DialogoHistorial, DialogoPlan, DialogoTarifa } from './dialogos-plan.tsx'
+import { AvisoApiPendienteM5 } from './aviso-api-m5.tsx'
 
 type Dialogo =
   | { tipo: 'crear' }
@@ -16,6 +18,8 @@ type FiltroEstado = 'ACTIVO' | 'INACTIVO' | ''
 
 /** RF-M5-01 a RF-M5-05: pantalla «Planes y tarifas» del Administrador (wireframes/grupo-04/planes). */
 export function PlanesTarifas() {
+  const { tienePermiso } = useSesion()
+  const puedeGestionar = tienePermiso(PERMISOS_M5.planGestionar)
   const [buscar, setBuscar] = useState('')
   const [tipo, setTipo] = useState<TipoPlan | ''>('')
   const [estado, setEstado] = useState<FiltroEstado>('ACTIVO')
@@ -65,10 +69,21 @@ export function PlanesTarifas() {
           <h1>Planes y tarifas</h1>
           <p className="vl-text-body-sm">Oferta de planes de la academia y su tarifa vigente.</p>
         </div>
-        <button className="vl-button vl-button--primary" type="button" onClick={() => setDialogo({ tipo: 'crear' })}>
-          Crear plan
-        </button>
+        {puedeGestionar && (
+          <button className="vl-button vl-button--primary" type="button" onClick={() => setDialogo({ tipo: 'crear' })}>
+            Crear plan
+          </button>
+        )}
       </header>
+
+      <AvisoApiPendienteM5 peticiones={[
+        'GET /m5/planes',
+        'GET /m5/planes/:id',
+        'POST /m5/planes',
+        'PATCH /m5/planes/:id',
+        'POST /m5/planes/:id/desactivar',
+        'POST /m5/planes/:id/tarifas',
+      ]} />
 
         <form className="vl-filter-bar" role="search" aria-label="Filtrar planes" onSubmit={(evento) => evento.preventDefault()}>
           <Campo etiqueta="Buscar" id="filtro-buscar">
@@ -144,7 +159,9 @@ export function PlanesTarifas() {
                     <Insignia entidad="plan" estado={plan.estado === 'ACTIVO' ? 'activo' : 'inactivo'} />
                   </td>
                   <td data-label="Acciones">
-                    <MenuAcciones plan={plan} alElegir={(accion) => setDialogo({ tipo: accion, plan })} />
+                    {puedeGestionar && (
+                      <MenuAcciones plan={plan} alElegir={(accion) => setDialogo({ tipo: accion, plan })} />
+                    )}
                   </td>
                 </tr>
               ))}

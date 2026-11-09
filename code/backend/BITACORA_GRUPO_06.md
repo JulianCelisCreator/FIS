@@ -273,6 +273,137 @@ y las actividades que todavía pertenecen a futuras entregas.
 
 ---
 
+## 🏃 Sprint 2 — Avance en progreso de ventas, préstamos y consulta financiera
+
+- **Período de avance:** 09 de noviembre de 2026.
+- **Objetivo:** adelantar las historias de préstamo y venta sin interferir con la
+  entrega de los demás módulos.
+- **Historia M6-08:** Préstamos y devoluciones, en avance verificable.
+- **Historia M6-07:** Venta de uniformes, pendiente de integración transaccional
+  con M5.
+- **Estado actual:** existe un recorrido funcional de préstamos en el backend y
+  la navegación; todavía faltan datos reales de patinadores y pruebas completas.
+
+### 17. Usuario Contador para prueba
+
+**Qué se hizo**
+
+- Se creó el usuario temporal `Carlos Ramírez`, correo
+  `contador@m6.local`, con rol Contador e identificador `2` en la base local.
+- El usuario aparece en el selector temporal de aplicación junto con Andrea.
+- Su acceso financiero se controla por permisos: puede consultar planes, pagos,
+  cartera e historial; no recibe permisos para administrar inventario.
+- La autenticación real continúa pendiente del módulo M1.
+
+**Qué se encontró**
+
+- La pantalla de planes y tarifas estaba usando el permiso de administración
+  (`M5_PLAN_GESTIONAR`) para decidir si Contador podía abrirla.
+- El permiso de consulta correcto ya existía en la base:
+  `M5_PLAN_CONSULTAR`.
+- La pantalla mostraba acciones administrativas aun cuando el usuario solo debía
+  consultar.
+
+**Qué se hizo para corregirlo**
+
+- La navegación de “Planes y tarifas” ahora acepta permisos de consulta.
+- Los botones de crear plan, editar, cambiar tarifa, desactivar y acciones por
+  fila se muestran solamente cuando el usuario tiene permiso de administración.
+- Contador entra en modo lectura para consultar planes y tarifas.
+
+**Qué falta**
+
+- El módulo M5 necesita confirmar que ofrece una API de consulta reusable para
+  Contador.
+- No deben mostrarse imágenes ni campos comerciales que no existan todavía en el
+  modelo aprobado.
+
+### 18. Préstamos de implementos
+
+**Qué se hizo**
+
+- Se creó el tipo de inventario `IMPLEMENTO`, separado de camisetas, chaquetas,
+  pantalones y uniformes completos.
+- Se añadieron endpoints NestJS bajo `/m6/prestamos` para consultar, registrar y
+  recibir préstamos.
+- Se añadió la pantalla “Préstamos de implementos” dentro de la navegación de M6.
+- El formulario permite seleccionar implementos con stock disponible, registrar
+  un patinador, responsable, cantidad, fecha prevista y estado inicial.
+- Se registró una devolución que recupera las unidades al inventario.
+- La pérdida o el daño quedan registrados sin devolver unidades automáticamente
+  al stock.
+- Las operaciones generan auditoría y movimientos de Kardex relacionados.
+
+**Qué se encontró**
+
+- El esquema permitía técnicamente prestar cualquier uniforme, pero la norma de
+  higiene exige no prestar prendas difíciles de higienizar.
+- Las prendas pueden dañarse, perderse o usarse sin el control de higiene que
+  corresponde a chaquetas, camisetas y pantalones.
+- El sistema debe validar el tipo antes de crear el préstamo, no solo antes de
+  mostrarlo en la interfaz.
+
+**Qué se decidió**
+
+- A partir de este avance solo se puede prestar `IMPLEMENTO`.
+- Camisetas, chaquetas, pantalones y uniformes completos quedan prohibidos para
+  préstamo.
+- La devolución correcta vuelve el implemento al stock.
+- Una pérdida o daño necesita observación y no vuelve automáticamente al stock.
+- La fecha de vencimiento se calcula comparando la fecha prevista con la fecha
+  actual; el esquema no guarda un estado duplicado llamado “Vencido”.
+
+**Qué falta**
+
+- Crear una interfaz para buscar o cargar los patinadores reales desde M2.
+- Mostrar responsables reales en lugar de ingresar identificadores manualmente.
+- Mostrar préstamos vencidos con un indicador visible e ícono más texto.
+- Agregar pruebas automáticas de cantidad insuficiente, tipo de prenda bloqueado,
+  devolución y pérdida con observación.
+- Comprobar la pantalla en móvil, tablet y escritorio.
+
+### 19. Decisión sobre ventas
+
+**Qué se decidió**
+
+- Los uniformes pueden tener precio de venta porque esa información ya pertenece
+  al inventario de M6.
+- La venta no se completará solo porque se actualice stock: debe existir un cobro
+  en M5.
+- Las cantidades vendidas deben descontarse únicamente cuando la venta sea
+  confirmada.
+- Si M5 rechaza el cobro o falla la operación, el descuento no debe quedar
+  registrado a medias.
+
+**Qué falta**
+
+- Crear la pantalla y el backend de M6-07.
+- Elegir comprador y patinador desde la información de M2.
+- Registrar medios de pago, referencias y comprobantes de M5.
+- Realizar una transacción coordinada entre venta y cobro.
+- Agregar comprobación de stock antes de confirmar.
+
+### 20. Imágenes de productos, uniformes o tarifas
+
+**Qué se decidió**
+
+- No corresponde agregar imágenes todavía sin que el requisito, wireframe y base
+  de datos lo hayan definido.
+- Las imágenes de uniformes o implementos serían parte de catálogo M6 y de
+  M6-06/M6-07.
+- Las imágenes de tarifas pertenecen principalmente al diseño M5, porque la
+  tarifa es un concepto de plan y no de inventario.
+- Como no existen campos de imagen ni almacenamiento aprobado, la imagen queda
+  fuera de este avance.
+
+**Qué falta**
+
+- Que los grupos responsables acuerden si se guardará una URL, un archivo o una
+  ficha de recurso.
+- Que M5 y M6 definan dónde almacenar la imagen y qué límites tendrá.
+- Añadir vista previa, tamaño máximo, formatos permitidos y eliminación sin
+  perder el historial.
+
 ## Pendientes fuera de la entrega realizada
 
 ### M6-01 — Panel administrativo
@@ -312,18 +443,22 @@ y las actividades que todavía pertenecen a futuras entregas.
 - Registrar medio de pago, monto y referencia.
 - Integrar el cobro con M5.
 - Confirmar la venta antes de descontar stock, o aplicar compensación si el cobro falla.
-- Mostrar comprobante o historial financiero desde la integración correspondiente.
 
 ### M6-08 — Préstamos y devoluciones
 
+**Qué se implementó en este avance**
+
+- Registrar préstamos de implementos con responsable, patinador y fecha prevista.
+- Validar que el implemento esté disponible y que haya stock suficiente.
+- Registrar la devolución y actualizar el stock; exigir observación para pérdida
+  o daño.
+- Calcular en la demo el cobro diario y vincularlo al flujo local de pagos.
+
 **Qué falta**
 
-- Registrar responsable y uniforme prestado.
-- Validar stock disponible.
-- Registrar fechas de entrega y devolución.
-- Mostrar préstamos vencidos.
-- Registrar pérdida o daño con motivo obligatorio.
-- Determinar cuándo una prenda devuelta vuelve al stock disponible.
+- Integrar cobros y pagos con las API reales de M5.
+- Completar la experiencia de consulta de préstamos vencidos y las pruebas
+  visuales en distintos tamaños de pantalla.
 
 ### Integración con otros módulos
 
@@ -346,11 +481,116 @@ y las actividades que todavía pertenecen a futuras entregas.
 - **Sprint 3:** Reportes financieros, exportación PDF/XLSX y panel administrativo.
 - **Sprint 4:** Integración con M1, M2, M3 y M5, pruebas finales y sustentación.
 
+### Avance de estabilización — Consultar, editar y fotografías
+
+**Qué se hizo**
+
+- Se encontró y corrigió la causa de las pantallas blancas al consultar o editar
+  una referencia. El mensaje se producía cuando el formulario recibía una fecha
+  vacía o no válida.
+- Ahora las fechas vacías o incorrectas muestran un texto comprensible:
+  `Sin fecha registrada`, sin detener el funcionamiento de la pantalla.
+- Se comprobó que el backend, la lista del inventario y el servidor de la interfaz
+  responden correctamente.
+- Se añadió al inventario un enlace opcional para mostrar la fotografía real de
+  cada producto. La imagen se puede registrar al crear una referencia o cambiar
+  al editarla.
+- Cuando una referencia todavía no tiene fotografía, el inventario muestra
+  `Sin foto` y no impide el registro ni las operaciones normales.
+- Las implementos disponibles para préstamo muestran ahora su fotografía junto
+  al nombre y la talla seleccionada.
+- La imagen quedó guardada en PostgreSQL mediante la nueva información de
+  `foto_url`, asociada únicamente a la referencia correspondiente.
+- El proyecto fue compilado de nuevo sin errores en frontend ni backend.
+- La interfaz y el servidor fueron reiniciados para aplicar los cambios.
+- Se confirmó nuevamente la lista de usuarios de prueba después de reiniciar los
+  servicios. Andrea López, Administradora, y Carlos Ramírez, Contador, aparecen
+  en el selector de ambas pestañas abiertas.
+-   de reiniciar el servidor para volver a consultar la lista actual de usuarios.
+
+## Avance adicional del 09 de noviembre de 2026
+
+### 25. Consulta del historial de movimientos
+
+**Qué se hizo**
+
+- Se completó la opción `Consultar movimientos` dentro del menú de cada
+   referencia de inventario.
+- El historial consulta al backend y muestra fecha, tipo, cantidad, responsable
+   y observación.
+- Los ajustes de stock positivos aparecen como entradas y los negativos como
+   salidas sin cambiar su trazabilidad.
+- Las referencias desactivadas conservan el acceso a su historial.
+- Si una referencia todavía no tiene movimientos, la pantalla informa
+   claramente que no existen registros.
+
+### 26. Planes, tarifas y pagos de demostración temporal
+
+**Qué se hizo**
+
+- Mientras el equipo del Módulo 5 termina sus API, las pantallas de planes,
+   tarifas, asignación de planes y registro de pagos muestran información
+   temporal quemada en el código.
+- Se dejaron ejemplos realistas: `Inicial`, `Competitivo`, `Competitivo Plus`
+   y `Sesión libre`, con tarifas en pesos colombianos.
+- También se dejaron usuarios y cobros de demostración para probar el recorrido
+   completo de la interfaz sin afectar la base de datos real.
+- Las pantallas muestran una advertencia visible que indica que los datos son
+   temporales y corresponden a una demostración.
+
+**Decisión temporal y pendiente de retiro**
+
+- Estas listas quemadas deben eliminarse cuando se entreguen las API reales del
+   Módulo 5.
+- Al retirar la demostración hay que quitar los datos y el aviso visible del
+   frontend.
+- Las operaciones reales de creación, edición, asignación y pago deben volver
+   exclusivamente al servicio HTTP.
+- La demostración local se mantiene intencionalmente para presentar y probar el
+   adelanto del Sprint 2 sin escribir en la base de datos de M5.
+
+### 27. Verificación pendiente
+
+**Qué falta revisar**
+
+- Abrir Inventario y comprobar desde el menú que cada referencia muestra su
+   Kardex.
+- Realizar un ajuste positivo y uno negativo y verificar que ambos aparezcan en
+   el historial.
+- Confirmar en móvil y escritorio que las tablas, fotos y diálogos se presentan
+   correctamente.
+- Probar las pantallas M5 con la advertencia temporal y sustituir los datos
+   quemados cuando M5 entregue sus servicios.
+
+## Avance del 09 de noviembre de 2026 — pagos y préstamos
+
+### M5 — planes, pagos e historial
+
+- Asignar un plan mensual crea el cobro correspondiente y permite registrar un
+   pago inicial completo o parcial. Cambiar de plan programa la tarifa futura y
+   no representa un pago recibido.
+- Un pago menor al saldo queda como abono; el saldo restante se puede pagar
+   después desde el flujo de registro de pago.
+- Se agregó historial general y filtrable por patinador con fecha, concepto,
+   monto, medio de pago, comprobante y usuario que lo registró.
+- Los datos de demostración de M5 viven en el frontend y se reinician al
+   recargar la aplicación; no se escriben en la base de datos de M5.
+- La integración real sigue pendiente de las API del Módulo 5, en particular
+   `GET /m5/pagos` y `POST /m5/cobros`.
+
+### Validaciones y verificación
+
+- Se validan cantidades, tarifas y montos para impedir valores negativos o
+   inválidos antes de registrar la operación.
+- Se verificaron los builds de frontend y backend, el lint del backend, sus
+   pruebas unitarias y los flujos locales de abono, historial, cálculo del
+   préstamo, pago del saldo y validaciones.
+
 ## Estado final de esta bitácora
 
 **Última actualización:** 09 de noviembre de 2026.
 
 La historia HU-M6-06 quedó implementada y verificada dentro del alcance asignado
-al Grupo 6. Las historias restantes del módulo 6 permanecen documentadas como
-pendientes y no deben marcarse como terminadas sin su implementación, integración
-y prueba correspondiente.
+al Grupo 6. Las integraciones con módulos externos y las historias restantes de
+M6 permanecen documentadas como pendientes y no deben marcarse como terminadas
+sin su implementación, integración y prueba correspondiente.

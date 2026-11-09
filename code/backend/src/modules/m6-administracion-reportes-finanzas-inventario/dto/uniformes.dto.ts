@@ -15,6 +15,7 @@ export enum TipoUniforme {
   CHAQUETA = 'CHAQUETA',
   PANTALON = 'PANTALON',
   UNIFORME_COMPLETO = 'UNIFORME_COMPLETO',
+  IMPLEMENTO = 'IMPLEMENTO',
 }
 
 export class FiltrosUniformesDto {
@@ -67,6 +68,11 @@ export class CrearUniformeDto {
   @IsInt()
   @Min(0)
   cantidadMinima = 0;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 1000)
+  fotoUrl?: string | null;
 }
 
 export class AjustarStockDto {
@@ -119,6 +125,11 @@ export class EditarUniformeDto {
   @IsInt()
   @Min(0)
   cantidadMinima?: number;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 1000)
+  fotoUrl?: string | null;
 }
 
 export class DesactivarUniformeDto {

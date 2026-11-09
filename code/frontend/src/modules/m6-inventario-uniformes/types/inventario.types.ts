@@ -2,13 +2,14 @@
 // existe; el servicio de demostración usa estos mismos tipos para que la
 // pantalla pueda cambiar a la API sin rehacer los componentes.
 
-export type TipoUniforme = 'CAMISETA' | 'CHAQUETA' | 'PANTALON' | 'UNIFORME_COMPLETO'
+export type TipoUniforme = 'CAMISETA' | 'CHAQUETA' | 'PANTALON' | 'UNIFORME_COMPLETO' | 'IMPLEMENTO'
 
 export const TIPOS_UNIFORME: { valor: TipoUniforme; texto: string }[] = [
   { valor: 'CAMISETA', texto: 'Camiseta oficial' },
   { valor: 'CHAQUETA', texto: 'Chaqueta' },
   { valor: 'PANTALON', texto: 'Pantalón' },
   { valor: 'UNIFORME_COMPLETO', texto: 'Uniforme completo' },
+  { valor: 'IMPLEMENTO', texto: 'Implemento apto para préstamo' },
 ]
 
 /** Tallas que usa la escuela; el esquema guarda la talla como texto. */
@@ -43,6 +44,7 @@ export interface Uniforme {
   cantidadMinima: number
   activo: boolean
   actualizadoEn: string
+  fotoUrl: string | null
 }
 
 /** Referencia con su proveedor y el estado derivado del stock. */
@@ -60,6 +62,7 @@ export interface DatosUniforme {
   precioVenta: number
   cantidadDisponible: number
   cantidadMinima: number
+  fotoUrl?: string | null
 }
 
 export interface DatosProveedor {

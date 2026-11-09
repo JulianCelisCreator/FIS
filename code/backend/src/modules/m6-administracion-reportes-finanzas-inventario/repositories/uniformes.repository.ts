@@ -16,6 +16,18 @@ export interface UniformeInventario {
   cantidadMinima: number;
   estadoStock: 'STOCK_NORMAL' | 'ALERTA_MINIMO';
   activo: boolean;
+  fotoUrl: string | null;
+}
+
+export interface MovimientoInventario {
+  id: number;
+  uniformeId: number;
+  referencia: string;
+  tipo: string;
+  cantidad: number;
+  observacion: string | null;
+  registradoPor: string;
+  registradoEn: string;
 }
 
 @Injectable()
@@ -53,6 +65,7 @@ export class UniformesRepository {
               CASE WHEN u.cantidad_disponible <= u.cantidad_minima
                    THEN 'ALERTA_MINIMO' ELSE 'STOCK_NORMAL' END AS "estadoStock",
               u.activo
+              , u.foto_url AS "fotoUrl"
        FROM uniforme u
        LEFT JOIN proveedor p ON p.id = u.proveedor_id
        ${condicionesSql}
@@ -72,11 +85,34 @@ export class UniformesRepository {
               CASE WHEN u.cantidad_disponible <= u.cantidad_minima
                    THEN 'ALERTA_MINIMO' ELSE 'STOCK_NORMAL' END AS "estadoStock",
               u.activo
+              , u.foto_url AS "fotoUrl"
        FROM uniforme u LEFT JOIN proveedor p ON p.id = u.proveedor_id
        WHERE u.id = $1`,
       [id],
     );
     return uniforme ?? null;
+  }
+
+  async listarMovimientos(uniformeId?: number): Promise<MovimientoInventario[]> {
+    const parametros: unknown[] = [];
+    const filtro = uniformeId === undefined ? '' : 'WHERE m.uniforme_id = $1';
+    if (uniformeId !== undefined) parametros.push(uniformeId);
+    return this.baseDatos.consultar<MovimientoInventario>(
+      `SELECT m.id,
+              m.uniforme_id AS "uniformeId",
+              u.referencia,
+              m.tipo,
+              m.cantidad,
+              m.observacion,
+              usuario.nombres || ' ' || usuario.apellidos AS "registradoPor",
+              m.registrado_en AS "registradoEn"
+       FROM movimiento_inventario m
+       JOIN uniforme u ON u.id = m.uniforme_id
+       JOIN usuario usuario ON usuario.id = m.registrado_por
+       ${filtro}
+       ORDER BY m.registrado_en DESC, m.id DESC`,
+      parametros,
+    );
   }
 
   async crear(dto: CrearUniformeDto, consultor: Consultor = this.baseDatos.consultor) {
@@ -85,8 +121,8 @@ export class UniformesRepository {
     }>(
       `INSERT INTO uniforme
        (referencia, tipo, talla, proveedor_id, costo, precio_venta,
-        cantidad_disponible, cantidad_minima)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        cantidad_disponible, cantidad_minima, foto_url)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING id, referencia, tipo, talla, activo`,
       [
         dto.referencia.trim(),
@@ -97,6 +133,7 @@ export class UniformesRepository {
         dto.precioVenta,
         dto.cantidadDisponible,
         dto.cantidadMinima,
+        dto.fotoUrl?.trim() || null,
       ],
     ).then((resultado) => resultado.rows);
     return creado;
@@ -142,8 +179,9 @@ export class UniformesRepository {
         precio_venta = COALESCE($7, precio_venta),
         cantidad_disponible = COALESCE($8, cantidad_disponible),
         cantidad_minima = COALESCE($9, cantidad_minima),
+        foto_url = CASE WHEN $10 THEN NULLIF($11::text, '') ELSE foto_url END,
         actualizado_en = NOW()
-       WHERE id = $10
+       WHERE id = $12
        RETURNING id`,
       [
         dto.referencia?.trim() ?? null,
@@ -155,6 +193,8 @@ export class UniformesRepository {
         dto.precioVenta ?? null,
         dto.cantidadDisponible ?? null,
         dto.cantidadMinima ?? null,
+        dto.fotoUrl !== undefined,
+        dto.fotoUrl?.trim() ?? null,
         id,
       ],
     ).then((resultado) => resultado.rows);

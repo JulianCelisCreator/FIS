@@ -17,6 +17,10 @@ export class UniformesService {
     return this.uniformes.listar(filtros);
   }
 
+  movimientos(uniformeId?: number) {
+    return this.uniformes.listarMovimientos(uniformeId);
+  }
+
   async detalle(id: number) {
     const uniforme = await this.uniformes.detalle(id);
     if (!uniforme) throw new NotFoundException('Uniforme no encontrado');

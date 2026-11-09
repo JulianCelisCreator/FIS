@@ -8,7 +8,7 @@ import {
   Pestanas,
 } from '../../../shared/ui/componentes.tsx'
 import { useSesion } from '../../../shared/sesion/use-sesion.ts'
-import { formatoCop, formatoFecha, formatoMesAnio, hoyEnClub } from '../../../shared/utils/formato.ts'
+import { formatoCop, formatoFecha, formatoMesAnio, hoyEnClub, leerPesos } from '../../../shared/utils/formato.ts'
 import { enlace } from '../../../shared/utils/use-ruta.ts'
 import {
   asignarPlan,
@@ -23,6 +23,7 @@ import {
   type PlanOfertado,
   type ResultadoAsignacion,
   type ResultadoCambio,
+  type ValoresTransaccion,
 } from '../types/m5.types.ts'
 import {
   diaDelMes,
@@ -31,8 +32,11 @@ import {
   primerDiaMesSiguiente,
   valorPrimeraMensualidad,
 } from '../utils/estimacion-cobros.ts'
+import { aDatosTransaccion, erroresTransaccion } from '../utils/validar-transaccion.ts'
+import { CamposTransaccion } from './campos-transaccion.tsx'
 import { DatosPatinador, SelectorPatinador } from './selector-patinador.tsx'
 import { usePatinadores } from './use-patinadores.ts'
+import { AvisoApiPendienteM5 } from './aviso-api-m5.tsx'
 
 type Pestana = 'asignar' | 'cambiar'
 
@@ -87,6 +91,22 @@ export function AsignarCambiarPlan({ pestanaInicial }: { pestanaInicial: Pestana
         <h1>Asignar o cambiar plan</h1>
         <p className="vl-text-body-sm">Vincula a un patinador con un plan activo o cambia el que tiene.</p>
       </header>
+
+      <AvisoApiPendienteM5 peticiones={[
+        'GET /m5/patinadores',
+        'GET /m5/patinadores/:id/plan',
+        'GET /m5/planes',
+        'GET /m5/planes/oferta',
+        'POST /m5/asignaciones',
+        'POST /m5/asignaciones/cambios',
+      ]} />
+      <Alerta tono="info" titulo="Asignar plan y registrar un pago son pasos distintos">
+        <p>
+          Asignar crea el cobro del plan, pero no supone que ya se recibió dinero. En una asignación mensual puedes indicar
+          abajo si recibiste un pago inicial o un abono; si no, el saldo queda pendiente y se paga después en «Registrar pago».
+          Cambiar un plan programa la tarifa nueva para el próximo mes y no registra un pago.
+        </p>
+      </Alerta>
 
       <Pestanas
         etiqueta="Asignar o cambiar plan"
@@ -166,22 +186,48 @@ function FormularioAsignar({
   const hoy = hoyEnClub()
   const [planId, setPlanId] = useState<number | null>(null)
   const [fechaInicio, setFechaInicio] = useState(hoy)
+  const [registrarPagoInicial, setRegistrarPagoInicial] = useState(false)
+  const [montoInicialTexto, setMontoInicialTexto] = useState('')
+  const [transaccionInicial, setTransaccionInicial] = useState<ValoresTransaccion>({
+    fechaPago: hoy,
+    medioPago: 'EFECTIVO',
+    referencia: '',
+  })
   const [dialogo, setDialogo] = useState(false)
   const [enviando, setEnviando] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [resultado, setResultado] = useState<ResultadoAsignacion | null>(null)
 
   const plan = planes.find((p) => p.id === planId) ?? null
+  const valorPrimerCobro = plan?.tarifa && plan.periodicidad === 'MENSUAL'
+    ? valorPrimeraMensualidad(plan.tarifa.valor, fechaInicio)
+    : null
+  const montoInicial = leerPesos(montoInicialTexto)
+  const errorMontoInicial = montoInicial === null || montoInicial <= 0
+    ? 'El abono debe ser mayor que cero.'
+    : valorPrimerCobro !== null && montoInicial > valorPrimerCobro
+      ? `El abono no puede superar el primer cobro (${formatoCop(valorPrimerCobro)}).`
+      : null
+  const erroresIniciales = erroresTransaccion(transaccionInicial, hoy)
   const sinAcudiente = patinador !== null && patinador.esMenor && patinador.acudientes.length === 0
   const fechaValida = fechaInicio >= primerDiaDelMes(hoy)
-  const listo = patinador !== null && plan !== null && plan.tarifa !== null && !sinAcudiente && fechaValida
+  const pagoInicialValido = !registrarPagoInicial ||
+    (valorPrimerCobro !== null && errorMontoInicial === null && Object.keys(erroresIniciales).length === 0)
+  const listo = patinador !== null && plan !== null && plan.tarifa !== null && !sinAcudiente && fechaValida && pagoInicialValido
 
   const confirmar = async () => {
     if (!patinador || !plan) return
     setEnviando(true)
     setError(null)
     try {
-      setResultado(await asignarPlan({ patinadorId: patinador.id, planId: plan.id, fechaInicio }))
+      setResultado(await asignarPlan({
+        patinadorId: patinador.id,
+        planId: plan.id,
+        fechaInicio,
+        ...(registrarPagoInicial && montoInicial !== null
+          ? { pagoInicial: { ...aDatosTransaccion(transaccionInicial), monto: montoInicial } }
+          : {}),
+      }))
       setDialogo(false)
     } catch (e) {
       setDialogo(false)
@@ -192,7 +238,14 @@ function FormularioAsignar({
   }
 
   if (resultado && patinador) {
-    return <ResultadoAsignado resultado={resultado} nombre={patinador.nombre} alContinuar={alTerminar} />
+    return (
+      <ResultadoAsignado
+        resultado={resultado}
+        nombre={patinador.nombre}
+        patinadorId={patinador.id}
+        alContinuar={alTerminar}
+      />
+    )
   }
 
   return (
@@ -214,7 +267,13 @@ function FormularioAsignar({
                 name="plan"
                 disabled={deshabilitado || !patinador || sinAcudiente}
                 checked={opcion.id === planId}
-                onChange={() => setPlanId(opcion.id)}
+                onChange={() => {
+                  setPlanId(opcion.id)
+                  const valor = opcion.tarifa && opcion.periodicidad === 'MENSUAL'
+                    ? valorPrimeraMensualidad(opcion.tarifa.valor, fechaInicio)
+                    : null
+                  setMontoInicialTexto(valor === null ? '' : String(valor))
+                }}
               />
               <span>
                 <span className="vl-text-label">{opcion.nombre} · {precioPlan(opcion)}</span>{' '}
@@ -255,6 +314,52 @@ function FormularioAsignar({
               ...resumenCobros(plan, plan.tarifa.valor, fechaInicio),
             ]}
           />
+          {plan.periodicidad === 'MENSUAL' && (
+            <section className="vl-stack" aria-labelledby="titulo-pago-inicial">
+              <label className="vl-check-row">
+                <input
+                  className="vl-radio"
+                  type="checkbox"
+                  checked={registrarPagoInicial}
+                  onChange={(evento) => {
+                    setRegistrarPagoInicial(evento.target.checked)
+                    if (evento.target.checked && valorPrimerCobro !== null) {
+                      setMontoInicialTexto(String(valorPrimerCobro))
+                    }
+                  }}
+                />
+                <span>
+                  <span className="vl-text-label">Registrar pago inicial ahora</span>
+                  <br />
+                  <span className="vl-text-caption">Actívalo solo si ya recibiste el dinero. Puedes ingresar el total o un abono.</span>
+                </span>
+              </label>
+              {registrarPagoInicial && valorPrimerCobro !== null && (
+                <>
+                  <h3 id="titulo-pago-inicial" className="vl-text-heading-h5">Pago inicial del primer cobro</h3>
+                  <Alerta tono="info">
+                    <p>Primer cobro: {formatoCop(valorPrimerCobro)}. Lo no abonado queda pendiente para «Registrar pago».</p>
+                  </Alerta>
+                  <Campo etiqueta="Monto recibido (COP)" id="monto-inicial" obligatorio error={errorMontoInicial}>
+                    <input
+                      id="monto-inicial"
+                      className="vl-input vl-input--numeric"
+                      inputMode="numeric"
+                      value={montoInicialTexto}
+                      onChange={(evento) => setMontoInicialTexto(evento.target.value)}
+                      aria-invalid={errorMontoInicial ? true : undefined}
+                    />
+                  </Campo>
+                  <CamposTransaccion
+                    valores={transaccionInicial}
+                    alCambiar={setTransaccionInicial}
+                    hoy={hoy}
+                    errores={erroresIniciales}
+                  />
+                </>
+              )}
+            </section>
+          )}
           {!patinador.matriculaPagada && (
             <Alerta tono="warning" titulo="Matrícula y gastos administrativos pendientes">
               <p>Ambos conceptos son obligatorios y deben registrarse y pagarse antes de activar el primer plan.</p>
@@ -290,7 +395,10 @@ function FormularioAsignar({
         <p>
           {patinador?.nombre} inicia el {formatoFecha(fechaInicio)}
           {plan?.periodicidad === 'MENSUAL'
-            ? '. El primer cobro mensual se genera al confirmar.'
+            ? `. El primer cobro será de ${formatoCop(valorPrimerCobro ?? 0)}.` +
+              (registrarPagoInicial
+                ? ` Se registrará un pago de ${formatoCop(montoInicial ?? 0)} y quedará pendiente el saldo restante.`
+                : ' Si no registras un pago inicial, el cobro queda pendiente.')
             : ' con un plan por sesión; no se generan cobros mensuales.'}
         </p>
       </DialogoConfirmacion>
@@ -309,7 +417,7 @@ function resumenCobros(plan: PlanOfertado, tarifa: number, fechaInicio: string):
     [
       dias < 30 ? 'Primer cobro mensual (prorrateado)' : 'Primer cobro mensual',
       `${formatoMesAnio(fechaInicio)} · ${formatoCop(valorPrimeraMensualidad(tarifa, fechaInicio))}` +
-        (dias < 30 ? ` (${dias}/30 días). Se paga al ingresar.` : ''),
+        (dias < 30 ? ` (${dias}/30 días). El pago puede registrarse ahora o después.` : ''),
     ],
     [
       'Mes siguiente',
@@ -321,10 +429,12 @@ function resumenCobros(plan: PlanOfertado, tarifa: number, fechaInicio: string):
 function ResultadoAsignado({
   resultado,
   nombre,
+  patinadorId,
   alContinuar,
 }: {
   resultado: ResultadoAsignacion
   nombre: string
+  patinadorId: number
   alContinuar: () => void
 }) {
   const { primerCobro, siguienteCobro } = resultado
@@ -342,22 +452,57 @@ function ResultadoAsignado({
                 [
                   'Primer cobro',
                   `${formatoMesAnio(primerCobro.periodo)} · ${formatoCop(primerCobro.valor)} (${primerCobro.diasCobrados}/30 días) · ` +
-                    `pagar hasta el ${formatoFecha(primerCobro.fechaLimite)}; pasa a «Vencido» desde el ${formatoFecha(primerCobro.vencidoDesde)}`,
+                    `pagar hasta el ${formatoFecha(primerCobro.fechaLimite)}`,
                 ],
               ] as [string, string][])
             : [['Cobros', 'Se paga por sesión en la sede.'] as [string, string]]),
+          ...(primerCobro
+            ? ([[
+                'Pago inicial',
+                resultado.pagoInicial
+                  ? `${formatoCop(resultado.pagoInicial.monto)} · comprobante ${resultado.pagoInicial.comprobante}`
+                  : 'No se registró pago; el cobro queda pendiente.',
+              ], [
+                'Saldo pendiente del primer cobro',
+                formatoCop(resultado.pagoInicial?.saldoRestante ?? primerCobro.valor),
+              ]] as [string, string][])
+            : []),
           ...(siguienteCobro
             ? ([
                 [
                   'Mes siguiente',
                   `${formatoMesAnio(siguienteCobro.periodo)} · ${formatoCop(siguienteCobro.valor)} · pagar hasta el ` +
-                    `${formatoFecha(siguienteCobro.fechaLimite)}; pasa a «Vencido» desde el ${formatoFecha(siguienteCobro.vencidoDesde)}`,
+                    `${formatoFecha(siguienteCobro.fechaLimite)}` +
+                    (siguienteCobro.vencidoDesde ? `; pasa a «Vencido» desde el ${formatoFecha(siguienteCobro.vencidoDesde)}` : ''),
                 ],
               ] as [string, string][])
             : []),
         ]}
       />
+      {primerCobro && (
+        <Alerta tono={!resultado.pagoInicial || resultado.pagoInicial.saldoRestante > 0 ? 'warning' : 'success'}>
+          <p>
+            {resultado.pagoInicial?.saldoRestante
+              ? `Queda un saldo de ${formatoCop(resultado.pagoInicial.saldoRestante)}. Regístralo cuando recibas el pago.`
+              : resultado.pagoInicial
+                ? 'El primer cobro quedó pagado.'
+                : 'No se recibió dinero en la asignación; el cobro queda pendiente hasta registrar un pago.'}
+          </p>
+        </Alerta>
+      )}
       <div className="app-actions">
+        <a
+          className="vl-button vl-button--secondary"
+          href={enlace('registrar-pago', {
+            pestana: resultado.plan.periodicidad === 'POR_SESION' ? 'sesion' : 'cobro',
+            patinador: patinadorId,
+          })}
+        >
+          Ir a Registrar pago
+        </a>
+        <a className="vl-button vl-button--secondary" href={enlace('historial-pagos', { patinador: patinadorId })}>
+          Ver historial de pagos
+        </a>
         <button className="vl-button vl-button--secondary" type="button" onClick={alContinuar}>
           Asignar a otro patinador
         </button>
@@ -462,7 +607,10 @@ function FormularioCambiar({
               [
                 'Próximo cobro',
                 `${formatoMesAnio(resultado.proximoCobro.periodo)} · ${formatoCop(resultado.proximoCobro.valor)} · pagar hasta el ` +
-                  `${formatoFecha(resultado.proximoCobro.fechaLimite)}; pasa a «Vencido» desde el ${formatoFecha(resultado.proximoCobro.vencidoDesde)}`,
+                  `${formatoFecha(resultado.proximoCobro.fechaLimite)}` +
+                  (resultado.proximoCobro.vencidoDesde
+                    ? `; pasa a «Vencido» desde el ${formatoFecha(resultado.proximoCobro.vencidoDesde)}`
+                    : ''),
               ],
             ]}
           />

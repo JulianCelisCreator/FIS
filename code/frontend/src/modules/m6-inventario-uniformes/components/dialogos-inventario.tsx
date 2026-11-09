@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Alerta,
   Campo,
@@ -14,6 +14,8 @@ import {
   crearProveedor,
   crearUniforme,
   editarUniforme,
+  listarMovimientos,
+  type MovimientoInventario,
 } from '../services/inventario.service.ts'
 import {
   TALLAS,
@@ -83,6 +85,7 @@ export function DialogoUniforme({
     uniforme ? String(uniforme.cantidadDisponible) : '',
   )
   const [minimoTexto, setMinimoTexto] = useState(uniforme ? String(uniforme.cantidadMinima) : '')
+  const [fotoUrl, setFotoUrl] = useState(uniforme?.fotoUrl ?? '')
   const [intentado, setIntentado] = useState(false)
   const { enviando, error, enviar } = useEnvio()
 
@@ -102,6 +105,7 @@ export function DialogoUniforme({
   const errorTipo = tipo ? null : 'Elige el tipo de uniforme.'
   const errorTalla = tallaNormalizada ? null : 'Elige la talla.'
   const errorCombinacion =
+    tipo !== 'IMPLEMENTO' &&
     !errorReferencia &&
     tipo &&
     tallaNormalizada &&
@@ -167,6 +171,7 @@ export function DialogoUniforme({
       precioVenta: precio,
       cantidadDisponible: disponible,
       cantidadMinima: minimo,
+      fotoUrl: fotoUrl.trim() || null,
     }
 
     if (uniforme) {
@@ -339,6 +344,27 @@ export function DialogoUniforme({
             aria-invalid={intentado && errorMinimo ? true : undefined}
           />
         </Campo>
+        <Campo
+          etiqueta="Foto del producto"
+          id="uniforme-foto"
+          ayuda="Enlace público a una imagen. Ejemplo: https://..."
+        >
+          <input
+            id="uniforme-foto"
+            className="vl-input"
+            type="url"
+            placeholder="https://..."
+            value={fotoUrl}
+            onChange={(evento) => setFotoUrl(evento.target.value)}
+          />
+          {fotoUrl && (
+            <img
+              className="app-producto__foto app-producto__foto--formulario"
+              src={fotoUrl}
+              alt={`Vista previa de ${referencia || 'la referencia'}`}
+            />
+          )}
+        </Campo>
       </div>
 
       {uniforme ? (
@@ -357,6 +383,86 @@ export function DialogoUniforme({
         </Alerta>
       )}
       {error && <Alerta tono="error" titulo="No se pudo guardar la referencia">{error}</Alerta>}
+    </DialogoConfirmacion>
+  )
+}
+
+/** Historial real de entradas, ajustes, préstamos, devoluciones y bajas. */
+export function DialogoMovimientos({
+  uniforme,
+  alCerrar,
+}: PropsDialogo & { uniforme: UniformeInventario }) {
+  const [movimientos, setMovimientos] = useState<MovimientoInventario[] | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let vigente = true
+    listarMovimientos(uniforme.id)
+      .then((filas) => {
+        if (vigente) setMovimientos(filas)
+      })
+      .catch((e) => {
+        if (vigente) setError((e as Error).message)
+      })
+    return () => { vigente = false }
+  }, [uniforme.id])
+
+  const etiquetas: Record<MovimientoInventario['tipo'], string> = {
+    ENTRADA: 'Entrada',
+    VENTA: 'Venta',
+    PRESTAMO: 'Préstamo',
+    DEVOLUCION: 'Devolución',
+    BAJA: 'Baja',
+    AJUSTE: 'Ajuste de stock',
+  }
+
+  return (
+    <DialogoConfirmacion
+      abierto
+      titulo={`Movimientos de ${uniforme.referencia}`}
+      textoCancelar="Cerrar"
+      alCancelar={alCerrar}
+    >
+      <ListaDatos
+        filas={[
+          ['Referencia', uniforme.referencia],
+          ['Stock actual', String(uniforme.cantidadDisponible)],
+          ['Talla', uniforme.talla],
+        ]}
+      />
+      {error && <Alerta tono="error" titulo="No se pudo consultar el historial">{error}</Alerta>}
+      {movimientos === null && !error && <p className="vl-text-body-sm">Consultando movimientos…</p>}
+      {movimientos?.length === 0 && (
+        <Alerta tono="info" titulo="Sin movimientos registrados">
+          Esta referencia todavía no tiene ajustes ni movimientos de inventario.
+        </Alerta>
+      )}
+      {movimientos && movimientos.length > 0 && (
+        <div className="vl-table-wrap">
+          <table className="vl-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Cantidad</th>
+                <th>Responsable</th>
+                <th>Observación</th>
+              </tr>
+            </thead>
+            <tbody>
+              {movimientos.map((movimiento) => (
+                <tr key={movimiento.id}>
+                  <td>{formatoFechaDeMarca(movimiento.registradoEn)}</td>
+                  <td>{etiquetas[movimiento.tipo]}</td>
+                  <td>{movimiento.cantidad > 0 ? '+' : ''}{movimiento.cantidad}</td>
+                  <td>{movimiento.registradoPor}</td>
+                  <td>{movimiento.observacion || 'Sin observación'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </DialogoConfirmacion>
   )
 }
