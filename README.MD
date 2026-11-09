@@ -276,6 +276,7 @@ Grupos con wireframes en el repositorio:
 | Grupo | Carpeta | Módulo |
 | ----- | ------- | ------ |
 | Grupo 01 | `wireframes/grupo-01/` | M1 · Usuarios y Acceso |
+| Grupo 02 | `wireframes/grupo-02/` | M3 · Grupos, Horarios y programación |
 | Grupo 03 | `wireframes/grupo-03/` | M2 · Gestión deportiva de patinadores |
 | Grupo 04 | `wireframes/grupo-04/` | M5 · Planes, Tarifas y Pagos |
 | Grupo 05 | `wireframes/grupo-05/` | M4 · Competencias y Resultados |
