@@ -8,14 +8,19 @@ import { ProveedoresService } from './services/proveedores.service.js';
 import { PrestamosController } from './controllers/prestamos.controller.js';
 import { PrestamosRepository } from './repositories/prestamos.repository.js';
 import { PrestamosService } from './services/prestamos.service.js';
+import { VentasController } from './controllers/ventas.controller.js';
+import { RegistroFinancieroVentaRepository } from './repositories/registro-financiero-venta.repository.js';
+import { VentasRepository } from './repositories/ventas.repository.js';
+import { VentasService } from './services/ventas.service.js';
 
 /** M6 · Administración, reportes, finanzas e inventario. */
 @Module({
-  controllers: [UniformesController, ProveedoresController, PrestamosController],
+  controllers: [UniformesController, ProveedoresController, PrestamosController, VentasController],
   providers: [
     UniformesRepository, UniformesService,
     ProveedoresRepository, ProveedoresService,
     PrestamosRepository, PrestamosService,
+    VentasRepository, VentasService, RegistroFinancieroVentaRepository,
   ],
 })
 export class M6AdministracionReportesFinanzasInventarioModule {}
