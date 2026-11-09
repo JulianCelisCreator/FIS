@@ -19,7 +19,7 @@ Además, cada pago emite su comprobante (RF-M5-14) y devuelve el estado de carte
 
 ## Endpoints
 
-Todos exigen la cabecera `x-usuario-id` (ver [Autenticación temporal](#autenticación-temporal)). Fechas en `AAAA-MM-DD`, montos en COP.
+Todos exigen una sesión iniciada (ver [Autenticación](#autenticación)). Fechas en `AAAA-MM-DD`, montos en COP.
 
 | Método y ruta | Permiso | Quién |
 | --- | --- | --- |
@@ -159,9 +159,9 @@ Errores: `400` datos inválidos, `401` sin usuario, `403` sin permiso o patinado
 
 Las asignaciones y los cambios se registran en `auditoria`.
 
-## Autenticación temporal
+## Autenticación
 
-M1 todavía no implementa el inicio de sesión (M1-02). Mientras tanto, `common/auth/autenticacion-temporal.guard.ts` identifica al usuario por la cabecera `x-usuario-id` y carga sus roles y permisos desde la base. **Es solo para desarrollo:** se niega a funcionar con `NODE_ENV=production`. Cuando M1 entregue la autenticación real, se reemplaza ese guard; los controladores ya reciben el usuario con `@UsuarioActual()` y no cambian.
+Los controladores usan `AutenticacionGuard` (`common/auth/`), que lee la cookie de sesión que crea M1 al ingresar (`POST /m1/acceso/ingreso`, RF-M1-02). El usuario llega con `@UsuarioActual()` y lleva solo el rol con el que ingresó y sus permisos. Los usuarios de `db/datos-demo.sql` ingresan con la contraseña `Velora2026`.
 
 ## Supuestos para confirmar
 
