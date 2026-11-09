@@ -17,6 +17,31 @@ La pantalla del adelanto Sprint 2 usa datos ficticios en memoria del navegador
 para poder registrar préstamos, devoluciones y pérdidas sin depender de datos de
 la base compartida. Los cambios se reinician al recargar la página.
 
+## Sprint 2: venta de uniformes (HU-6.7 / RF-M6-07)
+
+- `GET /m6/ventas?buscar=`: ventas registradas con sus líneas y comprobante.
+- `GET /m6/ventas/compradores`: patinadores activos con sus acudientes vinculados.
+- `GET /m6/ventas/:ventaId`: detalle y comprobante de una venta.
+- `POST /m6/ventas`: registra la venta. Cuerpo:
+  `{ patinadorId, compradorTipo: 'PATINADOR' | 'ACUDIENTE', acudienteId?, medioPago, referenciaPago?, items: [{ uniformeId, cantidad }] }`.
+
+Reglas:
+
+- El valor unitario es el `precio_venta` vigente de la referencia; el cliente no lo envía.
+- Solo se venden referencias activas, con precio y de tipo prenda (no `IMPLEMENTO`).
+- Si la cantidad pedida (sumando líneas repetidas) supera las existencias, la venta
+  se rechaza con el detalle de lo pedido y lo disponible.
+- Todo ocurre en **una sola transacción**: bloqueo de las referencias (`FOR UPDATE`),
+  cobro y pago `VENTA_UNIFORME` en M5, comprobante `CP-xxxxxx`, venta y detalle,
+  descuento del stock, movimiento `VENTA` en el Kardex y auditoría. Si algo falla,
+  no queda nada registrado.
+- La venta confirmada es inmutable: no hay `PATCH` ni `DELETE` y la base rechaza
+  `UPDATE`/`DELETE` sobre `venta_uniforme` y `venta_detalle` con un trigger. Las
+  correcciones se registran como ajuste autorizado de stock (`PATCH /m6/uniformes/:id/stock`)
+  o, cuando se implemente, como devolución.
+- La escritura en tablas de M5 está aislada en `RegistroFinancieroVentaRepository`:
+  cuando M5 publique su servicio de pagos, solo se reemplaza esa clase.
+
 ## Endpoint
 
 - `GET /m6/uniformes`
