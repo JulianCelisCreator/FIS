@@ -283,7 +283,7 @@ y las actividades que todavía pertenecen a futuras entregas.
 - **Objetivo:** hacer operativas las prendas para venderlas o prestarlas y
   restringir los permisos del Contador.
 - **Estado del sprint:** No completado. Hay avances parciales en permisos y
-  préstamos; ventas sigue pendiente.
+  préstamos; ventas (HU-6.7) quedó implementada.
 
 ### HU-6.3 — Rol Contador: adelanto de demostración
 
@@ -365,26 +365,45 @@ y las actividades que todavía pertenecen a futuras entregas.
   devolución y pérdida con observación.
 - Comprobar la pantalla en móvil, tablet y escritorio.
 
-### HU-6.7 — Ventas: pendiente
+### HU-6.7 — Ventas: implementada
 
-**Qué se decidió**
+**Qué se hizo**
 
-- Los uniformes pueden tener precio de venta porque esa información ya pertenece
-  al inventario de M6.
-- La venta no se completará solo porque se actualice stock: debe existir un cobro
-  en M5.
-- Las cantidades vendidas deben descontarse únicamente cuando la venta sea
-  confirmada.
-- Si M5 rechaza el cobro o falla la operación, el descuento no debe quedar
-  registrado a medias.
+- Backend NestJS en `/m6/ventas`: consultar ventas, consultar compradores
+  (patinadores activos y acudientes vinculados), consultar el detalle y registrar
+  una venta con varias referencias.
+- La venta registra fecha, comprador (patinador o acudiente), referencia, talla,
+  cantidad, valor unitario, valor total y medio de pago.
+- El valor unitario sale del precio de venta del inventario; el cliente no puede
+  enviarlo.
+- Se bloquea la venta si la cantidad pedida supera las existencias, si la
+  referencia está desactivada, no tiene precio o es un implemento de préstamo.
+- Venta, cobro y pago `VENTA_UNIFORME` de M5, comprobante `CP-xxxxxx`, descuento de
+  stock, movimiento `VENTA` en el Kardex y auditoría se ejecutan en una sola
+  transacción.
+- La venta confirmada no se puede modificar: no existen endpoints de edición o
+  borrado y la base de datos lo impide con un trigger.
+- Pantalla «Venta de uniformes» en `/app/#/ventas`: formulario con varias líneas,
+  existencias visibles al elegir la referencia y talla, alerta de existencias
+  insuficientes, total calculado automáticamente, confirmación y comprobante
+  imprimible. El pago aparece en el historial de pagos.
+- Pruebas unitarias de las reglas de venta (stock, líneas repetidas, implementos,
+  referencias sin precio y cálculo de totales).
+
+**Decisiones**
+
+- Mientras M5 no publique su API, M6 escribe el cobro, el pago y el comprobante
+  directamente en las tablas de M5, aislado en `RegistroFinancieroVentaRepository`.
+- Los medios de pago son los de M5: efectivo, transferencia y consignación; la
+  referencia es obligatoria salvo en efectivo.
+- La pantalla usa la demostración local, como inventario y préstamos, hasta que
+  M1 entregue el inicio de sesión.
 
 **Qué falta**
 
-- Crear la pantalla y el backend de M6-07.
-- Elegir comprador y patinador desde la información de M2.
-- Registrar medios de pago, referencias y comprobantes de M5.
-- Realizar una transacción coordinada entre venta y cobro.
-- Agregar comprobación de stock antes de confirmar.
+- Flujo de devolución de venta (reingreso de stock y anulación del pago en M5).
+- Confirmar con M5 el contrato definitivo del asiento de venta.
+- Conectar la pantalla a la API real.
 
 ### 20. Imágenes de productos, uniformes o tarifas
 
@@ -581,6 +600,6 @@ y las actividades que todavía pertenecen a futuras entregas.
 El Sprint 1 está completo. El Sprint 2 es el trabajo pendiente actual: HU-6.8
 tiene funcionalidades iniciales de préstamo y devolución; HU-6.3 tiene un
 adelanto de demostración, pendiente de integración y verificación real; HU-6.7
-sigue pendiente. La demo de pagos de M5 es local y no reemplaza la integración
+está implementada (backend y pantalla), pendiente de la devolución de ventas. La demo de pagos de M5 es local y no reemplaza la integración
 con sus API. No se debe marcar el Sprint 2 como terminado hasta completar sus
 historias, integraciones y criterios de aceptación.
