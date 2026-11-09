@@ -6,13 +6,14 @@ y las actividades que todavía pertenecen a futuras entregas.
 
 ---
 
-## 🏃 Sprint 1 (Semana 1) — Inventario y Administración del Módulo 6
+## 🏃 Sprint 1 (Semana 1) — Personal e inventario
 
 - **Período:** 29 de octubre de 2026 – 05 de noviembre de 2026
-- **Objetivo del Sprint:** Dejar funcional el control de uniformes del módulo 6,
-  manteniendo separados los archivos y responsabilidades de los demás grupos.
-- **Historia principal:** HU-M6-06 — Registro y control de uniformes.
-- **Estado de la historia:** Completada funcionalmente.
+- **Objetivo del Sprint:** Dejar lista la base de datos y funcionando los
+  catálogos principales de Personal e Inventario.
+- **Historias:** HU-6.2 — Personal y HU-6.6 — Inventario de uniformes.
+- **Estado del Sprint:** Completado.
+- **Estado de HU-6.6:** Implementada y verificada funcionalmente.
 - **Usuario temporal de prueba:** Andrea López, Administradora, identificada con el
   usuario de ID `1`.
 - **Aplicación frontend:** `http://localhost:5173`
@@ -273,18 +274,18 @@ y las actividades que todavía pertenecen a futuras entregas.
 
 ---
 
-## 🏃 Sprint 2 — Avance en progreso de ventas, préstamos y consulta financiera
+## 🏃 Sprint 2 (Semana 2) — Pendiente, con adelantos parciales
 
-- **Período de avance:** 09 de noviembre de 2026.
-- **Objetivo:** adelantar las historias de préstamo y venta sin interferir con la
-  entrega de los demás módulos.
-- **Historia M6-08:** Préstamos y devoluciones, en avance verificable.
-- **Historia M6-07:** Venta de uniformes, pendiente de integración transaccional
-  con M5.
-- **Estado actual:** existe un recorrido funcional de préstamos en el backend y
-  la navegación; todavía faltan datos reales de patinadores y pruebas completas.
+- **Período del adelanto documentado:** 09 de noviembre de 2026.
+- **Esfuerzo estimado del sprint:** 41 horas.
+- **Historias del sprint:** HU-6.3 (Rol Contador), HU-6.7 (Ventas) y HU-6.8
+  (Préstamos).
+- **Objetivo:** hacer operativas las prendas para venderlas o prestarlas y
+  restringir los permisos del Contador.
+- **Estado del sprint:** No completado. Hay avances parciales en permisos y
+  préstamos; ventas sigue pendiente.
 
-### 17. Usuario Contador para prueba
+### HU-6.3 — Rol Contador: adelanto de demostración
 
 **Qué se hizo**
 
@@ -315,10 +316,12 @@ y las actividades que todavía pertenecen a futuras entregas.
 
 - El módulo M5 necesita confirmar que ofrece una API de consulta reusable para
   Contador.
+- Completar y verificar los permisos del rol en las operaciones y rutas reales
+  de M6, con autenticación integrada desde M1.
 - No deben mostrarse imágenes ni campos comerciales que no existan todavía en el
   modelo aprobado.
 
-### 18. Préstamos de implementos
+### HU-6.8 — Préstamos y devoluciones: adelanto parcial
 
 **Qué se hizo**
 
@@ -362,7 +365,7 @@ y las actividades que todavía pertenecen a futuras entregas.
   devolución y pérdida con observación.
 - Comprobar la pantalla en móvil, tablet y escritorio.
 
-### 19. Decisión sobre ventas
+### HU-6.7 — Ventas: pendiente
 
 **Qué se decidió**
 
@@ -404,7 +407,7 @@ y las actividades que todavía pertenecen a futuras entregas.
 - Añadir vista previa, tamaño máximo, formatos permitidos y eliminación sin
   perder el historial.
 
-## Pendientes fuera de la entrega realizada
+## Sprint 3 y trabajo posterior — estado por historia
 
 ### M6-01 — Panel administrativo
 
@@ -434,32 +437,6 @@ y las actividades que todavía pertenecen a futuras entregas.
 - Agregar exportación PDF y XLSX según el alcance aprobado.
 - Excluir al Contador de reportes de inventario y administración.
 
-### M6-07 — Venta de uniformes
-
-**Qué falta**
-
-- Seleccionar comprador y referencia.
-- Validar cantidad disponible.
-- Registrar medio de pago, monto y referencia.
-- Integrar el cobro con M5.
-- Confirmar la venta antes de descontar stock, o aplicar compensación si el cobro falla.
-
-### M6-08 — Préstamos y devoluciones
-
-**Qué se implementó en este avance**
-
-- Registrar préstamos de implementos con responsable, patinador y fecha prevista.
-- Validar que el implemento esté disponible y que haya stock suficiente.
-- Registrar la devolución y actualizar el stock; exigir observación para pérdida
-  o daño.
-- Calcular en la demo el cobro diario y vincularlo al flujo local de pagos.
-
-**Qué falta**
-
-- Integrar cobros y pagos con las API reales de M5.
-- Completar la experiencia de consulta de préstamos vencidos y las pruebas
-  visuales en distintos tamaños de pantalla.
-
 ### Integración con otros módulos
 
 **Qué falta**
@@ -475,11 +452,22 @@ y las actividades que todavía pertenecen a futuras entregas.
 
 ---
 
-## 📅 Planificación de Sprints futuros
+## 📅 Plan de sprints y estado
 
-- **Sprint 2:** Personal y permisos, venta de uniformes y préstamos.
-- **Sprint 3:** Reportes financieros, exportación PDF/XLSX y panel administrativo.
-- **Sprint 4:** Integración con M1, M2, M3 y M5, pruebas finales y sustentación.
+- **Sprint 1 (Semana 1, 26 h) — Completado:** HU-6.2 (Personal) y HU-6.6
+  (Inventario de uniformes). Objetivo: dejar lista la base de datos y los dos
+  catálogos principales funcionando.
+- **Sprint 2 (Semana 2, 41 h) — Pendiente; adelantos parciales solamente:**
+  HU-6.3 (Rol Contador), HU-6.7 (Ventas) y HU-6.8 (Préstamos). Objetivo: hacer
+  operativas las prendas para venderlas o prestarlas y restringir los permisos
+  del Contador. El trabajo adelantado en préstamos y la demo local de pagos no
+  significa que el sprint esté completo.
+- **Sprint 3 (Semana 3, 53 h) — Pendiente:** HU-6.4 (Reportes), HU-6.5
+  (Exportar PDF/Excel) y HU-6.1 (Dashboard KPIs). Objetivo: consolidar los
+  números financieros y armar el panel principal del Administrador.
+- **Sprint 4 (Semana 4) — Pendiente:** integración con los módulos de los otros
+  grupos, verificación de criterios de aceptación y preparación de la
+  sustentación.
 
 ### Avance de estabilización — Consultar, editar y fotografías
 
@@ -590,7 +578,9 @@ y las actividades que todavía pertenecen a futuras entregas.
 
 **Última actualización:** 09 de noviembre de 2026.
 
-La historia HU-M6-06 quedó implementada y verificada dentro del alcance asignado
-al Grupo 6. Las integraciones con módulos externos y las historias restantes de
-M6 permanecen documentadas como pendientes y no deben marcarse como terminadas
-sin su implementación, integración y prueba correspondiente.
+El Sprint 1 está completo. El Sprint 2 es el trabajo pendiente actual: HU-6.8
+tiene funcionalidades iniciales de préstamo y devolución; HU-6.3 tiene un
+adelanto de demostración, pendiente de integración y verificación real; HU-6.7
+sigue pendiente. La demo de pagos de M5 es local y no reemplaza la integración
+con sus API. No se debe marcar el Sprint 2 como terminado hasta completar sus
+historias, integraciones y criterios de aceptación.
