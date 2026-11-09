@@ -796,6 +796,7 @@ CREATE TABLE uniforme (
   precio_venta        NUMERIC(14,2) NOT NULL CHECK (precio_venta >= 0),
   cantidad_disponible INTEGER NOT NULL DEFAULT 0 CHECK (cantidad_disponible >= 0),
   cantidad_minima     INTEGER NOT NULL DEFAULT 0 CHECK (cantidad_minima >= 0),
+  foto_url            TEXT,
   activo              BOOLEAN NOT NULL DEFAULT true,
   creado_en           TIMESTAMPTZ NOT NULL DEFAULT now(),
   actualizado_en      TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -1086,5 +1087,19 @@ INSERT INTO rol_permiso (rol_id, permiso_id)
 SELECT r.id, p.id FROM rol r JOIN permiso p ON p.codigo IN
   ('M5_PLAN_CONSULTAR','M5_PLAN_ASIGNAR','M5_COMPROBANTE_DESCARGAR')
 WHERE r.codigo IN ('ACUDIENTE','PATINADOR');
+
+-- Usuario de prueba para consultar finanzas y usar la vista de Contador en desarrollo.
+INSERT INTO usuario (
+  nombres, apellidos, correo, contrasena_hash, estado, correo_verificado_en
+) VALUES (
+  'Carlos', 'Ramírez', 'contador@m6.local',
+  '$2b$12$temporal.seguro', 'ACTIVA', now()
+);
+
+INSERT INTO usuario_rol (usuario_id, rol_id, asignado_por)
+SELECT usuario.id, rol.id, usuario.id
+FROM usuario
+CROSS JOIN rol
+WHERE usuario.correo = 'contador@m6.local' AND rol.codigo = 'CONTADOR';
 
 COMMIT;
