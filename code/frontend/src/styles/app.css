@@ -279,18 +279,17 @@ p {
   text-transform: uppercase;
 }
 
-.vl-user label {
-  color: var(--muted-on-dark);
-  font-family: var(--font-mono);
-  font-size: var(--app-fs-tag);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+/* Cerrar sesión (RF-M1-03): botón fantasma sobre la pista (DESIGN.md, button-ghost). */
+.vl-user .vl-user__salir {
+  justify-self: start;
+  color: var(--white);
+  background: transparent;
+  border-color: var(--line-strong);
 }
 
-.vl-user .vl-select {
-  color: var(--white);
-  background: var(--rink-deep);
-  border-color: var(--line-strong);
+.vl-user .vl-user__salir:hover {
+  color: var(--signal);
+  border-color: var(--signal);
 }
 
 .vl-main {

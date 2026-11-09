@@ -9,23 +9,18 @@ import {
   type CamposRegistro,
   type ErroresRegistro,
 } from '../utils/validar-registro.ts'
+import { describirCampo } from '../utils/describir-campo.ts'
 
 const VACIO: CamposRegistro = { nombres: '', apellidos: '', correo: '', contrasena: '', rol: '' }
 
 const ORDEN_CAMPOS: (keyof CamposRegistro)[] = ['nombres', 'apellidos', 'correo', 'contrasena', 'rol']
-
-/** Atributos de accesibilidad de un control según su error y su ayuda. */
-function describir(id: string, error: string | undefined, conAyuda = false) {
-  const descripciones = [conAyuda && `${id}-ayuda`, error && `${id}-error`].filter(Boolean).join(' ')
-  return { 'aria-invalid': error ? true : undefined, 'aria-describedby': descripciones || undefined }
-}
 
 /**
  * RF-M1-01 · Registro de usuario (W01, pestaña «Registrarse»). Los errores
  * aparecen solo después de intentar enviar; el correo duplicado se muestra en
  * su campo.
  */
-export function FormularioRegistro({ alIrAIngresar }: { alIrAIngresar?: () => void }) {
+export function FormularioRegistro({ alIrAIngresar }: { alIrAIngresar?: (cuenta: CuentaRegistrada) => void }) {
   const [campos, setCampos] = useState<CamposRegistro>(VACIO)
   const [errores, setErrores] = useState<ErroresRegistro>({})
   const [intentado, setIntentado] = useState(false)
@@ -97,7 +92,7 @@ export function FormularioRegistro({ alIrAIngresar }: { alIrAIngresar?: () => vo
           ]}
         />
         {alIrAIngresar && (
-          <button className="vl-button vl-button--primary m1-acceso__accion" type="button" onClick={alIrAIngresar}>
+          <button className="vl-button vl-button--primary m1-acceso__accion" type="button" onClick={() => alIrAIngresar(cuenta)}>
             Ir a ingresar
           </button>
         )}
@@ -124,7 +119,7 @@ export function FormularioRegistro({ alIrAIngresar }: { alIrAIngresar?: () => vo
             placeholder="Sofía"
             value={campos.nombres}
             onChange={(evento) => cambiar('nombres', evento.target.value)}
-            {...describir('registro-nombres', errores.nombres)}
+            {...describirCampo('registro-nombres', errores.nombres)}
           />
         </Campo>
         <Campo etiqueta="Apellidos" id="registro-apellidos" obligatorio error={errores.apellidos}>
@@ -135,7 +130,7 @@ export function FormularioRegistro({ alIrAIngresar }: { alIrAIngresar?: () => vo
             placeholder="Ramírez"
             value={campos.apellidos}
             onChange={(evento) => cambiar('apellidos', evento.target.value)}
-            {...describir('registro-apellidos', errores.apellidos)}
+            {...describirCampo('registro-apellidos', errores.apellidos)}
           />
         </Campo>
       </div>
@@ -151,7 +146,7 @@ export function FormularioRegistro({ alIrAIngresar }: { alIrAIngresar?: () => vo
           placeholder="sofia@example.com"
           value={campos.correo}
           onChange={(evento) => cambiar('correo', evento.target.value)}
-          {...describir('registro-correo', errores.correo)}
+          {...describirCampo('registro-correo', errores.correo)}
         />
       </Campo>
 
@@ -169,7 +164,7 @@ export function FormularioRegistro({ alIrAIngresar }: { alIrAIngresar?: () => vo
           autoComplete="new-password"
           value={campos.contrasena}
           onChange={(evento) => cambiar('contrasena', evento.target.value)}
-          {...describir('registro-contrasena', errores.contrasena, true)}
+          {...describirCampo('registro-contrasena', errores.contrasena, true)}
         />
       </Campo>
       <label className="vl-check-row m1-acceso__ver">
@@ -194,7 +189,7 @@ export function FormularioRegistro({ alIrAIngresar }: { alIrAIngresar?: () => vo
           className="vl-select"
           value={campos.rol}
           onChange={(evento) => cambiar('rol', evento.target.value)}
-          {...describir('registro-rol', errores.rol, true)}
+          {...describirCampo('registro-rol', errores.rol, true)}
         >
           <option value="">Elige un rol…</option>
           {ROLES_AUTORREGISTRO.map((opcion) => (

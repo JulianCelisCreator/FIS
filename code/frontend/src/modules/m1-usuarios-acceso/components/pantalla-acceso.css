@@ -81,6 +81,11 @@
   max-width: 60ch;
 }
 
+/* Las dos pestañas reparten el ancho de la columna. */
+.m1-acceso .vl-tabs__tab {
+  flex: 1;
+}
+
 .m1-acceso__fila {
   display: grid;
   gap: 1rem;

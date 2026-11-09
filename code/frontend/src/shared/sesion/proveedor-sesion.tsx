@@ -1,62 +1,50 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import {
-  guardarUsuarioPrueba,
-  pedir,
-  usuarioPruebaGuardado,
-} from '../services/cliente-api.ts'
-import type { Rol, Sesion, UsuarioPrueba } from './sesion.types.ts'
+import { ErrorApi, EVENTO_SESION_VENCIDA, pedir } from '../services/cliente-api.ts'
+import type { Rol, Sesion } from './sesion.types.ts'
 import { SesionContexto } from './use-sesion.ts'
 
-interface RespuestaSesion {
-  usuarioId: number
-  sesion: Sesion | null
-  error: string | null
-}
-
 /**
- * TEMPORAL hasta que M1 implemente el inicio de sesión: el usuario se elige de
- * una lista de prueba y se envía en la cabecera x-usuario-id.
+ * Sesión del usuario (RF-M1-02). El token vive en una cookie httpOnly que el
+ * navegador envía solo; aquí se consulta GET /sesion al abrir la aplicación y
+ * se guarda la sesión que devuelve el ingreso.
  */
 export function ProveedorSesion({ children }: { children: ReactNode }) {
-  const [usuarioId, setUsuarioId] = useState<number | null>(usuarioPruebaGuardado)
-  const [respuesta, setRespuesta] = useState<RespuestaSesion | null>(null)
-  const [usuarios, setUsuarios] = useState<UsuarioPrueba[]>([])
-  const [errorUsuarios, setErrorUsuarios] = useState<string | null>(null)
+  const [sesion, setSesion] = useState<Sesion | null>(null)
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    pedir<UsuarioPrueba[]>('/sesion/usuarios')
-      .then(setUsuarios)
-      .catch((e: Error) => setErrorUsuarios(e.message))
-  }, [])
-
-  useEffect(() => {
-    if (usuarioId === null) return
     let vigente = true
     pedir<Sesion>('/sesion')
-      .then((sesion) => vigente && setRespuesta({ usuarioId, sesion, error: null }))
-      .catch((e: Error) => vigente && setRespuesta({ usuarioId, sesion: null, error: e.message }))
+      .then((actual) => vigente && setSesion(actual))
+      .catch((e: Error) => {
+        // 401 = no hay sesión abierta: no es un error, se muestra el acceso.
+        if (vigente && !(e instanceof ErrorApi && e.estado === 401)) setError(e.message)
+      })
+      .finally(() => vigente && setCargando(false))
     return () => {
       vigente = false
     }
-  }, [usuarioId])
+  }, [])
 
-  // La respuesta solo vale si es del usuario elegido ahora.
-  const vigente = usuarioId !== null && respuesta?.usuarioId === usuarioId ? respuesta : null
-  const sesion = vigente?.sesion ?? null
+  useEffect(() => {
+    const alVencer = () => setSesion(null)
+    window.addEventListener(EVENTO_SESION_VENCIDA, alVencer)
+    return () => window.removeEventListener(EVENTO_SESION_VENCIDA, alVencer)
+  }, [])
 
-  const cambiarUsuario = (id: number | null) => {
-    guardarUsuarioPrueba(id)
-    setUsuarioId(id)
+  const establecerSesion = (nueva: Sesion | null) => {
+    setSesion(nueva)
+    setError(null)
   }
 
   return (
     <SesionContexto
       value={{
         sesion,
-        usuarios,
-        cargando: usuarioId !== null && vigente === null,
-        error: vigente?.error ?? errorUsuarios,
-        cambiarUsuario,
+        cargando,
+        error,
+        establecerSesion,
         tienePermiso: (permiso: string) => sesion?.permisos.includes(permiso) ?? false,
         tieneRol: (rol: Rol) => sesion?.roles.includes(rol) ?? false,
       }}
