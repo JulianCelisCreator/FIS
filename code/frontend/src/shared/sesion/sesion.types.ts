@@ -7,7 +7,7 @@ export type Rol =
   | 'FISIOTERAPEUTA'
   | 'VISITANTE'
 
-/** Usuario de la sesión actual (GET /sesion y POST /m1/acceso/ingreso). Lleva solo el rol con el que ingresó. */
+/** Usuario de la sesión actual (GET /sesion y POST /m1/acceso/ingreso), con sus roles y permisos. */
 export interface Sesion {
   id: number
   nombre: string
@@ -20,8 +20,8 @@ export interface ContextoSesion {
   /** true mientras se consulta si hay una sesión abierta. */
   cargando: boolean
   error: string | null
-  /** Guarda la sesión que devolvió el ingreso, o null al cerrar sesión. */
-  establecerSesion: (sesion: Sesion | null) => void
+  /** Guarda la sesión que devolvió el ingreso (HU-M1-02). */
+  establecerSesion: (sesion: Sesion) => void
   tienePermiso: (permiso: string) => boolean
   tieneRol: (rol: Rol) => boolean
 }

@@ -5,7 +5,7 @@
 --   docker exec -i patinaje-db psql -U patinaje -d patinaje < db/datos-demo.sql
 --
 -- Las fechas son relativas al mes actual para que la demo siempre tenga sentido.
--- Usuarios (ingresan en /app/#/acceso con la contraseña Velora2026 y su rol):
+-- Usuarios (ingresan en /app/ con su correo y la contraseña Velora2026):
 --   Andrea López (Administradora) · Martha Gómez (Contadora)
 --   Carolina Torres (Acudiente de Sofía y Mateo) · Luis Herrera (Acudiente de Samuel)
 --   Juan Pablo González (Patinador mayor) · Sofía Ramírez Torres (Patinadora menor)

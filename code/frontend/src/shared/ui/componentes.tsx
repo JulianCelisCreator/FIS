@@ -63,8 +63,7 @@ export function Alerta({ tono, titulo, children }: { tono: Exclude<Tono, 'neutra
 
 /** Estados del catálogo (REQUIREMENTS §5.1): texto e ícono, nunca solo color. */
 const ESTADOS: Record<string, Record<string, [string, Tono]>> = {
-  correo: { 'pendiente-verificacion': ['Pendiente de verificación', 'warning'], verificado: ['Verificado', 'success'] },
-  cuenta: { activa: ['Activa', 'success'], desactivada: ['Desactivada', 'neutral'] },
+  cuenta: { 'por-registrar': ['Por registrar', 'neutral'] },
   plan: { activo: ['Activo', 'success'], inactivo: ['Inactivo', 'neutral'] },
   cobro: { pendiente: ['Pendiente', 'warning'], pagado: ['Pagado', 'success'], anulado: ['Anulado', 'neutral'] },
   pago: { registrado: ['Registrado', 'success'], anulado: ['Anulado', 'neutral'] },

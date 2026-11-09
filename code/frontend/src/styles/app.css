@@ -279,19 +279,6 @@ p {
   text-transform: uppercase;
 }
 
-/* Cerrar sesión (RF-M1-03): botón fantasma sobre la pista (DESIGN.md, button-ghost). */
-.vl-user .vl-user__salir {
-  justify-self: start;
-  color: var(--white);
-  background: transparent;
-  border-color: var(--line-strong);
-}
-
-.vl-user .vl-user__salir:hover {
-  color: var(--signal);
-  border-color: var(--signal);
-}
-
 .vl-main {
   min-width: 0;
   padding-inline: clamp(1.25rem, 3vw, 2.5rem);

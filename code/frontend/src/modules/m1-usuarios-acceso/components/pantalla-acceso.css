@@ -1,4 +1,4 @@
-/* W01 · Acceso. Banda de pista (rink) con líneas de carril de 1 px y panel de
+/* HU-M1-02 · Ingreso. Banda de pista (rink) con líneas de carril de 1 px y panel de
    tiza con el formulario. Solo tokens de src/styles/tokens.css y app.css. */
 
 .m1-acceso {
@@ -81,16 +81,6 @@
   max-width: 60ch;
 }
 
-/* Las dos pestañas reparten el ancho de la columna. */
-.m1-acceso .vl-tabs__tab {
-  flex: 1;
-}
-
-.m1-acceso__fila {
-  display: grid;
-  gap: 1rem;
-}
-
 .m1-acceso .vl-stack > .m1-acceso__ver {
   margin-top: 0.25rem;
 }
@@ -101,18 +91,6 @@
 
 .m1-acceso .vl-stack > .m1-acceso__accion {
   margin-top: 1.5rem;
-}
-
-.m1-acceso__dato {
-  font-family: var(--font-mono);
-  font-size: var(--app-fs-small);
-  overflow-wrap: anywhere;
-}
-
-@media (min-width: 520px) {
-  .m1-acceso__fila {
-    grid-template-columns: 1fr 1fr;
-  }
 }
 
 /* Por debajo de 980 px la pista pasa a ser una franja superior, como el riel de la aplicación. */

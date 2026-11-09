@@ -7,8 +7,9 @@ export interface NuevoUsuario {
   apellidos: string;
   correo: string;
   contrasenaHash: string;
-  /** null = autorregistro (RF-M1-01). */
-  creadoPor: number | null;
+  estado: 'POR_REGISTRAR' | 'ACTIVA';
+  /** Administrador que crea la cuenta (HU-M1-01). */
+  creadoPor: number;
 }
 
 export interface UsuarioCreado {
@@ -24,7 +25,6 @@ export interface UsuarioParaIngreso {
   nombre: string;
   estado: 'POR_REGISTRAR' | 'ACTIVA' | 'DESACTIVADA';
   contrasenaHash: string;
-  roles: Rol[];
 }
 
 /** Código de PostgreSQL para una violación de índice único. */
@@ -38,7 +38,7 @@ export class CorreoDuplicadoError extends Error {
   }
 }
 
-/** Cuentas de acceso (tabla usuario y usuario_rol, RF-M1-01). */
+/** Cuentas de acceso (tablas usuario y usuario_rol, HU-M1-01). */
 @Injectable()
 export class UsuariosRepository {
   async existeCorreo(consultor: Consultor, correo: string): Promise<boolean> {
@@ -58,9 +58,9 @@ export class UsuariosRepository {
     try {
       const { rows } = await consultor.query<UsuarioCreado>(
         `INSERT INTO usuario (nombres, apellidos, correo, contrasena_hash, estado, creado_por)
-         VALUES ($1, $2, $3, $4, 'ACTIVA', $5)
+         VALUES ($1, $2, $3, $4, $5, $6)
          RETURNING id, nombres, apellidos, correo, estado`,
-        [nuevo.nombres, nuevo.apellidos, nuevo.correo, nuevo.contrasenaHash, nuevo.creadoPor],
+        [nuevo.nombres, nuevo.apellidos, nuevo.correo, nuevo.contrasenaHash, nuevo.estado, nuevo.creadoPor],
       );
       return rows[0];
     } catch (error) {
@@ -69,41 +69,37 @@ export class UsuariosRepository {
     }
   }
 
-  /** Datos para verificar el ingreso (RF-M1-02). Incluye el hash: nunca se devuelve al cliente. */
+  /** Datos para verificar el ingreso (HU-M1-02). Incluye el hash: nunca se devuelve al cliente. */
   async buscarParaIngreso(consultor: Consultor, correo: string): Promise<UsuarioParaIngreso | null> {
     const { rows } = await consultor.query<UsuarioParaIngreso>(
-      `SELECT u.id, u.nombres || ' ' || u.apellidos AS nombre, u.estado,
-              u.contrasena_hash AS "contrasenaHash",
-              COALESCE(array_agg(r.codigo) FILTER (WHERE r.id IS NOT NULL), '{}') AS roles
-       FROM usuario u
-       LEFT JOIN usuario_rol ur ON ur.usuario_id = u.id
-       LEFT JOIN rol r ON r.id = ur.rol_id
-       WHERE lower(u.correo) = lower($1)
-       GROUP BY u.id`,
+      `SELECT id, nombres || ' ' || apellidos AS nombre, estado, contrasena_hash AS "contrasenaHash"
+       FROM usuario
+       WHERE lower(correo) = lower($1)`,
       [correo],
     );
     return rows[0] ?? null;
+  }
+
+  /** Roles de la cuenta y los permisos de esos roles (CA-04: solo lo autorizado para su rol). */
+  async rolesYPermisos(consultor: Consultor, usuarioId: number): Promise<{ roles: Rol[]; permisos: string[] }> {
+    const { rows } = await consultor.query<{ roles: Rol[]; permisos: string[] }>(
+      `SELECT COALESCE(array_agg(DISTINCT r.codigo) FILTER (WHERE r.id IS NOT NULL), '{}') AS roles,
+              COALESCE(array_agg(DISTINCT pe.codigo) FILTER (WHERE pe.id IS NOT NULL), '{}') AS permisos
+       FROM usuario_rol ur
+       JOIN rol r               ON r.id = ur.rol_id
+       LEFT JOIN rol_permiso rp ON rp.rol_id = r.id
+       LEFT JOIN permiso pe     ON pe.id = rp.permiso_id
+       WHERE ur.usuario_id = $1`,
+      [usuarioId],
+    );
+    return rows[0] ?? { roles: [], permisos: [] };
   }
 
   async registrarIngreso(consultor: Consultor, usuarioId: number): Promise<void> {
     await consultor.query(`UPDATE usuario SET ultimo_ingreso_en = now() WHERE id = $1`, [usuarioId]);
   }
 
-  /** Permisos de un rol (tabla rol_permiso, RF-M1-07). */
-  async permisosDeRol(consultor: Consultor, rol: Rol): Promise<string[]> {
-    const { rows } = await consultor.query<{ codigo: string }>(
-      `SELECT DISTINCT pe.codigo
-       FROM rol r
-       JOIN rol_permiso rp ON rp.rol_id = r.id
-       JOIN permiso pe ON pe.id = rp.permiso_id
-       WHERE r.codigo = $1
-       ORDER BY pe.codigo`,
-      [rol],
-    );
-    return rows.map((fila) => fila.codigo);
-  }
-
-  async asignarRol(consultor: Consultor, usuarioId: number, rol: Rol, asignadoPor: number | null): Promise<void> {
+  async asignarRol(consultor: Consultor, usuarioId: number, rol: Rol, asignadoPor: number): Promise<void> {
     await consultor.query(
       `INSERT INTO usuario_rol (usuario_id, rol_id, asignado_por)
        SELECT $1, r.id, $3 FROM rol r WHERE r.codigo = $2`,

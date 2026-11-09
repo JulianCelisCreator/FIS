@@ -1,36 +1,20 @@
 import { createHash, randomBytes } from 'node:crypto';
 import type { CookieOptions } from 'express';
-import { Rol } from './usuario-autenticado.js';
 
-/** Cookie httpOnly con el token de la sesión (RF-M1-02). JavaScript del navegador no la lee. */
+/** Cookie httpOnly con el token de la sesión (HU-M1-02). JavaScript del navegador no la lee. */
 export const COOKIE_SESION = 'velora_sesion';
 
 /** Duración de una sesión: una jornada de trabajo. */
 export const DURACION_SESION_MS = 12 * 60 * 60 * 1000;
 
-const ROLES = new Set<string>(Object.values(Rol));
-
-/**
- * Token de sesión: `<ROL>.<secreto aleatorio>`. En la tabla sesion se guarda
- * el SHA-256 del token completo, nunca el token. Como el rol es parte de lo que
- * se hashea, cambiar el rol en la cookie hace que deje de coincidir: el rol con
- * el que se ingresó no se puede alterar desde el navegador.
- */
-export function crearTokenSesion(rol: Rol): { token: string; hash: string } {
-  const token = `${rol}.${randomBytes(32).toString('base64url')}`;
+/** Token aleatorio de sesión. En la tabla sesion se guarda su SHA-256, nunca el token. */
+export function crearTokenSesion(): { token: string; hash: string } {
+  const token = randomBytes(32).toString('base64url');
   return { token, hash: hashTokenSesion(token) };
 }
 
 export function hashTokenSesion(token: string): string {
   return createHash('sha256').update(token).digest('hex');
-}
-
-/** Rol que declara el token, o null si el formato no es válido. */
-export function rolDelToken(token: string): Rol | null {
-  const punto = token.indexOf('.');
-  if (punto <= 0 || punto === token.length - 1) return null;
-  const rol = token.slice(0, punto);
-  return ROLES.has(rol) ? (rol as Rol) : null;
 }
 
 /** Lee una cookie de la cabecera Cookie sin dependencias extra. */

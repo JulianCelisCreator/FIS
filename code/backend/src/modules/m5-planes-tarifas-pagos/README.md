@@ -161,7 +161,7 @@ Las asignaciones y los cambios se registran en `auditoria`.
 
 ## Autenticación
 
-Los controladores usan `AutenticacionGuard` (`common/auth/`), que lee la cookie de sesión que crea M1 al ingresar (`POST /m1/acceso/ingreso`, RF-M1-02). El usuario llega con `@UsuarioActual()` y lleva solo el rol con el que ingresó y sus permisos. Los usuarios de `db/datos-demo.sql` ingresan con la contraseña `Velora2026`.
+Los controladores usan `AutenticacionGuard` (`common/auth/`), que lee la cookie de sesión que crea M1 al ingresar (`POST /m1/acceso/ingreso`, RF-M1-02). El usuario llega con `@UsuarioActual()`, con sus roles y los permisos de esos roles. Los usuarios de `db/datos-demo.sql` ingresan con la contraseña `Velora2026`.
 
 ## Supuestos para confirmar
 

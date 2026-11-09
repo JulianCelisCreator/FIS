@@ -1,26 +1,20 @@
 import { useState, type FormEvent } from 'react'
 import { useSesion } from '../../../shared/sesion/use-sesion.ts'
-import type { Rol } from '../../../shared/sesion/sesion.types.ts'
 import { Alerta, Campo } from '../../../shared/ui/componentes.tsx'
 import { ingresar } from '../services/acceso.service.ts'
-import { ROLES_INGRESO } from '../types/acceso.types.ts'
 import { describirCampo } from '../utils/describir-campo.ts'
 import { validarIngreso, type CamposIngreso, type ErroresIngreso } from '../utils/validar-ingreso.ts'
 
-const ORDEN_CAMPOS: (keyof CamposIngreso)[] = ['correo', 'contrasena', 'rol']
+const ORDEN_CAMPOS: (keyof CamposIngreso)[] = ['correo', 'contrasena']
 
 /**
- * RF-M1-02 · Inicio de sesión (W01, pestaña «Ingresar»): correo, contraseña y
- * el rol con el que se ingresa («Soy»). Al ingresar, la sesión queda en el
- * proveedor y la aplicación muestra las pantallas de ese rol.
+ * HU-M1-02 · Inicio de sesión con correo y contraseña. Sin selector de rol: el
+ * sistema identifica los roles de la cuenta. Al ingresar, la sesión queda en
+ * el proveedor y la aplicación muestra las pantallas autorizadas.
  */
-export function FormularioIngreso({ inicial }: { inicial?: { correo?: string; rol?: Rol } }) {
+export function FormularioIngreso() {
   const { establecerSesion } = useSesion()
-  const [campos, setCampos] = useState<CamposIngreso>({
-    correo: inicial?.correo ?? '',
-    contrasena: '',
-    rol: inicial?.rol ?? '',
-  })
+  const [campos, setCampos] = useState<CamposIngreso>({ correo: '', contrasena: '' })
   const [errores, setErrores] = useState<ErroresIngreso>({})
   const [intentado, setIntentado] = useState(false)
   const [enviando, setEnviando] = useState(false)
@@ -39,6 +33,7 @@ export function FormularioIngreso({ inicial }: { inicial?: { correo?: string; ro
     setIntentado(true)
     setErrorGeneral(null)
 
+    // CA-05: si falta un dato se indica aquí, sin llamar al servidor.
     const encontrados = validarIngreso(campos)
     setErrores(encontrados)
     const primero = ORDEN_CAMPOS.find((campo) => encontrados[campo])
@@ -49,9 +44,9 @@ export function FormularioIngreso({ inicial }: { inicial?: { correo?: string; ro
 
     setEnviando(true)
     try {
-      const sesion = await ingresar({ correo: campos.correo.trim(), contrasena: campos.contrasena, rol: campos.rol as Rol })
-      establecerSesion(sesion)
+      establecerSesion(await ingresar({ correo: campos.correo.trim(), contrasena: campos.contrasena }))
     } catch (error) {
+      // CA-02 y CA-03: el mensaje de la API no revela cuál dato falló.
       setErrorGeneral(error instanceof Error ? error.message : 'No se pudo ingresar. Intenta de nuevo.')
       setCampos((actuales) => ({ ...actuales, contrasena: '' }))
       document.getElementById('ingreso-contrasena')?.focus()
@@ -75,7 +70,7 @@ export function FormularioIngreso({ inicial }: { inicial?: { correo?: string; ro
           inputMode="email"
           autoComplete="username"
           spellCheck={false}
-          placeholder="sofia@example.com"
+          placeholder="laura.cubillos@example.com"
           value={campos.correo}
           onChange={(evento) => cambiar('correo', evento.target.value)}
           {...describirCampo('ingreso-correo', errores.correo)}
@@ -102,23 +97,6 @@ export function FormularioIngreso({ inicial }: { inicial?: { correo?: string; ro
         />
         <span className="vl-text-body-sm">Mostrar contraseña</span>
       </label>
-
-      <Campo etiqueta="Soy" id="ingreso-rol" obligatorio error={errores.rol}>
-        <select
-          id="ingreso-rol"
-          className="vl-select"
-          value={campos.rol}
-          onChange={(evento) => cambiar('rol', evento.target.value)}
-          {...describirCampo('ingreso-rol', errores.rol)}
-        >
-          <option value="">Elige tu rol…</option>
-          {ROLES_INGRESO.map((opcion) => (
-            <option key={opcion.rol} value={opcion.rol}>
-              {opcion.texto}
-            </option>
-          ))}
-        </select>
-      </Campo>
 
       <button className="vl-button vl-button--primary m1-acceso__accion" type="submit" aria-disabled={enviando || undefined}>
         {enviando ? 'Ingresando…' : 'Ingresar'}

@@ -1,5 +1,5 @@
 import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
-import { hashTokenSesion, rolDelToken } from '../../../common/auth/token-sesion.js';
+import { hashTokenSesion } from '../../../common/auth/token-sesion.js';
 import { Rol } from '../../../common/auth/usuario-autenticado.js';
 import type { BaseDatosService, Consultor } from '../../../common/database/base-datos.service.js';
 import type { NuevaSesion, SesionesRepository } from '../repositories/sesiones.repository.js';
@@ -9,8 +9,7 @@ import {
   IngresoService,
   MENSAJE_CREDENCIALES,
   MENSAJE_CUENTA_DESACTIVADA,
-  MENSAJE_CUENTA_POR_ACTIVAR,
-  mensajeSinRol,
+  MENSAJE_CUENTA_POR_REGISTRAR,
 } from './ingreso.service.js';
 
 const consultor = {} as Consultor;
@@ -23,63 +22,50 @@ const contexto = { ip: '127.0.0.1', userAgent: 'vitest' };
 let hashGuardado: string;
 
 beforeAll(async () => {
-  hashGuardado = await hashContrasena('Patines2026');
+  hashGuardado = await hashContrasena('Velora2026');
 });
 
 function crearServicio(usuario: Partial<UsuarioParaIngreso> | null) {
   const sesionesCreadas: NuevaSesion[] = [];
-  const cerradas: string[] = [];
   const registrarIngreso = vi.fn().mockResolvedValue(undefined);
   const usuarios = {
     buscarParaIngreso: vi.fn().mockResolvedValue(
-      usuario && {
-        id: 3,
-        nombre: 'Carolina Torres',
-        estado: 'ACTIVA',
-        contrasenaHash: hashGuardado,
-        roles: [Rol.ACUDIENTE],
-        ...usuario,
-      },
+      usuario && { id: 2, nombre: 'Martha Gómez', estado: 'ACTIVA', contrasenaHash: hashGuardado, ...usuario },
     ),
     registrarIngreso,
-    permisosDeRol: vi.fn().mockResolvedValue(['M5_PLAN_ASIGNAR', 'M5_PLAN_CONSULTAR']),
+    rolesYPermisos: vi.fn().mockResolvedValue({ roles: [Rol.CONTADOR], permisos: ['M5_PAGO_REGISTRAR'] }),
   } as unknown as UsuariosRepository;
   const sesiones = {
     crear: vi.fn((_c: Consultor, nueva: NuevaSesion) => {
       sesionesCreadas.push(nueva);
-      return Promise.resolve(40);
-    }),
-    cerrarPorToken: vi.fn((_c: Consultor, hash: string) => {
-      cerradas.push(hash);
       return Promise.resolve();
     }),
   } as unknown as SesionesRepository;
-  return { servicio: new IngresoService(baseDatos, usuarios, sesiones), sesionesCreadas, cerradas, registrarIngreso };
+  return { servicio: new IngresoService(baseDatos, usuarios, sesiones), sesionesCreadas, registrarIngreso };
 }
 
-const ingreso = { correo: 'carolina.torres@example.com', contrasena: 'Patines2026', rol: Rol.ACUDIENTE };
+const ingreso = { correo: 'martha.gomez@escuela.com', contrasena: 'Velora2026' };
 
-describe('IngresoService.iniciar (RF-M1-02)', () => {
-  it('crea la sesión con el rol elegido y guarda solo el hash del token', async () => {
+describe('IngresoService.iniciar (HU-M1-02)', () => {
+  it('CA-01 y CA-04: autentica, identifica los roles y sus permisos, y guarda solo el hash del token', async () => {
     const { servicio, sesionesCreadas, registrarIngreso } = crearServicio({});
 
     const resultado = await servicio.iniciar(ingreso, contexto);
 
     expect(resultado.sesion).toEqual({
-      id: 3,
-      nombre: 'Carolina Torres',
-      roles: [Rol.ACUDIENTE],
-      permisos: ['M5_PLAN_ASIGNAR', 'M5_PLAN_CONSULTAR'],
+      id: 2,
+      nombre: 'Martha Gómez',
+      roles: [Rol.CONTADOR],
+      permisos: ['M5_PAGO_REGISTRAR'],
     });
-    expect(rolDelToken(resultado.token)).toBe(Rol.ACUDIENTE);
     expect(sesionesCreadas).toHaveLength(1);
     expect(sesionesCreadas[0].tokenHash).toBe(hashTokenSesion(resultado.token));
     expect(sesionesCreadas[0].tokenHash).not.toBe(resultado.token);
     expect(resultado.expiraEn.getTime()).toBeGreaterThan(Date.now());
-    expect(registrarIngreso).toHaveBeenCalledWith(consultor, 3);
+    expect(registrarIngreso).toHaveBeenCalledWith(consultor, 2);
   });
 
-  it('da el mismo mensaje para un correo sin cuenta y una contraseña equivocada', async () => {
+  it('CA-02: el mismo mensaje para un correo sin cuenta y una contraseña equivocada, sin crear sesión', async () => {
     const sinCuenta = crearServicio(null);
     const claveMala = crearServicio({});
 
@@ -93,42 +79,26 @@ describe('IngresoService.iniciar (RF-M1-02)', () => {
     expect(claveMala.sesionesCreadas).toHaveLength(0);
   });
 
-  it('rechaza el ingreso con un rol que la cuenta no tiene', async () => {
-    const { servicio, sesionesCreadas } = crearServicio({});
-
-    await expect(servicio.iniciar({ ...ingreso, rol: Rol.ADMINISTRADOR }, contexto)).rejects.toThrow(
-      new ForbiddenException(mensajeSinRol(Rol.ADMINISTRADOR)),
+  it('CA-03: una cuenta desactivada no ingresa y se le pide contactar al Administrador', async () => {
+    const { servicio, sesionesCreadas } = crearServicio({ estado: 'DESACTIVADA' });
+    await expect(servicio.iniciar(ingreso, contexto)).rejects.toThrow(
+      new ForbiddenException(MENSAJE_CUENTA_DESACTIVADA),
     );
     expect(sesionesCreadas).toHaveLength(0);
   });
 
-  it('permite elegir cualquiera de los roles de una cuenta con varios', async () => {
-    const { servicio } = crearServicio({ roles: [Rol.ACUDIENTE, Rol.PROFESOR] });
-
-    const resultado = await servicio.iniciar({ ...ingreso, rol: Rol.PROFESOR }, contexto);
-    expect(resultado.sesion.roles).toEqual([Rol.PROFESOR]);
-  });
-
-  it('no deja ingresar a una cuenta desactivada ni a una por activar', async () => {
-    await expect(crearServicio({ estado: 'DESACTIVADA' }).servicio.iniciar(ingreso, contexto)).rejects.toThrow(
-      new ForbiddenException(MENSAJE_CUENTA_DESACTIVADA),
+  it('una cuenta «Por registrar» no ingresa hasta activarse (precondición: cuenta habilitada)', async () => {
+    const { servicio, sesionesCreadas } = crearServicio({ estado: 'POR_REGISTRAR' });
+    await expect(servicio.iniciar(ingreso, contexto)).rejects.toThrow(
+      new ForbiddenException(MENSAJE_CUENTA_POR_REGISTRAR),
     );
-    await expect(crearServicio({ estado: 'POR_REGISTRAR' }).servicio.iniciar(ingreso, contexto)).rejects.toThrow(
-      new ForbiddenException(MENSAJE_CUENTA_POR_ACTIVAR),
+    expect(sesionesCreadas).toHaveLength(0);
+  });
+
+  it('una contraseña equivocada en una cuenta desactivada no revela su estado', async () => {
+    const { servicio } = crearServicio({ estado: 'DESACTIVADA' });
+    await expect(servicio.iniciar({ ...ingreso, contrasena: 'otra' }, contexto)).rejects.toThrow(
+      new UnauthorizedException(MENSAJE_CREDENCIALES),
     );
-  });
-});
-
-describe('IngresoService.cerrar (RF-M1-03)', () => {
-  it('cierra la sesión por el hash del token', async () => {
-    const { servicio, cerradas } = crearServicio({});
-    await servicio.cerrar('ACUDIENTE.secreto');
-    expect(cerradas).toEqual([hashTokenSesion('ACUDIENTE.secreto')]);
-  });
-
-  it('no hace nada sin token', async () => {
-    const { servicio, cerradas } = crearServicio({});
-    await servicio.cerrar(null);
-    expect(cerradas).toEqual([]);
   });
 });

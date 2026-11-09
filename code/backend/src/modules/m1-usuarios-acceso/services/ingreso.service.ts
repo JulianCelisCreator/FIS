@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { crearTokenSesion, DURACION_SESION_MS, hashTokenSesion } from '../../../common/auth/token-sesion.js';
+import { crearTokenSesion, DURACION_SESION_MS } from '../../../common/auth/token-sesion.js';
 import type { Rol } from '../../../common/auth/usuario-autenticado.js';
 import { BaseDatosService } from '../../../common/database/base-datos.service.js';
 import type { IniciarSesionDto } from '../dto/iniciar-sesion.dto.js';
@@ -8,22 +8,9 @@ import { UsuariosRepository } from '../repositories/usuarios.repository.js';
 import { hashContrasena, verificarContrasena } from '../utils/contrasena.js';
 
 export const MENSAJE_CREDENCIALES = 'El correo o la contraseña no son correctos.';
-export const MENSAJE_CUENTA_DESACTIVADA = 'Tu cuenta está desactivada. Comunícate con la escuela.';
-export const MENSAJE_CUENTA_POR_ACTIVAR = 'Tu cuenta aún no está activa. Comunícate con la escuela.';
-
-const NOMBRE_ROL: Record<Rol, string> = {
-  ADMINISTRADOR: 'Administrador',
-  PROFESOR: 'Profesor',
-  PATINADOR: 'Patinador',
-  ACUDIENTE: 'Acudiente',
-  CONTADOR: 'Contador',
-  FISIOTERAPEUTA: 'Fisioterapeuta',
-  VISITANTE: 'Visitante',
-};
-
-export function mensajeSinRol(rol: Rol): string {
-  return `Tu cuenta no tiene el rol ${NOMBRE_ROL[rol]}. Elige el rol con el que te registraste.`;
-}
+export const MENSAJE_CUENTA_DESACTIVADA = 'Tu cuenta está desactivada. Contacta al Administrador.';
+export const MENSAJE_CUENTA_POR_REGISTRAR =
+  'Tu cuenta aún no está activa. Contacta al Administrador para completar la activación.';
 
 export interface ContextoIngreso {
   ip: string | null;
@@ -38,9 +25,10 @@ export interface SesionIniciada {
 }
 
 /**
- * RF-M1-02 · Inicio de sesión con correo, contraseña y rol. RF-M1-03 · Cierre.
- * Un correo que no existe y una contraseña equivocada dan el mismo mensaje y
- * tardan lo mismo, para no revelar qué correos tienen cuenta.
+ * HU-M1-02 · Inicio de sesión con correo y contraseña. El sistema identifica
+ * los roles de la cuenta (CA-01). Un correo que no existe y una contraseña
+ * equivocada dan el mismo mensaje y tardan lo mismo (CA-02), para no revelar
+ * qué correos tienen cuenta.
  */
 @Injectable()
 export class IngresoService {
@@ -54,8 +42,7 @@ export class IngresoService {
   ) {}
 
   async iniciar(dto: IniciarSesionDto, contexto: ContextoIngreso): Promise<SesionIniciada> {
-    const consultor = this.baseDatos.consultor;
-    const usuario = await this.usuarios.buscarParaIngreso(consultor, dto.correo);
+    const usuario = await this.usuarios.buscarParaIngreso(this.baseDatos.consultor, dto.correo);
 
     if (!usuario) {
       this.hashFicticio ??= hashContrasena('contrasena-de-referencia');
@@ -66,11 +53,11 @@ export class IngresoService {
       throw new UnauthorizedException(MENSAJE_CREDENCIALES);
     }
     // Desde aquí la persona demostró ser dueña de la cuenta: los mensajes pueden ser específicos.
-    if (usuario.estado === 'DESACTIVADA') throw new ForbiddenException(MENSAJE_CUENTA_DESACTIVADA);
-    if (usuario.estado !== 'ACTIVA') throw new ForbiddenException(MENSAJE_CUENTA_POR_ACTIVAR);
-    if (!usuario.roles.includes(dto.rol)) throw new ForbiddenException(mensajeSinRol(dto.rol));
+    if (usuario.estado === 'DESACTIVADA') throw new ForbiddenException(MENSAJE_CUENTA_DESACTIVADA); // CA-03
+    // Precondición «cuenta habilitada»: la activación de «Por registrar» es otra historia (HU-M1-12).
+    if (usuario.estado !== 'ACTIVA') throw new ForbiddenException(MENSAJE_CUENTA_POR_REGISTRAR);
 
-    const { token, hash } = crearTokenSesion(dto.rol);
+    const { token, hash } = crearTokenSesion();
     const expiraEn = new Date(Date.now() + DURACION_SESION_MS);
 
     return this.baseDatos.transaccion(async (cliente) => {
@@ -82,18 +69,8 @@ export class IngresoService {
         userAgent: contexto.userAgent?.slice(0, 500) ?? null,
       });
       await this.usuarios.registrarIngreso(cliente, usuario.id);
-      const permisos = await this.usuarios.permisosDeRol(cliente, dto.rol);
-      return {
-        token,
-        expiraEn,
-        sesion: { id: usuario.id, nombre: usuario.nombre, roles: [dto.rol], permisos },
-      };
+      const { roles, permisos } = await this.usuarios.rolesYPermisos(cliente, usuario.id);
+      return { token, expiraEn, sesion: { id: usuario.id, nombre: usuario.nombre, roles, permisos } };
     });
-  }
-
-  /** Cierra la sesión del token. Si no hay token o ya estaba cerrada, no falla. */
-  async cerrar(token: string | null): Promise<void> {
-    if (!token) return;
-    await this.sesiones.cerrarPorToken(this.baseDatos.consultor, hashTokenSesion(token));
   }
 }

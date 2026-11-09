@@ -5,9 +5,6 @@
 
 const BASE = '/api'
 
-/** Se emite en window cuando la API rechaza la sesión; ProveedorSesion vuelve al acceso. */
-export const EVENTO_SESION_VENCIDA = 'velora:sesion-vencida'
-
 /** Error de la API con el mensaje en español que devuelve el backend. */
 export class ErrorApi extends Error {
   readonly estado: number
@@ -55,8 +52,6 @@ export async function pedir<T>(
   }
 
   const cuerpo: unknown = await respuesta.json().catch(() => null)
-  // Una ruta protegida respondió 401: la sesión venció o se cerró en otra pestaña.
-  if (respuesta.status === 401 && !ruta.startsWith('/m1/acceso/')) window.dispatchEvent(new Event(EVENTO_SESION_VENCIDA))
   if (!respuesta.ok) throw new ErrorApi(respuesta.status, mensajeDeError(cuerpo, respuesta.status))
   return cuerpo as T
 }

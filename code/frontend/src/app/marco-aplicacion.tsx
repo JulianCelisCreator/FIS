@@ -4,7 +4,6 @@ import { Icono } from '../shared/ui/icono.tsx'
 import { MarcaVelora } from '../shared/ui/marca-velora.tsx'
 import { useSesion } from '../shared/sesion/use-sesion.ts'
 import { NOMBRE_ROL } from '../shared/sesion/sesion.types.ts'
-import { salir } from '../modules/m1-usuarios-acceso/services/acceso.service.ts'
 
 export interface EnlaceNavegacion {
   pagina: string
@@ -27,24 +26,9 @@ export function MarcoAplicacion({
   paginaActual: string
   children: ReactNode
 }) {
-  const { sesion, establecerSesion } = useSesion()
+  const { sesion } = useSesion()
   const [esMovil, setEsMovil] = useState(() => window.matchMedia(CONSULTA_MOVIL).matches)
   const [menuAbierto, setMenuAbierto] = useState(false)
-  const [saliendo, setSaliendo] = useState(false)
-
-  // RF-M1-03: cierra la sesión en la API y vuelve al acceso. Si la API no
-  // responde, la sesión local se cierra igual; la del servidor vence sola.
-  const cerrarSesion = async () => {
-    if (saliendo) return
-    setSaliendo(true)
-    try {
-      await salir()
-    } catch {
-      // Se ignora: lo importante es no dejar la interfaz con una sesión abierta.
-    }
-    window.location.hash = '#/acceso'
-    establecerSesion(null)
-  }
 
   useEffect(() => {
     const consulta = window.matchMedia(CONSULTA_MOVIL)
@@ -118,14 +102,6 @@ export function MarcoAplicacion({
                 </div>
               </div>
             )}
-            <button
-              className="vl-button vl-button--sm vl-user__salir"
-              type="button"
-              aria-disabled={saliendo || undefined}
-              onClick={cerrarSesion}
-            >
-              {saliendo ? 'Cerrando sesión…' : 'Cerrar sesión'}
-            </button>
           </div>
         </div>
       </aside>

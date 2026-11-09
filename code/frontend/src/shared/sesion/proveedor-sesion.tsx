@@ -1,10 +1,10 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { ErrorApi, EVENTO_SESION_VENCIDA, pedir } from '../services/cliente-api.ts'
+import { ErrorApi, pedir } from '../services/cliente-api.ts'
 import type { Rol, Sesion } from './sesion.types.ts'
 import { SesionContexto } from './use-sesion.ts'
 
 /**
- * Sesión del usuario (RF-M1-02). El token vive en una cookie httpOnly que el
+ * Sesión del usuario (HU-M1-02). El token vive en una cookie httpOnly que el
  * navegador envía solo; aquí se consulta GET /sesion al abrir la aplicación y
  * se guarda la sesión que devuelve el ingreso.
  */
@@ -27,13 +27,7 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  useEffect(() => {
-    const alVencer = () => setSesion(null)
-    window.addEventListener(EVENTO_SESION_VENCIDA, alVencer)
-    return () => window.removeEventListener(EVENTO_SESION_VENCIDA, alVencer)
-  }, [])
-
-  const establecerSesion = (nueva: Sesion | null) => {
+  const establecerSesion = (nueva: Sesion) => {
     setSesion(nueva)
     setError(null)
   }

@@ -38,7 +38,7 @@ Para cargar los datos de demostración sobre una base recién creada:
 docker exec -i patinaje-db psql -U patinaje -d patinaje < db/datos-demo.sql
 ```
 
-Los usuarios de demostración ingresan en `/app/#/acceso` con la contraseña `Velora2026` y su rol. Si cargaste los datos antes de que existiera el inicio de sesión (contraseña `demo`), actualízalos sin recrear la base copiando el hash de `clave_demo` de `datos-demo.sql`:
+Los usuarios de demostración ingresan en `/app/` con su correo y la contraseña `Velora2026`. Si cargaste los datos antes de que existiera el inicio de sesión (contraseña `demo`), actualízalos sin recrear la base copiando el hash de `clave_demo` de `datos-demo.sql`:
 
 ```sql
 UPDATE usuario SET contrasena_hash = '<hash de clave_demo>' WHERE contrasena_hash = 'demo';
