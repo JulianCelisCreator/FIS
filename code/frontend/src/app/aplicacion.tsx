@@ -1,6 +1,7 @@
 import { Alerta } from '../shared/ui/componentes.tsx'
 import { useSesion } from '../shared/sesion/use-sesion.ts'
-import { useRuta } from '../shared/utils/use-ruta.ts'
+import { enlace, useRuta } from '../shared/utils/use-ruta.ts'
+import { PantallaAcceso } from '../modules/m1-usuarios-acceso/components/pantalla-acceso.tsx'
 import { AsignarCambiarPlan } from '../modules/m5-planes-tarifas-pagos/components/asignar-cambiar-plan.tsx'
 import { PlanesTarifas } from '../modules/m5-planes-tarifas-pagos/components/planes-tarifas.tsx'
 import {
@@ -24,6 +25,9 @@ export function Aplicacion() {
   const { sesion, cargando, error, tienePermiso } = useSesion()
   const { pagina, parametros } = useRuta()
 
+  // Pantalla pública de acceso (M1): sin el marco interno ni la navegación por rol.
+  if (pagina === 'acceso') return <PantallaAcceso />
+
   const permitidas = PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso))
   const actual = pagina || permitidas[0]?.pagina || ''
   const navegacion = [{ grupo: 'Planes y pagos', enlaces: permitidas }]
@@ -42,6 +46,12 @@ export function Aplicacion() {
             superior.
           </p>
         </Alerta>
+        <p className="vl-text-body-sm">
+          ¿Aún no tienes cuenta?{' '}
+          <a className="vl-link" href={enlace('acceso')}>
+            Crea tu cuenta
+          </a>
+        </p>
       </div>
     )
   } else if (!permitidas.some((pantalla) => pantalla.pagina === actual)) {
