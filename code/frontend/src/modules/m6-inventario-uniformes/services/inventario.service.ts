@@ -8,9 +8,20 @@ import type {
 } from '../types/inventario.types.ts'
 import { hoyEnClub } from '../../../shared/utils/formato.ts'
 import {
+  buscarPatinadores,
+  pagarCobro,
   registrarCobroLocal,
   saldoCobroLocal,
 } from '../../m5-planes-tarifas-pagos/services/m5.service.ts'
+import { MEDIOS_PAGO } from '../../m5-planes-tarifas-pagos/types/m5.types.ts'
+import { erroresTransaccion } from '../../m5-planes-tarifas-pagos/utils/validar-transaccion.ts'
+import {
+  TIPOS_VENDIBLES,
+  type CompradorVenta,
+  type DatosVenta,
+  type LineaVenta,
+  type VentaRegistrada,
+} from '../types/venta.types.ts'
 
 export interface MovimientoInventario {
   id: number
@@ -484,4 +495,128 @@ export function recibirPrestamo(
     registrarMovimiento(uniforme, 'DEVOLUCION', prestamo.cantidad, 'Devolución de demostración')
   }
   return Promise.resolve({ uniformeId: prestamo.uniformeId, cantidad: prestamo.cantidad })
+}
+
+// --- Venta de uniformes (HU-6.7 / RF-M6-07) ---
+// Misma secuencia que POST /m6/ventas en NestJS: se valida todo antes de tocar
+// datos; luego se registra el cobro y el pago en M5 (comprobante), se descuenta
+// el stock y queda el movimiento VENTA en el Kardex. Una venta confirmada no se
+// edita: no existe función para modificarla ni para borrarla.
+
+let siguienteVentaId = 1
+let ventasDemo: VentaRegistrada[] = []
+
+export function listarVentas(): Promise<VentaRegistrada[]> {
+  return Promise.resolve(ventasDemo.map((venta) => ({ ...venta, items: venta.items.map((item) => ({ ...item })) })))
+}
+
+export async function listarCompradoresVenta(): Promise<CompradorVenta[]> {
+  const patinadores = await buscarPatinadores()
+  return patinadores.map((patinador) => ({
+    patinadorId: patinador.id,
+    patinador: patinador.nombre,
+    documento: `${patinador.tipoDocumento} ${patinador.numeroDocumento}`,
+    acudientes: patinador.acudientes.map((acudiente) => ({ ...acudiente })),
+  }))
+}
+
+/** Une las líneas repetidas de una misma referencia sumando sus cantidades. */
+export function consolidarItemsVenta(items: DatosVenta['items']): DatosVenta['items'] {
+  const porUniforme = new Map<number, number>()
+  for (const item of items) porUniforme.set(item.uniformeId, (porUniforme.get(item.uniformeId) ?? 0) + item.cantidad)
+  return [...porUniforme.entries()].map(([uniformeId, cantidad]) => ({ uniformeId, cantidad }))
+}
+
+export async function registrarVenta(datos: DatosVenta): Promise<VentaRegistrada> {
+  const hoy = hoyEnClub()
+  const compradores = await listarCompradoresVenta()
+  const comprador = compradores.find((item) => item.patinadorId === datos.patinadorId)
+  if (!comprador) throw new Error('Selecciona un patinador registrado y activo.')
+  const acudiente = datos.compradorTipo === 'ACUDIENTE'
+    ? comprador.acudientes.find((item) => item.id === datos.acudienteId)
+    : undefined
+  if (datos.compradorTipo === 'ACUDIENTE' && !acudiente) {
+    throw new Error('El acudiente no está vinculado a ese patinador.')
+  }
+  if (!MEDIOS_PAGO.some((medio) => medio.valor === datos.medioPago)) throw new Error('Elige el medio de pago.')
+  const errorPago = Object.values(erroresTransaccion(
+    { fechaPago: hoy, medioPago: datos.medioPago, referencia: datos.referenciaPago ?? '' },
+    hoy,
+  ))[0]
+  if (errorPago) throw new Error(errorPago)
+
+  const items = consolidarItemsVenta(datos.items)
+  if (items.length === 0) throw new Error('Agrega al menos un uniforme a la venta.')
+  const lineas: LineaVenta[] = items.map((item) => {
+    if (!Number.isSafeInteger(item.cantidad) || item.cantidad < 1) {
+      throw new Error('Cada cantidad debe ser un entero mayor que cero.')
+    }
+    const uniforme = inventarioDemo.find((ref) => ref.id === item.uniformeId)
+    if (!uniforme || !uniforme.activo) throw new Error('Una de las referencias no existe o está desactivada.')
+    if (!(TIPOS_VENDIBLES as readonly string[]).includes(uniforme.tipo)) {
+      throw new Error(`${uniforme.referencia} es un implemento de préstamo y no se vende.`)
+    }
+    if (!(uniforme.precioVenta > 0)) throw new Error(`${uniforme.referencia} no tiene precio de venta registrado.`)
+    if (item.cantidad > uniforme.cantidadDisponible) {
+      throw new Error(
+        `Existencias insuficientes para ${uniforme.referencia} talla ${uniforme.talla}: ` +
+        `se solicitan ${item.cantidad} y solo hay ${uniforme.cantidadDisponible} disponibles.`,
+      )
+    }
+    return {
+      uniformeId: uniforme.id,
+      referencia: uniforme.referencia,
+      talla: uniforme.talla,
+      cantidad: item.cantidad,
+      valorUnitario: uniforme.precioVenta,
+      subtotal: uniforme.precioVenta * item.cantidad,
+    }
+  })
+  const total = lineas.reduce((suma, linea) => suma + linea.subtotal, 0)
+  if (!Number.isSafeInteger(total) || total <= 0) throw new Error('El total de la venta no es válido.')
+
+  const descripcion = `Venta de uniformes: ${lineas.map((linea) => `${linea.referencia} (${linea.talla}) x${linea.cantidad}`).join(', ')}`
+  const cobro = registrarCobroLocal({
+    patinadorId: datos.patinadorId,
+    concepto: 'Venta de uniformes',
+    descripcion,
+    valor: total,
+    fechaLimite: hoy,
+  })
+  const pago = await pagarCobro({
+    cobroId: cobro.id,
+    monto: total,
+    fechaPago: hoy,
+    medioPago: datos.medioPago,
+    referencia: datos.referenciaPago?.trim() || undefined,
+  })
+
+  const ventaId = siguienteVentaId++
+  for (const linea of lineas) {
+    const uniforme = inventarioDemo.find((ref) => ref.id === linea.uniformeId)
+    if (!uniforme) continue
+    uniforme.cantidadDisponible -= linea.cantidad
+    uniforme.actualizadoEn = new Date().toISOString()
+    recalcularStock(uniforme)
+    registrarMovimiento(uniforme, 'VENTA', -linea.cantidad, `Venta #${ventaId}`)
+  }
+
+  const venta: VentaRegistrada = {
+    id: ventaId,
+    fecha: hoy,
+    patinadorId: comprador.patinadorId,
+    patinador: comprador.patinador,
+    compradorTipo: datos.compradorTipo,
+    comprador: acudiente?.nombre ?? comprador.patinador,
+    medioPago: datos.medioPago,
+    referenciaPago: datos.referenciaPago?.trim() || null,
+    total,
+    comprobante: pago.comprobante.numero,
+    estadoPago: 'REGISTRADO',
+    registradoPor: 'Andrea Administradora (demo)',
+    registradoEn: new Date().toISOString(),
+    items: lineas,
+  }
+  ventasDemo = [venta, ...ventasDemo]
+  return { ...venta, items: lineas.map((linea) => ({ ...linea })) }
 }

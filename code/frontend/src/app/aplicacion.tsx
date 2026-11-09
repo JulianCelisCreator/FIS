@@ -11,6 +11,7 @@ import {
 import { PERMISOS_M5 } from '../modules/m5-planes-tarifas-pagos/types/m5.types.ts'
 import { InventarioUniformes } from '../modules/m6-inventario-uniformes/components/inventario-uniformes.tsx'
 import { PrestamosUniformes } from '../modules/m6-inventario-uniformes/components/prestamos-uniformes.tsx'
+import { VentasUniformes } from '../modules/m6-inventario-uniformes/components/ventas-uniformes.tsx'
 import { PERMISOS_M6 } from '../modules/m6-inventario-uniformes/types/inventario.types.ts'
 import { MarcoAplicacion } from './marco-aplicacion.tsx'
 
@@ -43,6 +44,12 @@ const PANTALLAS = [
   {
     pagina: 'inventario',
     texto: 'Inventario de uniformes',
+    grupo: 'Uniformes',
+    permiso: PERMISOS_M6.inventarioGestionar,
+  },
+  {
+    pagina: 'ventas',
+    texto: 'Venta de uniformes',
     grupo: 'Uniformes',
     permiso: PERMISOS_M6.inventarioGestionar,
   },
@@ -101,6 +108,8 @@ export function Aplicacion() {
     contenido = <PlanesTarifas key={sesion.id} />
   } else if (actual === 'inventario') {
     contenido = <InventarioUniformes key={sesion.id} />
+  } else if (actual === 'ventas') {
+    contenido = <VentasUniformes key={sesion.id} />
   } else if (actual === 'prestamos') {
     contenido = <PrestamosUniformes key={sesion.id} />
   } else if (actual === 'historial-pagos') {
