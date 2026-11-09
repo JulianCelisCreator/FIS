@@ -1,6 +1,7 @@
 import { Alerta } from '../shared/ui/componentes.tsx'
 import { useSesion } from '../shared/sesion/use-sesion.ts'
 import { useRuta } from '../shared/utils/use-ruta.ts'
+import { NuevaCuenta } from '../modules/m1-usuarios-acceso/components/nueva-cuenta.tsx'
 import { AsignarCambiarPlan } from '../modules/m5-planes-tarifas-pagos/components/asignar-cambiar-plan.tsx'
 import { PlanesTarifas } from '../modules/m5-planes-tarifas-pagos/components/planes-tarifas.tsx'
 import {
@@ -17,16 +18,24 @@ const PANTALLAS = [
   { pagina: 'registrar-pago', texto: 'Registrar pago', permiso: PERMISOS_M5.pagoRegistrar },
 ]
 
+/** Pantallas de M1 solo para el Administrador (HU-M1-01; la matriz de permisos llega con HU-M1-07). */
+const PANTALLAS_ADMINISTRADOR = [{ pagina: 'nueva-cuenta', texto: 'Nueva cuenta' }]
+
 const PESTANAS_PAGO: PestanaPago[] = ['cobro', 'sesion', 'matricula']
 
-/** Aplicación interna por roles (/app/). Por ahora tiene las pantallas de M5. */
+/** Aplicación interna por roles (/app/): pantallas de M1 y M5. */
 export function Aplicacion() {
-  const { sesion, cargando, error, tienePermiso } = useSesion()
+  const { sesion, cargando, error, tienePermiso, tieneRol } = useSesion()
   const { pagina, parametros } = useRuta()
 
-  const permitidas = PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso))
+  const usuarios = tieneRol('ADMINISTRADOR') ? PANTALLAS_ADMINISTRADOR : []
+  const pagos = PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso))
+  const permitidas = [...usuarios, ...pagos]
   const actual = pagina || permitidas[0]?.pagina || ''
-  const navegacion = [{ grupo: 'Planes y pagos', enlaces: permitidas }]
+  const navegacion = [
+    { grupo: 'Usuarios', enlaces: usuarios },
+    { grupo: 'Planes y pagos', enlaces: pagos },
+  ]
 
   let contenido
   if (cargando) {
@@ -52,11 +61,13 @@ export function Aplicacion() {
           <p>
             {permitidas.length > 0
               ? 'Usa el menú para ir a las pantallas de tu rol.'
-              : 'Tu rol no tiene pantallas de planes y pagos.'}
+              : 'Tu rol aún no tiene pantallas disponibles.'}
           </p>
         </Alerta>
       </div>
     )
+  } else if (actual === 'nueva-cuenta') {
+    contenido = <NuevaCuenta key={sesion.id} />
   } else if (actual === 'planes') {
     contenido = <PlanesTarifas key={sesion.id} />
   } else if (actual === 'asignar-plan') {
