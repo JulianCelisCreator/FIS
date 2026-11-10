@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import './App.css'
 
+type Role = 'ADMIN' | 'PATINADOR'
+
 type Tariff = {
   id?: string
   amountCop: number
@@ -66,6 +68,9 @@ function App() {
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
   const [mensaje, setMensaje] = useState('')
+
+  // RF-M5-05: Estado para controlar la vista por Rol
+  const [rol, setRol] = useState<Role>('ADMIN')
 
   const [mostrarFormulario, setMostrarFormulario] = useState(false)
   const [formulario, setFormulario] = useState<PlanForm>(nuevoFormulario())
@@ -268,21 +273,51 @@ function App() {
     }
   }
 
+  // RF-M5-05: Filtrado de planes según el rol seleccionado
+  const planesVisibles = planes.filter((plan) => {
+    if (rol === 'PATINADOR') {
+      // El patinador solo puede ver los planes activos que cuentan con tarifa vigente
+      return plan.status === 'ACTIVE' && plan.currentTariff !== null
+    }
+    return true // El Administrador ve todos los planes
+  })
+
   return (
     <main className="admin-container">
       <header className="admin-header">
         <div>
-          <h1 style={{ margin: 0 }}>Planes disponibles</h1>
+          <h1 style={{ margin: 0 }}>
+            {rol === 'ADMIN' ? 'Gestión de Planes y Tarifas' : 'Planes Vigentes'}
+          </h1>
           <p style={{ margin: '4px 0 0 0', opacity: 0.8 }}>
-            Consulta y administra los planes y sus tarifas.
+            {rol === 'ADMIN'
+              ? 'Consulta y administra los planes y sus tarifas.'
+              : 'Consulta los planes de formación disponibles y sus tarifas vigentes.'}
           </p>
+        </div>
+
+        {/* RF-M5-05: Control selector de rol */}
+        <div className="role-selector-box">
+          <label htmlFor="role-select">Vista por rol:</label>
+          <select
+            id="role-select"
+            value={rol}
+            onChange={(e) => setRol(e.target.value as Role)}
+            className="role-dropdown"
+          >
+            <option value="ADMIN">Administrador (Control total)</option>
+            <option value="PATINADOR">Patinador / Cliente (Consulta)</option>
+          </select>
         </div>
       </header>
 
       <div className="admin-toolbar">
-        <button type="button" className="btn btn-primary" onClick={abrirCrear}>
-          + Crear plan
-        </button>
+        {/* Solo el Administrador puede crear planes */}
+        {rol === 'ADMIN' && (
+          <button type="button" className="btn btn-primary" onClick={abrirCrear}>
+            + Crear plan
+          </button>
+        )}
         <button
           type="button"
           className="btn"
@@ -436,14 +471,14 @@ function App() {
         </div>
       )}
 
-      {!cargando && !error && planes.length === 0 && (
-        <p>No hay planes registrados.</p>
+      {!cargando && !error && planesVisibles.length === 0 && (
+        <p>No hay planes vigentes disponibles para este rol.</p>
       )}
 
       {/* Lista / Tarjetas de Planes */}
       <div className="planes-grid">
         {!cargando &&
-          planes.map((plan) => (
+          planesVisibles.map((plan) => (
             <article key={plan.id} className="plan-card">
               <div>
                 <div className="plan-card-header">
@@ -493,51 +528,65 @@ function App() {
                 </div>
               </div>
 
+              {/* Botonera de acciones (Diferenciada según el rol) */}
               <div className="plan-card-actions">
-                <div className="plan-card-actions-row">
-                  <button
-                    type="button"
-                    className="btn"
-                    onClick={() => abrirEditar(plan)}
-                    disabled={plan.status !== 'ACTIVE'}
-                  >
-                    Editar
-                  </button>
-                  <button
-                    type="button"
-                    className="btn"
-                    onClick={() => abrirTarifa(plan)}
-                    disabled={plan.status !== 'ACTIVE'}
-                  >
-                    + Tarifa
-                  </button>
-                </div>
+                {rol === 'ADMIN' ? (
+                  <>
+                    <div className="plan-card-actions-row">
+                      <button
+                        type="button"
+                        className="btn"
+                        onClick={() => abrirEditar(plan)}
+                        disabled={plan.status !== 'ACTIVE'}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        className="btn"
+                        onClick={() => abrirTarifa(plan)}
+                        disabled={plan.status !== 'ACTIVE'}
+                      >
+                        + Tarifa
+                      </button>
+                    </div>
 
-                <div className="plan-card-actions-row">
+                    <div className="plan-card-actions-row">
+                      <button
+                        type="button"
+                        className="btn"
+                        onClick={() => void consultarDetalle(plan, 'tarifas')}
+                      >
+                        Historial
+                      </button>
+                      <button
+                        type="button"
+                        className="btn"
+                        onClick={() => void consultarDetalle(plan, 'auditoria')}
+                      >
+                        Auditoría
+                      </button>
+                    </div>
+
+                    {plan.status === 'ACTIVE' && (
+                      <button
+                        type="button"
+                        className="btn"
+                        onClick={() => void desactivarPlan(plan)}
+                        style={{ color: '#ef4444', borderColor: '#ef4444' }}
+                      >
+                        Desactivar plan
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  // Vista Patinador: Solo consulta el historial de tarifas si lo desea
                   <button
                     type="button"
                     className="btn"
                     onClick={() => void consultarDetalle(plan, 'tarifas')}
                   >
-                    Historial
-                  </button>
-                  <button
-                    type="button"
-                    className="btn"
-                    onClick={() => void consultarDetalle(plan, 'auditoria')}
-                  >
-                    Auditoría
-                  </button>
-                </div>
-
-                {plan.status === 'ACTIVE' && (
-                  <button
-                    type="button"
-                    className="btn"
-                    onClick={() => void desactivarPlan(plan)}
-                    style={{ color: '#ef4444', borderColor: '#ef4444' }}
-                  >
-                    Desactivar plan
+                    Ver historial de tarifas
                   </button>
                 )}
               </div>

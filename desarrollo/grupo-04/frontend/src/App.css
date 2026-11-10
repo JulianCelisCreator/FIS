@@ -183,7 +183,7 @@
   }
 }
 
-/* ESTILOS DE LA TAREA 15: DIÁLOGOS DE ADMINISTRACIÓN DE PLANES Y TARIFAS */
+/* ESTILOS DE: Pantalla de planes y tarifas del administrador con sus diálogos. */
 
 .admin-container {
   padding: 32px 24px;
@@ -361,4 +361,38 @@
 
 .btn-primary:hover {
   opacity: 0.9;
+}
+
+/* ESTILOS DE: Consulta de planes y tarifas vigentes por rol (RF-M5-05) */
+
+.role-selector-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--code-bg);
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.role-selector-box label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.role-dropdown {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+}
+
+.role-dropdown:focus {
+  border-color: var(--accent);
 }
