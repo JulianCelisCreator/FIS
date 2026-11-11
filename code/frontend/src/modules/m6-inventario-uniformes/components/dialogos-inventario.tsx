@@ -86,6 +86,7 @@ export function DialogoUniforme({
   )
   const [minimoTexto, setMinimoTexto] = useState(uniforme ? String(uniforme.cantidadMinima) : '')
   const [fotoUrl, setFotoUrl] = useState(uniforme?.fotoUrl ?? '')
+  const [tarifaTexto, setTarifaTexto] = useState(uniforme ? formatoCop(uniforme.tarifaPrestamoDia ?? 0) : '')
   const [intentado, setIntentado] = useState(false)
   const { enviando, error, enviar } = useEnvio()
 
@@ -96,6 +97,7 @@ export function DialogoUniforme({
   const precio = leerPesos(precioTexto)
   const disponible = leerEntero(disponibleTexto)
   const minimo = leerEntero(minimoTexto)
+  const tarifa = tarifaTexto.trim() ? leerPesos(tarifaTexto) : 0
 
   const errorReferencia = !referenciaNormalizada
     ? 'La referencia es obligatoria.'
@@ -137,6 +139,9 @@ export function DialogoUniforme({
   const errorDisponible =
     disponible === null ? 'Ingresa una cantidad entera de cero o más.' : null
   const errorMinimo = minimo === null ? 'Ingresa una cantidad entera de cero o más.' : null
+  const errorTarifa = tipo === 'IMPLEMENTO' && (tarifaTexto.includes('-') || tarifa === null)
+    ? 'Ingresa la tarifa por día (cero o más).'
+    : null
   const sinProveedoresActivos = proveedores.every((proveedor) => !proveedor.activo)
   const bloqueado = !editando && sinProveedoresActivos
 
@@ -152,6 +157,7 @@ export function DialogoUniforme({
       errorPrecio ||
       errorDisponible ||
       errorMinimo ||
+      errorTarifa ||
       !tipo ||
       !proveedorSeleccionado ||
       costo === null ||
@@ -172,6 +178,7 @@ export function DialogoUniforme({
       cantidadDisponible: disponible,
       cantidadMinima: minimo,
       fotoUrl: fotoUrl.trim() || null,
+      tarifaPrestamoDia: tipo === 'IMPLEMENTO' ? tarifa ?? 0 : 0,
     }
 
     if (uniforme) {
@@ -306,6 +313,25 @@ export function DialogoUniforme({
             aria-invalid={intentado && errorPrecio ? true : undefined}
           />
         </Campo>
+        {tipo === 'IMPLEMENTO' && (
+          <Campo
+            etiqueta="Tarifa de préstamo por unidad y día (COP)"
+            id="uniforme-tarifa"
+            ayuda="Valor sugerido al prestar este implemento; se puede ajustar en cada préstamo. Cero = sin cobro."
+            error={intentado ? errorTarifa : null}
+          >
+            <input
+              id="uniforme-tarifa"
+              className="vl-input vl-input--numeric"
+              inputMode="numeric"
+              placeholder="$ 0"
+              value={tarifaTexto}
+              onChange={(evento) => setTarifaTexto(evento.target.value)}
+              onBlur={() => tarifa !== null && !tarifaTexto.includes('-') && setTarifaTexto(formatoCop(tarifa))}
+              aria-invalid={intentado && errorTarifa ? true : undefined}
+            />
+          </Campo>
+        )}
 
         <Campo
           etiqueta="Cantidad disponible"

@@ -110,8 +110,12 @@ function uniformeDemo(
     fotoUrl,
     estadoStock: cantidadDisponible <= cantidadMinima ? 'ALERTA_MINIMO' : 'STOCK_NORMAL',
     proveedor: PROVEEDOR_DEMO,
+    tarifaPrestamoDia: TARIFAS_PRESTAMO_DEMO.get(id) ?? 0,
   }
 }
+
+/** Tarifa sugerida por unidad y día de los implementos de demostración. */
+const TARIFAS_PRESTAMO_DEMO = new Map([[4, 10000], [5, 5000], [6, 5000], [7, 5000], [8, 2000]])
 
 let inventarioDemo: UniformeInventario[] = [
   uniformeDemo(1, 'CAMISETA-OFICIAL', 'CAMISETA', 'M', 14, 4, '/stock/camisa.jfif', 38000, 55000),
@@ -279,6 +283,7 @@ export async function crearUniforme(datos: DatosUniforme): Promise<UniformeInven
   )
   creado.proveedorId = proveedor.id
   creado.proveedor = proveedor
+  creado.tarifaPrestamoDia = datos.tipo === 'IMPLEMENTO' ? datos.tarifaPrestamoDia ?? 0 : 0
   inventarioDemo.push(creado)
   if (creado.cantidadDisponible > 0) registrarMovimiento(creado, 'ENTRADA', creado.cantidadDisponible, 'Stock inicial')
   return { ...creado, proveedor: { ...proveedor } }
@@ -317,6 +322,7 @@ export async function editarUniforme(id: number, datos: DatosUniforme): Promise<
     cantidadDisponible: datos.cantidadDisponible,
     cantidadMinima: datos.cantidadMinima,
     fotoUrl: datos.fotoUrl?.trim() || null,
+    tarifaPrestamoDia: datos.tipo === 'IMPLEMENTO' ? datos.tarifaPrestamoDia ?? 0 : 0,
     actualizadoEn: new Date().toISOString(),
   })
   recalcularStock(uniforme)
@@ -406,25 +412,34 @@ export async function ajustarStock(
   return { ...uniforme, proveedor: { ...uniforme.proveedor } }
 }
 
+// --- Préstamo de implementos (HU-6.8 / RF-M6-08) ---
+// Mismo contrato que /m6/prestamos: el préstamo genera un cobro en M5 de
+// tarifa por unidad y día × cantidad × días previstos (mínimo 1).
+
 export interface PrestamoUniformeApi {
   id: number
   uniformeId: number
+  uniforme: string
   patinadorId: number
+  patinador: string
   responsableId: number
+  responsable: string
   cantidad: number
   valorPorUnidad: number
   valorCobro: number
   duracionDias: number
-  cobroId: number
+  /** null cuando la tarifa es 0 y no se generó cobro. */
+  cobroId: number | null
   saldoPendiente: number
   fechaPrestamo: string
   fechaDevolucionPrevista: string
   estadoEntrega: 'NUEVO' | 'BUEN_ESTADO' | 'CON_DESGASTE'
   estado: 'ACTIVO' | 'DEVUELTO' | 'PERDIDA_DANO'
+  /** Igual a estado, salvo ACTIVO con fecha prevista pasada: VENCIDO. */
+  estadoActual: 'ACTIVO' | 'VENCIDO' | 'DEVUELTO' | 'PERDIDA_DANO'
   fechaRecepcion: string | null
   estadoRecepcion: 'BUEN_ESTADO' | 'CON_DESGASTE' | 'DANADO' | null
   observacion: string | null
-  uniforme: string
 }
 
 export interface DatosPrestamo {
@@ -437,9 +452,10 @@ export interface DatosPrestamo {
   estadoEntrega: 'NUEVO' | 'BUEN_ESTADO' | 'CON_DESGASTE'
 }
 
-export interface PatinadorPrestamo {
-  id: number
-  nombre: string
+export interface DatosRecepcion {
+  estado: 'DEVUELTO' | 'PERDIDA_DANO'
+  estadoRecepcion?: 'BUEN_ESTADO' | 'CON_DESGASTE' | 'DANADO'
+  observacion?: string
 }
 
 export interface ResponsablePrestamo {
@@ -447,42 +463,11 @@ export interface ResponsablePrestamo {
   nombre: string
 }
 
-const responsableDemo: ResponsablePrestamo[] = [
-  { id: 201, nombre: 'María Ramírez · acudiente de Sofía' },
-  { id: 202, nombre: 'Andrea Martínez · acudiente de Lucas' },
-  { id: 203, nombre: 'Carlos Torres · acudiente de Valentina' },
-  { id: 204, nombre: 'Laura Cárdenas · acudiente de Mateo' },
-  { id: 205, nombre: 'Samuel Rojas · patinador' },
-  { id: 206, nombre: 'Paula Demo · acudiente de Diego' },
-]
-
-const patinadorDemo: PatinadorPrestamo[] = [
-  { id: 101, nombre: 'Sofía Ramírez' },
-  { id: 102, nombre: 'Lucas Martínez' },
-  { id: 103, nombre: 'Valentina Torres' },
-  { id: 104, nombre: 'Mateo Cárdenas' },
-  { id: 105, nombre: 'Samuel Rojas' },
-  { id: 106, nombre: 'Diego Demo Pago' },
-]
-const responsablePorPatinador = new Map([
-  [101, 201],
-  [102, 202],
-  [103, 203],
-  [104, 204],
-  [105, 205],
-  [106, 206],
-])
-
-const TARIFAS_PRESTAMO_DEMO = new Map([
-  [4, 10000],
-  [5, 5000],
-  [6, 5000],
-  [7, 5000],
-  [8, 2000],
-])
-
-export function valorPrestamoPorUnidad(uniformeId: number): number {
-  return TARIFAS_PRESTAMO_DEMO.get(uniformeId) ?? 5000
+/** GET /m6/prestamos/patinadores: patinador activo y quién puede responder. */
+export interface PatinadorPrestamo {
+  id: number
+  nombre: string
+  responsables: ResponsablePrestamo[]
 }
 
 export function diasPrestamo(fechaDevolucionPrevista: string, fechaPrestamo = hoyEnClub()): number {
@@ -497,134 +482,151 @@ function sumarDias(fecha: string, dias: number): string {
   return valor.toISOString().slice(0, 10)
 }
 
+const patinadoresPrestamoDemo: PatinadorPrestamo[] = [
+  { id: 101, nombre: 'Sofía Ramírez', responsables: [{ id: 201, nombre: 'María Ramírez · acudiente' }] },
+  { id: 102, nombre: 'Lucas Martínez', responsables: [{ id: 202, nombre: 'Andrea Martínez · acudiente' }] },
+  { id: 103, nombre: 'Valentina Torres', responsables: [{ id: 203, nombre: 'Carlos Torres · acudiente' }] },
+  { id: 104, nombre: 'Mateo Cárdenas', responsables: [{ id: 204, nombre: 'Laura Cárdenas · acudiente' }] },
+  { id: 105, nombre: 'Samuel Rojas', responsables: [{ id: 205, nombre: 'Samuel Rojas · patinador' }] },
+  { id: 106, nombre: 'Diego Demo Pago', responsables: [{ id: 206, nombre: 'Paula Demo · acudiente' }] },
+]
+
+function estadoActualDemo(prestamo: PrestamoUniformeApi): PrestamoUniformeApi['estadoActual'] {
+  return prestamo.estado === 'ACTIVO' && prestamo.fechaDevolucionPrevista < hoyEnClub() ? 'VENCIDO' : prestamo.estado
+}
+
+// Préstamo de ejemplo ya vencido, para ver el indicador en la demostración.
 let prestamosDemo: PrestamoUniformeApi[] = [{
   id: 500,
   uniformeId: 4,
+  uniforme: 'CASCO-PATINAJE · M',
   patinadorId: 101,
+  patinador: 'Sofía Ramírez',
   responsableId: 201,
+  responsable: 'María Ramírez · acudiente',
   cantidad: 1,
   valorPorUnidad: 10000,
   valorCobro: 50000,
   duracionDias: 5,
   cobroId: 504,
   saldoPendiente: 10000,
-  fechaPrestamo: hoyEnClub(),
-  fechaDevolucionPrevista: sumarDias(hoyEnClub(), 5),
+  fechaPrestamo: sumarDias(hoyEnClub(), -7),
+  fechaDevolucionPrevista: sumarDias(hoyEnClub(), -2),
   estadoEntrega: 'BUEN_ESTADO',
   estado: 'ACTIVO',
+  estadoActual: 'ACTIVO',
   fechaRecepcion: null,
   estadoRecepcion: null,
   observacion: null,
-  uniforme: 'CASCO-PATINAJE',
 }]
 
 export function listarPrestamos(): Promise<PrestamoUniformeApi[]> {
-  return Promise.resolve(prestamosDemo.map((prestamo) => ({
-    ...prestamo,
-    saldoPendiente: saldoCobroLocal(prestamo.cobroId) ?? 0,
-  })))
+  if (!usandoDemoLocal()) return pedir<PrestamoUniformeApi[]>('/m6/prestamos')
+  return Promise.resolve(prestamosDemo
+    .map((prestamo) => ({
+      ...prestamo,
+      estadoActual: estadoActualDemo(prestamo),
+      saldoPendiente: prestamo.cobroId === null ? 0 : saldoCobroLocal(prestamo.cobroId) ?? 0,
+    }))
+    .sort((a, b) => Number(b.estadoActual === 'VENCIDO') - Number(a.estadoActual === 'VENCIDO')))
 }
 
 export function listarPatinadoresPrestamo(): Promise<PatinadorPrestamo[]> {
-  return Promise.resolve(patinadorDemo.map((patinador) => ({ ...patinador })))
+  if (!usandoDemoLocal()) return pedir<PatinadorPrestamo[]>('/m6/prestamos/patinadores')
+  return Promise.resolve(patinadoresPrestamoDemo.map((patinador) => ({
+    ...patinador,
+    responsables: patinador.responsables.map((responsable) => ({ ...responsable })),
+  })))
 }
 
-export function listarResponsablesPrestamo(): Promise<ResponsablePrestamo[]> {
-  return Promise.resolve(responsableDemo.map((responsable) => ({ ...responsable })))
-}
-
-export function crearPrestamo(datos: DatosPrestamo): Promise<PrestamoUniformeApi> {
-  if (!Number.isInteger(datos.uniformeId) || datos.uniformeId < 1) {
-    throw new Error('Selecciona un implemento disponible.')
-  }
-  if (!Number.isInteger(datos.patinadorId) || datos.patinadorId < 1) {
-    throw new Error('Selecciona un patinador.')
-  }
-  if (!Number.isInteger(datos.responsableId) || datos.responsableId < 1) {
-    throw new Error('Selecciona un responsable.')
-  }
+function validarDatosPrestamo(datos: DatosPrestamo): void {
+  if (!Number.isInteger(datos.uniformeId) || datos.uniformeId < 1) throw new Error('Selecciona un implemento disponible.')
+  if (!Number.isInteger(datos.patinadorId) || datos.patinadorId < 1) throw new Error('Selecciona un patinador.')
+  if (!Number.isInteger(datos.responsableId) || datos.responsableId < 1) throw new Error('Selecciona un responsable.')
   if (!Number.isSafeInteger(datos.cantidad) || datos.cantidad < 1) {
     throw new Error('La cantidad debe ser un entero mayor que cero.')
   }
-  if (!Number.isSafeInteger(datos.valorPorUnidad) || datos.valorPorUnidad <= 0) {
-    throw new Error('El valor por implemento debe ser un entero mayor que cero.')
+  if (!Number.isFinite(datos.valorPorUnidad) || datos.valorPorUnidad < 0) {
+    throw new Error('La tarifa por día debe ser un valor de cero o más.')
   }
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(datos.fechaDevolucionPrevista)) {
-    throw new Error('Indica una fecha de devolución válida.')
-  }
-  const fecha = new Date(`${datos.fechaDevolucionPrevista}T00:00:00Z`)
-  if (Number.isNaN(fecha.getTime()) || fecha.toISOString().slice(0, 10) !== datos.fechaDevolucionPrevista) {
-    throw new Error('Indica una fecha de devolución válida.')
-  }
-  if (datos.fechaDevolucionPrevista < hoyEnClub()) {
-    throw new Error('La fecha prevista debe ser hoy o posterior.')
-  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(datos.fechaDevolucionPrevista)) throw new Error('Indica una fecha de devolución válida.')
+  if (datos.fechaDevolucionPrevista < hoyEnClub()) throw new Error('La fecha prevista debe ser hoy o posterior.')
+}
+
+export async function crearPrestamo(datos: DatosPrestamo): Promise<PrestamoUniformeApi> {
+  validarDatosPrestamo(datos)
+  if (!usandoDemoLocal()) return pedir<PrestamoUniformeApi>('/m6/prestamos', { metodo: 'POST', cuerpo: datos })
+
   const uniforme = inventarioDemo.find((item) => item.id === datos.uniformeId && item.activo)
-  if (!uniforme || uniforme.tipo !== 'IMPLEMENTO') throw new Error('Elige un implemento activo.')
-  if (uniforme.cantidadDisponible < datos.cantidad) throw new Error('No hay cantidad suficiente para el préstamo.')
-  if (!patinadorDemo.some((item) => item.id === datos.patinadorId)) throw new Error('Selecciona un patinador de prueba.')
-  if (!responsableDemo.some((item) => item.id === datos.responsableId)) throw new Error('Selecciona un responsable de prueba.')
-  if (responsablePorPatinador.get(datos.patinadorId) !== datos.responsableId) {
-    throw new Error('El responsable seleccionado no está vinculado a ese patinador.')
+  if (!uniforme || uniforme.tipo !== 'IMPLEMENTO') {
+    throw new Error('Solo se pueden prestar implementos; las prendas quedan disponibles para venta.')
+  }
+  if (uniforme.cantidadDisponible < datos.cantidad) throw new Error('No hay cantidad suficiente para realizar el préstamo.')
+  const patinador = patinadoresPrestamoDemo.find((item) => item.id === datos.patinadorId)
+  const responsable = patinador?.responsables.find((item) => item.id === datos.responsableId)
+  if (!patinador || !responsable) {
+    throw new Error('El patinador debe estar activo y el responsable debe ser él mismo o un acudiente vinculado.')
   }
   const duracionDias = diasPrestamo(datos.fechaDevolucionPrevista)
-  const valorCobro = datos.valorPorUnidad * datos.cantidad * duracionDias
-  if (!Number.isSafeInteger(valorCobro)) {
-    throw new Error('El total del préstamo supera el valor permitido.')
-  }
-  const cobro = registrarCobroLocal({
-    patinadorId: datos.patinadorId,
-    concepto: 'Préstamo de implemento',
-    descripcion: `${uniforme.referencia} · ${datos.cantidad} unidad${datos.cantidad === 1 ? '' : 'es'} · ${duracionDias} días`,
-    valor: valorCobro,
-    fechaLimite: datos.fechaDevolucionPrevista,
-  })
+  const valorCobro = Math.round(datos.valorPorUnidad * datos.cantidad * duracionDias)
+  const cobro = valorCobro > 0
+    ? registrarCobroLocal({
+        patinadorId: datos.patinadorId,
+        concepto: 'Préstamo de implemento',
+        descripcion: `${uniforme.referencia} · ${datos.cantidad} unidad${datos.cantidad === 1 ? '' : 'es'} · ${duracionDias} días`,
+        valor: valorCobro,
+        fechaLimite: datos.fechaDevolucionPrevista,
+      })
+    : null
   uniforme.cantidadDisponible -= datos.cantidad
   recalcularStock(uniforme)
-  registrarMovimiento(uniforme, 'PRESTAMO', -datos.cantidad, 'Préstamo de demostración')
+  registrarMovimiento(uniforme, 'PRESTAMO', -datos.cantidad, 'Préstamo registrado')
   const prestamo: PrestamoUniformeApi = {
     id: siguientePrestamoId++,
     ...datos,
+    uniforme: `${uniforme.referencia} · ${uniforme.talla}`,
+    patinador: patinador.nombre,
+    responsable: responsable.nombre,
     valorCobro,
     duracionDias,
-    cobroId: cobro.id,
+    cobroId: cobro?.id ?? null,
     saldoPendiente: valorCobro,
     fechaPrestamo: hoyEnClub(),
     estado: 'ACTIVO',
+    estadoActual: 'ACTIVO',
     fechaRecepcion: null,
     estadoRecepcion: null,
     observacion: null,
-    uniforme: uniforme.referencia,
   }
   prestamosDemo = [prestamo, ...prestamosDemo]
-  return Promise.resolve({ ...prestamo })
+  return { ...prestamo }
 }
 
-export function recibirPrestamo(
-  id: number,
-  datos: {
-    estado: 'DEVUELTO' | 'PERDIDA_DANO'
-    estadoRecepcion?: 'BUEN_ESTADO' | 'CON_DESGASTE' | 'DANADO'
-    observacion?: string
-  },
-): Promise<{ uniformeId: number; cantidad: number }> {
-  const prestamo = prestamosDemo.find((item) => item.id === id && item.estado === 'ACTIVO')
-  if (!prestamo) throw new Error('No se encontró un préstamo activo.')
+export async function recibirPrestamo(id: number, datos: DatosRecepcion): Promise<PrestamoUniformeApi> {
   if (datos.estado === 'PERDIDA_DANO' && !datos.observacion?.trim()) {
-    throw new Error('Describe la pérdida o el daño.')
+    throw new Error('Debes explicar la pérdida o el daño.')
   }
+  if (!usandoDemoLocal()) {
+    return pedir<PrestamoUniformeApi>(`/m6/prestamos/${id}/recibir`, {
+      metodo: 'PATCH',
+      cuerpo: { ...datos, observacion: datos.observacion?.trim() || undefined },
+    })
+  }
+  const prestamo = prestamosDemo.find((item) => item.id === id && item.estado === 'ACTIVO')
+  if (!prestamo) throw new Error('Préstamo activo no encontrado.')
   prestamo.estado = datos.estado
+  prestamo.estadoActual = datos.estado
   prestamo.fechaRecepcion = hoyEnClub()
   prestamo.estadoRecepcion = datos.estadoRecepcion ?? (datos.estado === 'DEVUELTO' ? 'BUEN_ESTADO' : 'DANADO')
-  prestamo.observacion = datos.observacion ?? null
+  prestamo.observacion = datos.observacion?.trim() || null
   if (datos.estado === 'DEVUELTO') {
     const uniforme = inventarioDemo.find((item) => item.id === prestamo.uniformeId)
     if (!uniforme) throw new Error('No se encontró el implemento del préstamo.')
     uniforme.cantidadDisponible += prestamo.cantidad
     recalcularStock(uniforme)
-    registrarMovimiento(uniforme, 'DEVOLUCION', prestamo.cantidad, 'Devolución de demostración')
+    registrarMovimiento(uniforme, 'DEVOLUCION', prestamo.cantidad, 'Devolución registrada')
   }
-  return Promise.resolve({ uniformeId: prestamo.uniformeId, cantidad: prestamo.cantidad })
+  return { ...prestamo }
 }
 
 // --- Venta de uniformes (HU-6.7 / RF-M6-07) ---
