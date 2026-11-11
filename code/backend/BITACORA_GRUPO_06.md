@@ -324,8 +324,8 @@ y las actividades que todavía pertenecen a futuras entregas.
 
 - El módulo M5 necesita confirmar que ofrece una API de consulta reusable para
   Contador.
-- Completar y verificar los permisos del rol en las operaciones y rutas reales
-  de M6, con autenticación integrada desde M1.
+- ~~Completar y verificar los permisos del rol en las operaciones y rutas reales
+  de M6~~. Hecho el 11/11 (ver §23). Sigue pendiente la autenticación real de M1.
 - No deben mostrarse imágenes ni campos comerciales que no existan todavía en el
   modelo aprobado.
 
@@ -366,9 +366,9 @@ y las actividades que todavía pertenecen a futuras entregas.
 
 **Qué falta**
 
-- Crear una interfaz para buscar o cargar los patinadores reales desde M2.
-- Mostrar responsables reales en lugar de ingresar identificadores manualmente.
-- Mostrar préstamos vencidos con un indicador visible e ícono más texto.
+- ~~Crear una interfaz para buscar o cargar los patinadores reales desde M2.~~ Hecho el 11/11 (ver §25).
+- ~~Mostrar responsables reales en lugar de ingresar identificadores manualmente.~~ Hecho el 11/11 (ver §25).
+- ~~Mostrar préstamos vencidos con un indicador visible e ícono más texto.~~ Hecho el 11/11 (ver §25).
 - ~~Agregar pruebas automáticas de cantidad insuficiente, tipo de prenda bloqueado,
   devolución y pérdida con observación.~~ Hecho el 11/11 (`reglas-prestamo.spec.ts`).
 - Comprobar la pantalla en móvil, tablet y escritorio.
@@ -409,9 +409,9 @@ y las actividades que todavía pertenecen a futuras entregas.
 
 **Qué falta**
 
-- Flujo de devolución de venta (reingreso de stock y anulación del pago en M5).
+- ~~Flujo de devolución de venta (reingreso de stock y anulación del pago en M5).~~ Hecho el 11/11 (ver §26).
 - Confirmar con M5 el contrato definitivo del asiento de venta.
-- Conectar la pantalla a la API real.
+- ~~Conectar la pantalla a la API real.~~ Hecho el 11/11 (ver §24).
 
 ### 17. Imágenes de productos, uniformes o tarifas
 
@@ -446,14 +446,14 @@ y las actividades que todavía pertenecen a futuras entregas.
 
 ### M6-02 y M6-03 — Personal y permisos
 
-**Qué falta**
+**Estado (11/11):** implementadas; ver §22 y §23.
 
-- Registrar datos laborales del personal.
-- Validar documentos y correos duplicados.
-- Vincular personal con cuentas y roles administrados por M1.
-- Permitir activar o desactivar personal sin eliminar el historial.
-- Asignar permisos específicos al rol Contador.
-- Integrar autenticación real.
+- ~~Registrar datos laborales del personal.~~
+- ~~Validar documentos y correos duplicados.~~
+- ~~Vincular personal con cuentas y roles administrados por M1.~~
+- ~~Permitir activar o desactivar personal sin eliminar el historial.~~
+- ~~Asignar permisos específicos al rol Contador.~~
+- Integrar autenticación real (depende de M1).
 
 ### M6-04 y M6-05 — Reportes y exportación
 
@@ -470,6 +470,7 @@ y las actividades que todavía pertenecen a futuras entregas.
 
 - M1 debe entregar autenticación real, cuentas y permisos.
 - M2 debe entregar la información de patinadores y acudientes para ventas y préstamos.
+  (Mientras tanto M6 lee directamente las tablas `patinador` y `acudiente_patinador`.)
 - M5 debe confirmar los conceptos, medios y transacciones financieras reutilizables.
 - Completar las pruebas visuales E2E de registro, edición, stock, desactivación,
   reactivación, proveedores y errores.
@@ -655,6 +656,150 @@ y las actividades que todavía pertenecen a futuras entregas.
 
 Las ramas están apiladas en ese orden sobre `hu/HU-M6-07-registro-de-venta-de-uniformes`
 (PR #19).
+
+### 22. HU-6.2 — Registro y administración de personal
+
+**Qué se hizo**
+
+- Backend `/m6/personal` con permiso `M6_PERSONAL_GESTIONAR` (solo Administrador):
+  listar, consultar, registrar, editar, desactivar y reactivar.
+- Búsqueda por documento o nombre, filtro por estado y cargo, y paginación hechos en
+  el servidor.
+- Campos obligatorios: tipo y número de documento, nombres, apellidos, correo,
+  teléfono y cargo. Los datos se normalizan antes de guardar (documento en
+  mayúsculas, correo en minúsculas, sin espacios sobrantes).
+- Documento y correo duplicados responden 409 con el campo que falla; la base lo
+  garantiza con restricciones únicas.
+- Desactivar deja la persona `INACTIVO` con fecha de retiro y conserva su historial;
+  reactivar la devuelve a `ACTIVO`. Todo queda en auditoría.
+- Vínculo opcional con una cuenta existente de M1, elegida desde
+  `GET /m6/personal/cuentas-disponibles` (cuentas no desactivadas y sin otra ficha).
+- Pantalla «Personal» en el menú «Administración»: tabla con buscador, filtro,
+  paginación, formulario con errores por campo y confirmación para desactivar.
+- Pruebas de normalización, mensajes de duplicado y reglas de vínculo con la cuenta.
+
+**Qué se encontró**
+
+- La tabla `personal` existía desde el Sprint 1, pero no había código que la usara;
+  la bitácora marcaba la historia como completa.
+- `personal.telefono` era opcional en la base aunque el RF lo exige (corregido en §21).
+
+**Qué se decidió**
+
+- M6 no crea cuentas: solo vincula una cuenta que ya exista en M1. Así no se cruza
+  con el registro de usuarios de M1.
+
+**Qué falta**
+
+- Probar contra PostgreSQL y revisar la pantalla en 375, 768 y 1280 px.
+
+### 23. HU-6.3 — Rol Contador
+
+**Qué se hizo**
+
+- `POST /m6/personal/:id/rol-contador` asigna el rol; `/rol-contador/retirar` lo quita.
+- Solo se asigna a personal activo con una cuenta vinculada que no esté desactivada.
+  Se acepta una cuenta «Por registrar» (el Contador entra con contraseña temporal,
+  cambio #3 del registro entre módulos).
+- Desactivar a una persona le retira el rol Contador.
+- Prueba automática que revisa que cada ruta del M6 declara su permiso, y otra que lee
+  la semilla de `schema.sql` y confirma que el Contador registra pagos, consulta
+  cartera e historial y reportes, pero no anula pagos ni gestiona inventario o personal.
+- La pantalla bloqueada muestra «Acceso no autorizado».
+- En la pantalla de Personal: insignia «Contador» y botones para asignar o retirar el
+  rol con confirmación.
+- Nuevo usuario «Demo local · Contador» en el selector de prueba, para mostrar las
+  restricciones sin base de datos.
+
+**Qué se decidió**
+
+- Personal inactivo no conserva permisos financieros.
+
+**Qué falta**
+
+- Reescribir la HU-6.3 con el cambio #5 (el Contador registra pagos).
+- Integrar la autenticación real de M1.
+
+### 24. Inventario y ventas conectados a la API
+
+**Qué se hizo**
+
+- Inventario, proveedores, historial de movimientos y ventas llaman a `/m6/...`
+  cuando se elige un usuario real en el selector de prueba. Con los usuarios
+  «Demo local» siguen funcionando con datos en memoria, para presentar sin base.
+- El aviso de demostración solo aparece en modo demo.
+- Desactivar una referencia ahora pide el motivo que exige la API.
+
+**Qué se encontró**
+
+- Editar la cantidad disponible desde «Editar referencia» cambiaba el stock sin dejar
+  movimiento en el Kardex.
+
+**Qué se hizo para corregirlo**
+
+- La diferencia queda como movimiento `AJUSTE` en la misma transacción, leyendo la
+  cantidad con la fila bloqueada.
+
+### 25. HU-6.8 — Préstamo de implementos con cobro
+
+**Qué se hizo**
+
+- El préstamo genera un cobro `PENDIENTE` en M5 con concepto `PRESTAMO_IMPLEMENTO`:
+  tarifa por unidad y día × cantidad × días (de hoy a la devolución prevista, mínimo
+  1), con fecha límite en la devolución prevista. Se paga desde «Registrar pago».
+- Cada implemento tiene una tarifa sugerida (`tarifa_prestamo_dia`) que se puede
+  ajustar en cada préstamo. Con tarifa cero no se genera cobro.
+- Préstamo, cobro, descuento de stock, Kardex y auditoría van en una sola transacción.
+- El listado muestra patinador, responsable, cobro, saldo y el estado Vencido (activo
+  con fecha prevista pasada), con los vencidos primero y un aviso en la pantalla.
+- El responsable se elige entre la cuenta del patinador y sus acudientes activos.
+- Recibir abre un diálogo con el estado de recepción; pérdida o daño exige una
+  observación escrita (antes se guardaba un texto fijo).
+- Pruebas del cálculo del cobro (días, mínimo un día, cambio de mes, tarifa cero).
+
+**Qué se encontró**
+
+- La HU-6.8 y el RF-M6-08 no mencionan ningún cobro: la tarifa solo existía en la
+  pantalla de demostración.
+
+**Qué se decidió**
+
+- El grupo decidió mantener el cobro por día.
+
+**Qué falta**
+
+- Actualizar la HU-6.8 y el RF-M6-08: solo implementos y cobro por día.
+- Avisar a M5 del nuevo concepto de cobro.
+
+### 26. HU-6.7 — Devolución de ventas
+
+**Qué se hizo**
+
+- `POST /m6/ventas/:id/devoluciones`, solo Administrador, con motivo, medio de
+  reembolso y las unidades por referencia.
+- La venta no se modifica: la devolución queda en `devolucion_venta` y su detalle,
+  también protegidos contra cambios. No se puede devolver más de lo pendiente.
+- Las unidades regresan al stock con movimiento `DEVOLUCION` en el Kardex.
+- Si una sola devolución cubre toda la venta, se anulan su pago, su comprobante y su
+  cobro en M5. Si es parcial, el reembolso queda registrado en M6.
+- Cada venta muestra su estado (Confirmada, Devuelta en parte, Devuelta), el valor
+  devuelto y lo devuelto por línea.
+- Diálogo de devolución en la pantalla de ventas, que funciona con la API y con la
+  demostración.
+- Pruebas: devolución parcial, total, completar una venta ya devuelta en parte,
+  líneas repetidas y cantidades fuera de rango.
+
+**Qué se decidió**
+
+- Solo el Administrador registra devoluciones, y pueden ser parciales.
+- Si una venta se completa con varias devoluciones, el pago no se anula al final:
+  así el ingreso no se descuenta dos veces.
+
+**Qué falta**
+
+- Los reportes (HU-6.4) deben restar `valor_devuelto` de los ingresos cuando la
+  devolución no anuló el pago.
+- Actualizar la HU-6.7 y confirmar con M5 el uso de la anulación de pagos.
 
 ### Migraciones para bases ya creadas (en orden)
 
