@@ -12,7 +12,8 @@ y las actividades que todavía pertenecen a futuras entregas.
 - **Objetivo del Sprint:** Dejar lista la base de datos y funcionando los
   catálogos principales de Personal e Inventario.
 - **Historias:** HU-6.2 — Personal y HU-6.6 — Inventario de uniformes.
-- **Estado del Sprint:** Completado.
+- **Estado del Sprint:** Parcial. HU-6.6 completa; **HU-6.2 pendiente**: solo
+  existe la tabla `personal` en la base, sin endpoints ni pantalla.
 - **Estado de HU-6.6:** Implementada y verificada funcionalmente.
 - **Usuario temporal de prueba:** Andrea López, Administradora, identificada con el
   usuario de ID `1`.
@@ -154,6 +155,12 @@ y las actividades que todavía pertenecen a futuras entregas.
   de proveedor quedaron delegadas al servidor y la base de datos.
 - Se comprobó que el inventario mostrado ya proviene únicamente de NestJS y
   PostgreSQL.
+
+> **Nota (11/11/2026):** desde el avance del 09/11 («completar flujos de demo del
+> sprint 2») el frontend de inventario, ventas y préstamos volvió a usar datos de
+> demostración en memoria (`m6-inventario-uniformes/services/inventario.service.ts`).
+> El backend sí persiste en PostgreSQL. Reconectar las pantallas a la API está
+> pendiente.
 
 ### 11. Backend NestJS y endpoints implementados
 
@@ -361,8 +368,8 @@ y las actividades que todavía pertenecen a futuras entregas.
 - Crear una interfaz para buscar o cargar los patinadores reales desde M2.
 - Mostrar responsables reales en lugar de ingresar identificadores manualmente.
 - Mostrar préstamos vencidos con un indicador visible e ícono más texto.
-- Agregar pruebas automáticas de cantidad insuficiente, tipo de prenda bloqueado,
-  devolución y pérdida con observación.
+- ~~Agregar pruebas automáticas de cantidad insuficiente, tipo de prenda bloqueado,
+  devolución y pérdida con observación.~~ Hecho el 11/11 (`reglas-prestamo.spec.ts`).
 - Comprobar la pantalla en móvil, tablet y escritorio.
 
 ### HU-6.7 — Ventas: implementada
@@ -405,7 +412,7 @@ y las actividades que todavía pertenecen a futuras entregas.
 - Confirmar con M5 el contrato definitivo del asiento de venta.
 - Conectar la pantalla a la API real.
 
-### 20. Imágenes de productos, uniformes o tarifas
+### 17. Imágenes de productos, uniformes o tarifas
 
 **Qué se decidió**
 
@@ -473,9 +480,9 @@ y las actividades que todavía pertenecen a futuras entregas.
 
 ## 📅 Plan de sprints y estado
 
-- **Sprint 1 (Semana 1, 26 h) — Completado:** HU-6.2 (Personal) y HU-6.6
-  (Inventario de uniformes). Objetivo: dejar lista la base de datos y los dos
-  catálogos principales funcionando.
+- **Sprint 1 (Semana 1, 26 h) — Parcial:** HU-6.6 (Inventario de uniformes)
+  completa; HU-6.2 (Personal) pendiente, solo con la tabla en la base. Objetivo:
+  dejar lista la base de datos y los dos catálogos principales funcionando.
 - **Sprint 2 (Semana 2, 41 h) — Pendiente; adelantos parciales solamente:**
   HU-6.3 (Rol Contador), HU-6.7 (Ventas) y HU-6.8 (Préstamos). Objetivo: hacer
   operativas las prendas para venderlas o prestarlas y restringir los permisos
@@ -513,11 +520,10 @@ y las actividades que todavía pertenecen a futuras entregas.
 - Se confirmó nuevamente la lista de usuarios de prueba después de reiniciar los
   servicios. Andrea López, Administradora, y Carlos Ramírez, Contador, aparecen
   en el selector de ambas pestañas abiertas.
--   de reiniciar el servidor para volver a consultar la lista actual de usuarios.
 
 ## Avance adicional del 09 de noviembre de 2026
 
-### 25. Consulta del historial de movimientos
+### 18. Consulta del historial de movimientos
 
 **Qué se hizo**
 
@@ -531,7 +537,7 @@ y las actividades que todavía pertenecen a futuras entregas.
 - Si una referencia todavía no tiene movimientos, la pantalla informa
    claramente que no existen registros.
 
-### 26. Planes, tarifas y pagos de demostración temporal
+### 19. Planes, tarifas y pagos de demostración temporal
 
 **Qué se hizo**
 
@@ -556,7 +562,7 @@ y las actividades que todavía pertenecen a futuras entregas.
 - La demostración local se mantiene intencionalmente para presentar y probar el
    adelanto del Sprint 2 sin escribir en la base de datos de M5.
 
-### 27. Verificación pendiente
+### 20. Verificación pendiente
 
 **Qué falta revisar**
 
@@ -593,11 +599,43 @@ y las actividades que todavía pertenecen a futuras entregas.
    pruebas unitarias y los flujos locales de abono, historial, cálculo del
    préstamo, pago del saldo y validaciones.
 
+## Avance del 11 de noviembre de 2026 — estabilización
+
+### 21. Correcciones
+
+**Qué se encontró**
+
+- El `CHECK` de `uniforme.tipo` no incluía `IMPLEMENTO`, aunque el backend solo
+  presta implementos: en la base real no se podía crear un implemento ni, por
+  tanto, registrar préstamos. Las pruebas no lo detectaban porque la pantalla
+  usa datos de demostración.
+- `personal.telefono` era opcional, aunque RF-M6-02 lo exige.
+- La carpeta frontend `m6-administracion-reportes-finanzas-inventario/` no la
+  importaba ninguna pantalla.
+
+**Qué se hizo**
+
+- `schema.sql`: `IMPLEMENTO` agregado al `CHECK` y `personal.telefono NOT NULL`.
+- Nueva carpeta `db/migraciones/` con el `ALTER TABLE` para bases ya creadas
+  (`2026-11-11-m6-implemento-y-telefono-personal.sql`), sin borrar datos.
+- Las reglas del préstamo pasan a `utils/reglas-prestamo.ts` y se prueban en
+  `reglas-prestamo.spec.ts`: cantidad insuficiente, prendas bloqueadas, cantidad
+  no válida, pérdida o daño sin observación y unidades que regresan al stock.
+- Se eliminó el código frontend sin uso.
+- Verificación: build del backend, 26 de 26 pruebas aprobadas, lint sin errores
+  y build del frontend.
+
+**Qué falta**
+
+- Aplicar la migración en cada base local de desarrollo.
+- Probar el préstamo de punta a punta contra PostgreSQL.
+
 ## Estado final de esta bitácora
 
-**Última actualización:** 09 de noviembre de 2026.
+**Última actualización:** 11 de noviembre de 2026.
 
-El Sprint 1 está completo. El Sprint 2 es el trabajo pendiente actual: HU-6.8
+El Sprint 1 está parcial: HU-6.6 completa y HU-6.2 (Personal) pendiente. El
+Sprint 2 es el trabajo pendiente actual: HU-6.8
 tiene funcionalidades iniciales de préstamo y devolución; HU-6.3 tiene un
 adelanto de demostración, pendiente de integración y verificación real; HU-6.7
 está implementada (backend y pantalla), pendiente de la devolución de ventas. La demo de pagos de M5 es local y no reemplaza la integración
