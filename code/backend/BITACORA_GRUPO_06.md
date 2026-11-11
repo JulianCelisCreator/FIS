@@ -12,8 +12,8 @@ y las actividades que todavía pertenecen a futuras entregas.
 - **Objetivo del Sprint:** Dejar lista la base de datos y funcionando los
   catálogos principales de Personal e Inventario.
 - **Historias:** HU-6.2 — Personal y HU-6.6 — Inventario de uniformes.
-- **Estado del Sprint:** Parcial. HU-6.6 completa; **HU-6.2 pendiente**: solo
-  existe la tabla `personal` en la base, sin endpoints ni pantalla.
+- **Estado del Sprint:** Implementado. HU-6.6 completa; HU-6.2 implementada el
+  11/11 (ver «Cierre de los Sprints 1 y 2»), pendiente de verificar contra la base.
 - **Estado de HU-6.6:** Implementada y verificada funcionalmente.
 - **Usuario temporal de prueba:** Andrea López, Administradora, identificada con el
   usuario de ID `1`.
@@ -281,7 +281,7 @@ y las actividades que todavía pertenecen a futuras entregas.
 
 ---
 
-## 🏃 Sprint 2 (Semana 2) — Pendiente, con adelantos parciales
+## 🏃 Sprint 2 (Semana 2) — Implementado el 11/11 (ver «Cierre de los Sprints 1 y 2»)
 
 - **Período del adelanto documentado:** 09 de noviembre de 2026.
 - **Esfuerzo estimado del sprint:** 41 horas.
@@ -289,8 +289,9 @@ y las actividades que todavía pertenecen a futuras entregas.
   (Préstamos).
 - **Objetivo:** hacer operativas las prendas para venderlas o prestarlas y
   restringir los permisos del Contador.
-- **Estado del sprint:** No completado. Hay avances parciales en permisos y
-  préstamos; ventas (HU-6.7) quedó implementada.
+- **Estado del sprint:** Implementado el 11/11/2026: HU-6.3, HU-6.7 (con
+  devolución) y HU-6.8 (con cobro). Las secciones siguientes son el historial del
+  adelanto del 09/11; el estado actual está en «Cierre de los Sprints 1 y 2».
 
 ### HU-6.3 — Rol Contador: adelanto de demostración
 
@@ -480,14 +481,13 @@ y las actividades que todavía pertenecen a futuras entregas.
 
 ## 📅 Plan de sprints y estado
 
-- **Sprint 1 (Semana 1, 26 h) — Parcial:** HU-6.6 (Inventario de uniformes)
-  completa; HU-6.2 (Personal) pendiente, solo con la tabla en la base. Objetivo:
-  dejar lista la base de datos y los dos catálogos principales funcionando.
-- **Sprint 2 (Semana 2, 41 h) — Pendiente; adelantos parciales solamente:**
-  HU-6.3 (Rol Contador), HU-6.7 (Ventas) y HU-6.8 (Préstamos). Objetivo: hacer
-  operativas las prendas para venderlas o prestarlas y restringir los permisos
-  del Contador. El trabajo adelantado en préstamos y la demo local de pagos no
-  significa que el sprint esté completo.
+- **Sprint 1 (Semana 1, 26 h) — Implementado:** HU-6.6 (Inventario de
+  uniformes) y HU-6.2 (Personal, completada el 11/11). Objetivo: dejar lista la
+  base de datos y los dos catálogos principales funcionando.
+- **Sprint 2 (Semana 2, 41 h) — Implementado el 11/11:** HU-6.3 (Rol Contador),
+  HU-6.7 (Ventas y devoluciones) y HU-6.8 (Préstamos con cobro). Falta la
+  verificación contra PostgreSQL con las migraciones y la revisión de criterios
+  de aceptación con el grupo.
 - **Sprint 3 (Semana 3, 53 h) — Pendiente:** HU-6.4 (Reportes), HU-6.5
   (Exportar PDF/Excel) y HU-6.1 (Dashboard KPIs). Objetivo: consolidar los
   números financieros y armar el panel principal del Administrador.
@@ -630,14 +630,60 @@ y las actividades que todavía pertenecen a futuras entregas.
 - Aplicar la migración en cada base local de desarrollo.
 - Probar el préstamo de punta a punta contra PostgreSQL.
 
+## Cierre de los Sprints 1 y 2 — 11 de noviembre de 2026
+
+### Decisiones del grupo tomadas hoy
+
+- **Préstamo con cobro:** la HU-6.8 no lo menciona, pero el grupo decidió
+  mantenerlo. Valor = tarifa por unidad y día × cantidad × días previstos
+  (mínimo 1). Hay que agregarlo a la HU-6.8 y al RF-M6-08.
+- **Solo se prestan implementos** (higiene). La HU-6.8 dice «uniformes»: hay que
+  actualizarla.
+- **Devolución de venta:** solo el Administrador, total o parcial.
+- **Personal y cuentas:** M6 guarda la ficha laboral y se vincula de forma
+  opcional a una cuenta existente de M1. M6 no crea cuentas.
+
+### Qué se hizo (ramas y commits locales, sin push)
+
+| Rama | HU | Qué incluye |
+| --- | --- | --- |
+| `hu/HU-M6-02-registro-de-personal` | HU-6.2 | CRUD `/m6/personal`, búsqueda y filtros en el servidor, unicidad con mensaje por campo, desactivar/reactivar, vínculo con cuenta de M1, pantalla «Personal». |
+| `hu/HU-M6-03-rol-contador` | HU-6.3 | Asignar/retirar rol Contador, retiro automático al desactivar, «Acceso no autorizado», usuario «Demo local · Contador», prueba de que toda ruta M6 exige permiso y de los permisos sembrados. |
+| `fix/m6-frontend-api-real` | HU-6.6/6.7 | Inventario, proveedores, movimientos y ventas usan la API con un usuario real; la demo local queda para los usuarios «Demo». Editar la cantidad de una referencia ahora deja AJUSTE en el Kardex. Desactivar pide motivo. |
+| `hu/HU-M6-08-prestamo-de-implementos` | HU-6.8 | Cobro PENDIENTE en M5 (`PRESTAMO_IMPLEMENTO`), tarifa sugerida por referencia, responsables según el patinador, estado Vencido, diálogo de recepción con observación obligatoria para pérdida o daño. |
+| `hu/HU-M6-07-devolucion-de-venta` | HU-6.7 | Devolución total o parcial; si cubre toda la venta de una vez se anula el pago en M5; estado de la venta (confirmada, devuelta en parte, devuelta). |
+
+Las ramas están apiladas en ese orden sobre `hu/HU-M6-07-registro-de-venta-de-uniformes`
+(PR #19).
+
+### Migraciones para bases ya creadas (en orden)
+
+1. `db/migraciones/2026-11-11-m6-implemento-y-telefono-personal.sql`
+2. `db/migraciones/2026-11-11-m6-prestamo-con-cobro.sql` (toca `cobro.concepto`, tabla de M5)
+3. `db/migraciones/2026-11-11-m6-devolucion-de-venta.sql`
+
+### Verificación
+
+- Backend: compila, 63 de 63 pruebas aprobadas, lint sin errores.
+- Frontend: `tsc` y `vite build` sin errores.
+- **No verificado todavía:** ninguna migración ni endpoint se probó contra
+  PostgreSQL (en el equipo donde se desarrolló no había Docker ni base del
+  proyecto). Tampoco se revisaron las pantallas en el navegador (375/768/1280).
+
+### Qué falta
+
+- Correr las migraciones y probar cada flujo de punta a punta con la base.
+- Avisar a M5: nuevo concepto `PRESTAMO_IMPLEMENTO` en `cobro`, y la devolución
+  total anula pago, comprobante y cobro de la venta.
+- Actualizar HU-6.3, HU-6.7 y HU-6.8 con las decisiones de hoy.
+- Sprint 3: los reportes (HU-6.4) deben restar `devolucion_venta.valor_devuelto`
+  de los ingresos cuando `anula_pago = false`.
+
 ## Estado final de esta bitácora
 
 **Última actualización:** 11 de noviembre de 2026.
 
-El Sprint 1 está parcial: HU-6.6 completa y HU-6.2 (Personal) pendiente. El
-Sprint 2 es el trabajo pendiente actual: HU-6.8
-tiene funcionalidades iniciales de préstamo y devolución; HU-6.3 tiene un
-adelanto de demostración, pendiente de integración y verificación real; HU-6.7
-está implementada (backend y pantalla), pendiente de la devolución de ventas. La demo de pagos de M5 es local y no reemplaza la integración
-con sus API. No se debe marcar el Sprint 2 como terminado hasta completar sus
-historias, integraciones y criterios de aceptación.
+Los Sprints 1 y 2 están implementados (HU-6.2, HU-6.3, HU-6.6, HU-6.7 con
+devolución y HU-6.8 con cobro), pendientes de verificarse contra la base de
+datos y de revisar los criterios de aceptación con el grupo. Sigue el Sprint 3:
+HU-6.4 (Reportes), HU-6.5 (Exportación) y HU-6.1 (Panel).
