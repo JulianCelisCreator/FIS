@@ -1,4 +1,5 @@
 import {
+  calcularCobroPrestamo,
   ErrorReglaPrestamo,
   unidadesQueRegresan,
   validarPrestamo,
@@ -72,6 +73,37 @@ describe('validarRecepcion', () => {
         observacion: 'Casco roto en entrenamiento',
       }),
     ).not.toThrow();
+  });
+});
+
+describe('calcularCobroPrestamo', () => {
+  it('cobra tarifa × cantidad × días previstos', () => {
+    expect(calcularCobroPrestamo(10000, 2, '2026-11-11', '2026-11-16')).toEqual({
+      dias: 5,
+      valor: 100000,
+    });
+  });
+
+  it('cobra al menos un día si se devuelve el mismo día', () => {
+    expect(calcularCobroPrestamo(5000, 1, '2026-11-11', '2026-11-11')).toEqual({
+      dias: 1,
+      valor: 5000,
+    });
+  });
+
+  it('cruza meses sin errores', () => {
+    expect(calcularCobroPrestamo(2000, 3, '2026-11-28', '2026-12-03').dias).toBe(5);
+  });
+
+  it('tarifa cero no genera valor', () => {
+    expect(calcularCobroPrestamo(0, 4, '2026-11-11', '2026-11-20').valor).toBe(0);
+  });
+
+  it('rechaza tarifa negativa y fechas invertidas', () => {
+    expect(() => calcularCobroPrestamo(-1, 1, '2026-11-11', '2026-11-12')).toThrow(/tarifa/);
+    expect(() => calcularCobroPrestamo(1000, 1, '2026-11-11', '2026-11-10')).toThrow(
+      /hoy o posterior/,
+    );
   });
 });
 

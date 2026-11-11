@@ -1,4 +1,13 @@
-import { IsDateString, IsIn, IsInt, IsOptional, IsString, Length, Min } from 'class-validator';
+import {
+  IsDateString,
+  IsIn,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Length,
+  Min,
+} from 'class-validator';
 
 export class CrearPrestamoDto {
   @IsInt()
@@ -22,6 +31,12 @@ export class CrearPrestamoDto {
 
   @IsIn(['NUEVO', 'BUEN_ESTADO', 'CON_DESGASTE'])
   estadoEntrega!: 'NUEVO' | 'BUEN_ESTADO' | 'CON_DESGASTE';
+
+  /** Tarifa por unidad y día. Si no llega se usa la sugerida de la referencia. */
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  valorPorUnidad?: number;
 }
 
 export class RecibirPrestamoDto {

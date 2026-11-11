@@ -30,10 +30,10 @@ export class ErrorReglaPrestamo extends Error {
  * Valida que la referencia pueda prestarse: existe y está activa (si no, llega
  * `null`), es un implemento y tiene existencias suficientes.
  */
-export function validarPrestamo(
-  uniforme: UniformePrestable | null,
+export function validarPrestamo<T extends UniformePrestable>(
+  uniforme: T | null,
   cantidad: number,
-): void {
+): T {
   if (!uniforme) {
     throw new ErrorReglaPrestamo(
       'El implemento no está disponible',
@@ -55,6 +55,7 @@ export function validarPrestamo(
       'No hay cantidad suficiente para realizar el préstamo',
     );
   }
+  return uniforme;
 }
 
 /** Una pérdida o un daño exige una observación que lo justifique. */
@@ -62,6 +63,45 @@ export function validarRecepcion(recepcion: RecepcionSolicitada): void {
   if (recepcion.estado === 'PERDIDA_DANO' && !recepcion.observacion?.trim()) {
     throw new ErrorReglaPrestamo('Debes explicar la pérdida o el daño');
   }
+}
+
+export interface CobroPrestamo {
+  /** Días cobrados: de la fecha del préstamo a la devolución prevista, mínimo 1. */
+  dias: number;
+  /** tarifa por unidad y día × cantidad × días. 0 = no se genera cobro. */
+  valor: number;
+}
+
+const MS_DIA = 86_400_000;
+
+/**
+ * Valor del préstamo (decisión del grupo, 11/11/2026): tarifa por unidad y día
+ * × cantidad × días previstos. Las fechas son 'YYYY-MM-DD' en hora del club.
+ */
+export function calcularCobroPrestamo(
+  tarifaDia: number,
+  cantidad: number,
+  fechaPrestamo: string,
+  fechaDevolucionPrevista: string,
+): CobroPrestamo {
+  if (!Number.isFinite(tarifaDia) || tarifaDia < 0) {
+    throw new ErrorReglaPrestamo('La tarifa por día debe ser un valor de cero o más');
+  }
+  const inicio = Date.parse(`${fechaPrestamo}T00:00:00Z`);
+  const fin = Date.parse(`${fechaDevolucionPrevista}T00:00:00Z`);
+  if (Number.isNaN(inicio) || Number.isNaN(fin)) {
+    throw new ErrorReglaPrestamo('Las fechas del préstamo no son válidas');
+  }
+  if (fin < inicio) {
+    throw new ErrorReglaPrestamo('La fecha prevista debe ser hoy o posterior');
+  }
+  const dias = Math.max(1, Math.round((fin - inicio) / MS_DIA));
+  // Redondeo a centavos para no arrastrar errores de punto flotante.
+  const valor = Math.round(tarifaDia * cantidad * dias * 100) / 100;
+  if (!Number.isFinite(valor) || valor > 999_999_999_999) {
+    throw new ErrorReglaPrestamo('El valor del préstamo supera el máximo permitido');
+  }
+  return { dias, valor };
 }
 
 /**

@@ -6,16 +6,29 @@ La primera implementación backend cubre `HU-M6-06`, inventario y control de
 uniformes. Las tablas, restricciones y vista de stock ya existen en
 `code/backend/db/schema.sql`.
 
-## Adelanto del Sprint 2: préstamos de implementos
+## Préstamo de implementos (HU-6.8 / RF-M6-08)
 
-- `GET /m6/prestamos`
-- `GET /m6/prestamos/patinadores`
-- `POST /m6/prestamos`
-- `PATCH /m6/prestamos/:prestamoId/recibir`
+- `GET /m6/prestamos`: préstamos con patinador, responsable, cobro, saldo y
+  `estadoActual` (`VENCIDO` = activo con fecha prevista pasada, de `v_prestamo_uniforme`).
+  Los vencidos salen primero.
+- `GET /m6/prestamos/patinadores`: patinadores activos con sus posibles responsables
+  (su propia cuenta y sus acudientes vinculados activos).
+- `POST /m6/prestamos`: `{ uniformeId, patinadorId, responsableId, cantidad,
+  fechaDevolucionPrevista, estadoEntrega, valorPorUnidad? }`.
+- `PATCH /m6/prestamos/:id/recibir`: `{ estado: 'DEVUELTO' | 'PERDIDA_DANO', estadoRecepcion?, observacion? }`.
 
-La pantalla del adelanto Sprint 2 usa datos ficticios en memoria del navegador
-para poder registrar préstamos, devoluciones y pérdidas sin depender de datos de
-la base compartida. Los cambios se reinician al recargar la página.
+Reglas:
+
+- Solo se prestan implementos (`tipo = IMPLEMENTO`); las prendas se venden (decisión del grupo por higiene).
+- **Cobro (decisión del grupo, 11/11/2026):** tarifa por unidad y día × cantidad × días
+  (de hoy a la devolución prevista, mínimo 1). La tarifa sugerida está en
+  `uniforme.tarifa_prestamo_dia` y se puede ajustar en cada préstamo (`valorPorUnidad`).
+  Se crea un cobro `PENDIENTE` en M5 con concepto `PRESTAMO_IMPLEMENTO` y fecha límite en la
+  devolución prevista; se paga desde «Registrar pago». Con valor 0 no se crea cobro.
+- Préstamo, cobro, descuento de stock, Kardex `PRESTAMO` y auditoría van en una transacción.
+- Devolución: las unidades regresan al stock (Kardex `DEVOLUCION`). Pérdida o daño exige
+  observación y no devuelve unidades.
+- Requiere la migración `db/migraciones/2026-11-11-m6-prestamo-con-cobro.sql` en bases ya creadas.
 
 ## Personal (HU-6.2 / RF-M6-02)
 

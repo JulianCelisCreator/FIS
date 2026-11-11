@@ -531,7 +531,8 @@ CREATE TABLE cobro (
   asignacion_plan_id  BIGINT REFERENCES asignacion_plan(id),
   tarifa_id           BIGINT REFERENCES tarifa(id),
   concepto            TEXT NOT NULL CHECK (concepto IN ('MENSUALIDAD','SESION','MATRICULA',
-                                                        'GASTOS_ADMINISTRATIVOS','VENTA_UNIFORME')),
+                                                        'GASTOS_ADMINISTRATIVOS','VENTA_UNIFORME',
+                                                        'PRESTAMO_IMPLEMENTO')),  -- M6-08
   periodo             DATE,                  -- primer día del mes cobrado (mensualidades)
   descripcion         TEXT,
   valor               NUMERIC(14,2) NOT NULL CHECK (valor > 0),
@@ -796,6 +797,7 @@ CREATE TABLE uniforme (
   precio_venta        NUMERIC(14,2) NOT NULL CHECK (precio_venta >= 0),
   cantidad_disponible INTEGER NOT NULL DEFAULT 0 CHECK (cantidad_disponible >= 0),
   cantidad_minima     INTEGER NOT NULL DEFAULT 0 CHECK (cantidad_minima >= 0),
+  tarifa_prestamo_dia NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (tarifa_prestamo_dia >= 0),  -- sugerida por unidad y día (M6-08)
   foto_url            TEXT,
   activo              BOOLEAN NOT NULL DEFAULT true,
   creado_en           TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -857,6 +859,13 @@ CREATE TABLE prestamo_uniforme (
   fecha_prestamo             DATE NOT NULL DEFAULT current_date,
   fecha_devolucion_prevista  DATE NOT NULL,
   estado_entrega             TEXT NOT NULL CHECK (estado_entrega IN ('NUEVO','BUEN_ESTADO','CON_DESGASTE')),
+  -- Cobro del préstamo: tarifa por unidad y día × cantidad × días previstos (mínimo 1).
+  -- Se copia al prestar; si el valor es 0 no se genera cobro en M5.
+  tarifa_dia                 NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (tarifa_dia >= 0),
+  dias_cobrados              INTEGER NOT NULL DEFAULT 1 CHECK (dias_cobrados >= 1),
+  valor_cobro                NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (valor_cobro >= 0),
+  cobro_id                   BIGINT UNIQUE REFERENCES cobro(id),  -- concepto PRESTAMO_IMPLEMENTO
+  CHECK ((valor_cobro > 0) = (cobro_id IS NOT NULL)),
   estado                     TEXT NOT NULL DEFAULT 'ACTIVO' CHECK (estado IN ('ACTIVO','DEVUELTO','PERDIDA_DANO')),
   fecha_recepcion            DATE,
   estado_recepcion           TEXT CHECK (estado_recepcion IN ('BUEN_ESTADO','CON_DESGASTE','DANADO')),
@@ -870,7 +879,7 @@ CREATE TABLE prestamo_uniforme (
 );
 CREATE INDEX prestamo_uniforme_activo_idx ON prestamo_uniforme (fecha_devolucion_prevista) WHERE estado = 'ACTIVO';
 COMMENT ON TABLE prestamo_uniforme IS
-  '[M6] Préstamo y devolución de uniformes (M6-08). «Vencido» no se guarda: es ACTIVO con fecha_devolucion_prevista pasada (v_prestamo_uniforme). Pérdida o daño exige observación justificativa.';
+  '[M6] Préstamo y devolución de implementos (M6-08). Solo se prestan implementos (decisión del grupo, higiene). «Vencido» no se guarda: es ACTIVO con fecha_devolucion_prevista pasada (v_prestamo_uniforme). Pérdida o daño exige observación justificativa. El préstamo genera un cobro PENDIENTE en M5 (concepto PRESTAMO_IMPLEMENTO) con fecha límite en la devolución prevista.';
 
 CREATE TABLE movimiento_inventario (
   id                 BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

@@ -17,6 +17,7 @@ export interface UniformeInventario {
   estadoStock: 'STOCK_NORMAL' | 'ALERTA_MINIMO';
   activo: boolean;
   fotoUrl: string | null;
+  tarifaPrestamoDia: number;
   actualizadoEn: string;
 }
 
@@ -67,6 +68,7 @@ export class UniformesRepository {
                    THEN 'ALERTA_MINIMO' ELSE 'STOCK_NORMAL' END AS "estadoStock",
               u.activo
               , u.foto_url AS "fotoUrl"
+              , u.tarifa_prestamo_dia AS "tarifaPrestamoDia"
               , u.actualizado_en AS "actualizadoEn"
        FROM uniforme u
        LEFT JOIN proveedor p ON p.id = u.proveedor_id
@@ -88,6 +90,7 @@ export class UniformesRepository {
                    THEN 'ALERTA_MINIMO' ELSE 'STOCK_NORMAL' END AS "estadoStock",
               u.activo
               , u.foto_url AS "fotoUrl"
+              , u.tarifa_prestamo_dia AS "tarifaPrestamoDia"
               , u.actualizado_en AS "actualizadoEn"
        FROM uniforme u LEFT JOIN proveedor p ON p.id = u.proveedor_id
        WHERE u.id = $1`,
@@ -124,8 +127,8 @@ export class UniformesRepository {
     }>(
       `INSERT INTO uniforme
        (referencia, tipo, talla, proveedor_id, costo, precio_venta,
-        cantidad_disponible, cantidad_minima, foto_url)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        cantidad_disponible, cantidad_minima, foto_url, tarifa_prestamo_dia)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING id, referencia, tipo, talla, activo`,
       [
         dto.referencia.trim(),
@@ -137,6 +140,7 @@ export class UniformesRepository {
         dto.cantidadDisponible,
         dto.cantidadMinima,
         dto.fotoUrl?.trim() || null,
+        dto.tarifaPrestamoDia ?? 0,
       ],
     ).then((resultado) => resultado.rows);
     return creado;
@@ -183,6 +187,7 @@ export class UniformesRepository {
         cantidad_disponible = COALESCE($8, cantidad_disponible),
         cantidad_minima = COALESCE($9, cantidad_minima),
         foto_url = CASE WHEN $10 THEN NULLIF($11::text, '') ELSE foto_url END,
+        tarifa_prestamo_dia = COALESCE($13, tarifa_prestamo_dia),
         actualizado_en = NOW()
        WHERE id = $12
        RETURNING id`,
@@ -199,6 +204,7 @@ export class UniformesRepository {
         dto.fotoUrl !== undefined,
         dto.fotoUrl?.trim() ?? null,
         id,
+        dto.tarifaPrestamoDia ?? null,
       ],
     ).then((resultado) => resultado.rows);
     return actualizado ?? null;
