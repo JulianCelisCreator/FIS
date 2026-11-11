@@ -16,6 +16,14 @@ export class ErrorApi extends Error {
   }
 }
 
+/**
+ * Con el inicio de sesión de M1 (HU-M1-02) ya no hay usuarios «Demo local»:
+ * las pantallas de M6 usan siempre la API.
+ */
+export function usandoDemoLocal(): boolean {
+  return false
+}
+
 function mensajeDeError(cuerpo: unknown, estado: number): string {
   if (cuerpo && typeof cuerpo === 'object' && 'message' in cuerpo) {
     const { message } = cuerpo as { message: unknown }

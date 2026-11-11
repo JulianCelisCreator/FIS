@@ -14,6 +14,8 @@ import { InventarioUniformes } from '../modules/m6-inventario-uniformes/componen
 import { PrestamosUniformes } from '../modules/m6-inventario-uniformes/components/prestamos-uniformes.tsx'
 import { VentasUniformes } from '../modules/m6-inventario-uniformes/components/ventas-uniformes.tsx'
 import { PERMISOS_M6 } from '../modules/m6-inventario-uniformes/types/inventario.types.ts'
+import { RegistroPersonal } from '../modules/m6-personal/components/registro-personal.tsx'
+import { PERMISOS_PERSONAL } from '../modules/m6-personal/types/personal.types.ts'
 import { MarcoAplicacion } from './marco-aplicacion.tsx'
 
 const PANTALLAS = [
@@ -23,6 +25,7 @@ const PANTALLAS = [
   { pagina: 'inventario', texto: 'Inventario de uniformes', grupo: 'Uniformes', permiso: PERMISOS_M6.inventarioGestionar },
   { pagina: 'ventas', texto: 'Venta de uniformes', grupo: 'Uniformes', permiso: PERMISOS_M6.inventarioGestionar },
   { pagina: 'prestamos', texto: 'Préstamos de implementos', grupo: 'Uniformes', permiso: PERMISOS_M6.inventarioGestionar },
+  { pagina: 'personal', texto: 'Personal', grupo: 'Administración', permiso: PERMISOS_PERSONAL.personalGestionar },
 ]
 
 const PESTANAS_PAGO: PestanaPago[] = ['cobro', 'sesion', 'matricula']
@@ -54,7 +57,7 @@ export function Aplicacion() {
     ...PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso)),
   ]
   const actual = pagina || permitidas[0]?.pagina || ''
-  const navegacion = ['Usuarios', 'Planes y pagos', 'Uniformes'].map((grupo) => ({
+  const navegacion = ['Usuarios', 'Administración', 'Planes y pagos', 'Uniformes'].map((grupo) => ({
     grupo,
     enlaces: permitidas.filter((pantalla) => pantalla.grupo === grupo),
   }))
@@ -88,6 +91,8 @@ export function Aplicacion() {
     contenido = <VentasUniformes key={sesion.id} />
   } else if (actual === 'prestamos') {
     contenido = <PrestamosUniformes key={sesion.id} />
+  } else if (actual === 'personal') {
+    contenido = <RegistroPersonal key={sesion.id} />
   } else if (actual === 'asignar-plan') {
     contenido = (
       <AsignarCambiarPlan
