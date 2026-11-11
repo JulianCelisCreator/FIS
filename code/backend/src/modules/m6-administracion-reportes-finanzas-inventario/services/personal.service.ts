@@ -20,6 +20,11 @@ import {
   normalizarPersonal,
   validarCuentaVinculable,
 } from '../utils/reglas-personal.js';
+import {
+  ROL_CONTADOR,
+  validarAsignacionContador,
+  validarRetiroContador,
+} from '../utils/reglas-contador.js';
 
 /** Traduce los errores de reglas y de unicidad a la respuesta HTTP. */
 export function traducirErrorPersonal(error: unknown): unknown {
@@ -129,6 +134,21 @@ export class PersonalService {
           );
         }
         await this.personal.cambiarEstado(id, estado, consultor);
+        // Personal inactivo no conserva permisos financieros (HU-6.3).
+        if (estado === 'INACTIVO' && actual.usuarioId !== null) {
+          const retirado = await this.personal.retirarRol(actual.usuarioId, ROL_CONTADOR, consultor);
+          if (retirado) {
+            await this.auditoria.registrar(consultor, {
+              modulo: 'M6',
+              tabla: 'usuario_rol',
+              registroId: actual.usuarioId,
+              accion: 'RETIRAR_ROL',
+              valorAnterior: { rol: ROL_CONTADOR },
+              motivo: 'Personal desactivado',
+              usuarioId: usuario.id,
+            });
+          }
+        }
         await this.auditoria.registrar(consultor, {
           modulo: 'M6',
           tabla: 'personal',
@@ -137,6 +157,50 @@ export class PersonalService {
           valorAnterior: { estado: actual.estado },
           valorNuevo: { estado },
           motivo: motivo?.trim() || null,
+          usuarioId: usuario.id,
+        });
+      });
+      return this.detalle(id);
+    } catch (error) {
+      throw traducirErrorPersonal(error);
+    }
+  }
+
+  /** Asigna el rol Contador (HU-6.3 / RF-M6-03). */
+  asignarContador(id: number, usuario: UsuarioAutenticado) {
+    return this.cambiarRolContador(id, usuario, 'ASIGNAR');
+  }
+
+  /** Retira el rol Contador sin tocar la cuenta ni los demás roles. */
+  retirarContador(id: number, usuario: UsuarioAutenticado) {
+    return this.cambiarRolContador(id, usuario, 'RETIRAR');
+  }
+
+  private async cambiarRolContador(
+    id: number,
+    usuario: UsuarioAutenticado,
+    accion: 'ASIGNAR' | 'RETIRAR',
+  ): Promise<Personal> {
+    try {
+      await this.baseDatos.transaccion(async (consultor) => {
+        const persona = await this.personal.bloquear(id, consultor);
+        const cuenta = persona?.usuarioId
+          ? await this.personal.cuentaConRoles(persona.usuarioId, consultor)
+          : null;
+        let usuarioId: number;
+        if (accion === 'ASIGNAR') {
+          usuarioId = validarAsignacionContador(persona, cuenta);
+          await this.personal.asignarRol(usuarioId, ROL_CONTADOR, usuario.id, consultor);
+        } else {
+          usuarioId = validarRetiroContador(persona, cuenta);
+          await this.personal.retirarRol(usuarioId, ROL_CONTADOR, consultor);
+        }
+        await this.auditoria.registrar(consultor, {
+          modulo: 'M6',
+          tabla: 'usuario_rol',
+          registroId: usuarioId,
+          accion: accion === 'ASIGNAR' ? 'ASIGNAR_ROL' : 'RETIRAR_ROL',
+          valorNuevo: { rol: ROL_CONTADOR, personalId: id },
           usuarioId: usuario.id,
         });
       });

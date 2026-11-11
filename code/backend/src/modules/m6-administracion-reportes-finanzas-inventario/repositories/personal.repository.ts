@@ -211,6 +211,43 @@ export class PersonalRepository {
     return (resultado.rowCount ?? 0) > 0;
   }
 
+  /** Estado de la cuenta vinculada y sus roles, bloqueando sus filas de rol. */
+  async cuentaConRoles(usuarioId: number, consultor: Consultor) {
+    const [fila] = await consultor
+      .query<{ estado: string; roles: string[] }>(
+        `SELECT u.estado,
+                COALESCE(array_agg(r.codigo) FILTER (WHERE r.id IS NOT NULL), '{}') AS roles
+         FROM usuario u
+         LEFT JOIN usuario_rol ur ON ur.usuario_id = u.id
+         LEFT JOIN rol r ON r.id = ur.rol_id
+         WHERE u.id = $1
+         GROUP BY u.id`,
+        [usuarioId],
+      )
+      .then((resultado) => resultado.rows);
+    return fila ?? null;
+  }
+
+  /** Asigna un rol de M1 a la cuenta (tabla usuario_rol). */
+  async asignarRol(usuarioId: number, rol: string, asignadoPor: number, consultor: Consultor) {
+    await consultor.query(
+      `INSERT INTO usuario_rol (usuario_id, rol_id, asignado_por)
+       SELECT $1, r.id, $3 FROM rol r WHERE r.codigo = $2
+       ON CONFLICT (usuario_id, rol_id) DO NOTHING`,
+      [usuarioId, rol, asignadoPor],
+    );
+  }
+
+  /** Retira un rol de la cuenta. Devuelve si la cuenta lo tenía. */
+  async retirarRol(usuarioId: number, rol: string, consultor: Consultor): Promise<boolean> {
+    const resultado = await consultor.query(
+      `DELETE FROM usuario_rol
+       WHERE usuario_id = $1 AND rol_id = (SELECT id FROM rol WHERE codigo = $2)`,
+      [usuarioId, rol],
+    );
+    return (resultado.rowCount ?? 0) > 0;
+  }
+
   /** Desactivar o reactivar sin borrar nada: el estado va con la fecha de retiro. */
   async cambiarEstado(id: number, estado: EstadoPersonal, consultor: Consultor): Promise<void> {
     await consultor.query(

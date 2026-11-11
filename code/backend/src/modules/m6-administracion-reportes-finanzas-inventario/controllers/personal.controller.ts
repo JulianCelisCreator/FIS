@@ -72,6 +72,23 @@ export class PersonalController {
     return this.personal.desactivar(personalId, usuario, dto.motivo);
   }
 
+  /** HU-6.3: asigna el rol Contador a la cuenta vinculada. */
+  @Post(':personalId/rol-contador')
+  asignarContador(
+    @UsuarioActual() usuario: UsuarioAutenticado,
+    @Param('personalId', ParseIntPipe) personalId: number,
+  ) {
+    return this.personal.asignarContador(personalId, usuario);
+  }
+
+  @Post(':personalId/rol-contador/retirar')
+  retirarContador(
+    @UsuarioActual() usuario: UsuarioAutenticado,
+    @Param('personalId', ParseIntPipe) personalId: number,
+  ) {
+    return this.personal.retirarContador(personalId, usuario);
+  }
+
   @Post(':personalId/reactivar')
   reactivar(
     @UsuarioActual() usuario: UsuarioAutenticado,

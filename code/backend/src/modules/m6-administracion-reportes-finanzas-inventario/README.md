@@ -37,6 +37,18 @@ Reglas:
   en M1 (no desactivada y sin otra ficha). `null` la desvincula.
 - Desactivar no borra nada: pasa a `INACTIVO` con `fecha_retiro`. Todo queda en auditoría.
 
+## Rol Contador (HU-6.3 / RF-M6-03)
+
+- `POST /m6/personal/:id/rol-contador`: asigna el rol a la cuenta vinculada. Exige personal
+  `ACTIVO` con cuenta de M1 no desactivada (se acepta `POR_REGISTRAR`, cambio #3).
+- `POST /m6/personal/:id/rol-contador/retirar`: retira solo ese rol.
+- Desactivar a una persona le retira el rol Contador (personal inactivo sin permisos financieros).
+- Permisos del rol (semilla de `schema.sql`): `M6_REPORTE_FINANCIERO`, `M5_PAGO_REGISTRAR`,
+  `M5_CARTERA_CONSULTAR`, `M5_PAGO_HISTORIAL`, `M5_PLAN_CONSULTAR`, `M5_COMPROBANTE_DESCARGAR`.
+  Sin `M5_PAGO_ANULAR`, `M6_INVENTARIO_GESTIONAR` ni `M6_PERSONAL_GESTIONAR`.
+- Cada ruta del M6 declara su permiso y el servidor lo valida en cada petición (403). Lo
+  comprueban `permisos-m6.spec.ts` y `reglas-contador.spec.ts`.
+
 ## Sprint 2: venta de uniformes (HU-6.7 / RF-M6-07)
 
 - `GET /m6/ventas?buscar=`: ventas registradas con sus líneas y comprobante.
