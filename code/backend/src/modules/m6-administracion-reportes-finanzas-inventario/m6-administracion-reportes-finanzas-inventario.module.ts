@@ -12,11 +12,18 @@ import { VentasController } from './controllers/ventas.controller.js';
 import { RegistroFinancieroVentaRepository } from './repositories/registro-financiero-venta.repository.js';
 import { VentasRepository } from './repositories/ventas.repository.js';
 import { VentasService } from './services/ventas.service.js';
+import { PersonalController } from './controllers/personal.controller.js';
+import { PersonalRepository } from './repositories/personal.repository.js';
+import { PersonalService } from './services/personal.service.js';
 
 /** M6 · Administración, reportes, finanzas e inventario. */
 @Module({
-  controllers: [UniformesController, ProveedoresController, PrestamosController, VentasController],
+  controllers: [
+    UniformesController, ProveedoresController, PrestamosController, VentasController,
+    PersonalController,
+  ],
   providers: [
+    PersonalRepository, PersonalService,
     UniformesRepository, UniformesService,
     ProveedoresRepository, ProveedoresService,
     PrestamosRepository, PrestamosService,

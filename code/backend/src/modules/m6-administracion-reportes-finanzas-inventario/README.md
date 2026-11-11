@@ -17,6 +17,26 @@ La pantalla del adelanto Sprint 2 usa datos ficticios en memoria del navegador
 para poder registrar préstamos, devoluciones y pérdidas sin depender de datos de
 la base compartida. Los cambios se reinician al recargar la página.
 
+## Personal (HU-6.2 / RF-M6-02)
+
+Permiso `M6_PERSONAL_GESTIONAR` (solo Administrador).
+
+- `GET /m6/personal?buscar=&estado=&cargo=&pagina=&tamano=`: listado paginado en el
+  servidor; `buscar` filtra por documento o nombre. Responde `{ datos, total, pagina, tamano }`.
+- `GET /m6/personal/cuentas-disponibles?buscar=`: cuentas de M1 no desactivadas y sin
+  ficha laboral, para vincularlas.
+- `GET /m6/personal/:id`, `POST /m6/personal`, `PATCH /m6/personal/:id`.
+- `POST /m6/personal/:id/desactivar` (`{ motivo? }`) y `POST /m6/personal/:id/reactivar`.
+
+Reglas:
+
+- Obligatorios: tipo y número de documento, nombres, apellidos, correo, teléfono y cargo.
+- Documento (por tipo) y correo únicos; la base lo garantiza y la API responde 409 con el
+  campo duplicado.
+- M6 **no crea cuentas**: `usuarioId` vincula, de forma opcional, una cuenta que ya existe
+  en M1 (no desactivada y sin otra ficha). `null` la desvincula.
+- Desactivar no borra nada: pasa a `INACTIVO` con `fecha_retiro`. Todo queda en auditoría.
+
 ## Sprint 2: venta de uniformes (HU-6.7 / RF-M6-07)
 
 - `GET /m6/ventas?buscar=`: ventas registradas con sus líneas y comprobante.
