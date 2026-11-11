@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BaseDatosService, Consultor } from '../../../common/database/base-datos.service.js';
 import type { CrearPrestamoDto, RecibirPrestamoDto } from '../dto/prestamos.dto.js';
+import { unidadesQueRegresan } from '../utils/reglas-prestamo.js';
 
 @Injectable()
 export class PrestamosRepository {
@@ -113,16 +114,17 @@ export class PrestamosRepository {
       [dto.estado, dto.estado === 'DEVUELTO' ? dto.estadoRecepcion ?? 'BUEN_ESTADO' : dto.estadoRecepcion ?? 'DANADO',
        dto.observacion ?? null, id],
     );
-    if (dto.estado === 'DEVUELTO') {
+    const regresan = unidadesQueRegresan(dto.estado, actual.cantidad);
+    if (regresan > 0) {
       await consultor.query(
         `UPDATE uniforme SET cantidad_disponible = cantidad_disponible + $1 WHERE id = $2`,
-        [actual.cantidad, actual.uniformeId],
+        [regresan, actual.uniformeId],
       );
       await consultor.query(
         `INSERT INTO movimiento_inventario
          (uniforme_id, tipo, cantidad, prestamo_id, observacion, registrado_por)
          VALUES ($1,'DEVOLUCION',$2,$3,'Devolución registrada',$4)`,
-        [actual.uniformeId, actual.cantidad, id, usuarioId],
+        [actual.uniformeId, regresan, id, usuarioId],
       );
     }
     return actual;

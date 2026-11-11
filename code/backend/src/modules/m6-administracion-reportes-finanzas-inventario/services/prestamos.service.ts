@@ -4,7 +4,21 @@ import { AuditoriaRepository } from '../../../common/auditoria/auditoria.reposit
 import { BaseDatosService } from '../../../common/database/base-datos.service.js';
 import type { CrearPrestamoDto, RecibirPrestamoDto } from '../dto/prestamos.dto.js';
 import { PrestamosRepository } from '../repositories/prestamos.repository.js';
+import { ErrorReglaPrestamo, validarPrestamo, validarRecepcion } from '../utils/reglas-prestamo.js';
 
+/** Ejecuta una regla de préstamo y traduce su error a la respuesta HTTP. */
+function aplicarRegla(regla: () => void): void {
+  try {
+    regla();
+  } catch (error) {
+    if (!(error instanceof ErrorReglaPrestamo)) throw error;
+    throw error.motivo === 'NO_ENCONTRADO'
+      ? new NotFoundException(error.message)
+      : new BadRequestException(error.message);
+  }
+}
+
+/** Préstamo y devolución de implementos (HU-6.8 / RF-M6-08). */
 @Injectable()
 export class PrestamosService {
   constructor(
@@ -30,13 +44,7 @@ export class PrestamosService {
         throw new BadRequestException('La fecha prevista debe ser hoy o posterior');
       }
       const uniforme = await this.prestamos.uniformeApto(dto.uniformeId, consultor);
-      if (!uniforme) throw new NotFoundException('El implemento no está disponible');
-      if (uniforme.tipo !== 'IMPLEMENTO') {
-        throw new BadRequestException('Solo se pueden prestar implementos; las prendas quedan disponibles para venta');
-      }
-      if (uniforme.cantidadDisponible < dto.cantidad) {
-        throw new BadRequestException('No hay cantidad suficiente para realizar el préstamo');
-      }
+      aplicarRegla(() => validarPrestamo(uniforme, dto.cantidad));
       const creado = await this.prestamos.crear(dto, usuario.id, consultor);
       await this.auditoria.registrar(consultor, {
         modulo: 'M6',
@@ -52,9 +60,7 @@ export class PrestamosService {
 
   async recibir(id: number, usuario: UsuarioAutenticado, dto: RecibirPrestamoDto) {
     return this.baseDatos.transaccion(async (consultor) => {
-      if (dto.estado === 'PERDIDA_DANO' && !dto.observacion?.trim()) {
-        throw new BadRequestException('Debes explicar la pérdida o el daño');
-      }
+      aplicarRegla(() => validarRecepcion(dto));
       const recibido = await this.prestamos.recibir(id, dto, usuario.id, consultor);
       if (!recibido) throw new NotFoundException('Préstamo activo no encontrado');
       await this.auditoria.registrar(consultor, {
