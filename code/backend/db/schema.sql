@@ -760,7 +760,7 @@ CREATE TABLE personal (
   nombres             TEXT NOT NULL,
   apellidos           TEXT NOT NULL,
   correo_institucional TEXT NOT NULL,
-  telefono            TEXT,
+  telefono            TEXT NOT NULL,  -- obligatorio según RF-M6-02
   cargo               TEXT NOT NULL CHECK (cargo IN ('PROFESOR','CONTADOR','FISIOTERAPEUTA','ADMINISTRATIVO')),
   estado              TEXT NOT NULL DEFAULT 'ACTIVO' CHECK (estado IN ('ACTIVO','INACTIVO')),
   fecha_ingreso       DATE NOT NULL DEFAULT current_date,
@@ -789,7 +789,7 @@ COMMENT ON TABLE proveedor IS '[M6] Proveedores de uniformes (M6-06).';
 CREATE TABLE uniforme (
   id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   referencia          TEXT NOT NULL UNIQUE,  -- UNI-CHA-10 (incluye la talla)
-  tipo                TEXT NOT NULL CHECK (tipo IN ('CAMISETA','CHAQUETA','PANTALON','UNIFORME_COMPLETO')),
+  tipo                TEXT NOT NULL CHECK (tipo IN ('CAMISETA','CHAQUETA','PANTALON','UNIFORME_COMPLETO','IMPLEMENTO')),  -- IMPLEMENTO: solo préstamo (M6-08)
   talla               TEXT NOT NULL,
   proveedor_id        BIGINT REFERENCES proveedor(id),
   costo               NUMERIC(14,2) NOT NULL CHECK (costo >= 0),
