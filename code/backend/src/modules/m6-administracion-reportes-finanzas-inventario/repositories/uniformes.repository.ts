@@ -17,6 +17,7 @@ export interface UniformeInventario {
   estadoStock: 'STOCK_NORMAL' | 'ALERTA_MINIMO';
   activo: boolean;
   fotoUrl: string | null;
+  actualizadoEn: string;
 }
 
 export interface MovimientoInventario {
@@ -66,6 +67,7 @@ export class UniformesRepository {
                    THEN 'ALERTA_MINIMO' ELSE 'STOCK_NORMAL' END AS "estadoStock",
               u.activo
               , u.foto_url AS "fotoUrl"
+              , u.actualizado_en AS "actualizadoEn"
        FROM uniforme u
        LEFT JOIN proveedor p ON p.id = u.proveedor_id
        ${condicionesSql}
@@ -86,6 +88,7 @@ export class UniformesRepository {
                    THEN 'ALERTA_MINIMO' ELSE 'STOCK_NORMAL' END AS "estadoStock",
               u.activo
               , u.foto_url AS "fotoUrl"
+              , u.actualizado_en AS "actualizadoEn"
        FROM uniforme u LEFT JOIN proveedor p ON p.id = u.proveedor_id
        WHERE u.id = $1`,
       [id],
