@@ -81,7 +81,12 @@ const ESTADOS: Record<string, Record<string, [string, Tono]>> = {
   },
   proveedor: { activo: ['Activo', 'success'], inactivo: ['Inactivo', 'neutral'] },
   personal: { activo: ['Activo', 'success'], inactivo: ['Inactivo', 'neutral'] },
-  venta: { confirmada: ['Confirmada', 'success'], devuelta: ['Devuelta', 'neutral'], ajustada: ['Ajustada', 'warning'] },
+  venta: {
+    confirmada: ['Confirmada', 'success'],
+    'devuelta-parcial': ['Devuelta en parte', 'warning'],
+    devuelta: ['Devuelta', 'neutral'],
+    ajustada: ['Ajustada', 'warning'],
+  },
 }
 
 export function Insignia({ entidad, estado }: { entidad: string; estado: string }) {

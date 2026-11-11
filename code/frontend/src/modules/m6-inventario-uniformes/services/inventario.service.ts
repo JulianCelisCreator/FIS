@@ -17,6 +17,7 @@ import { erroresTransaccion } from '../../m5-planes-tarifas-pagos/utils/validar-
 import {
   TIPOS_VENDIBLES,
   type CompradorVenta,
+  type DatosDevolucion,
   type DatosVenta,
   type LineaVenta,
   type VentaRegistrada,
@@ -640,7 +641,7 @@ let ventasDemo: VentaRegistrada[] = []
 
 export function listarVentas(): Promise<VentaRegistrada[]> {
   if (!usandoDemoLocal()) return pedir<VentaRegistrada[]>('/m6/ventas')
-  return Promise.resolve(ventasDemo.map((venta) => ({ ...venta, items: venta.items.map((item) => ({ ...item })) })))
+  return Promise.resolve(ventasDemo.map(copiaVenta))
 }
 
 export async function listarCompradoresVenta(): Promise<CompradorVenta[]> {
@@ -755,8 +756,83 @@ export async function registrarVenta(datos: DatosVenta): Promise<VentaRegistrada
     estadoPago: 'REGISTRADO',
     registradoPor: 'Andrea Administradora (demo)',
     registradoEn: new Date().toISOString(),
-    items: lineas,
+    estado: 'CONFIRMADA',
+    valorDevuelto: 0,
+    items: lineas.map((linea) => ({ ...linea, devuelto: 0 })),
+    devoluciones: [],
   }
   ventasDemo = [venta, ...ventasDemo]
-  return { ...venta, items: lineas.map((linea) => ({ ...linea })) }
+  return copiaVenta(venta)
+}
+
+function copiaVenta(venta: VentaRegistrada): VentaRegistrada {
+  return {
+    ...venta,
+    items: venta.items.map((item) => ({ ...item })),
+    devoluciones: venta.devoluciones.map((devolucion) => ({ ...devolucion, items: devolucion.items.map((i) => ({ ...i })) })),
+  }
+}
+
+/**
+ * Devolución total o parcial (HU-6.7), misma regla que el servidor: no se
+ * devuelve más de lo pendiente, el stock regresa y, si una sola devolución
+ * cubre toda la venta, se anula su pago. La venta original no se modifica.
+ */
+export async function registrarDevolucion(ventaId: number, datos: DatosDevolucion): Promise<VentaRegistrada> {
+  if (datos.motivo.trim().length < 3) throw new Error('Escribe el motivo de la devolución.')
+  if (!MEDIOS_PAGO.some((medio) => medio.valor === datos.medioReembolso)) throw new Error('Elige el medio del reembolso.')
+  const items = consolidarItemsVenta(datos.items.filter((item) => item.cantidad > 0))
+  if (items.length === 0) throw new Error('Indica al menos una unidad a devolver.')
+  if (!usandoDemoLocal()) {
+    return pedir<VentaRegistrada>(`/m6/ventas/${ventaId}/devoluciones`, {
+      metodo: 'POST',
+      cuerpo: { ...datos, motivo: datos.motivo.trim(), items },
+    })
+  }
+
+  const venta = ventasDemo.find((item) => item.id === ventaId)
+  if (!venta) throw new Error('Venta no encontrada.')
+  if (venta.estadoPago === 'ANULADO') throw new Error('El pago de esta venta está anulado; no admite devoluciones.')
+  const lineas = items.map((item) => {
+    const vendida = venta.items.find((linea) => linea.uniformeId === item.uniformeId)
+    if (!vendida) throw new Error('Una de las referencias no pertenece a esta venta.')
+    const pendiente = vendida.cantidad - vendida.devuelto
+    if (!Number.isInteger(item.cantidad) || item.cantidad > pendiente) {
+      throw new Error(`Solo quedan ${pendiente} unidades de ${vendida.referencia} talla ${vendida.talla} por devolver.`)
+    }
+    return { vendida, cantidad: item.cantidad, subtotal: item.cantidad * vendida.valorUnitario }
+  })
+  const sinPrevias = venta.devoluciones.length === 0
+  const valorDevuelto = lineas.reduce((suma, linea) => suma + linea.subtotal, 0)
+  for (const linea of lineas) {
+    linea.vendida.devuelto += linea.cantidad
+    const uniforme = inventarioDemo.find((ref) => ref.id === linea.vendida.uniformeId)
+    if (uniforme) {
+      uniforme.cantidadDisponible += linea.cantidad
+      recalcularStock(uniforme)
+      registrarMovimiento(uniforme, 'DEVOLUCION', linea.cantidad, `Devolución de la venta #${ventaId}: ${datos.motivo.trim()}`)
+    }
+  }
+  const completa = venta.items.every((item) => item.devuelto === item.cantidad)
+  const anulaPago = completa && sinPrevias
+  venta.devoluciones.push({
+    id: venta.devoluciones.length + 1,
+    fecha: hoyEnClub(),
+    motivo: datos.motivo.trim(),
+    valorDevuelto,
+    medioReembolso: datos.medioReembolso,
+    anulaPago,
+    registradoPor: 'Andrea Administradora (demo)',
+    items: lineas.map((linea) => ({
+      uniformeId: linea.vendida.uniformeId,
+      referencia: linea.vendida.referencia,
+      talla: linea.vendida.talla,
+      cantidad: linea.cantidad,
+      subtotal: linea.subtotal,
+    })),
+  })
+  venta.valorDevuelto += valorDevuelto
+  venta.estado = completa ? 'DEVUELTA' : 'DEVUELTA_PARCIAL'
+  if (anulaPago) venta.estadoPago = 'ANULADO'
+  return copiaVenta(venta)
 }
