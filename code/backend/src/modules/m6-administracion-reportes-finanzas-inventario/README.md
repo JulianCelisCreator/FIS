@@ -84,6 +84,15 @@ Reglas:
   `UPDATE`/`DELETE` sobre `venta_uniforme` y `venta_detalle` con un trigger. Las
   correcciones se registran como ajuste autorizado de stock (`PATCH /m6/uniformes/:id/stock`)
   o, cuando se implemente, como devolución.
+- **Devolución (decisión del grupo, 11/11/2026: solo Administrador, total o parcial):**
+  `POST /m6/ventas/:id/devoluciones` con `{ motivo, medioReembolso, items: [{ uniformeId, cantidad }] }`.
+  No se puede devolver más de lo pendiente por línea. La venta no cambia: la devolución
+  queda en `devolucion_venta` (inmutable), las unidades regresan al stock (Kardex `DEVOLUCION`)
+  y, si **una sola** devolución cubre toda la venta, se anulan el pago, el comprobante y el
+  cobro en M5. Si es parcial, el reembolso queda en `devolucion_venta.valor_devuelto` y los
+  reportes (HU-6.4) deben restarlo de los ingresos. La venta muestra `estado`
+  (`CONFIRMADA`, `DEVUELTA_PARCIAL`, `DEVUELTA`), `valorDevuelto`, lo devuelto por línea y sus
+  devoluciones. Requiere la migración `db/migraciones/2026-11-11-m6-devolucion-de-venta.sql`.
 - La escritura en tablas de M5 está aislada en `RegistroFinancieroVentaRepository`:
   cuando M5 publique su servicio de pagos, solo se reemplaza esa clase.
 

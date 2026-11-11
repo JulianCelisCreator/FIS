@@ -3,7 +3,7 @@ import { AutenticacionTemporalGuard } from '../../../common/auth/autenticacion-t
 import { RequierePermiso, UsuarioActual } from '../../../common/auth/decoradores.js';
 import { PermisosGuard } from '../../../common/auth/permisos.guard.js';
 import type { UsuarioAutenticado } from '../../../common/auth/usuario-autenticado.js';
-import { FiltrosVentasDto, RegistrarVentaDto } from '../dto/ventas.dto.js';
+import { FiltrosVentasDto, RegistrarDevolucionDto, RegistrarVentaDto } from '../dto/ventas.dto.js';
 import { PermisoM6 } from '../enums/permiso-m6.enum.js';
 import { VentasService } from '../services/ventas.service.js';
 
@@ -35,5 +35,15 @@ export class VentasController {
   @Post()
   registrar(@UsuarioActual() usuario: UsuarioAutenticado, @Body() dto: RegistrarVentaDto) {
     return this.ventas.registrar(usuario, dto);
+  }
+
+  /** Devolución total o parcial; la venta no se modifica. Responde la venta actualizada. */
+  @Post(':ventaId/devoluciones')
+  registrarDevolucion(
+    @UsuarioActual() usuario: UsuarioAutenticado,
+    @Param('ventaId', ParseIntPipe) ventaId: number,
+    @Body() dto: RegistrarDevolucionDto,
+  ) {
+    return this.ventas.registrarDevolucion(ventaId, usuario, dto);
   }
 }

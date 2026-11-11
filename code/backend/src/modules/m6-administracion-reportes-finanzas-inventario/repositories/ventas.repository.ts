@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BaseDatosService, type Consultor } from '../../../common/database/base-datos.service.js';
 import type { MedioPago, TipoComprador } from '../dto/ventas.dto.js';
 import type { LineaVenta, UniformeVendible } from '../utils/reglas-venta.js';
+import type { LineaDevolucion, LineaVendida } from '../utils/reglas-devolucion.js';
 
 export interface CompradorVenta {
   patinadorId: number;
@@ -24,7 +25,22 @@ export interface VentaRegistrada {
   estadoPago: 'REGISTRADO' | 'ANULADO';
   registradoPor: string;
   registradoEn: string;
-  items: LineaVenta[];
+  /** Derivado de las devoluciones: la venta en sí nunca cambia. */
+  estado: 'CONFIRMADA' | 'DEVUELTA_PARCIAL' | 'DEVUELTA';
+  valorDevuelto: number;
+  items: (LineaVenta & { devuelto: number })[];
+  devoluciones: DevolucionRegistrada[];
+}
+
+export interface DevolucionRegistrada {
+  id: number;
+  fecha: string;
+  motivo: string;
+  valorDevuelto: number;
+  medioReembolso: MedioPago;
+  anulaPago: boolean;
+  registradoPor: string;
+  items: { uniformeId: number; referencia: string; talla: string; cantidad: number; subtotal: number }[];
 }
 
 const SELECT_VENTA = `
@@ -37,12 +53,40 @@ const SELECT_VENTA = `
          v.total, cp.numero AS comprobante, pg.estado AS "estadoPago",
          ru.nombres || ' ' || ru.apellidos AS "registradoPor",
          v.creado_en AS "registradoEn",
+         CASE WHEN dv.unidades IS NULL THEN 'CONFIRMADA'
+              WHEN dv.unidades >= (SELECT sum(d.cantidad) FROM venta_detalle d WHERE d.venta_id = v.id)
+                THEN 'DEVUELTA'
+              ELSE 'DEVUELTA_PARCIAL' END AS estado,
+         COALESCE(dv.valor, 0) AS "valorDevuelto",
          (SELECT json_agg(json_build_object(
                    'uniformeId', d.uniforme_id, 'referencia', d.referencia, 'talla', d.talla,
                    'cantidad', d.cantidad, 'valorUnitario', d.valor_unitario::float8,
-                   'subtotal', d.subtotal::float8) ORDER BY d.referencia, d.talla)
-          FROM venta_detalle d WHERE d.venta_id = v.id) AS items
+                   'subtotal', d.subtotal::float8,
+                   'devuelto', COALESCE((SELECT sum(dd.cantidad)::int
+                                         FROM devolucion_venta_detalle dd
+                                         JOIN devolucion_venta dvx ON dvx.id = dd.devolucion_id
+                                         WHERE dvx.venta_id = v.id AND dd.uniforme_id = d.uniforme_id), 0)
+                 ) ORDER BY d.referencia, d.talla)
+          FROM venta_detalle d WHERE d.venta_id = v.id) AS items,
+         COALESCE((SELECT json_agg(json_build_object(
+                   'id', x.id, 'fecha', x.fecha, 'motivo', x.motivo,
+                   'valorDevuelto', x.valor_devuelto::float8, 'medioReembolso', x.medio_reembolso,
+                   'anulaPago', x.anula_pago,
+                   'registradoPor', xu.nombres || ' ' || xu.apellidos,
+                   'items', (SELECT json_agg(json_build_object(
+                               'uniformeId', xd.uniforme_id, 'referencia', u.referencia, 'talla', u.talla,
+                               'cantidad', xd.cantidad, 'subtotal', xd.subtotal::float8))
+                             FROM devolucion_venta_detalle xd JOIN uniforme u ON u.id = xd.uniforme_id
+                             WHERE xd.devolucion_id = x.id)
+                 ) ORDER BY x.creado_en)
+          FROM devolucion_venta x JOIN usuario xu ON xu.id = x.registrado_por
+          WHERE x.venta_id = v.id), '[]'::json) AS devoluciones
   FROM venta_uniforme v
+  LEFT JOIN LATERAL (
+    SELECT sum(dd.cantidad) AS unidades, sum(dd.subtotal) AS valor
+    FROM devolucion_venta x JOIN devolucion_venta_detalle dd ON dd.devolucion_id = x.id
+    WHERE x.venta_id = v.id
+  ) dv ON true
   JOIN patinador pt     ON pt.id = v.patinador_id
   LEFT JOIN usuario cu  ON cu.id = v.comprador_id
   JOIN pago pg          ON pg.id = v.pago_id
@@ -195,5 +239,78 @@ export class VentasRepository {
       );
     }
     return venta.id;
+  }
+
+  /**
+   * Bloquea la venta (FOR UPDATE, no la modifica) para que dos devoluciones
+   * simultáneas no superen lo vendido, y devuelve sus líneas con lo ya devuelto.
+   */
+  async lineasParaDevolver(ventaId: number, consultor: Consultor) {
+    const [venta] = await consultor
+      .query<{ id: number; pagoId: number; cobroId: number; estadoPago: string }>(
+        `SELECT v.id, v.pago_id AS "pagoId", v.cobro_id AS "cobroId", p.estado AS "estadoPago"
+         FROM venta_uniforme v JOIN pago p ON p.id = v.pago_id
+         WHERE v.id = $1
+         FOR UPDATE OF v`,
+        [ventaId],
+      )
+      .then((resultado) => resultado.rows);
+    if (!venta) return null;
+    const lineas = await consultor
+      .query<LineaVendida>(
+        `SELECT d.uniforme_id AS "uniformeId", d.referencia, d.talla, d.cantidad,
+                d.valor_unitario AS "valorUnitario",
+                COALESCE((SELECT sum(dd.cantidad)::int
+                          FROM devolucion_venta_detalle dd
+                          JOIN devolucion_venta x ON x.id = dd.devolucion_id
+                          WHERE x.venta_id = d.venta_id AND dd.uniforme_id = d.uniforme_id), 0) AS devuelto
+         FROM venta_detalle d WHERE d.venta_id = $1`,
+        [ventaId],
+      )
+      .then((resultado) => resultado.rows);
+    return { ...venta, lineas };
+  }
+
+  /** Registra la devolución, reingresa el stock y deja el movimiento DEVOLUCION. */
+  async crearDevolucion(
+    datos: {
+      ventaId: number;
+      motivo: string;
+      medioReembolso: MedioPago;
+      valorDevuelto: number;
+      anulaPago: boolean;
+      usuarioId: number;
+    },
+    lineas: LineaDevolucion[],
+    consultor: Consultor,
+  ): Promise<number> {
+    const [devolucion] = await consultor
+      .query<{ id: number }>(
+        `INSERT INTO devolucion_venta
+         (venta_id, motivo, valor_devuelto, medio_reembolso, anula_pago, registrado_por)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         RETURNING id`,
+        [datos.ventaId, datos.motivo, datos.valorDevuelto, datos.medioReembolso, datos.anulaPago, datos.usuarioId],
+      )
+      .then((resultado) => resultado.rows);
+    for (const linea of lineas) {
+      await consultor.query(
+        `INSERT INTO devolucion_venta_detalle (devolucion_id, uniforme_id, cantidad, valor_unitario)
+         VALUES ($1, $2, $3, $4)`,
+        [devolucion.id, linea.uniformeId, linea.cantidad, linea.valorUnitario],
+      );
+      await consultor.query(
+        `UPDATE uniforme SET cantidad_disponible = cantidad_disponible + $1, actualizado_en = now()
+         WHERE id = $2`,
+        [linea.cantidad, linea.uniformeId],
+      );
+      await consultor.query(
+        `INSERT INTO movimiento_inventario (uniforme_id, tipo, cantidad, venta_id, observacion, registrado_por)
+         VALUES ($1, 'DEVOLUCION', $2, $3, $4, $5)`,
+        [linea.uniformeId, linea.cantidad, datos.ventaId,
+         `Devolución #${devolucion.id} de la venta #${datos.ventaId}: ${datos.motivo}`, datos.usuarioId],
+      );
+    }
+    return devolucion.id;
   }
 }

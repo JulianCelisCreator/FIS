@@ -841,13 +841,48 @@ COMMENT ON TABLE venta_detalle IS '[M6] Ítems de cada venta de uniformes (M6-07
 CREATE FUNCTION fn_venta_inmutable() RETURNS trigger
 LANGUAGE plpgsql AS $$
 BEGIN
-  RAISE EXCEPTION 'Una venta confirmada no puede modificarse; registra una devolución o un ajuste autorizado'
+  RAISE EXCEPTION 'Una venta o devolución confirmada no puede modificarse; registra una devolución o un ajuste autorizado'
     USING ERRCODE = 'P0001';
 END;
 $$;
 CREATE TRIGGER trg_venta_uniforme_inmutable BEFORE UPDATE OR DELETE ON venta_uniforme
   FOR EACH ROW EXECUTE FUNCTION fn_venta_inmutable();
 CREATE TRIGGER trg_venta_detalle_inmutable BEFORE UPDATE OR DELETE ON venta_detalle
+  FOR EACH ROW EXECUTE FUNCTION fn_venta_inmutable();
+
+-- Devolución de una venta (M6-07): total o parcial, solo el Administrador.
+-- La venta no se toca; las unidades regresan al stock (Kardex DEVOLUCION).
+-- Si una sola devolución cubre toda la venta, se anula su pago en M5 (anula_pago);
+-- si es parcial, el reembolso queda aquí y los reportes lo restan de los ingresos.
+CREATE TABLE devolucion_venta (
+  id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  venta_id        BIGINT NOT NULL REFERENCES venta_uniforme(id),
+  fecha           DATE NOT NULL DEFAULT current_date,
+  motivo          TEXT NOT NULL CHECK (btrim(motivo) <> ''),
+  valor_devuelto  NUMERIC(14,2) NOT NULL CHECK (valor_devuelto > 0),
+  medio_reembolso TEXT NOT NULL CHECK (medio_reembolso IN ('EFECTIVO','TRANSFERENCIA','CONSIGNACION')),
+  anula_pago      BOOLEAN NOT NULL DEFAULT false,
+  registrado_por  BIGINT NOT NULL REFERENCES usuario(id),
+  creado_en       TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX devolucion_venta_venta_idx ON devolucion_venta (venta_id);
+CREATE INDEX devolucion_venta_fecha_idx ON devolucion_venta (fecha);
+COMMENT ON TABLE devolucion_venta IS
+  '[M6] Devoluciones de ventas de uniformes (M6-07), totales o parciales. Corrigen una venta sin modificarla. anula_pago = la devolución cubrió toda la venta y se anuló el pago en M5; si no, valor_devuelto se resta de los ingresos en los reportes (M6-04).';
+
+CREATE TABLE devolucion_venta_detalle (
+  devolucion_id  BIGINT NOT NULL REFERENCES devolucion_venta(id),
+  uniforme_id    BIGINT NOT NULL REFERENCES uniforme(id),
+  cantidad       INTEGER NOT NULL CHECK (cantidad > 0),
+  valor_unitario NUMERIC(14,2) NOT NULL CHECK (valor_unitario > 0),
+  subtotal       NUMERIC(14,2) GENERATED ALWAYS AS (cantidad * valor_unitario) STORED,
+  PRIMARY KEY (devolucion_id, uniforme_id)
+);
+COMMENT ON TABLE devolucion_venta_detalle IS '[M6] Unidades devueltas por referencia, al valor unitario de la venta.';
+
+CREATE TRIGGER trg_devolucion_venta_inmutable BEFORE UPDATE OR DELETE ON devolucion_venta
+  FOR EACH ROW EXECUTE FUNCTION fn_venta_inmutable();
+CREATE TRIGGER trg_devolucion_venta_detalle_inmutable BEFORE UPDATE OR DELETE ON devolucion_venta_detalle
   FOR EACH ROW EXECUTE FUNCTION fn_venta_inmutable();
 
 CREATE TABLE prestamo_uniforme (
