@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Alerta, Campo, DialogoConfirmacion, Insignia } from '../../../shared/ui/componentes.tsx'
 import { formatoFecha } from '../../../shared/utils/formato.ts'
 import {
+  cambiarRolContador,
   crearPersonal,
   cuentasDisponibles,
   desactivarPersonal,
@@ -162,6 +163,26 @@ export function RegistroPersonal() {
     }
   }
 
+  const [rolPendiente, setRolPendiente] = useState<{ persona: Personal; asignar: boolean } | null>(null)
+
+  const confirmarRol = async () => {
+    if (!rolPendiente) return
+    setOcupado(true)
+    setError(null)
+    try {
+      const persona = await cambiarRolContador(rolPendiente.persona.id, rolPendiente.asignar)
+      setAviso(rolPendiente.asignar
+        ? `${nombreCompleto(persona)} ahora tiene el rol Contador: consulta y exporta reportes y registra pagos.`
+        : `Se retiró el rol Contador a ${nombreCompleto(persona)}.`)
+      setVersion((valor) => valor + 1)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'No se pudo cambiar el rol.')
+    } finally {
+      setRolPendiente(null)
+      setOcupado(false)
+    }
+  }
+
   const totalPaginas = pagina ? Math.max(1, Math.ceil(pagina.total / pagina.tamano)) : 1
   const datos = edicion?.datos
   const opcionesCuenta = edicion?.cuentaActual && !cuentas.some((c) => c.id === edicion.cuentaActual?.id)
@@ -219,7 +240,16 @@ export function RegistroPersonal() {
                   <td data-label="Documento">{persona.tipoDocumento} {persona.numeroDocumento}</td>
                   <td data-label="Cargo"><span className="vl-badge vl-badge--neutral">{textoCargo(persona.cargo)}</span></td>
                   <td data-label="Contacto">{persona.correo}<br /><span className="vl-text-caption">{persona.telefono}</span></td>
-                  <td data-label="Cuenta">{persona.cuenta ? persona.cuenta.correo : <span className="vl-text-caption">Sin cuenta vinculada</span>}</td>
+                  <td data-label="Cuenta">
+                    {persona.cuenta ? (
+                      <>
+                        {persona.cuenta.correo}
+                        {persona.cuenta.roles.includes('CONTADOR') && (
+                          <> <span className="vl-badge vl-badge--neutral">Contador</span></>
+                        )}
+                      </>
+                    ) : <span className="vl-text-caption">Sin cuenta vinculada</span>}
+                  </td>
                   <td data-label="Estado">
                     <Insignia entidad="personal" estado={persona.estado.toLowerCase()} />
                     {persona.fechaRetiro && <p className="vl-text-caption">Retiro: {formatoFecha(persona.fechaRetiro)}</p>}
@@ -227,6 +257,13 @@ export function RegistroPersonal() {
                   <td data-label="Acciones">
                     <div className="vl-stack">
                       <button className="vl-button vl-button--secondary" type="button" onClick={() => abrir(persona)}>Editar</button>
+                      {persona.cuenta?.roles.includes('CONTADOR') ? (
+                        <button className="vl-button vl-button--secondary" type="button"
+                          onClick={() => setRolPendiente({ persona, asignar: false })}>Retirar rol Contador</button>
+                      ) : persona.estado === 'ACTIVO' && persona.cuenta && (
+                        <button className="vl-button vl-button--secondary" type="button"
+                          onClick={() => setRolPendiente({ persona, asignar: true })}>Asignar rol Contador</button>
+                      )}
                       {persona.estado === 'ACTIVO' ? (
                         <button className="vl-button vl-button--danger" type="button"
                           onClick={() => { setMotivo(''); setPorDesactivar(persona) }}>Desactivar</button>
@@ -315,6 +352,24 @@ export function RegistroPersonal() {
       </DialogoConfirmacion>
 
       <DialogoConfirmacion
+        abierto={rolPendiente !== null}
+        titulo={rolPendiente?.asignar ? 'Asignar rol Contador' : 'Retirar rol Contador'}
+        textoConfirmar={rolPendiente?.asignar ? 'Asignar rol' : 'Retirar rol'}
+        ocupado={ocupado}
+        alConfirmar={confirmarRol}
+        alCancelar={() => setRolPendiente(null)}
+      >
+        {rolPendiente?.asignar ? (
+          <p>
+            {nombreCompleto(rolPendiente.persona)} podrá consultar y exportar reportes financieros, registrar pagos y consultar
+            cartera e historial. No podrá anular pagos ni modificar usuarios, grupos, horarios, matrículas ni inventario.
+          </p>
+        ) : (
+          <p>{rolPendiente && nombreCompleto(rolPendiente.persona)} dejará de tener acceso a la información financiera.</p>
+        )}
+      </DialogoConfirmacion>
+
+      <DialogoConfirmacion
         abierto={porDesactivar !== null}
         titulo="Desactivar persona"
         textoConfirmar="Desactivar"
@@ -324,6 +379,7 @@ export function RegistroPersonal() {
       >
         <p>
           {porDesactivar && nombreCompleto(porDesactivar)} quedará inactivo. No se borra su historial ni sus registros asociados.
+          {porDesactivar?.cuenta?.roles.includes('CONTADOR') && ' También pierde el rol Contador.'}
         </p>
         <Campo etiqueta="Motivo (opcional)" id="personal-motivo">
           <input id="personal-motivo" className="vl-input" value={motivo} maxLength={500}

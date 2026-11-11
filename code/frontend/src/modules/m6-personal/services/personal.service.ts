@@ -156,7 +156,30 @@ export async function desactivarPersonal(id: number, motivo: string): Promise<Pe
   }
   const actual = buscarDemo(id)
   if (actual.estado === 'INACTIVO') throw new Error('La persona ya está inactiva')
-  const editado: Personal = { ...actual, estado: 'INACTIVO', fechaRetiro: hoyEnClub() }
+  // Igual que la API: el personal inactivo pierde el rol Contador.
+  const cuenta = actual.cuenta && { ...actual.cuenta, roles: actual.cuenta.roles.filter((rol) => rol !== 'CONTADOR') }
+  const editado: Personal = { ...actual, estado: 'INACTIVO', fechaRetiro: hoyEnClub(), cuenta }
+  personalDemo = personalDemo.map((persona) => (persona.id === id ? editado : persona))
+  return copia(editado)
+}
+
+/** HU-6.3: asigna o retira el rol Contador de la cuenta vinculada. */
+export async function cambiarRolContador(id: number, asignar: boolean): Promise<Personal> {
+  if (!usandoDemoLocal()) {
+    return pedir<Personal>(`/m6/personal/${id}/rol-contador${asignar ? '' : '/retirar'}`, { metodo: 'POST', cuerpo: {} })
+  }
+  const actual = buscarDemo(id)
+  if (asignar) {
+    if (actual.estado !== 'ACTIVO') throw new Error('Solo se puede asignar el rol Contador a personal activo')
+    if (!actual.cuenta) throw new Error('La persona no tiene una cuenta de usuario vinculada; vincúlala antes de asignar el rol')
+    if (actual.cuenta.roles.includes('CONTADOR')) throw new Error('La persona ya tiene el rol Contador')
+  } else if (!actual.cuenta?.roles.includes('CONTADOR')) {
+    throw new Error('La persona no tiene el rol Contador')
+  }
+  const roles = asignar
+    ? [...(actual.cuenta?.roles ?? []), 'CONTADOR'].sort()
+    : (actual.cuenta?.roles ?? []).filter((rol) => rol !== 'CONTADOR')
+  const editado: Personal = { ...actual, cuenta: actual.cuenta && { ...actual.cuenta, roles } }
   personalDemo = personalDemo.map((persona) => (persona.id === id ? editado : persona))
   return copia(editado)
 }
