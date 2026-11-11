@@ -1,5 +1,9 @@
-// Datos locales de demostración para el adelanto de M6, aislados de la base compartida.
+// Inventario, ventas y préstamos de M6. Con un usuario real del selector de
+// prueba se usa la API NestJS (/m6/...); con los usuarios «Demo local» se
+// trabaja con datos en memoria, aislados de la base compartida (se reinician
+// al recargar). Las dos rutas devuelven los mismos tipos.
 
+import { pedir, usandoDemoLocal } from '../../../shared/services/cliente-api.ts'
 import type {
   DatosProveedor,
   DatosUniforme,
@@ -28,6 +32,45 @@ export interface MovimientoInventario {
   registradoPor: string
   registradoEn: string
 }
+
+// ---------------------------------------------------------------- API real
+
+/** Referencia tal como la devuelve GET /m6/uniformes (proveedor como texto). */
+interface UniformeApi extends Omit<UniformeInventario, 'proveedor' | 'proveedorId'> {
+  proveedorId: number | null
+  proveedor: string | null
+}
+
+function adaptarUniforme(uniforme: UniformeApi, proveedores: Proveedor[]): UniformeInventario {
+  const proveedor = proveedores.find((item) => item.id === uniforme.proveedorId) ?? {
+    id: 0,
+    razonSocial: uniforme.proveedor ?? 'Sin proveedor',
+    nitDocumento: '',
+    correo: null,
+    telefono: null,
+    activo: true,
+    creadoEn: '',
+  }
+  return { ...uniforme, proveedorId: uniforme.proveedorId ?? 0, proveedor }
+}
+
+async function uniformeDeApi(peticion: Promise<UniformeApi>): Promise<UniformeInventario> {
+  const [uniforme, proveedores] = await Promise.all([peticion, pedir<Proveedor[]>('/m6/proveedores')])
+  return adaptarUniforme(uniforme, proveedores)
+}
+
+/** Cuerpo de POST/PATCH /m6/uniformes: sin campos vacíos que el DTO rechaza. */
+function cuerpoUniforme(datos: DatosUniforme) {
+  return {
+    ...datos,
+    referencia: datos.referencia.trim(),
+    talla: datos.talla.trim(),
+    proveedorId: datos.proveedorId || undefined,
+    fotoUrl: datos.fotoUrl?.trim() || null,
+  }
+}
+
+// ---------------------------------------------------------- Demostración local
 
 const PROVEEDOR_DEMO: Proveedor = {
   id: 1,
@@ -154,6 +197,11 @@ function registrarMovimiento(
 }
 
 export function listarMovimientos(uniformeId?: number): Promise<MovimientoInventario[]> {
+  if (!usandoDemoLocal()) {
+    return pedir<MovimientoInventario[]>(
+      uniformeId === undefined ? '/m6/uniformes/movimientos' : `/m6/uniformes/${uniformeId}/movimientos`,
+    )
+  }
   return Promise.resolve(movimientosDemo
     .filter((movimiento) => uniformeId === undefined || movimiento.uniformeId === uniformeId)
     .map((movimiento) => ({ ...movimiento })))
@@ -187,7 +235,14 @@ function validarUniforme(datos: DatosUniforme) {
 }
 
 /** Referencias ficticias para presentar el inventario sin consultar la base compartida. */
-export function listarInventario(): Promise<UniformeInventario[]> {
+export async function listarInventario(): Promise<UniformeInventario[]> {
+  if (!usandoDemoLocal()) {
+    const [uniformes, proveedores] = await Promise.all([
+      pedir<UniformeApi[]>('/m6/uniformes'),
+      pedir<Proveedor[]>('/m6/proveedores'),
+    ])
+    return uniformes.map((uniforme) => adaptarUniforme(uniforme, proveedores))
+  }
   return Promise.resolve(inventarioDemo.map((uniforme) => ({
     ...uniforme,
     proveedor: { ...uniforme.proveedor },
@@ -195,11 +250,15 @@ export function listarInventario(): Promise<UniformeInventario[]> {
 }
 
 export function listarProveedores(): Promise<Proveedor[]> {
+  if (!usandoDemoLocal()) return pedir<Proveedor[]>('/m6/proveedores')
   return Promise.resolve(proveedoresDemo.map((proveedor) => ({ ...proveedor })))
 }
 
 export async function crearUniforme(datos: DatosUniforme): Promise<UniformeInventario> {
   validarUniforme(datos)
+  if (!usandoDemoLocal()) {
+    return uniformeDeApi(pedir<UniformeApi>('/m6/uniformes', { metodo: 'POST', cuerpo: cuerpoUniforme(datos) }))
+  }
   const referencia = normalizarReferencia(datos.referencia)
   if (inventarioDemo.some((uniforme) => uniforme.referencia === referencia)) {
     throw new Error('Ya existe una referencia con ese código.')
@@ -227,6 +286,9 @@ export async function crearUniforme(datos: DatosUniforme): Promise<UniformeInven
 
 export async function editarUniforme(id: number, datos: DatosUniforme): Promise<UniformeInventario> {
   validarUniforme(datos)
+  if (!usandoDemoLocal()) {
+    return uniformeDeApi(pedir<UniformeApi>(`/m6/uniformes/${id}`, { metodo: 'PATCH', cuerpo: cuerpoUniforme(datos) }))
+  }
   const uniforme = inventarioDemo.find((item) => item.id === id)
   if (!uniforme) throw new Error('No se encontró la referencia.')
   const proveedor = proveedoresDemo.find((item) => item.id === datos.proveedorId)
@@ -262,7 +324,18 @@ export async function editarUniforme(id: number, datos: DatosUniforme): Promise<
   return { ...uniforme, proveedor: { ...proveedor } }
 }
 
-export async function cambiarEstadoUniforme(id: number, activo: boolean): Promise<UniformeInventario> {
+export async function cambiarEstadoUniforme(
+  id: number,
+  activo: boolean,
+  motivo = '',
+): Promise<UniformeInventario> {
+  if (!activo && !motivo.trim()) throw new Error('Escribe el motivo de la desactivación.')
+  if (!usandoDemoLocal()) {
+    return uniformeDeApi(pedir<UniformeApi>(
+      `/m6/uniformes/${id}/${activo ? 'reactivar' : 'desactivar'}`,
+      { metodo: 'POST', cuerpo: activo ? {} : { motivo: motivo.trim() } },
+    ))
+  }
   const uniforme = inventarioDemo.find((item) => item.id === id)
   if (!uniforme) throw new Error('No se encontró la referencia.')
   uniforme.activo = activo
@@ -272,6 +345,17 @@ export async function cambiarEstadoUniforme(id: number, activo: boolean): Promis
 export async function crearProveedor(datos: DatosProveedor): Promise<Proveedor> {
   if (!datos.razonSocial.trim()) throw new Error('El nombre del proveedor es obligatorio.')
   if (!datos.nitDocumento.trim()) throw new Error('El NIT o documento es obligatorio.')
+  if (!usandoDemoLocal()) {
+    return pedir<Proveedor>('/m6/proveedores', {
+      metodo: 'POST',
+      cuerpo: {
+        razonSocial: datos.razonSocial.trim(),
+        nitDocumento: datos.nitDocumento.trim(),
+        correo: datos.correo?.trim() || undefined,
+        telefono: datos.telefono?.trim() || undefined,
+      },
+    })
+  }
   if (proveedoresDemo.some((proveedor) => proveedor.nitDocumento === datos.nitDocumento.trim())) {
     throw new Error('Ya existe un proveedor con ese NIT o documento.')
   }
@@ -289,6 +373,9 @@ export async function crearProveedor(datos: DatosProveedor): Promise<Proveedor> 
 }
 
 export async function cambiarEstadoProveedor(id: number, activo: boolean): Promise<Proveedor> {
+  if (!usandoDemoLocal()) {
+    return pedir<Proveedor>(`/m6/proveedores/${id}/estado`, { metodo: 'PATCH', cuerpo: { activo } })
+  }
   const proveedor = proveedoresDemo.find((item) => item.id === id)
   if (!proveedor) throw new Error('No se encontró el proveedor.')
   proveedor.activo = activo
@@ -302,6 +389,12 @@ export async function ajustarStock(
 ): Promise<UniformeInventario> {
   if (!Number.isInteger(cantidad) || cantidad === 0) {
     throw new Error('El ajuste debe ser un número entero distinto de cero.')
+  }
+  if (!usandoDemoLocal()) {
+    return uniformeDeApi(pedir<UniformeApi>(`/m6/uniformes/${id}/stock`, {
+      metodo: 'PATCH',
+      cuerpo: { cantidad, observacion: observacion.trim() || undefined },
+    }))
   }
   const uniforme = inventarioDemo.find((item) => item.id === id)
   if (!uniforme) throw new Error('No se encontró la referencia.')
@@ -544,10 +637,12 @@ let siguienteVentaId = 1
 let ventasDemo: VentaRegistrada[] = []
 
 export function listarVentas(): Promise<VentaRegistrada[]> {
+  if (!usandoDemoLocal()) return pedir<VentaRegistrada[]>('/m6/ventas')
   return Promise.resolve(ventasDemo.map((venta) => ({ ...venta, items: venta.items.map((item) => ({ ...item })) })))
 }
 
 export async function listarCompradoresVenta(): Promise<CompradorVenta[]> {
+  if (!usandoDemoLocal()) return pedir<CompradorVenta[]>('/m6/ventas/compradores')
   const patinadores = await buscarPatinadores()
   return patinadores.map((patinador) => ({
     patinadorId: patinador.id,
@@ -565,6 +660,18 @@ export function consolidarItemsVenta(items: DatosVenta['items']): DatosVenta['it
 }
 
 export async function registrarVenta(datos: DatosVenta): Promise<VentaRegistrada> {
+  if (!usandoDemoLocal()) {
+    // El servidor valida existencias, precios y medio de pago en una sola transacción.
+    return pedir<VentaRegistrada>('/m6/ventas', {
+      metodo: 'POST',
+      cuerpo: {
+        ...datos,
+        acudienteId: datos.compradorTipo === 'ACUDIENTE' ? datos.acudienteId : undefined,
+        referenciaPago: datos.referenciaPago?.trim() || undefined,
+        items: consolidarItemsVenta(datos.items),
+      },
+    })
+  }
   const hoy = hoyEnClub()
   const compradores = await listarCompradoresVenta()
   const comprador = compradores.find((item) => item.patinadorId === datos.patinadorId)

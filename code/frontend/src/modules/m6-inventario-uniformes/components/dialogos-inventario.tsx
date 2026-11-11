@@ -681,6 +681,7 @@ export function DialogoEstadoUniforme({
   alGuardar: (uniforme: UniformeInventario) => void
 }) {
   const { enviando, error, enviar } = useEnvio()
+  const [motivo, setMotivo] = useState('')
   const estadoActual = <Insignia entidad="uniforme" estado={estadoInsigniaUniforme(uniforme)} />
 
   return (
@@ -693,7 +694,7 @@ export function DialogoEstadoUniforme({
       }
       textoConfirmar={activar ? 'Reactivar referencia' : 'Desactivar referencia'}
       ocupado={enviando}
-      alConfirmar={() => void enviar(() => cambiarEstadoUniforme(uniforme.id, activar), alGuardar)}
+      alConfirmar={() => void enviar(() => cambiarEstadoUniforme(uniforme.id, activar, motivo), alGuardar)}
       alCancelar={alCerrar}
     >
       <ListaDatos
@@ -723,6 +724,12 @@ export function DialogoEstadoUniforme({
           )}
         </ul>
       </div>
+      {!activar && (
+        <Campo etiqueta="Motivo de la desactivación" id="uniforme-motivo" obligatorio>
+          <input id="uniforme-motivo" className="vl-input" value={motivo} maxLength={500}
+            onChange={(e) => setMotivo(e.target.value)} />
+        </Campo>
+      )}
       {error && (
         <Alerta tono="error" titulo="No se pudo cambiar el estado de la referencia">{error}</Alerta>
       )}
