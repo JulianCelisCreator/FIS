@@ -10,6 +10,7 @@ export type NombreIcono =
   | 'mas'
   | 'menu'
   | 'cerrar'
+  | 'salir'
 
 const TRAZOS: Record<NombreIcono, ReactNode> = {
   info: (
@@ -51,6 +52,12 @@ const TRAZOS: Record<NombreIcono, ReactNode> = {
   ),
   menu: <path d="M4 7h16M4 12h16M4 17h16" />,
   cerrar: <path d="m6 6 12 12M18 6 6 18" />,
+  salir: (
+    <>
+      <path d="M10 4.5H6.5a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1H10" />
+      <path d="M15 8.5 18.5 12 15 15.5M18.5 12H9.5" />
+    </>
+  ),
 }
 
 /** Ícono decorativo: el significado siempre va también en texto. */

@@ -516,7 +516,9 @@ function App() {
 
   return (
     <>
-      <a className="skip-link" href="#contenido">
+      
+
+      <a className="skip-link" href="/PantallaAcceso" >
         Saltar al contenido
       </a>
 
