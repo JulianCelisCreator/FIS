@@ -1,0 +1,128 @@
+/* HU-M1-02 · Ingreso. Banda de pista (rink) con líneas de carril de 1 px y panel de
+   tiza con el formulario. Solo tokens de src/styles/tokens.css y app.css. */
+
+.m1-acceso {
+  display: grid;
+  grid-template-columns: minmax(18rem, 5fr) minmax(0, 7fr);
+  min-height: 100vh;
+  background: var(--chalk);
+}
+
+.m1-acceso__pista {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2rem;
+  height: 100vh;
+  padding: 2rem clamp(1.5rem, 3vw, 3rem);
+  color: var(--white);
+  background: var(--rink);
+  border-right: 1px solid var(--rink-deep);
+}
+
+/* Carriles: líneas finas horizontales entre la marca y el lema, como marcas de
+   medición sobre la pista. No cruzan el texto. */
+.m1-acceso__pista::before {
+  content: '';
+  position: absolute;
+  inset: 6.5rem 0 13rem;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--line-dark) 0 1px,
+    transparent 1px 4.5rem
+  );
+  pointer-events: none;
+}
+
+.m1-acceso__pista > * {
+  position: relative;
+}
+
+.m1-acceso__lema {
+  max-width: 18ch;
+  font-family: var(--font-display);
+  font-size: var(--app-fs-heading-compact);
+  font-weight: 800;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.m1-acceso__panel {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  padding: clamp(2rem, 5vw, 4.5rem) clamp(1.25rem, 4vw, 3rem);
+}
+
+.m1-acceso__contenido {
+  width: 100%;
+  min-width: 0;
+  max-width: 30rem;
+}
+
+.m1-acceso__panel {
+  min-width: 0;
+}
+
+.m1-acceso__contenido > * + * {
+  margin-top: 1.75rem;
+}
+
+.m1-acceso__encabezado h1 {
+  font-size: var(--app-fs-heading);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+.m1-acceso__encabezado p {
+  margin-top: 0.6rem;
+  max-width: 60ch;
+}
+
+.m1-acceso .vl-stack > .m1-acceso__ver {
+  margin-top: 0.25rem;
+}
+
+.m1-acceso__accion {
+  width: 100%;
+}
+
+.m1-acceso .vl-stack > .m1-acceso__accion {
+  margin-top: 1.5rem;
+}
+
+/* Por debajo de 980 px la pista pasa a ser una franja superior, como el riel de la aplicación. */
+@media (max-width: 979px) {
+  .m1-acceso {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+  }
+
+  .m1-acceso__pista::before {
+    display: none;
+  }
+
+  .m1-acceso__pista {
+    position: static;
+    height: auto;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--rink-deep);
+  }
+
+  .m1-acceso__lema {
+    max-width: 28ch;
+    font-size: var(--app-fs-title);
+  }
+
+  .m1-acceso__panel {
+    align-items: start;
+  }
+
+  .m1-acceso__encabezado h1 {
+    font-size: var(--app-fs-heading-compact);
+  }
+}

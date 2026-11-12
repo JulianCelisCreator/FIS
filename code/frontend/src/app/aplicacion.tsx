@@ -2,6 +2,7 @@ import { Alerta } from '../shared/ui/componentes.tsx'
 import { useSesion } from '../shared/sesion/use-sesion.ts'
 import { useRuta } from '../shared/utils/use-ruta.ts'
 import { NuevaCuenta } from '../modules/m1-usuarios-acceso/components/nueva-cuenta.tsx'
+import { PantallaAcceso } from '../modules/m1-usuarios-acceso/components/pantalla-acceso.tsx'
 import { AsignarCambiarPlan } from '../modules/m5-planes-tarifas-pagos/components/asignar-cambiar-plan.tsx'
 import { PlanesTarifas } from '../modules/m5-planes-tarifas-pagos/components/planes-tarifas.tsx'
 import {
@@ -28,6 +29,21 @@ export function Aplicacion() {
   const { sesion, cargando, error, tienePermiso, tieneRol } = useSesion()
   const { pagina, parametros } = useRuta()
 
+  if (cargando) {
+    return (
+      <main className="vl-main">
+        <div className="app-page">
+          <p className="vl-text-body-sm" role="status">
+            Cargando…
+          </p>
+        </div>
+      </main>
+    )
+  }
+
+  // Sin sesión: ingreso de M1 (HU-M1-02), sin el marco interno ni la navegación por rol.
+  if (!sesion) return <PantallaAcceso />
+
   const usuarios = tieneRol('ADMINISTRADOR') ? PANTALLAS_ADMINISTRADOR : []
   const pagos = PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso))
   const permitidas = [...usuarios, ...pagos]
@@ -38,18 +54,13 @@ export function Aplicacion() {
   ]
 
   let contenido
-  if (cargando) {
-    contenido = <p className="vl-text-body-sm" role="status">Cargando…</p>
-  } else if (!sesion) {
+  if (permitidas.length === 0) {
     contenido = (
       <div className="app-page">
-        <h1>Escuela de patinaje</h1>
-        {error && <Alerta tono="error" titulo="No se pudo iniciar la sesión">{error}</Alerta>}
-        <Alerta tono="info" titulo="Elige un usuario de prueba">
-          <p>
-            Mientras el módulo de Usuarios y Acceso (M1) implementa el inicio de sesión, elige con qué usuario probar en la barra
-            superior.
-          </p>
+        <h1>Hola, {sesion.nombre}</h1>
+        {error && <Alerta tono="error" titulo="Algo salió mal">{error}</Alerta>}
+        <Alerta tono="info" titulo="Aún no hay pantallas para tu rol">
+          <p>Las pantallas de tu rol se irán habilitando a medida que la escuela active los módulos.</p>
         </Alerta>
       </div>
     )
@@ -58,11 +69,7 @@ export function Aplicacion() {
       <div className="app-page">
         <h1>Sin acceso</h1>
         <Alerta tono="warning" titulo="No tienes acceso a esta pantalla">
-          <p>
-            {permitidas.length > 0
-              ? 'Usa el menú para ir a las pantallas de tu rol.'
-              : 'Tu rol aún no tiene pantallas disponibles.'}
-          </p>
+          <p>Usa el menú para ir a las pantallas de tu rol.</p>
         </Alerta>
       </div>
     )
@@ -90,7 +97,7 @@ export function Aplicacion() {
   }
 
   return (
-    <MarcoAplicacion navegacion={sesion ? navegacion : []} paginaActual={actual}>
+    <MarcoAplicacion navegacion={navegacion} paginaActual={actual}>
       {contenido}
     </MarcoAplicacion>
   )

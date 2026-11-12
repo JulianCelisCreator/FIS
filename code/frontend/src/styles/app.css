@@ -279,20 +279,6 @@ p {
   text-transform: uppercase;
 }
 
-.vl-user label {
-  color: var(--muted-on-dark);
-  font-family: var(--font-mono);
-  font-size: var(--app-fs-tag);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.vl-user .vl-select {
-  color: var(--white);
-  background: var(--rink-deep);
-  border-color: var(--line-strong);
-}
-
 .vl-main {
   min-width: 0;
   padding-inline: clamp(1.25rem, 3vw, 2.5rem);

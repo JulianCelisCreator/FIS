@@ -1,5 +1,5 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { AutenticacionTemporalGuard } from '../../../common/auth/autenticacion-temporal.guard.js';
+import { AutenticacionGuard } from '../../../common/auth/autenticacion.guard.js';
 import { RequierePermiso, UsuarioActual } from '../../../common/auth/decoradores.js';
 import { PermisosGuard } from '../../../common/auth/permisos.guard.js';
 import type { UsuarioAutenticado } from '../../../common/auth/usuario-autenticado.js';
@@ -13,7 +13,7 @@ import { PagosService } from '../services/pagos.service.js';
 
 /** Registro manual de pagos: Administrador y Contador (M6-03). */
 @Controller('m5/pagos')
-@UseGuards(AutenticacionTemporalGuard, PermisosGuard)
+@UseGuards(AutenticacionGuard, PermisosGuard)
 @RequierePermiso(PermisoM5.PAGO_REGISTRAR)
 export class PagosController {
   constructor(private readonly pagosService: PagosService) {}

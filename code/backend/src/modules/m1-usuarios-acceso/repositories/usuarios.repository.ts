@@ -20,6 +20,13 @@ export interface UsuarioCreado {
   estado: 'POR_REGISTRAR' | 'ACTIVA' | 'DESACTIVADA';
 }
 
+export interface UsuarioParaIngreso {
+  id: number;
+  nombre: string;
+  estado: 'POR_REGISTRAR' | 'ACTIVA' | 'DESACTIVADA';
+  contrasenaHash: string;
+}
+
 /** Código de PostgreSQL para una violación de índice único. */
 const VIOLACION_UNICA = '23505';
 
@@ -60,6 +67,36 @@ export class UsuariosRepository {
       if ((error as { code?: string }).code === VIOLACION_UNICA) throw new CorreoDuplicadoError();
       throw error;
     }
+  }
+
+  /** Datos para verificar el ingreso (HU-M1-02). Incluye el hash: nunca se devuelve al cliente. */
+  async buscarParaIngreso(consultor: Consultor, correo: string): Promise<UsuarioParaIngreso | null> {
+    const { rows } = await consultor.query<UsuarioParaIngreso>(
+      `SELECT id, nombres || ' ' || apellidos AS nombre, estado, contrasena_hash AS "contrasenaHash"
+       FROM usuario
+       WHERE lower(correo) = lower($1)`,
+      [correo],
+    );
+    return rows[0] ?? null;
+  }
+
+  /** Roles de la cuenta y los permisos de esos roles (CA-04: solo lo autorizado para su rol). */
+  async rolesYPermisos(consultor: Consultor, usuarioId: number): Promise<{ roles: Rol[]; permisos: string[] }> {
+    const { rows } = await consultor.query<{ roles: Rol[]; permisos: string[] }>(
+      `SELECT COALESCE(array_agg(DISTINCT r.codigo) FILTER (WHERE r.id IS NOT NULL), '{}') AS roles,
+              COALESCE(array_agg(DISTINCT pe.codigo) FILTER (WHERE pe.id IS NOT NULL), '{}') AS permisos
+       FROM usuario_rol ur
+       JOIN rol r               ON r.id = ur.rol_id
+       LEFT JOIN rol_permiso rp ON rp.rol_id = r.id
+       LEFT JOIN permiso pe     ON pe.id = rp.permiso_id
+       WHERE ur.usuario_id = $1`,
+      [usuarioId],
+    );
+    return rows[0] ?? { roles: [], permisos: [] };
+  }
+
+  async registrarIngreso(consultor: Consultor, usuarioId: number): Promise<void> {
+    await consultor.query(`UPDATE usuario SET ultimo_ingreso_en = now() WHERE id = $1`, [usuarioId]);
   }
 
   async asignarRol(consultor: Consultor, usuarioId: number, rol: Rol, asignadoPor: number): Promise<void> {

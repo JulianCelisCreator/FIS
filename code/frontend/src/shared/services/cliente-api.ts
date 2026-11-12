@@ -1,8 +1,9 @@
 // Cliente HTTP de la aplicación. Por ahora llama directo a la API NestJS por
 // /api (proxy de Vite en desarrollo); cuando exista el BFF, solo cambia aquí.
+// La sesión viaja en una cookie httpOnly del mismo origen: el navegador la
+// envía solo y JavaScript no la puede leer.
 
 const BASE = '/api'
-const CLAVE_USUARIO = 'escuela.usuarioPruebaId'
 
 /** Error de la API con el mensaje en español que devuelve el backend. */
 export class ErrorApi extends Error {
@@ -12,28 +13,6 @@ export class ErrorApi extends Error {
     super(mensaje)
     this.name = 'ErrorApi'
     this.estado = estado
-  }
-}
-
-/**
- * TEMPORAL: usuario con el que se prueba, enviado en la cabecera x-usuario-id,
- * mientras M1 implementa el inicio de sesión.
- */
-export function usuarioPruebaGuardado(): number | null {
-  try {
-    const valor = Number(localStorage.getItem(CLAVE_USUARIO))
-    return Number.isInteger(valor) && valor > 0 ? valor : null
-  } catch {
-    return null
-  }
-}
-
-export function guardarUsuarioPrueba(id: number | null): void {
-  try {
-    if (id === null) localStorage.removeItem(CLAVE_USUARIO)
-    else localStorage.setItem(CLAVE_USUARIO, String(id))
-  } catch {
-    // Sin almacenamiento disponible: la elección dura lo que dure la página.
   }
 }
 
@@ -58,8 +37,6 @@ export async function pedir<T>(
   const url = `${BASE}${ruta}${parametros.size ? `?${parametros}` : ''}`
 
   const cabeceras: Record<string, string> = { Accept: 'application/json' }
-  const usuarioId = usuarioPruebaGuardado()
-  if (usuarioId) cabeceras['x-usuario-id'] = String(usuarioId)
   if (opciones.cuerpo !== undefined) cabeceras['Content-Type'] = 'application/json'
 
   let respuesta: Response
@@ -67,6 +44,7 @@ export async function pedir<T>(
     respuesta = await fetch(url, {
       method: opciones.metodo ?? 'GET',
       headers: cabeceras,
+      credentials: 'same-origin',
       body: opciones.cuerpo === undefined ? undefined : JSON.stringify(opciones.cuerpo),
     })
   } catch {
