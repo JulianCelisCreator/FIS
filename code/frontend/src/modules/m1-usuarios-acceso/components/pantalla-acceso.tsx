@@ -1,3 +1,5 @@
+import { useSesion } from '../../../shared/sesion/use-sesion.ts'
+import { Alerta } from '../../../shared/ui/componentes.tsx'
 import { MarcaVelora } from '../../../shared/ui/marca-velora.tsx'
 import { FormularioIngreso } from './formulario-ingreso.tsx'
 import './pantalla-acceso.css'
@@ -8,6 +10,9 @@ import './pantalla-acceso.css'
  * Administrador (HU-M1-01).
  */
 export function PantallaAcceso() {
+  const sesion = useSesion() as ReturnType<typeof useSesion> & { sesionRecienCerrada?: boolean }
+  const { sesionRecienCerrada = false } = sesion
+
   return (
     <div className="m1-acceso">
       <aside className="m1-acceso__pista">
@@ -29,6 +34,11 @@ export function PantallaAcceso() {
             <h1>Ingresa a Velora</h1>
             <p className="vl-text-body-sm">Usa el correo y la contraseña de tu cuenta.</p>
           </header>
+          {sesionRecienCerrada && (
+            <Alerta tono="success" titulo="Sesión cerrada">
+              Saliste de Velora. Ingresa de nuevo cuando quieras.
+            </Alerta>
+          )}
           <FormularioIngreso />
         </div>
       </main>
