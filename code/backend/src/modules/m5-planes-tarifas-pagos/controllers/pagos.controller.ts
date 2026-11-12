@@ -8,6 +8,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 import { AutenticacionTemporalGuard } from '../../../common/auth/autenticacion-temporal.guard.js';
 import { RequierePermiso, UsuarioActual } from '../../../common/auth/decoradores.js';
 import { PermisosGuard } from '../../../common/auth/permisos.guard.js';
@@ -21,6 +22,9 @@ import { PermisoM5 } from '../enums/permiso-m5.enum.js';
 import { PagosService } from '../services/pagos.service.js';
 
 class AnularPagoDto {
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(500)
   motivo!: string;
 }
 
