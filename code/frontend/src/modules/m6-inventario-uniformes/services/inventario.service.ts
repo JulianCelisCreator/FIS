@@ -7,12 +7,7 @@ import type {
   UniformeInventario,
 } from '../types/inventario.types.ts'
 import { hoyEnClub } from '../../../shared/utils/formato.ts'
-import {
-  buscarPatinadores,
-  pagarCobro,
-  registrarCobroLocal,
-  saldoCobroLocal,
-} from '../../m5-planes-tarifas-pagos/services/m5.service.ts'
+import { buscarPatinadores } from '../../m5-planes-tarifas-pagos/services/m5.service.ts'
 import { MEDIOS_PAGO } from '../../m5-planes-tarifas-pagos/types/m5.types.ts'
 import { erroresTransaccion } from '../../m5-planes-tarifas-pagos/utils/validar-transaccion.ts'
 import {
@@ -91,6 +86,48 @@ let siguienteProveedorId = 2
 let siguienteMovimientoId = 1
 let siguientePrestamoId = 501
 let movimientosDemo: MovimientoInventario[] = []
+let siguienteCobroDemoId = 505
+const saldosCobroDemo = new Map<number, number>([[504, 10000]])
+
+function registrarCobroLocal(datos: {
+  patinadorId: number
+  concepto: string
+  descripcion: string
+  valor: number
+  fechaLimite: string
+}): { id: number } {
+  if (!Number.isInteger(datos.patinadorId) || datos.patinadorId < 1) {
+    throw new Error('Selecciona un patinador válido para asociar el cobro.')
+  }
+  if (!Number.isSafeInteger(datos.valor) || datos.valor <= 0) {
+    throw new Error('El cobro debe ser un valor entero mayor que cero.')
+  }
+  const fechaLimite = new Date(`${datos.fechaLimite}T00:00:00Z`)
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(datos.fechaLimite) ||
+    Number.isNaN(fechaLimite.getTime()) ||
+    fechaLimite.toISOString().slice(0, 10) !== datos.fechaLimite
+  ) {
+    throw new Error('Indica una fecha límite válida.')
+  }
+  const id = siguienteCobroDemoId++
+  saldosCobroDemo.set(id, datos.valor)
+  return { id }
+}
+
+function saldoCobroLocal(cobroId: number): number | null {
+  return saldosCobroDemo.get(cobroId) ?? null
+}
+
+function pagarCobroLocal(cobroId: number, monto: number): { comprobante: { numero: string } } {
+  const saldo = saldoCobroLocal(cobroId)
+  if (saldo === null || saldo <= 0) throw new Error('No se encontró un cobro pendiente.')
+  if (!Number.isSafeInteger(monto) || monto <= 0 || monto > saldo) {
+    throw new Error('El monto no es válido para el saldo pendiente.')
+  }
+  saldosCobroDemo.set(cobroId, saldo - monto)
+  return { comprobante: { numero: `DEMO-${String(cobroId).padStart(6, '0')}` } }
+}
 
 function recalcularStock(uniforme: UniformeInventario): void {
   uniforme.estadoStock = uniforme.cantidadDisponible <= uniforme.cantidadMinima
@@ -583,13 +620,7 @@ export async function registrarVenta(datos: DatosVenta): Promise<VentaRegistrada
     valor: total,
     fechaLimite: hoy,
   })
-  const pago = await pagarCobro({
-    cobroId: cobro.id,
-    monto: total,
-    fechaPago: hoy,
-    medioPago: datos.medioPago,
-    referencia: datos.referenciaPago?.trim() || undefined,
-  })
+  const pago = pagarCobroLocal(cobro.id, total)
 
   const ventaId = siguienteVentaId++
   for (const linea of lineas) {
