@@ -216,6 +216,65 @@ export class PagosService {
     });
   }
 
+
+  /**
+   * Anula un pago registrado, conserva su trazabilidad y recalcula
+   * los cobros y el estado de cartera (RF-M5-11 y RF-M5-12).
+   */
+  async anularPago(
+    usuario: UsuarioAutenticado,
+    pagoId: number,
+    motivo: string,
+  ) {
+    const motivoLimpio = motivo?.trim();
+
+    if (!motivoLimpio) {
+      throw new BadRequestException('El motivo de anulación es obligatorio');
+    }
+
+    if (motivoLimpio.length > 500) {
+      throw new BadRequestException('El motivo no puede superar los 500 caracteres');
+    }
+
+    return this.baseDatos.transaccion(async (tx) => {
+      const pago = await this.pagos.bloquearParaAnular(tx, pagoId);
+
+      if (!pago) {
+        throw new NotFoundException('El pago no existe');
+      }
+
+      if (pago.estado === 'ANULADO') {
+        throw new ConflictException('El pago ya se encuentra anulado');
+      }
+
+      // Bloquea al patinador para evitar operaciones simultáneas sobre su cartera.
+      await this.obtenerPatinadorBloqueado(tx, pago.patinadorId);
+
+      const cobrosAfectados = await this.pagos.cobrosDelPago(tx, pagoId);
+
+      // Conserva el pago y registra quién lo anuló, cuándo y por qué.
+      await this.pagos.anular(tx, pagoId, usuario.id, motivoLimpio);
+
+      // El comprobante original también queda anulado, sin eliminarse.
+      await this.pagos.anularComprobante(tx, pagoId);
+
+      // Recalcula cada cobro considerando únicamente pagos registrados.
+      for (const cobro of cobrosAfectados) {
+        await this.cobros.bloquearParaActualizar(tx, cobro.id);
+        await this.cobros.recalcularEstado(tx, cobro.id);
+      }
+
+      return {
+        pagoId,
+        estado: 'ANULADO',
+        motivoAnulacion: motivoLimpio,
+        cobrosAfectados: cobrosAfectados.map((cobro) => cobro.id),
+        estadoCartera: await this.pagos.estadoCartera(tx, pago.patinadorId),
+      };
+    });
+  }
+
+
   private async obtenerPatinadorBloqueado(tx: Consultor, patinadorId: number): Promise<void> {
     const patinador = await this.patinadores.obtenerContexto(tx, patinadorId);
     if (!patinador) {

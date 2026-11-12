@@ -1,4 +1,13 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+
+import {
+  Body,
+  Controller,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { AutenticacionTemporalGuard } from '../../../common/auth/autenticacion-temporal.guard.js';
 import { RequierePermiso, UsuarioActual } from '../../../common/auth/decoradores.js';
 import { PermisosGuard } from '../../../common/auth/permisos.guard.js';
@@ -11,15 +20,19 @@ import {
 import { PermisoM5 } from '../enums/permiso-m5.enum.js';
 import { PagosService } from '../services/pagos.service.js';
 
-/** Registro manual de pagos: Administrador y Contador (M6-03). */
+class AnularPagoDto {
+  motivo!: string;
+}
+
+/** Registro y anulación de pagos. */
 @Controller('m5/pagos')
 @UseGuards(AutenticacionTemporalGuard, PermisosGuard)
-@RequierePermiso(PermisoM5.PAGO_REGISTRAR)
 export class PagosController {
   constructor(private readonly pagosService: PagosService) {}
 
   /** RF-M5-09: pago total o parcial de un cobro. */
   @Post('cobro')
+  @RequierePermiso(PermisoM5.PAGO_REGISTRAR)
   registrarPagoCobro(
     @UsuarioActual() usuario: UsuarioAutenticado,
     @Body() dto: RegistrarPagoCobroDto,
@@ -29,6 +42,7 @@ export class PagosController {
 
   /** RF-M5-10: pago por sesión (plan de día único). */
   @Post('sesion')
+  @RequierePermiso(PermisoM5.PAGO_REGISTRAR)
   registrarPagoSesion(
     @UsuarioActual() usuario: UsuarioAutenticado,
     @Body() dto: RegistrarPagoSesionDto,
@@ -36,12 +50,24 @@ export class PagosController {
     return this.pagosService.registrarPagoSesion(usuario, dto);
   }
 
-  /** Matrícula y gastos administrativos, previos a activar el primer plan. */
+  /** Matrícula y gastos administrativos. */
   @Post('matricula')
+  @RequierePermiso(PermisoM5.PAGO_REGISTRAR)
   registrarMatricula(
     @UsuarioActual() usuario: UsuarioAutenticado,
     @Body() dto: RegistrarMatriculaDto,
   ) {
     return this.pagosService.registrarMatricula(usuario, dto);
+  }
+
+  /** RF-M5-11: anulación de pago exclusiva para Administrador. */
+  @Patch(':id/anular')
+  @RequierePermiso(PermisoM5.PAGO_ANULAR)
+  anularPago(
+    @UsuarioActual() usuario: UsuarioAutenticado,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: AnularPagoDto,
+  ) {
+    return this.pagosService.anularPago(usuario, id, dto.motivo);
   }
 }

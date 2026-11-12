@@ -95,6 +95,40 @@ export class CobrosRepository {
     await consultor.query(`UPDATE cobro SET estado = 'PAGADO' WHERE id = $1`, [cobroId]);
   }
 
+
+  /** Bloquea un cobro para recalcular su estado de forma segura. */
+  async bloquearParaActualizar(consultor: Consultor, cobroId: number): Promise<void> {
+    await consultor.query(
+      `SELECT id FROM cobro WHERE id = $1 FOR UPDATE`,
+      [cobroId],
+    );
+  }
+
+  /**
+   * Recalcula el estado del cobro según los pagos que continúan registrados.
+   * Si conserva saldo, vuelve a PENDIENTE.
+   */
+  async recalcularEstado(consultor: Consultor, cobroId: number): Promise<void> {
+    await consultor.query(
+      `UPDATE cobro
+       SET estado = CASE
+         WHEN COALESCE((
+           SELECT SUM(pc.monto_aplicado)
+           FROM pago_cobro pc
+           JOIN pago p ON p.id = pc.pago_id
+           WHERE pc.cobro_id = cobro.id
+             AND p.estado = 'REGISTRADO'
+         ), 0) >= valor THEN 'PAGADO'
+         ELSE 'PENDIENTE'
+       END,
+       actualizado_en = now()
+       WHERE id = $1
+         AND estado <> 'ANULADO'`,
+      [cobroId],
+    );
+  }
+
+
   /** Cobros con saldo, del vencimiento más antiguo al más reciente. */
   async pendientes(consultor: Consultor, patinadorId: number): Promise<CobroPendiente[]> {
     const { rows } = await consultor.query<CobroPendiente>(
