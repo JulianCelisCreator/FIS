@@ -6,6 +6,7 @@ DDL de la base de datos de la plataforma (PostgreSQL 17), común a todos los mó
 | --- | --- |
 | `schema.sql` | Todo el DDL: tablas, restricciones, índices, vistas, comentarios y catálogos semilla. |
 | `compose.yaml` | Contenedor de PostgreSQL que carga `schema.sql` al crearse. |
+| `datos-demo.sql` | Datos de demostración de M5 con los nombres de los wireframes (opcional, se cargan a mano). |
 
 ## Levantar la base
 
@@ -22,13 +23,19 @@ docker compose -f db/compose.yaml up -d --wait
 | Usuario | `patinaje` | `DB_USER` |
 | Contraseña | `patinaje_dev` | `DB_PASSWORD` |
 
-Las credenciales son solo para desarrollo local. Para cambiarlas, defínelas en `db/.env` (git ya lo ignora) o directamente en el comando, por ejemplo `DB_PORT=55432 docker compose -f db/compose.yaml up -d`.
+Las credenciales son solo para desarrollo local. Para cambiarlas, defínelas en `code/backend/.env` (copia de `.env.example`; git la ignora) y levanta el contenedor con `docker compose --env-file .env -f db/compose.yaml up -d`: así la API y el contenedor usan los mismos valores.
 
 ```bash
 psql -h localhost -U patinaje -d patinaje   # conectarse
 \dt+                                        # tablas con su comentario [Mx]
 docker compose -f db/compose.yaml down      # detener (conserva los datos)
 docker compose -f db/compose.yaml down -v   # borrar los datos y recrear desde cero
+```
+
+Para cargar los datos de demostración sobre una base recién creada:
+
+```bash
+docker exec -i patinaje-db psql -U patinaje -d patinaje < db/datos-demo.sql
 ```
 
 PostgreSQL ejecuta `schema.sql` **solo cuando el volumen está vacío**. Si el archivo cambia, hay que recrear la base con `down -v` y volver a levantarla.

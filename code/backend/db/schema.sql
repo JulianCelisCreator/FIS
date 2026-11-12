@@ -920,21 +920,24 @@ COMMENT ON VIEW v_tarifa_vigente IS '[M5] Tarifa vigente de cada plan a la fecha
 CREATE VIEW v_saldo_cobro AS
 SELECT c.id AS cobro_id, c.patinador_id, c.concepto, c.periodo, c.valor, c.fecha_limite, c.estado,
        COALESCE(sum(pc.monto_aplicado) FILTER (WHERE p.estado = 'REGISTRADO'), 0) AS pagado,
-       c.valor - COALESCE(sum(pc.monto_aplicado) FILTER (WHERE p.estado = 'REGISTRADO'), 0) AS saldo
+       c.valor - COALESCE(sum(pc.monto_aplicado) FILTER (WHERE p.estado = 'REGISTRADO'), 0) AS saldo,
+       -- Primer día en mora: fecha límite + días de gracia + 1 (límite día 5 y 4 de gracia → día 10).
+       c.fecha_limite + 1 + COALESCE(
+         (SELECT valor::int FROM parametro_sistema WHERE clave = 'dias_gracia_mora'), 0) AS vencido_desde
 FROM cobro c
 LEFT JOIN pago_cobro pc ON pc.cobro_id = c.id
 LEFT JOIN pago p        ON p.id = pc.pago_id
 GROUP BY c.id;
-COMMENT ON VIEW v_saldo_cobro IS '[M5] Pagado y saldo de cada cobro (M5-09, M5-13). Los pagos anulados no suman (M5-11).';
+COMMENT ON VIEW v_saldo_cobro IS '[M5] Pagado, saldo y fecha desde la que el cobro queda en mora (M5-09, M5-12, M5-13). Los pagos anulados no suman (M5-11).';
 
 -- [M5] Estado de cartera por patinador (M5-12). Vencido prevalece sobre Pendiente.
 CREATE VIEW v_estado_cartera AS
 SELECT pt.id AS patinador_id,
        COALESCE(sum(s.saldo), 0)                                       AS saldo_pendiente,
-       count(*) FILTER (WHERE s.fecha_limite < current_date)          AS cobros_vencidos,
+       count(*) FILTER (WHERE s.vencido_desde <= current_date)        AS cobros_vencidos,
        min(s.fecha_limite)                                             AS vencimiento_mas_antiguo,
        CASE
-         WHEN count(*) FILTER (WHERE s.fecha_limite < current_date) > 0 THEN 'VENCIDO'
+         WHEN count(*) FILTER (WHERE s.vencido_desde <= current_date) > 0 THEN 'VENCIDO'
          WHEN count(s.cobro_id) > 0                                      THEN 'PENDIENTE'
          ELSE 'AL_DIA'
        END                                                             AS estado
@@ -1052,6 +1055,7 @@ INSERT INTO rol (codigo, nombre, descripcion) VALUES
 INSERT INTO parametro_sistema (clave, valor, descripcion) VALUES
   ('alerta_aforo_porcentaje',          '90',    'M3-02: % de ocupación que dispara la alerta del grupo'),
   ('dia_generacion_cobros',            '1',     'M5-08: día del mes en que se generan las mensualidades'),
+  ('dias_gracia_mora',                 '4',     'M5-12: días después de la fecha límite antes de pasar a Vencido (límite día 5 → vencido desde el día 10)'),
   ('observaciones_visibles_patinador', 'false', 'M2-23: si el club permite al patinador ver las observaciones'),
   ('zona_horaria',                     'America/Bogota', 'Zona horaria del club');
 
@@ -1065,6 +1069,7 @@ INSERT INTO permiso (codigo, modulo, descripcion) VALUES
   ('M5_CARTERA_CONSULTAR',     'M5', 'Consultar la cartera de todos los patinadores (M5-13)'),
   ('M5_PAGO_HISTORIAL',        'M5', 'Consultar el historial de pagos (M5-16)'),
   ('M5_COMPROBANTE_DESCARGAR', 'M5', 'Descargar comprobantes de pago (M5-15)'),
+  ('M5_COBRO_GENERAR',         'M5', 'Lanzar o recuperar la generación de mensualidades (M5-08)'),
   ('M6_REPORTE_FINANCIERO',    'M6', 'Generar y exportar reportes financieros (M6-04, M6-05)'),
   ('M6_PERSONAL_GESTIONAR',    'M6', 'Registrar y administrar personal (M6-02, M6-03)'),
   ('M6_INVENTARIO_GESTIONAR',  'M6', 'Inventario, ventas y préstamos de uniformes (M6-06 a M6-08)');
