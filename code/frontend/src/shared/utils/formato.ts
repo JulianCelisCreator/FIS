@@ -47,3 +47,9 @@ const fechaDeMarca = new Intl.DateTimeFormat('es-CO', {
 export function formatoFechaDeMarca(iso: string): string {
   return fechaDeMarca.format(new Date(iso))
 }
+
+/** Cierra una frase con punto sin duplicarlo («S.A.S.» → «S.A.S.»). */
+export function cerrarFrase(texto: string): string {
+  const limpio = texto.trim()
+  return /[.!?]$/.test(limpio) ? limpio : `${limpio}.`
+}

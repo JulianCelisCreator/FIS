@@ -10,23 +10,26 @@ import {
   type PestanaPago,
 } from '../modules/m5-planes-tarifas-pagos/components/registrar-pago.tsx'
 import { PERMISOS_M5 } from '../modules/m5-planes-tarifas-pagos/types/m5.types.ts'
+import { InventarioUniformes } from '../modules/m6-inventario-uniformes/components/inventario-uniformes.tsx'
+import { PrestamosUniformes } from '../modules/m6-inventario-uniformes/components/prestamos-uniformes.tsx'
+import { VentasUniformes } from '../modules/m6-inventario-uniformes/components/ventas-uniformes.tsx'
+import { PERMISOS_M6 } from '../modules/m6-inventario-uniformes/types/inventario.types.ts'
 import { MarcoAplicacion } from './marco-aplicacion.tsx'
 
-/** Pantallas disponibles y el permiso que exige cada una. */
 const PANTALLAS = [
-  { pagina: 'planes', texto: 'Planes y tarifas', permiso: PERMISOS_M5.planGestionar },
-  { pagina: 'asignar-plan', texto: 'Asignar o cambiar plan', permiso: PERMISOS_M5.planAsignar },
-  { pagina: 'registrar-pago', texto: 'Registrar pago', permiso: PERMISOS_M5.pagoRegistrar },
+  { pagina: 'planes', texto: 'Planes y tarifas', grupo: 'Planes y pagos', permiso: PERMISOS_M5.planGestionar },
+  { pagina: 'asignar-plan', texto: 'Asignar o cambiar plan', grupo: 'Planes y pagos', permiso: PERMISOS_M5.planAsignar },
+  { pagina: 'registrar-pago', texto: 'Registrar pago', grupo: 'Planes y pagos', permiso: PERMISOS_M5.pagoRegistrar },
+  { pagina: 'inventario', texto: 'Inventario de uniformes', grupo: 'Uniformes', permiso: PERMISOS_M6.inventarioGestionar },
+  { pagina: 'ventas', texto: 'Venta de uniformes', grupo: 'Uniformes', permiso: PERMISOS_M6.inventarioGestionar },
+  { pagina: 'prestamos', texto: 'Préstamos de implementos', grupo: 'Uniformes', permiso: PERMISOS_M6.inventarioGestionar },
 ]
-
-/** Pantallas de M1 solo para el Administrador (HU-M1-01; la matriz de permisos llega con HU-M1-07). */
-const PANTALLAS_ADMINISTRADOR = [{ pagina: 'nueva-cuenta', texto: 'Nueva cuenta' }]
 
 const PESTANAS_PAGO: PestanaPago[] = ['cobro', 'sesion', 'matricula']
 
-/** Aplicación interna por roles (/app/): pantallas de M1 y M5. */
+/** Aplicación interna con las pantallas de M1, M5 y M6 habilitadas por rol. */
 export function Aplicacion() {
-  const { sesion, cargando, error, tienePermiso, tieneRol } = useSesion()
+  const { sesion, cargando, tienePermiso, tieneRol } = useSesion()
   const { pagina, parametros } = useRuta()
 
   if (cargando) {
@@ -41,24 +44,26 @@ export function Aplicacion() {
     )
   }
 
-  // Sin sesión: ingreso de M1 (HU-M1-02), sin el marco interno ni la navegación por rol.
   if (!sesion) return <PantallaAcceso />
 
-  const usuarios = tieneRol('ADMINISTRADOR') ? PANTALLAS_ADMINISTRADOR : []
-  const pagos = PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso))
-  const permitidas = [...usuarios, ...pagos]
-  const actual = pagina || permitidas[0]?.pagina || ''
-  const navegacion = [
-    { grupo: 'Usuarios', enlaces: usuarios },
-    { grupo: 'Planes y pagos', enlaces: pagos },
+  const usuarios = tieneRol('ADMINISTRADOR')
+    ? [{ pagina: 'nueva-cuenta', texto: 'Nueva cuenta', grupo: 'Usuarios' }]
+    : []
+  const permitidas = [
+    ...usuarios,
+    ...PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso)),
   ]
+  const actual = pagina || permitidas[0]?.pagina || ''
+  const navegacion = ['Usuarios', 'Planes y pagos', 'Uniformes'].map((grupo) => ({
+    grupo,
+    enlaces: permitidas.filter((pantalla) => pantalla.grupo === grupo),
+  }))
 
   let contenido
   if (permitidas.length === 0) {
     contenido = (
       <div className="app-page">
         <h1>Hola, {sesion.nombre}</h1>
-        {error && <Alerta tono="error" titulo="Algo salió mal">{error}</Alerta>}
         <Alerta tono="info" titulo="Aún no hay pantallas para tu rol">
           <p>Las pantallas de tu rol se irán habilitando a medida que la escuela active los módulos.</p>
         </Alerta>
@@ -77,6 +82,12 @@ export function Aplicacion() {
     contenido = <NuevaCuenta key={sesion.id} />
   } else if (actual === 'planes') {
     contenido = <PlanesTarifas key={sesion.id} />
+  } else if (actual === 'inventario') {
+    contenido = <InventarioUniformes key={sesion.id} />
+  } else if (actual === 'ventas') {
+    contenido = <VentasUniformes key={sesion.id} />
+  } else if (actual === 'prestamos') {
+    contenido = <PrestamosUniformes key={sesion.id} />
   } else if (actual === 'asignar-plan') {
     contenido = (
       <AsignarCambiarPlan

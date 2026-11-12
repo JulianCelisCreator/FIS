@@ -796,6 +796,7 @@ CREATE TABLE uniforme (
   precio_venta        NUMERIC(14,2) NOT NULL CHECK (precio_venta >= 0),
   cantidad_disponible INTEGER NOT NULL DEFAULT 0 CHECK (cantidad_disponible >= 0),
   cantidad_minima     INTEGER NOT NULL DEFAULT 0 CHECK (cantidad_minima >= 0),
+  foto_url            TEXT,
   activo              BOOLEAN NOT NULL DEFAULT true,
   creado_en           TIMESTAMPTZ NOT NULL DEFAULT now(),
   actualizado_en      TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -806,26 +807,46 @@ COMMENT ON TABLE uniforme IS
 
 CREATE TABLE venta_uniforme (
   id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  comprador_id   BIGINT NOT NULL REFERENCES usuario(id),   -- patinador o acudiente
-  patinador_id   BIGINT REFERENCES patinador(id),
+  patinador_id   BIGINT NOT NULL REFERENCES patinador(id), -- patinador al que se asocia el ingreso en M5
+  comprador_tipo TEXT NOT NULL CHECK (comprador_tipo IN ('PATINADOR','ACUDIENTE')),
+  comprador_id   BIGINT REFERENCES usuario(id),            -- acudiente, o cuenta del patinador si la tiene
   fecha          DATE NOT NULL DEFAULT current_date,
-  total          NUMERIC(14,2) NOT NULL CHECK (total >= 0),
-  cobro_id       BIGINT UNIQUE REFERENCES cobro(id),       -- asiento en M5 (concepto VENTA_UNIFORME)
+  total          NUMERIC(14,2) NOT NULL CHECK (total > 0),
+  medio_pago     TEXT NOT NULL CHECK (medio_pago IN ('EFECTIVO','TRANSFERENCIA','CONSIGNACION')),
+  cobro_id       BIGINT NOT NULL UNIQUE REFERENCES cobro(id), -- asiento en M5 (concepto VENTA_UNIFORME)
+  pago_id        BIGINT NOT NULL UNIQUE REFERENCES pago(id),  -- pago y comprobante en M5
   registrado_por BIGINT NOT NULL REFERENCES usuario(id),
-  creado_en      TIMESTAMPTZ NOT NULL DEFAULT now()
+  creado_en      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CHECK (comprador_tipo = 'PATINADOR' OR comprador_id IS NOT NULL)
 );
+CREATE INDEX venta_uniforme_fecha_idx ON venta_uniforme (fecha DESC);
 COMMENT ON TABLE venta_uniforme IS
-  '[M6] Venta de uniformes (M6-07). M6 guarda el detalle comercial; el ingreso, el pago y el comprobante van a M5 mediante un cobro VENTA_UNIFORME (punto abierto 1 de grupo-06/trazabilidad.md).';
+  '[M6] Venta de uniformes (M6-07). M6 guarda el detalle comercial; el ingreso, el pago y el comprobante van a M5 mediante un cobro y un pago VENTA_UNIFORME registrados en la misma transacción que descuenta el stock. Una venta confirmada no se modifica ni se borra: las correcciones son devoluciones o ajustes de inventario.';
 
 CREATE TABLE venta_detalle (
   venta_id       BIGINT NOT NULL REFERENCES venta_uniforme(id),
   uniforme_id    BIGINT NOT NULL REFERENCES uniforme(id),
+  referencia     TEXT NOT NULL,              -- copia al vender: la referencia puede editarse después
+  talla          TEXT NOT NULL,
   cantidad       INTEGER NOT NULL CHECK (cantidad > 0),
-  valor_unitario NUMERIC(14,2) NOT NULL CHECK (valor_unitario >= 0),
+  valor_unitario NUMERIC(14,2) NOT NULL CHECK (valor_unitario > 0),
   subtotal       NUMERIC(14,2) GENERATED ALWAYS AS (cantidad * valor_unitario) STORED,
   PRIMARY KEY (venta_id, uniforme_id)
 );
-COMMENT ON TABLE venta_detalle IS '[M6] Ítems de cada venta de uniformes (M6-07).';
+COMMENT ON TABLE venta_detalle IS '[M6] Ítems de cada venta de uniformes (M6-07), con la referencia, la talla y el valor unitario vigentes al vender.';
+
+-- Una venta confirmada es inmutable (M6-07): la base rechaza cualquier UPDATE o DELETE.
+CREATE FUNCTION fn_venta_inmutable() RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION 'Una venta confirmada no puede modificarse; registra una devolución o un ajuste autorizado'
+    USING ERRCODE = 'P0001';
+END;
+$$;
+CREATE TRIGGER trg_venta_uniforme_inmutable BEFORE UPDATE OR DELETE ON venta_uniforme
+  FOR EACH ROW EXECUTE FUNCTION fn_venta_inmutable();
+CREATE TRIGGER trg_venta_detalle_inmutable BEFORE UPDATE OR DELETE ON venta_detalle
+  FOR EACH ROW EXECUTE FUNCTION fn_venta_inmutable();
 
 CREATE TABLE prestamo_uniforme (
   id                         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -1091,5 +1112,19 @@ INSERT INTO rol_permiso (rol_id, permiso_id)
 SELECT r.id, p.id FROM rol r JOIN permiso p ON p.codigo IN
   ('M5_PLAN_CONSULTAR','M5_PLAN_ASIGNAR','M5_COMPROBANTE_DESCARGAR')
 WHERE r.codigo IN ('ACUDIENTE','PATINADOR');
+
+-- Usuario de prueba para consultar finanzas y usar la vista de Contador en desarrollo.
+INSERT INTO usuario (
+  nombres, apellidos, correo, contrasena_hash, estado, correo_verificado_en
+) VALUES (
+  'Carlos', 'Ramírez', 'contador@m6.local',
+  '$2b$12$temporal.seguro', 'ACTIVA', now()
+);
+
+INSERT INTO usuario_rol (usuario_id, rol_id, asignado_por)
+SELECT usuario.id, rol.id, usuario.id
+FROM usuario
+CROSS JOIN rol
+WHERE usuario.correo = 'contador@m6.local' AND rol.codigo = 'CONTADOR';
 
 COMMIT;
