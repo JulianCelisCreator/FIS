@@ -1,0 +1,64 @@
+/* HU-M1-01 · Nueva cuenta. Solo disposición; colores y tipografía vienen de tokens.css y app.css. */
+
+.m1-cuenta {
+  max-width: 40rem;
+}
+
+.m1-cuenta__fila {
+  display: grid;
+  gap: 1rem;
+}
+
+.m1-cuenta .vl-stack > .m1-cuenta__acciones,
+.m1-cuenta.vl-stack > .m1-cuenta__acciones {
+  margin-top: 1.75rem;
+}
+
+.m1-cuenta__dato {
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-small);
+  overflow-wrap: anywhere;
+}
+
+.m1-cuenta__clave {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--ice);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.m1-cuenta__clave-fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* Mono tabular para dictarla o copiarla carácter por carácter. */
+.m1-cuenta__clave-valor {
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-title);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
+@media (min-width: 520px) {
+  .m1-cuenta__fila {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Móvil: botones apilados a ancho completo, la acción principal arriba. */
+@media (max-width: 519px) {
+  .m1-cuenta__acciones {
+    flex-direction: column-reverse;
+  }
+
+  .m1-cuenta__acciones .vl-button {
+    width: 100%;
+  }
+}
