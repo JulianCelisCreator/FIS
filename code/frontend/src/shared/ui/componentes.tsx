@@ -61,25 +61,13 @@ export function Alerta({ tono, titulo, children }: { tono: Exclude<Tono, 'neutra
   )
 }
 
-/** Estados de los catálogos de M5 y M6 (REQUIREMENTS §5.1): texto e ícono, nunca solo color. */
+/** Estados del catálogo (REQUIREMENTS §5.1): texto e ícono, nunca solo color. */
 const ESTADOS: Record<string, Record<string, [string, Tono]>> = {
+  cuenta: { 'por-registrar': ['Por registrar', 'neutral'] },
   plan: { activo: ['Activo', 'success'], inactivo: ['Inactivo', 'neutral'] },
   cobro: { pendiente: ['Pendiente', 'warning'], pagado: ['Pagado', 'success'], anulado: ['Anulado', 'neutral'] },
   pago: { registrado: ['Registrado', 'success'], anulado: ['Anulado', 'neutral'] },
   cartera: { 'al-dia': ['Al día', 'success'], pendiente: ['Pendiente', 'warning'], vencido: ['Vencido', 'error'] },
-  prestamo: {
-    activo: ['Activo', 'info'],
-    devuelto: ['Devuelto', 'success'],
-    vencido: ['Vencido', 'error'],
-    'perdida-dano': ['Pérdida o daño', 'error'],
-  },
-  uniforme: {
-    'stock-normal': ['Stock normal', 'success'],
-    'alerta-minimo': ['Alerta por cantidad mínima', 'warning'],
-    inactiva: ['Inactiva', 'neutral'],
-  },
-  proveedor: { activo: ['Activo', 'success'], inactivo: ['Inactivo', 'neutral'] },
-  venta: { confirmada: ['Confirmada', 'success'], devuelta: ['Devuelta', 'neutral'], ajustada: ['Ajustada', 'warning'] },
 }
 
 export function Insignia({ entidad, estado }: { entidad: string; estado: string }) {

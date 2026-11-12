@@ -1,83 +1,44 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import {
-  guardarUsuarioPrueba,
-  pedir,
-  usuarioPruebaGuardado,
-} from '../services/cliente-api.ts'
-import { PERMISOS_M5 } from '../../modules/m5-planes-tarifas-pagos/types/m5.types.ts'
-import { PERMISOS_M6 } from '../../modules/m6-inventario-uniformes/types/inventario.types.ts'
-import type { Rol, Sesion, UsuarioPrueba } from './sesion.types.ts'
+import { ErrorApi, pedir } from '../services/cliente-api.ts'
+import type { Rol, Sesion } from './sesion.types.ts'
 import { SesionContexto } from './use-sesion.ts'
 
-const ID_USUARIO_DEMO = -1
-const USUARIO_DEMO: UsuarioPrueba = {
-  id: ID_USUARIO_DEMO,
-  nombre: 'Demo local M5/M6',
-  correo: 'demo-local@escuela.test',
-  roles: ['ADMINISTRADOR', 'CONTADOR'],
-}
-const SESION_DEMO: Sesion = {
-  ...USUARIO_DEMO,
-  permisos: [
-    PERMISOS_M5.planGestionar,
-    PERMISOS_M5.planConsultar,
-    PERMISOS_M5.planAsignar,
-    PERMISOS_M5.pagoRegistrar,
-    PERMISOS_M6.inventarioGestionar,
-  ],
-}
-
-interface RespuestaSesion {
-  usuarioId: number
-  sesion: Sesion | null
-  error: string | null
-}
-
 /**
- * TEMPORAL hasta que M1 implemente el inicio de sesión: el usuario se elige de
- * una lista de prueba y se envía en la cabecera x-usuario-id.
+ * Sesión del usuario (HU-M1-02). El token vive en una cookie httpOnly que el
+ * navegador envía solo; aquí se consulta GET /sesion al abrir la aplicación y
+ * se guarda la sesión que devuelve el ingreso.
  */
 export function ProveedorSesion({ children }: { children: ReactNode }) {
-  const [usuarioId, setUsuarioId] = useState<number | null>(usuarioPruebaGuardado() ?? ID_USUARIO_DEMO)
-  const [respuesta, setRespuesta] = useState<RespuestaSesion | null>(null)
-  const [usuarios, setUsuarios] = useState<UsuarioPrueba[]>([USUARIO_DEMO])
-  const [errorUsuarios, setErrorUsuarios] = useState<string | null>(null)
+  const [sesion, setSesion] = useState<Sesion | null>(null)
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    pedir<UsuarioPrueba[]>('/sesion/usuarios')
-      .then((usuariosApi) => setUsuarios([USUARIO_DEMO, ...usuariosApi.filter((usuario) => usuario.id !== ID_USUARIO_DEMO)]))
-      .catch((e: Error) => setErrorUsuarios(e.message))
-  }, [])
-
-  useEffect(() => {
-    if (usuarioId === null) return
-    if (usuarioId === ID_USUARIO_DEMO) return
     let vigente = true
     pedir<Sesion>('/sesion')
-      .then((sesion) => vigente && setRespuesta({ usuarioId, sesion, error: null }))
-      .catch((e: Error) => vigente && setRespuesta({ usuarioId, sesion: null, error: e.message }))
+      .then((actual) => vigente && setSesion(actual))
+      .catch((e: Error) => {
+        // 401 = no hay sesión abierta: no es un error, se muestra el acceso.
+        if (vigente && !(e instanceof ErrorApi && e.estado === 401)) setError(e.message)
+      })
+      .finally(() => vigente && setCargando(false))
     return () => {
       vigente = false
     }
-  }, [usuarioId])
+  }, [])
 
-  // La respuesta solo vale si es del usuario elegido ahora.
-  const vigente = usuarioId !== null && respuesta?.usuarioId === usuarioId ? respuesta : null
-  const sesion = usuarioId === ID_USUARIO_DEMO ? SESION_DEMO : vigente?.sesion ?? null
-
-  const cambiarUsuario = (id: number | null) => {
-    guardarUsuarioPrueba(id)
-    setUsuarioId(id)
+  const establecerSesion = (nueva: Sesion) => {
+    setSesion(nueva)
+    setError(null)
   }
 
   return (
     <SesionContexto
       value={{
         sesion,
-        usuarios,
-        cargando: usuarioId !== null && usuarioId !== ID_USUARIO_DEMO && vigente === null,
-        error: usuarioId === ID_USUARIO_DEMO ? null : vigente?.error ?? errorUsuarios,
-        cambiarUsuario,
+        cargando,
+        error,
+        establecerSesion,
         tienePermiso: (permiso: string) => sesion?.permisos.includes(permiso) ?? false,
         tieneRol: (rol: Rol) => sesion?.roles.includes(rol) ?? false,
       }}

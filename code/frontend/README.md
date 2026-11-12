@@ -2,7 +2,7 @@
 
 Aplicación de la plataforma de gestión de la escuela de patinaje. El cliente actual usa React, TypeScript y Vite. El desarrollo se organizará **por módulos de dominio** y seguirá una arquitectura objetivo **BFF (Backend for Frontend)**.
 
-> **Estado actual:** hay dos páginas. La landing pública (`/`) y la aplicación interna por roles (`/app/`), que por ahora tiene las pantallas de M5 «Planes y tarifas», «Asignar o cambiar plan» y «Registrar pago» y llama directo a la API NestJS (sin BFF todavía). Ver [Aplicación interna](#aplicación-interna-app).
+> **Estado actual:** hay dos páginas. La landing pública (`/`) y la aplicación interna por roles (`/app/`), que tiene el ingreso y la pantalla «Nueva cuenta» de M1, las pantallas de M5 y el inventario, las ventas y los préstamos de uniformes de M6. Llama directo a la API NestJS (sin BFF todavía); la sesión viaja en una cookie `httpOnly`. Ver [Aplicación interna](#aplicación-interna-app).
 
 ## Puesta en marcha
 
@@ -34,7 +34,7 @@ docker exec -i patinaje-db psql -U patinaje -d patinaje < db/datos-demo.sql   # 
 pnpm start:dev
 ```
 
-Después, `pnpm dev` en `code/frontend` y abre `http://localhost:5173/app/`. Vite redirige `/api/*` a `http://localhost:3000` (cámbialo con la variable `API_URL`). Mientras M1 implementa el inicio de sesión, en la barra superior se elige un **usuario de prueba**: el menú y las pantallas cambian según sus permisos.
+Después, `pnpm dev` en `code/frontend` y abre `http://localhost:5173/app/`. Vite redirige `/api/*` a `http://localhost:3000` (cámbialo con la variable `API_URL`). Sin sesión, la aplicación muestra el **ingreso** de M1 (correo y contraseña). Al ingresar, el menú y las pantallas cambian según los permisos de los roles de la cuenta. Los usuarios de `db/datos-demo.sql` ingresan con la contraseña `Velora2026`.
 
 Decisiones:
 

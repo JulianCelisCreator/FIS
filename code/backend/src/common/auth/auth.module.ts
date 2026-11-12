@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { SesionController } from './sesion.controller.js';
 import { SesionService } from './sesion.service.js';
 
-/** Autenticación temporal de desarrollo; la reemplaza M1 con el inicio de sesión real. */
+/** Sesión actual (GET /sesion). El inicio y cierre de sesión están en M1 (m1/acceso). */
 @Module({
   controllers: [SesionController],
   providers: [SesionService],

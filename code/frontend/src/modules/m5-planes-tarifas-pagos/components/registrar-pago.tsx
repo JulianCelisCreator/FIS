@@ -15,7 +15,6 @@ import {
   pagarMatricula,
   pagarSesiones,
   planesParaElegir,
-  buscarPatinadores,
 } from '../services/m5.service.ts'
 import {
   ESTADO_CARTERA_DS,
@@ -30,7 +29,6 @@ import { aDatosTransaccion, erroresTransaccion } from '../utils/validar-transacc
 import { CamposTransaccion } from './campos-transaccion.tsx'
 import { DatosPatinador, SelectorPatinador } from './selector-patinador.tsx'
 import { usePatinadores } from './use-patinadores.ts'
-import { AvisoApiPendienteM5 } from './aviso-api-m5.tsx'
 
 export type PestanaPago = 'cobro' | 'sesion' | 'matricula'
 
@@ -52,33 +50,25 @@ const SIN_RESULTADOS: Record<PestanaPago, string> = {
   matricula: 'No hay patinadores con la matrícula pendiente.',
 }
 
-function patinadorDemoInicial(pestana: PestanaPago): number {
-  return pestana === 'cobro' ? 106 : pestana === 'sesion' ? 105 : 104
-}
-
 function textoMedio(medio: string): string {
   return MEDIOS_PAGO.find((m) => m.valor === medio)?.texto ?? medio
 }
 
-const transaccionVacia = (hoy: string): ValoresTransaccion => ({ fechaPago: hoy, medioPago: 'EFECTIVO', referencia: '' })
+const transaccionVacia = (hoy: string): ValoresTransaccion => ({ fechaPago: hoy, medioPago: '', referencia: '' })
 
 /** RF-M5-09 y RF-M5-10: pantalla «Registrar pago» (wireframes/grupo-04/registrar-pago). */
 export function RegistrarPago({
   pestanaInicial,
   patinadorInicial,
-  cobroInicial,
 }: {
   pestanaInicial: PestanaPago
   patinadorInicial?: number
-  cobroInicial?: number
 }) {
   const [pestana, setPestana] = useState<PestanaPago>(pestanaInicial)
   const [texto, setTexto] = useState('')
   const [fijo, setFijo] = useState<number | undefined>(patinadorInicial)
   const { patinadores, cargando, error, recargar } = usePatinadores(texto, fijo)
-  const [seleccionadoId, setSeleccionadoId] = useState<number | null>(
-    patinadorInicial ?? patinadorDemoInicial(pestanaInicial),
-  )
+  const [seleccionadoId, setSeleccionadoId] = useState<number | null>(patinadorInicial ?? null)
 
   const candidatos = patinadores.filter(FILTRO[pestana])
   const patinador = candidatos.find((p) => p.id === seleccionadoId) ?? null
@@ -92,17 +82,6 @@ export function RegistrarPago({
     recargar()
   }
 
-  const cambiarPestana = (nueva: PestanaPago) => {
-    setPestana(nueva)
-    setFijo(undefined)
-    setTexto('')
-    const idInicial = patinadorDemoInicial(nueva)
-    setSeleccionadoId(idInicial)
-    void buscarPatinadores(undefined, idInicial).then((coincidencias) => {
-      if (coincidencias.length === 0) setSeleccionadoId(null)
-    })
-  }
-
   return (
     <div className="app-page">
       <header className="vl-stack">
@@ -113,34 +92,16 @@ export function RegistrarPago({
         </nav>
         <h1>Registrar pago</h1>
         <p className="vl-text-body-sm">Registro manual de un pago recibido en la sede: efectivo, transferencia o consignación.</p>
-        <div className="app-actions">
-          <a className="vl-button vl-button--secondary" href={enlace('historial-pagos')}>Ver historial de pagos</a>
-        </div>
       </header>
-
-      <AvisoApiPendienteM5 peticiones={[
-        'GET /m5/patinadores',
-        'GET /m5/planes',
-        'GET /m5/planes/oferta',
-        'GET /m5/patinadores/:id/cobros-pendientes',
-        'POST /m5/pagos/cobro',
-        'POST /m5/pagos/sesion',
-        'POST /m5/pagos/matricula',
-      ]} />
-      {pestana === 'cobro' && patinadorInicial === undefined && seleccionadoId === 106 && (
-        <Alerta tono="info" titulo="Prueba rápida lista">
-          <p>
-            La demo inicia con Diego Demo Pago y un cobro de $ 180.000. El saldo y el medio Efectivo vienen precargados;
-            puedes registrar un abono o pagar el total. Al recargar, los datos vuelven a su estado inicial.
-          </p>
-        </Alerta>
-      )}
 
       <Pestanas
         etiqueta="Tipo de pago"
         opciones={PESTANAS}
         activa={pestana}
-        alCambiar={cambiarPestana}
+        alCambiar={(nueva) => {
+          setPestana(nueva)
+          elegir(null)
+        }}
       />
 
       <section id={`panel-${pestana}`} role="tabpanel" aria-labelledby={`pestana-${pestana}`} className="app-cols app-cols--2">
@@ -168,9 +129,6 @@ export function RegistrarPago({
               <p className="vl-text-body-sm">
                 Estado de cartera: <Insignia entidad="cartera" estado={ESTADO_CARTERA_DS[patinador.estadoCartera]} />
               </p>
-              <a className="vl-link" href={enlace('historial-pagos', { patinador: patinador.id })}>
-                Ver historial de {patinador.nombre}
-              </a>
             </>
           )}
         </section>
@@ -181,14 +139,7 @@ export function RegistrarPago({
             <p className="vl-text-body-sm">Elige primero al patinador.</p>
           </section>
         )}
-        {patinador && pestana === 'cobro' && (
-          <PagoCobro
-            key={patinador.id}
-            patinador={patinador}
-            cobroInicial={cobroInicial}
-            alTerminar={reiniciar}
-          />
-        )}
+        {patinador && pestana === 'cobro' && <PagoCobro key={patinador.id} patinador={patinador} alTerminar={reiniciar} />}
         {patinador && pestana === 'sesion' && <PagoSesion key={patinador.id} patinador={patinador} alTerminar={reiniciar} />}
         {patinador && pestana === 'matricula' && (
           <PagoMatricula key={patinador.id} patinador={patinador} alTerminar={reiniciar} />
@@ -242,15 +193,7 @@ function textoCobro(cobro: CobroPendiente): string {
 }
 
 /** RF-M5-09: pago total o parcial de un cobro con saldo. */
-function PagoCobro({
-  patinador,
-  cobroInicial,
-  alTerminar,
-}: {
-  patinador: PatinadorM5
-  cobroInicial?: number
-  alTerminar: () => void
-}) {
+function PagoCobro({ patinador, alTerminar }: { patinador: PatinadorM5; alTerminar: () => void }) {
   const hoy = hoyEnClub()
   const [cobros, setCobros] = useState<CobroPendiente[] | null>(null)
   const [cobroId, setCobroId] = useState<number | null>(null)
@@ -267,16 +210,13 @@ function PagoCobro({
       .then((datos) => {
         if (!vigente) return
         setCobros(datos)
-        const cobroInicialEncontrado = datos.find((cobro) => cobro.id === cobroInicial)
-        const cobroSeleccionado = cobroInicialEncontrado ?? datos[0]
-        setCobroId(cobroSeleccionado?.id ?? null)
-        setMontoTexto(cobroSeleccionado ? String(cobroSeleccionado.saldo) : '')
+        setCobroId(datos[0]?.id ?? null)
       })
       .catch((e: Error) => vigente && setError(e.message))
     return () => {
       vigente = false
     }
-  }, [patinador.id, cobroInicial])
+  }, [patinador.id])
 
   const cobro = cobros?.find((c) => c.id === cobroId) ?? null
   const monto = leerPesos(montoTexto)
@@ -336,16 +276,7 @@ function PagoCobro({
           <div className="vl-radio-group" role="radiogroup">
             {cobros.map((c) => (
               <label key={c.id} className="vl-check-row">
-                <input
-                  className="vl-radio"
-                  type="radio"
-                  name="cobro"
-                  checked={c.id === cobroId}
-                  onChange={() => {
-                    setCobroId(c.id)
-                    setMontoTexto(String(c.saldo))
-                  }}
-                />
+                <input className="vl-radio" type="radio" name="cobro" checked={c.id === cobroId} onChange={() => setCobroId(c.id)} />
                 <span>
                   <span className="vl-text-label">
                     {textoCobro(c)} · saldo {formatoCop(c.saldo)}
@@ -354,17 +285,14 @@ function PagoCobro({
                   <br />
                   <span className="vl-text-caption">
                     Valor {formatoCop(c.valor)}
-                    {c.pagado > 0 && ` · abonado ${formatoCop(c.pagado)}`} · fecha límite {formatoFecha(c.fechaLimite)}
-                    {c.vencidoDesde && ` · vencido desde ${formatoFecha(c.vencidoDesde)}`}
+                    {c.pagado > 0 && ` · abonado ${formatoCop(c.pagado)}`} · fecha límite {formatoFecha(c.fechaLimite)} · vencido
+                    desde {formatoFecha(c.vencidoDesde)}
                   </span>
                 </span>
               </label>
             ))}
           </div>
-          <p className="vl-text-caption">
-            Solo aparecen cobros con saldo. Registra aquí el dinero que recibiste: si es menor que el saldo, queda como abono
-            y el resto continúa pendiente; si cubre todo, el cobro queda pagado. No es una aprobación posterior.
-          </p>
+          <p className="vl-text-caption">Solo aparecen los cobros con saldo pendiente.</p>
         </fieldset>
       )}
 

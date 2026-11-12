@@ -19,7 +19,6 @@ export const DIAS_LIMITE_PAGO = [5, 10, 15, 20]
 
 export const PERMISOS_M5 = {
   planGestionar: 'M5_PLAN_GESTIONAR',
-  planConsultar: 'M5_PLAN_CONSULTAR',
   planAsignar: 'M5_PLAN_ASIGNAR',
   pagoRegistrar: 'M5_PAGO_REGISTRAR',
 } as const
@@ -140,7 +139,6 @@ export interface ResultadoAsignacion {
   tarifa: number
   primerCobro: (CobroProyectado & { id: number; diasCobrados: number }) | null
   siguienteCobro: CobroProyectado | null
-  pagoInicial?: { monto: number; saldoRestante: number; comprobante: string }
 }
 
 /** POST /m5/asignaciones/cambios */
@@ -167,19 +165,6 @@ export interface CobroPendiente {
   fechaLimite: string
   vencidoDesde: string
   vencido: boolean
-}
-
-export interface PagoDemo {
-  id: number
-  patinadorId: number
-  patinadorNombre: string
-  concepto: string
-  monto: number
-  fechaPago: string
-  medioPago: MedioPago
-  referencia: string
-  comprobante: string
-  registradoPor: string
 }
 
 /** Lo que se escribe en los campos de fecha, medio y referencia (aún sin validar). */

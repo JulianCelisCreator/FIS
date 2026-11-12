@@ -44,15 +44,6 @@ const fechaDeMarca = new Intl.DateTimeFormat('es-CO', {
 })
 
 /** Marca de tiempo ISO de la API (registrado, modificado) → 'DD/MM/AAAA' en hora del club. */
-export function formatoFechaDeMarca(iso: string | null | undefined): string {
-  if (!iso || !iso.trim()) return 'Sin fecha registrada'
-  const fecha = new Date(iso)
-  if (Number.isNaN(fecha.getTime())) return 'Sin fecha registrada'
-  return fechaDeMarca.format(fecha)
-}
-
-/** Cierra una frase con punto sin duplicarlo («S.A.S.» → «S.A.S.»). */
-export function cerrarFrase(texto: string): string {
-  const limpio = texto.trim()
-  return /[.!?]$/.test(limpio) ? limpio : `${limpio}.`
+export function formatoFechaDeMarca(iso: string): string {
+  return fechaDeMarca.format(new Date(iso))
 }
