@@ -1,4 +1,4 @@
-import { CategoriaPatinaje } from '../entities/grupo.entity';
+import { CategoriaPatinaje } from '../entities/grupo.entity.js';
 
 export class CreateGrupoDto {
   nombre!: string;

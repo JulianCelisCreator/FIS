@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
-import { AsignarProfesorDto, CreateGrupoDto } from './dto/create-grupo.dto';
-import { CreateHorarioDto } from './dto/create-horario.dto';
-import { GruposService } from './grupos.service';
+import { AsignarProfesorDto, CreateGrupoDto } from './dto/create-grupo.dto.js';
+import { CreateHorarioDto } from './dto/create-horario.dto.js';
+import { GruposService } from './grupos.service.js';
 
 @Controller('grupos')
 export class GruposController {
