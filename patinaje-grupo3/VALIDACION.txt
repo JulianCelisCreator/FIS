@@ -1,0 +1,4 @@
+React: npm run build correcto.
+Backend: npm test, 9 pruebas aprobadas.
+Interfaz: comprobación DOM con jsdom: renderizado React, acceso demo, navegación, formularios estudiante/acudiente/nivel, perfil con acudiente y edición en demo.
+Pendiente: revisión visual en navegador real y ejecución Docker/PostgreSQL real. El navegador automatizado no pudo descargarse en el entorno.
