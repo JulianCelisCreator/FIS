@@ -1,5 +1,4 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { usandoDemoLocal } from '../../../shared/services/cliente-api.ts'
 import { Alerta, Campo, DialogoConfirmacion, Insignia } from '../../../shared/ui/componentes.tsx'
 import { formatoCop, formatoFecha, hoyEnClub } from '../../../shared/utils/formato.ts'
 import { enlace } from '../../../shared/utils/use-ruta.ts'
@@ -141,11 +140,6 @@ export function PrestamosUniformes() {
           </p>
         </div>
       </header>
-      {usandoDemoLocal() && (
-        <Alerta tono="info" titulo="Préstamos de demostración local">
-          <p>Con el usuario «Demo local» patinadores e implementos son ficticios y se reinician al recargar. Elige un usuario real para usar la API.</p>
-        </Alerta>
-      )}
       {vencidos > 0 && (
         <Alerta tono="warning" titulo={`${vencidos} préstamo${vencidos === 1 ? '' : 's'} vencido${vencidos === 1 ? '' : 's'}`}>
           <p>Tienen la fecha de devolución vencida y aún no se registra su devolución.</p>

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Alerta, Campo, DialogoConfirmacion, Insignia, ListaDatos } from '../../../shared/ui/componentes.tsx'
 import { formatoCop, formatoFecha, hoyEnClub } from '../../../shared/utils/formato.ts'
-import { usandoDemoLocal } from '../../../shared/services/cliente-api.ts'
 import { enlace } from '../../../shared/utils/use-ruta.ts'
 import { MEDIOS_PAGO, type MedioPago } from '../../m5-planes-tarifas-pagos/types/m5.types.ts'
 import {
@@ -216,14 +215,6 @@ export function VentasUniformes() {
         </div>
       </header>
 
-      {usandoDemoLocal() && (
-        <Alerta tono="info" titulo="Ventas de demostración local">
-          <p>
-            Con el usuario «Demo local» patinadores, acudientes y existencias son ficticios y se reinician al recargar.
-            Elige un usuario real para registrar la venta con la API <code>/m6/ventas</code>.
-          </p>
-        </Alerta>
-      )}
       {errorCarga && <Alerta tono="error" titulo="No se pudo cargar la información"><p>{errorCarga}</p></Alerta>}
       {errorVenta && <Alerta tono="error" titulo="La venta no se registró"><p>{errorVenta}</p></Alerta>}
 

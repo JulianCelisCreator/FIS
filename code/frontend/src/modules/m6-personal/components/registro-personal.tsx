@@ -9,7 +9,6 @@ import {
   editarPersonal,
   listarPersonal,
   reactivarPersonal,
-  usandoDemoLocal,
 } from '../services/personal.service.ts'
 import {
   CARGOS,
@@ -200,11 +199,6 @@ export function RegistroPersonal() {
         <button className="vl-button vl-button--primary" type="button" onClick={() => abrir()}>Registrar persona</button>
       </header>
 
-      {usandoDemoLocal() && (
-        <Alerta tono="info" titulo="Demostración local">
-          <p>Con el usuario «Demo local» los datos son ficticios y se reinician al recargar. Elige un usuario real para usar la API.</p>
-        </Alerta>
-      )}
       {aviso && <Alerta tono="success"><p>{aviso}</p></Alerta>}
       {error && <Alerta tono="error" titulo="No se pudo completar la operación"><p>{error}</p></Alerta>}
 
