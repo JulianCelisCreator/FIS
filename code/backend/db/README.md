@@ -7,6 +7,7 @@ DDL de la base de datos de la plataforma (PostgreSQL 17), común a todos los mó
 | `schema.sql` | Todo el DDL: tablas, restricciones, índices, vistas, comentarios y catálogos semilla. |
 | `compose.yaml` | Contenedor de PostgreSQL que carga `schema.sql` al crearse. |
 | `datos-demo.sql` | Datos de demostración de M5 con los nombres de los wireframes (opcional, se cargan a mano). |
+| `datos-demo-m6.sql` | Datos de demostración de M6 (personal, proveedores, inventario, ventas con devoluciones y préstamos). Requiere `datos-demo.sql`. |
 | `migraciones/` | Scripts `ALTER` para aplicar cambios de `schema.sql` a una base ya creada sin borrar datos (`psql … -f db/migraciones/<archivo>.sql`). Una base nueva no los necesita. |
 
 ## Levantar la base
@@ -37,6 +38,8 @@ Para cargar los datos de demostración sobre una base recién creada:
 
 ```bash
 docker exec -i patinaje-db psql -U patinaje -d patinaje < db/datos-demo.sql
+# Opcional, después del anterior: datos del módulo 6
+docker exec -i patinaje-db psql -U patinaje -d patinaje < db/datos-demo-m6.sql
 ```
 
 Los usuarios de demostración ingresan en `/app/` con su correo y la contraseña `Velora2026`. Si cargaste los datos antes de que existiera el inicio de sesión (contraseña `demo`), actualízalos sin recrear la base copiando el hash de `clave_demo` de `datos-demo.sql`:
