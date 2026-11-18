@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Alerta, Campo, DialogoConfirmacion, Insignia, ListaDatos } from '../../../shared/ui/componentes.tsx'
 import { formatoCop, formatoFecha, hoyEnClub } from '../../../shared/utils/formato.ts'
-import { enlace } from '../../../shared/utils/use-ruta.ts'
 import { MEDIOS_PAGO, type MedioPago } from '../../m5-planes-tarifas-pagos/types/m5.types.ts'
 import {
   consolidarItemsVenta,
@@ -409,7 +408,6 @@ export function VentasUniformes() {
       <section className="vl-stack" aria-labelledby="titulo-ventas">
         <div className="app-panel-head">
           <h2 id="titulo-ventas" className="vl-text-heading-h5">Ventas registradas</h2>
-          <a className="vl-link" href={enlace('historial-pagos')}>Ver historial de pagos</a>
         </div>
         {avisoDevolucion && <Alerta tono="success"><p>{avisoDevolucion}</p></Alerta>}
         {ventas && ventas.length === 0 && <p className="vl-text-body-sm">Todavía no hay ventas registradas.</p>}
