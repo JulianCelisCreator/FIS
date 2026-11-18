@@ -16,6 +16,8 @@ import { VentasUniformes } from '../modules/m6-inventario-uniformes/components/v
 import { PERMISOS_M6 } from '../modules/m6-inventario-uniformes/types/inventario.types.ts'
 import { RegistroPersonal } from '../modules/m6-personal/components/registro-personal.tsx'
 import { PERMISOS_PERSONAL } from '../modules/m6-personal/types/personal.types.ts'
+import { ReportesFinancieros } from '../modules/m6-reportes/components/reportes-financieros.tsx'
+import { PERMISOS_REPORTES } from '../modules/m6-reportes/types/reportes.types.ts'
 import { MarcoAplicacion } from './marco-aplicacion.tsx'
 
 const PANTALLAS = [
@@ -26,6 +28,7 @@ const PANTALLAS = [
   { pagina: 'ventas', texto: 'Venta de uniformes', grupo: 'Uniformes', permiso: PERMISOS_M6.inventarioGestionar },
   { pagina: 'prestamos', texto: 'Préstamos de implementos', grupo: 'Uniformes', permiso: PERMISOS_M6.inventarioGestionar },
   { pagina: 'personal', texto: 'Personal', grupo: 'Administración', permiso: PERMISOS_PERSONAL.personalGestionar },
+  { pagina: 'reportes', texto: 'Reportes financieros', grupo: 'Administración', permiso: PERMISOS_REPORTES.reporteFinanciero },
 ]
 
 const PESTANAS_PAGO: PestanaPago[] = ['cobro', 'sesion', 'matricula']
@@ -97,6 +100,8 @@ export function Aplicacion() {
     contenido = <PrestamosUniformes key={sesion.id} />
   } else if (actual === 'personal') {
     contenido = <RegistroPersonal key={sesion.id} />
+  } else if (actual === 'reportes') {
+    contenido = <ReportesFinancieros key={sesion.id} />
   } else if (actual === 'asignar-plan') {
     contenido = (
       <AsignarCambiarPlan

@@ -4,6 +4,7 @@ import { PermisoM6 } from '../enums/permiso-m6.enum.js';
 import { PersonalController } from './personal.controller.js';
 import { PrestamosController } from './prestamos.controller.js';
 import { ProveedoresController } from './proveedores.controller.js';
+import { ReportesController } from './reportes.controller.js';
 import { UniformesController } from './uniformes.controller.js';
 import { VentasController } from './ventas.controller.js';
 
@@ -16,6 +17,8 @@ const CONTROLADORES = [
   { controlador: PrestamosController, permiso: PermisoM6.INVENTARIO_GESTIONAR },
   { controlador: VentasController, permiso: PermisoM6.INVENTARIO_GESTIONAR },
   { controlador: PersonalController, permiso: PermisoM6.PERSONAL_GESTIONAR },
+  // HU-6.4: el Contador sí tiene este permiso; consulta reportes pero no modifica nada.
+  { controlador: ReportesController, permiso: PermisoM6.REPORTE_FINANCIERO },
 ];
 
 describe('control de acceso de las rutas del M6', () => {
