@@ -109,8 +109,9 @@ Reglas:
 - `POST /m6/proveedores`
 - `PATCH /m6/proveedores/:proveedorId/estado`
 
-Todas las solicitudes usan temporalmente la cabecera `x-usuario-id` y el permiso
-`M6_INVENTARIO_GESTIONAR`.
+Todas las solicitudes exigen la sesión de M1 (cookie httpOnly, `AutenticacionGuard`,
+HU-M1-02) y el permiso de la ruta: `M6_INVENTARIO_GESTIONAR` para inventario, ventas
+y préstamos, y `M6_PERSONAL_GESTIONAR` para personal.
 
 ## Reglas implementadas
 

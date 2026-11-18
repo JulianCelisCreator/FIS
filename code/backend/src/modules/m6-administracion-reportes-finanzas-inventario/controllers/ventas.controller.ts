@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
-import { AutenticacionTemporalGuard } from '../../../common/auth/autenticacion-temporal.guard.js';
+import { AutenticacionGuard } from '../../../common/auth/autenticacion.guard.js';
 import { RequierePermiso, UsuarioActual } from '../../../common/auth/decoradores.js';
 import { PermisosGuard } from '../../../common/auth/permisos.guard.js';
 import type { UsuarioAutenticado } from '../../../common/auth/usuario-autenticado.js';
@@ -12,7 +12,7 @@ import { VentasService } from '../services/ventas.service.js';
  * No hay PATCH ni DELETE: una venta confirmada es inmutable.
  */
 @Controller('m6/ventas')
-@UseGuards(AutenticacionTemporalGuard, PermisosGuard)
+@UseGuards(AutenticacionGuard, PermisosGuard)
 @RequierePermiso(PermisoM6.INVENTARIO_GESTIONAR)
 export class VentasController {
   constructor(private readonly ventas: VentasService) {}

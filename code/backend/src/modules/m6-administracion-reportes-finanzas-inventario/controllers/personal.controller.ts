@@ -9,7 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { AutenticacionTemporalGuard } from '../../../common/auth/autenticacion-temporal.guard.js';
+import { AutenticacionGuard } from '../../../common/auth/autenticacion.guard.js';
 import { RequierePermiso, UsuarioActual } from '../../../common/auth/decoradores.js';
 import { PermisosGuard } from '../../../common/auth/permisos.guard.js';
 import type { UsuarioAutenticado } from '../../../common/auth/usuario-autenticado.js';
@@ -28,7 +28,7 @@ import { PersonalService } from '../services/personal.service.js';
  * (M6_PERSONAL_GESTIONAR). No hay DELETE: se desactiva sin borrar el historial.
  */
 @Controller('m6/personal')
-@UseGuards(AutenticacionTemporalGuard, PermisosGuard)
+@UseGuards(AutenticacionGuard, PermisosGuard)
 @RequierePermiso(PermisoM6.PERSONAL_GESTIONAR)
 export class PersonalController {
   constructor(private readonly personal: PersonalService) {}
