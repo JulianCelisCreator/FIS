@@ -1,0 +1,69 @@
+/* HU-M1-05 · Usuarios. Solo disposición; la tabla, el filtro y el menú vienen de app.css. */
+
+.m1-usuarios__persona {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.m1-usuarios__tu {
+  white-space: nowrap;
+}
+
+.m1-usuarios__correo {
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-small);
+  overflow-wrap: anywhere;
+}
+
+.m1-usuarios__roles {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.m1-usuarios__paginas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.m1-usuarios__cifra {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Cargando: filas con la forma de la tabla (nombre, correo, rol, estado). */
+.m1-usuarios__esqueleto {
+  background: var(--chalk);
+}
+
+.m1-usuarios__esqueleto-fila {
+  display: grid;
+  grid-template-columns: 2fr 2.5fr 1fr 1fr;
+  gap: 1.5rem;
+  padding: 1.05rem 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.m1-usuarios__esqueleto-fila span {
+  height: 0.8rem;
+  background: var(--ice-deep);
+  border-radius: var(--radius);
+  animation: m1-usuarios-pulso 1.4s var(--ease) infinite alternate;
+}
+
+@keyframes m1-usuarios-pulso {
+  to {
+    opacity: 0.45;
+  }
+}
+
+@media (max-width: 599px) {
+  .m1-usuarios__esqueleto-fila {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+}
