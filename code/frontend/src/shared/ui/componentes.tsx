@@ -63,7 +63,6 @@ export function Alerta({ tono, titulo, children }: { tono: Exclude<Tono, 'neutra
 
 /** Estados del catálogo (REQUIREMENTS §5.1): texto e ícono, nunca solo color. */
 
-type Tono = 'neutral' | 'success' | 'warning' | 'error' | 'info';
 
 const ESTADOS: Record<string, Record<string, [string, Tono]>> = {
   cuenta: {
