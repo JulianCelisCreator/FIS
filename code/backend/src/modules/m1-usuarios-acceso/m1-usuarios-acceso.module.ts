@@ -6,10 +6,11 @@ import { UsuariosRepository } from './repositories/usuarios.repository.js';
 import { CuentasService } from './services/cuentas.service.js';
 import { GestionCuentasService } from './services/gestion-cuentas.service.js';
 import { IngresoService } from './services/ingreso.service.js';
+import { RolesService } from './services/roles.service.js';
 
 /** M1 · Usuarios y Acceso. */
 @Module({
   controllers: [AccesoController, CuentasController],
-  providers: [CuentasService, GestionCuentasService, IngresoService, UsuariosRepository, SesionesRepository],
+  providers: [CuentasService, GestionCuentasService, RolesService, IngresoService, UsuariosRepository, SesionesRepository],
 })
 export class M1UsuariosAccesoModule {}

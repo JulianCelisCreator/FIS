@@ -197,6 +197,16 @@ export class UsuariosRepository {
     return estado === 'ACTIVA' || estado === 'POR_REGISTRAR' ? estado : null;
   }
 
+  /**
+   * HU-M1-06 CA-02: el nuevo rol reemplaza al anterior. Quitar un rol borra su
+   * fila de usuario_rol (así lo define el esquema); el cambio queda en la
+   * auditoría con los roles anteriores.
+   */
+  async reemplazarRoles(consultor: Consultor, usuarioId: number, rol: Rol, asignadoPor: number): Promise<void> {
+    await consultor.query(`DELETE FROM usuario_rol WHERE usuario_id = $1`, [usuarioId]);
+    await this.asignarRol(consultor, usuarioId, rol, asignadoPor);
+  }
+
   async asignarRol(consultor: Consultor, usuarioId: number, rol: Rol, asignadoPor: number): Promise<void> {
     await consultor.query(
       `INSERT INTO usuario_rol (usuario_id, rol_id, asignado_por)
