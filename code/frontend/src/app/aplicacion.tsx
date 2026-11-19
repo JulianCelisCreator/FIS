@@ -14,6 +14,8 @@ import { InventarioUniformes } from '../modules/m6-inventario-uniformes/componen
 import { PrestamosUniformes } from '../modules/m6-inventario-uniformes/components/prestamos-uniformes.tsx'
 import { VentasUniformes } from '../modules/m6-inventario-uniformes/components/ventas-uniformes.tsx'
 import { PERMISOS_M6 } from '../modules/m6-inventario-uniformes/types/inventario.types.ts'
+import { PanelAdministrativo } from '../modules/m6-panel/components/panel-administrativo.tsx'
+import { PERMISOS_PANEL } from '../modules/m6-panel/types/panel.types.ts'
 import { RegistroPersonal } from '../modules/m6-personal/components/registro-personal.tsx'
 import { PERMISOS_PERSONAL } from '../modules/m6-personal/types/personal.types.ts'
 import { ReportesFinancieros } from '../modules/m6-reportes/components/reportes-financieros.tsx'
@@ -21,6 +23,7 @@ import { PERMISOS_REPORTES } from '../modules/m6-reportes/types/reportes.types.t
 import { MarcoAplicacion } from './marco-aplicacion.tsx'
 
 const PANTALLAS = [
+  { pagina: 'panel', texto: 'Panel general', grupo: 'Administración', permiso: PERMISOS_PANEL.panelConsultar },
   { pagina: 'planes', texto: 'Planes y tarifas', grupo: 'Planes y pagos', permiso: PERMISOS_M5.planGestionar },
   { pagina: 'asignar-plan', texto: 'Asignar o cambiar plan', grupo: 'Planes y pagos', permiso: PERMISOS_M5.planAsignar },
   { pagina: 'registrar-pago', texto: 'Registrar pago', grupo: 'Planes y pagos', permiso: PERMISOS_M5.pagoRegistrar },
@@ -55,9 +58,12 @@ export function Aplicacion() {
   const usuarios = tieneRol('ADMINISTRADOR')
     ? [{ pagina: 'nueva-cuenta', texto: 'Nueva cuenta', grupo: 'Usuarios' }]
     : []
+  const pantallasRol = PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso))
+  // El panel general (HU-6.1) es la primera pantalla del Administrador.
   const permitidas = [
+    ...pantallasRol.filter((pantalla) => pantalla.pagina === 'panel'),
     ...usuarios,
-    ...PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso)),
+    ...pantallasRol.filter((pantalla) => pantalla.pagina !== 'panel'),
   ]
   const actual = pagina || permitidas[0]?.pagina || ''
   const navegacion = ['Usuarios', 'Administración', 'Planes y pagos', 'Uniformes'].map((grupo) => ({
@@ -100,6 +106,8 @@ export function Aplicacion() {
     contenido = <PrestamosUniformes key={sesion.id} />
   } else if (actual === 'personal') {
     contenido = <RegistroPersonal key={sesion.id} />
+  } else if (actual === 'panel') {
+    contenido = <PanelAdministrativo key={sesion.id} />
   } else if (actual === 'reportes') {
     contenido = <ReportesFinancieros key={sesion.id} />
   } else if (actual === 'asignar-plan') {

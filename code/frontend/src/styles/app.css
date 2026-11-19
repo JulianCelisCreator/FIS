@@ -1260,3 +1260,20 @@ fieldset {
     flex: 1;
   }
 }
+
+/* Panel general (M6): tarjetas KPI con ícono, valor y etiqueta. */
+.app-kpis {
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+
+.app-kpi dt {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.app-kpi__icono {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+}

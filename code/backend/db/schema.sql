@@ -1137,7 +1137,8 @@ INSERT INTO permiso (codigo, modulo, descripcion) VALUES
   ('M5_COBRO_GENERAR',         'M5', 'Lanzar o recuperar la generación de mensualidades (M5-08)'),
   ('M6_REPORTE_FINANCIERO',    'M6', 'Generar y exportar reportes financieros (M6-04, M6-05)'),
   ('M6_PERSONAL_GESTIONAR',    'M6', 'Registrar y administrar personal (M6-02, M6-03)'),
-  ('M6_INVENTARIO_GESTIONAR',  'M6', 'Inventario, ventas y préstamos de uniformes (M6-06 a M6-08)');
+  ('M6_INVENTARIO_GESTIONAR',  'M6', 'Inventario, ventas y préstamos de uniformes (M6-06 a M6-08)'),
+  ('M6_PANEL_CONSULTAR',       'M6', 'Consultar el panel general administrativo (M6-01); solo Administrador');
 
 -- Administrador: todos los permisos cargados.
 INSERT INTO rol_permiso (rol_id, permiso_id)
