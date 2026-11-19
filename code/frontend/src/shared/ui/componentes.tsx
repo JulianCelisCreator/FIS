@@ -63,11 +63,21 @@ export function Alerta({ tono, titulo, children }: { tono: Exclude<Tono, 'neutra
 
 /** Estados del catálogo (REQUIREMENTS §5.1): texto e ícono, nunca solo color. */
 const ESTADOS: Record<string, Record<string, [string, Tono]>> = {
-  cuenta: { 'por-registrar': ['Por registrar', 'neutral'] },
+  cuenta: {
+    'por-registrar': ['Por registrar', 'neutral'],
+    activa: ['Activa', 'success'],
+    desactivada: ['Desactivada', 'neutral'],
+  },
   plan: { activo: ['Activo', 'success'], inactivo: ['Inactivo', 'neutral'] },
   cobro: { pendiente: ['Pendiente', 'warning'], pagado: ['Pagado', 'success'], anulado: ['Anulado', 'neutral'] },
   pago: { registrado: ['Registrado', 'success'], anulado: ['Anulado', 'neutral'] },
   cartera: { 'al-dia': ['Al día', 'success'], pendiente: ['Pendiente', 'warning'], vencido: ['Vencido', 'error'] },
+  autorizacion: {
+    registrada: ['Registrada', 'success'],
+    pendiente: ['Pendiente', 'warning'],
+    'no-aplica': ['No aplica', 'neutral'],
+  },
+  perfil: { bloqueado: ['Bloqueado', 'error'], habilitado: ['Habilitado', 'success'] },
 }
 
 export function Insignia({ entidad, estado }: { entidad: string; estado: string }) {
@@ -146,6 +156,7 @@ export function DialogoConfirmacion({
   textoCancelar = 'Cancelar',
   variante = 'confirm',
   ocupado = false,
+  textoOcupado = 'Guardando…',
   alConfirmar,
   alCancelar,
   children,
@@ -156,6 +167,8 @@ export function DialogoConfirmacion({
   textoCancelar?: string
   variante?: 'confirm' | 'form'
   ocupado?: boolean
+  /** Texto del botón de confirmar mientras `ocupado` es true. */
+  textoOcupado?: string
   alConfirmar?: () => void
   alCancelar: () => void
   children: ReactNode
@@ -193,7 +206,7 @@ export function DialogoConfirmacion({
             aria-disabled={ocupado || undefined}
             onClick={() => !ocupado && alConfirmar?.()}
           >
-            {ocupado ? 'Guardando…' : textoConfirmar}
+            {ocupado ? textoOcupado : textoConfirmar}
           </button>
         )}
       </div>

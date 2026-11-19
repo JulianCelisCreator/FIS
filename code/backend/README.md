@@ -97,6 +97,7 @@ Si una capacidad necesita repositorios, políticas u otras carpetas, agrégalas 
 - **Validación:** `class-validator` en los DTO, con un `ValidationPipe` global (`src/configurar-aplicacion.ts`) que rechaza campos no declarados y devuelve un mensaje por campo.
 - **Autenticación:** sesión con cookie `httpOnly` que crea M1 al ingresar (`POST /m1/acceso/ingreso`). En la base solo se guarda el hash del token. Los controladores usan `@UseGuards(AutenticacionGuard, PermisosGuard)`, `@RequierePermiso(...)` y `@UsuarioActual()`; el usuario llega con sus roles y los permisos de esos roles.
 - **Auditoría:** `common/auditoria/AuditoriaRepository.registrar()` dentro de la misma transacción del cambio.
+- **Documentos:** `pdfkit` para los PDF (comprobantes e historial) y `exceljs` para los XLSX. Se generan en memoria y se envían con `StreamableFile`.
 - **Tareas programadas:** `@nestjs/schedule`, con la zona horaria del club (`America/Bogota`).
 
 ### Flujo y dependencias

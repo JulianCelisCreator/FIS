@@ -79,7 +79,7 @@ export function NuevaCuenta() {
     <div className="app-page">
       <header className="vl-stack">
         <nav className="vl-breadcrumb" aria-label="Ruta">
-          <span>Usuarios</span>
+          <a className="vl-link" href="#/usuarios">Usuarios</a>
           <span aria-hidden="true">/</span>
           <span aria-current="page">Nueva cuenta</span>
         </nav>
@@ -169,7 +169,7 @@ export function NuevaCuenta() {
           </Campo>
 
           <div className="app-actions m1-cuenta__acciones">
-            <a className="vl-button vl-button--secondary" href="#/">
+            <a className="vl-button vl-button--secondary" href="#/usuarios">
               Cancelar
             </a>
             <button className="vl-button vl-button--primary" type="submit" aria-disabled={enviando || undefined}>
@@ -230,6 +230,9 @@ function ResultadoCuenta({ cuenta, alCrearOtra }: { cuenta: CuentaCreada; alCrea
       </div>
 
       <div className="app-actions m1-cuenta__acciones">
+        <a className="vl-button vl-button--secondary" href="#/usuarios">
+          Volver a Usuarios
+        </a>
         <button className="vl-button vl-button--primary" type="button" onClick={alCrearOtra}>
           Crear otra cuenta
         </button>

@@ -53,6 +53,40 @@ export class CobrosService {
     }
   }
 
+/**
+   * Revisa diariamente el estado de cartera de los patinadores.
+   * La vista calcula los estados según los saldos y los días de gracia.
+   */
+  @Cron('10 0 * * *', {
+    name: 'revision-diaria-cartera',
+    timeZone: ZONA_HORARIA_CLUB,
+  })
+  async revisarEstadoCartera(): Promise<void> {
+    try {
+      const [resultado] = await this.baseDatos.consultar<{
+        vencidos: number;
+        pendientes: number;
+        alDia: number;
+      }>(
+        `SELECT
+           COUNT(*) FILTER (WHERE estado = 'VENCIDO')::int AS vencidos,
+           COUNT(*) FILTER (WHERE estado = 'PENDIENTE')::int AS pendientes,
+           COUNT(*) FILTER (WHERE estado = 'AL_DIA')::int AS "alDia"
+         FROM v_estado_cartera`,
+      );
+
+      this.logger.log(
+        `Revisión diaria de cartera: ${resultado.vencidos} vencidos, ` +
+          `${resultado.pendientes} pendientes, ${resultado.alDia} al día`,
+      );
+    } catch (error) {
+      this.logger.error(
+        'Falló la revisión diaria de cartera',
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
+  }
+
   /** Genera las mensualidades de `mes` ('AAAA-MM'); por defecto, el mes actual. */
   async generarMensualidades(mes?: string): Promise<ResultadoGeneracion> {
     const mesActual = hoyEnClub().slice(0, 7);
