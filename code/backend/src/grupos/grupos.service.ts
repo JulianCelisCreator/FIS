@@ -8,16 +8,20 @@ import {
 import { G4SedesCarteraMockAdapter } from '../external-dependencies/adapters/g4-sedes-cartera.mock.adapter.js';
 import { M1UsuariosMockAdapter } from '../external-dependencies/adapters/m1-usuarios.mock.adapter.js';
 import { M2DeportivoMockAdapter } from '../external-dependencies/adapters/m2-deportivo.mock.adapter.js';
+import { M6PersonalMockAdapter } from '../external-dependencies/adapters/m6-personal.mock.adapter.js';
 import {
   type IPuertoG4SedesCartera,
   type IPuertoM1Usuarios,
   type IPuertoM2Deportivo,
+  type IPuertoM6Personal,
   PUERTO_G4_SEDES_CARTERA,
   PUERTO_M1_USUARIOS,
   PUERTO_M2_DEPORTIVO,
+  PUERTO_M6_PERSONAL,
 } from '../external-dependencies/interfaces/external-dependencies.interfaces.js';
 import {
   AsignarProfesorDto,
+  AsignarProfesoresMultipleDto,
   CreateGrupoDto,
   UpdateGrupoDto,
 } from './dto/create-grupo.dto.js';
@@ -26,8 +30,12 @@ import {
   type CategoriaPatinaje,
   type DiaSemana,
   type EstadoCupoGrupo,
+  type EvaluacionDisponibilidadProfesorM3,
   Grupo,
+  type GrupoAsignadoProfesorM3,
   type Horario,
+  type ProfesorAsignadoGrupo,
+  type RolDocenteGrupo,
 } from './entities/grupo.entity.js';
 
 const DIAS_VALIDOS: DiaSemana[] = [
@@ -45,6 +53,7 @@ export class GruposService {
   private readonly puertoM1: IPuertoM1Usuarios;
   private readonly puertoM2: IPuertoM2Deportivo;
   private readonly puertoG4: IPuertoG4SedesCartera;
+  private readonly puertoM6: IPuertoM6Personal;
 
   private grupos: Grupo[] = [];
 
@@ -58,10 +67,14 @@ export class GruposService {
     @Optional()
     @Inject(PUERTO_G4_SEDES_CARTERA)
     puertoG4?: IPuertoG4SedesCartera,
+    @Optional()
+    @Inject(PUERTO_M6_PERSONAL)
+    puertoM6?: IPuertoM6Personal,
   ) {
     this.puertoM1 = puertoM1 ?? new M1UsuariosMockAdapter();
     this.puertoM2 = puertoM2 ?? new M2DeportivoMockAdapter();
     this.puertoG4 = puertoG4 ?? new G4SedesCarteraMockAdapter();
+    this.puertoM6 = puertoM6 ?? new M6PersonalMockAdapter();
 
     this.grupos = [
       this.construirGrupo({
@@ -75,7 +88,22 @@ export class GruposService {
         ocupados: 12,
         profesorId: 'PROF-01',
         profesorNombre: 'Carlos Mendoza',
+        profesoresAsignados: [
+          {
+            profesorId: 'PROF-01',
+            nombreCompleto: 'Carlos Mendoza',
+            rolDocente: 'TITULAR',
+            fechaAsignacion: '2026-09-23T08:00:00Z',
+          },
+        ],
         horarios: [
+          {
+            id: 'HOR-00',
+            dia: 'Lunes',
+            horaInicio: '14:00',
+            horaFin: '16:00',
+            pista: 'Pista 1 · Norte',
+          },
           {
             id: 'HOR-01',
             dia: 'Martes',
@@ -97,6 +125,20 @@ export class GruposService {
         ocupados: 18,
         profesorId: 'PROF-03',
         profesorNombre: 'Ana Gómez',
+        profesoresAsignados: [
+          {
+            profesorId: 'PROF-03',
+            nombreCompleto: 'Ana Gómez',
+            rolDocente: 'TITULAR',
+            fechaAsignacion: '2026-09-23T08:30:00Z',
+          },
+          {
+            profesorId: 'PROF-05',
+            nombreCompleto: 'Carlos Díaz',
+            rolDocente: 'ASISTENTE',
+            fechaAsignacion: '2026-09-23T09:00:00Z',
+          },
+        ],
         horarios: [
           {
             id: 'HOR-02',
@@ -126,6 +168,14 @@ export class GruposService {
         ocupados: 20,
         profesorId: 'PROF-04',
         profesorNombre: 'Luis Rojas',
+        profesoresAsignados: [
+          {
+            profesorId: 'PROF-04',
+            nombreCompleto: 'Luis Rojas',
+            rolDocente: 'TITULAR',
+            fechaAsignacion: '2026-09-23T10:00:00Z',
+          },
+        ],
         horarios: [
           {
             id: 'HOR-04',
@@ -228,6 +278,7 @@ export class GruposService {
     ocupados: number;
     profesorId: string | null;
     profesorNombre: string | null;
+    profesoresAsignados?: ProfesorAsignadoGrupo[];
     horarios: Horario[];
     activo: boolean;
   }): Grupo {
@@ -244,6 +295,19 @@ export class GruposService {
       params.ocupados,
       params.aforoMax,
     );
+
+    const profesoresAsignados: ProfesorAsignadoGrupo[] =
+      params.profesoresAsignados ??
+      (params.profesorId && params.profesorNombre
+        ? [
+            {
+              profesorId: params.profesorId,
+              nombreCompleto: params.profesorNombre,
+              rolDocente: 'TITULAR',
+              fechaAsignacion: '2026-09-23T08:00:00Z',
+            },
+          ]
+        : []);
 
     return {
       grupoId: params.grupoId,
@@ -267,8 +331,10 @@ export class GruposService {
       alerta90: metricas.alerta90,
       estadoCupo: metricas.estadoCupo,
       bloqueadoInscripcion: metricas.bloqueadoInscripcion || !params.activo,
-      profesorId: params.profesorId,
-      profesorNombre: params.profesorNombre,
+      profesorId: profesoresAsignados[0]?.profesorId ?? params.profesorId,
+      profesorNombre:
+        profesoresAsignados[0]?.nombreCompleto ?? params.profesorNombre,
+      profesoresAsignados,
       horarios: params.horarios,
       activo: params.activo,
     };
@@ -285,6 +351,24 @@ export class GruposService {
     grupo.estadoCupo = metricas.estadoCupo;
     grupo.porcentajeOcupacion = metricas.porcentajeOcupacion;
     grupo.bloqueadoInscripcion = metricas.bloqueadoInscripcion || !grupo.activo;
+    if (!Array.isArray(grupo.profesoresAsignados)) {
+      grupo.profesoresAsignados =
+        grupo.profesorId && grupo.profesorNombre
+          ? [
+              {
+                profesorId: grupo.profesorId,
+                nombreCompleto: grupo.profesorNombre,
+                rolDocente: 'TITULAR',
+                fechaAsignacion: '2026-09-23T08:00:00Z',
+              },
+            ]
+          : [];
+    }
+    const titular =
+      grupo.profesoresAsignados.find((p) => p.rolDocente === 'TITULAR') ??
+      grupo.profesoresAsignados[0];
+    grupo.profesorId = titular?.profesorId ?? null;
+    grupo.profesorNombre = titular?.nombreCompleto ?? null;
     return grupo;
   }
 
@@ -417,6 +501,7 @@ export class GruposService {
       ocupados: ocupadosInicial,
       profesorId: null,
       profesorNombre: null,
+      profesoresAsignados: [],
       horarios: [],
       activo: true,
     });
@@ -538,32 +623,316 @@ export class GruposService {
     return this.sincronizarMetricas(grupo);
   }
 
-  asignarProfesor(grupoId: string, dto: AsignarProfesorDto): Grupo {
-    const grupo = this.findOne(grupoId);
+  // ==========================================================================
+  // HU-3.2: ASIGNACIÓN DE PROFESORES Y VALIDACIÓN DE CONFLICTOS DE HORARIO
+  // ==========================================================================
 
-    const gruposDelProfesor = this.grupos.filter(
-      (g) => g.profesorId === dto.profesorId && g.id !== grupoId,
+  private profesorPerteneceAGrupo(grupo: Grupo, profesorId: string): boolean {
+    return (
+      grupo.profesorId === profesorId ||
+      grupo.profesoresAsignados.some((p) => p.profesorId === profesorId)
+    );
+  }
+
+  /**
+   * Evalúa si un profesor tiene conflicto de horario o restricción contractual (DEP-M6-01)
+   * frente a los horarios de un grupo objetivo, cruzando además contra otros grupos asignados.
+   */
+  evaluarConflictoHorarioProfesor(
+    grupo: Grupo,
+    profesorId: string,
+    nombreFallback?: string,
+  ): string | null {
+    const profM1 = this.puertoM1
+      .listarProfesoresActivos()
+      .find((p) => p.profesorId === profesorId);
+    const nombreProfesor =
+      profM1?.nombreCompleto ?? nombreFallback ?? profesorId;
+
+    const infoPersonalM6 =
+      this.puertoM6.obtenerDisponibilidadDocente(profesorId);
+
+    if (infoPersonalM6 && infoPersonalM6.estadoContrato !== 'ACTIVO') {
+      return `El profesor ${nombreProfesor} no tiene un contrato activo en DEP-M6-01 (estado: ${infoPersonalM6.estadoContrato}).`;
+    }
+
+    // 1. Cruzar horarios del grupo contra bloques ocupados externos y disponibilidad de DEP-M6-01
+    if (infoPersonalM6) {
+      for (const hActual of grupo.horarios) {
+        const conflictoExterno = infoPersonalM6.bloquesOcupadosExternos?.find(
+          (bloque) =>
+            bloque.diaSemana === hActual.dia &&
+            hActual.horaInicio < bloque.horaFin &&
+            hActual.horaFin > bloque.horaInicio,
+        );
+        if (conflictoExterno) {
+          return `${nombreProfesor} ya tiene clase programada los ${hActual.dia.toLowerCase()} a las ${conflictoExterno.horaInicio} (${conflictoExterno.motivo}). Seleccione otro docente o franja.`;
+        }
+
+        const dentroDeJornada = infoPersonalM6.disponibilidad.some(
+          (disp) =>
+            disp.diaSemana === hActual.dia &&
+            hActual.horaInicio >= disp.horaInicio &&
+            hActual.horaFin <= disp.horaFin,
+        );
+        if (!dentroDeJornada) {
+          return `${nombreProfesor} no cuenta con disponibilidad laboral registrada en DEP-M6-01 para el día ${hActual.dia} (${hActual.horaInicio}–${hActual.horaFin}).`;
+        }
+      }
+    }
+
+    // 2. Cruzar horarios del grupo contra asignaciones previas en otros grupos activos
+    const otrosGruposDelProfesor = this.grupos.filter(
+      (g) =>
+        g.activo &&
+        g.grupoId !== grupo.grupoId &&
+        this.profesorPerteneceAGrupo(g, profesorId),
     );
 
-    for (const otroGrupo of gruposDelProfesor) {
+    for (const otroGrupo of otrosGruposDelProfesor) {
       for (const hActual of grupo.horarios) {
-        const hayCruce = otroGrupo.horarios.some(
+        const cruce = otroGrupo.horarios.find(
           (hOtro) =>
             hOtro.dia === hActual.dia &&
             hActual.horaInicio < hOtro.horaFin &&
             hActual.horaFin > hOtro.horaInicio,
         );
-        if (hayCruce) {
-          throw new BadRequestException(
-            `El profesor ${dto.profesorNombre} ya tiene clase asignada el ${hActual.dia} en ese bloque horario`,
-          );
+        if (cruce) {
+          return `El profesor ${nombreProfesor} ya tiene clase asignada en «${otroGrupo.nombre}» el ${hActual.dia} de ${cruce.horaInicio} a ${cruce.horaFin}. Seleccione otro docente o franja.`;
         }
       }
     }
 
-    grupo.profesorId = dto.profesorId;
-    grupo.profesorNombre = dto.profesorNombre;
-    return grupo;
+    return null;
+  }
+
+  /**
+   * API-M3-02: GET /api/v1/profesores/{id}/grupos
+   * Devuelve [{ grupoId, nombreGrupo, rolDocente, horarios[] }]
+   */
+  obtenerGruposPorProfesor(profesorId: string): GrupoAsignadoProfesorM3[] {
+    const resultado: GrupoAsignadoProfesorM3[] = [];
+    for (const grupo of this.grupos) {
+      if (!grupo.activo) continue;
+      const asignacion = grupo.profesoresAsignados.find(
+        (p) => p.profesorId === profesorId,
+      );
+      if (asignacion || grupo.profesorId === profesorId) {
+        resultado.push({
+          grupoId: grupo.grupoId,
+          nombreGrupo: grupo.nombre,
+          rolDocente: asignacion?.rolDocente ?? 'TITULAR',
+          sedeNombre: grupo.sedeNombre,
+          nivelNombre: grupo.nivelNombre,
+          horarios: grupo.horarios,
+        });
+      }
+    }
+    return resultado;
+  }
+
+  /**
+   * Lista todos los profesores activos de DEP-M1-02 enriquecidos con su disponibilidad
+   * laboral de DEP-M6-01, sus grupos asignados (API-M3-02) y la validación de conflicto
+   * en tiempo real frente al grupo consultado.
+   */
+  listarProfesoresConDisponibilidad(
+    grupoId?: string,
+  ): EvaluacionDisponibilidadProfesorM3[] {
+    const grupoObjetivo = grupoId
+      ? this.grupos.find((g) => g.grupoId === grupoId || g.id === grupoId)
+      : undefined;
+
+    return this.puertoM1.listarProfesoresActivos().map((prof) => {
+      const infoM6 = this.puertoM6.obtenerDisponibilidadDocente(prof.profesorId);
+      const detalleConflicto = grupoObjetivo
+        ? this.evaluarConflictoHorarioProfesor(
+            grupoObjetivo,
+            prof.profesorId,
+            prof.nombreCompleto,
+          )
+        : null;
+      const yaAsignadoAlGrupo = grupoObjetivo
+        ? this.profesorPerteneceAGrupo(grupoObjetivo, prof.profesorId)
+        : false;
+
+      return {
+        profesorId: prof.profesorId,
+        nombreCompleto: prof.nombreCompleto,
+        especialidad: prof.especialidad ?? 'Patinaje de velocidad',
+        cargo: infoM6?.cargo ?? 'Entrenador',
+        estadoContrato: infoM6?.estadoContrato ?? 'ACTIVO',
+        disponible: detalleConflicto === null,
+        tieneConflicto: detalleConflicto !== null,
+        yaAsignadoAlGrupo,
+        detalleConflicto,
+        gruposAsignados: this.obtenerGruposPorProfesor(prof.profesorId),
+      };
+    });
+  }
+
+  /**
+   * Obtiene el perfil actualizado y la agenda completa de un profesor específico.
+   */
+  obtenerPerfilProfesor(profesorId: string) {
+    const profM1 = this.puertoM1
+      .listarProfesoresActivos()
+      .find((p) => p.profesorId === profesorId);
+    if (!profM1) {
+      throw new NotFoundException(
+        `El profesor con ID ${profesorId} no existe o no está activo en DEP-M1-02`,
+      );
+    }
+    const infoM6 = this.puertoM6.obtenerDisponibilidadDocente(profesorId);
+    return {
+      profesorId: profM1.profesorId,
+      nombreCompleto: profM1.nombreCompleto,
+      estado: profM1.estado,
+      especialidad: profM1.especialidad ?? 'Patinaje de velocidad',
+      cargo: infoM6?.cargo ?? 'Entrenador',
+      estadoContrato: infoM6?.estadoContrato ?? 'ACTIVO',
+      disponibilidad: infoM6?.disponibilidad ?? [],
+      bloquesOcupadosExternos: infoM6?.bloquesOcupadosExternos ?? [],
+      gruposAsignados: this.obtenerGruposPorProfesor(profesorId),
+    };
+  }
+
+  /**
+   * HU-3.2: Asignar un profesor a un grupo validando conflictos en tiempo real
+   * contra otros grupos y DEP-M6-01 (Escenario BDD 3).
+   */
+  asignarProfesor(grupoId: string, dto: AsignarProfesorDto): Grupo {
+    const grupo = this.findOne(grupoId);
+
+    const profM1 = this.puertoM1
+      .listarProfesoresActivos()
+      .find((p) => p.profesorId === dto.profesorId);
+    const nombreDocente =
+      profM1?.nombreCompleto ?? dto.profesorNombre ?? dto.profesorId;
+
+    const conflicto = this.evaluarConflictoHorarioProfesor(
+      grupo,
+      dto.profesorId,
+      nombreDocente,
+    );
+    if (conflicto) {
+      throw new BadRequestException(conflicto);
+    }
+
+    const rolDocente: RolDocenteGrupo =
+      dto.rolDocente ??
+      (grupo.profesoresAsignados.length === 0 ? 'TITULAR' : 'ASISTENTE');
+
+    const yaExiste = grupo.profesoresAsignados.find(
+      (p) => p.profesorId === dto.profesorId,
+    );
+    if (yaExiste) {
+      yaExiste.rolDocente = dto.rolDocente ?? yaExiste.rolDocente;
+      yaExiste.nombreCompleto = nombreDocente;
+    } else {
+      if (rolDocente === 'TITULAR') {
+        for (const existente of grupo.profesoresAsignados) {
+          if (existente.rolDocente === 'TITULAR') {
+            existente.rolDocente = 'ASISTENTE';
+          }
+        }
+      }
+      grupo.profesoresAsignados.push({
+        profesorId: dto.profesorId,
+        nombreCompleto: nombreDocente,
+        rolDocente,
+        fechaAsignacion: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+      });
+    }
+
+    return this.sincronizarMetricas(grupo);
+  }
+
+  /**
+   * HU-3.2: Asignar múltiples profesores en lote a un grupo específico.
+   * Si alguno presenta traslape de horario, bloquea la operación con el detalle del conflicto.
+   */
+  asignarProfesoresMultiple(
+    grupoId: string,
+    dto: AsignarProfesoresMultipleDto,
+  ): Grupo {
+    const grupo = this.findOne(grupoId);
+    if (!dto.profesoresIds || dto.profesoresIds.length === 0) {
+      throw new BadRequestException(
+        'Debe seleccionar al menos un profesor para asignar al grupo',
+      );
+    }
+
+    // Primero validamos todos para que la asignación sea atómica
+    for (const profesorId of dto.profesoresIds) {
+      const profM1 = this.puertoM1
+        .listarProfesoresActivos()
+        .find((p) => p.profesorId === profesorId);
+      if (!profM1) {
+        throw new BadRequestException(
+          `El profesor '${profesorId}' no existe o no está activo en DEP-M1-02`,
+        );
+      }
+      const conflicto = this.evaluarConflictoHorarioProfesor(
+        grupo,
+        profesorId,
+        profM1.nombreCompleto,
+      );
+      if (conflicto) {
+        throw new BadRequestException(conflicto);
+      }
+    }
+
+    for (const profesorId of dto.profesoresIds) {
+      const profM1 = this.puertoM1
+        .listarProfesoresActivos()
+        .find((p) => p.profesorId === profesorId)!;
+      const yaAsignado = grupo.profesoresAsignados.find(
+        (p) => p.profesorId === profesorId,
+      );
+      if (!yaAsignado) {
+        const tieneTitular = grupo.profesoresAsignados.some(
+          (p) => p.rolDocente === 'TITULAR',
+        );
+        grupo.profesoresAsignados.push({
+          profesorId: profM1.profesorId,
+          nombreCompleto: profM1.nombreCompleto,
+          rolDocente:
+            dto.rolDocente ?? (tieneTitular ? 'ASISTENTE' : 'TITULAR'),
+          fechaAsignacion: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+        });
+      }
+    }
+
+    return this.sincronizarMetricas(grupo);
+  }
+
+  /**
+   * HU-3.2: Quitar (desasignar) un profesor de un grupo actualizando de inmediato su agenda.
+   */
+  desasignarProfesor(grupoId: string, profesorId: string): Grupo {
+    const grupo = this.findOne(grupoId);
+    const existia = grupo.profesoresAsignados.some(
+      (p) => p.profesorId === profesorId,
+    );
+    if (!existia && grupo.profesorId !== profesorId) {
+      throw new NotFoundException(
+        `El profesor ${profesorId} no se encuentra asignado al grupo ${grupo.nombre}`,
+      );
+    }
+
+    grupo.profesoresAsignados = grupo.profesoresAsignados.filter(
+      (p) => p.profesorId !== profesorId,
+    );
+
+    if (
+      grupo.profesoresAsignados.length > 0 &&
+      !grupo.profesoresAsignados.some((p) => p.rolDocente === 'TITULAR')
+    ) {
+      grupo.profesoresAsignados[0].rolDocente = 'TITULAR';
+    }
+
+    return this.sincronizarMetricas(grupo);
   }
 
   agregarHorario(grupoId: string, dto: CreateHorarioDto): Horario {

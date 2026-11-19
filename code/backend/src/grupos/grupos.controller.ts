@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Headers,
   Param,
@@ -9,6 +10,7 @@ import {
 } from '@nestjs/common';
 import {
   AsignarProfesorDto,
+  AsignarProfesoresMultipleDto,
   CambiarEstadoGrupoDto,
   CreateGrupoDto,
   UpdateGrupoDto,
@@ -17,7 +19,7 @@ import { CreateHorarioDto } from './dto/create-horario.dto.js';
 import { GruposService } from './grupos.service.js';
 
 /**
- * Controlador de Grupos (HU-3.1).
+ * Controlador de Grupos (HU-3.1 y HU-3.2).
  * Expone API-M3-01 en GET /api/v1/grupos, y soporta además /v1/grupos y /grupos
  * para compatibilidad directa y a través del proxy /api de Vite.
  */
@@ -65,12 +67,31 @@ export class GruposController {
     return this.gruposService.registrarInscripcionEnGrupo(id);
   }
 
+  /** HU-3.2: Asignar un profesor individual a un grupo */
   @Patch(':id/profesor')
   asignarProfesor(
     @Param('id') id: string,
     @Body() asignarProfesorDto: AsignarProfesorDto,
   ) {
     return this.gruposService.asignarProfesor(id, asignarProfesorDto);
+  }
+
+  /** HU-3.2: Asignar uno o varios profesores a un grupo con validación de traslape */
+  @Post(':id/profesores')
+  asignarProfesoresMultiple(
+    @Param('id') id: string,
+    @Body() dto: AsignarProfesoresMultipleDto,
+  ) {
+    return this.gruposService.asignarProfesoresMultiple(id, dto);
+  }
+
+  /** HU-3.2: Quitar (desasignar) un profesor de un grupo */
+  @Delete(':id/profesores/:profesorId')
+  desasignarProfesor(
+    @Param('id') id: string,
+    @Param('profesorId') profesorId: string,
+  ) {
+    return this.gruposService.desasignarProfesor(id, profesorId);
   }
 
   @Post(':id/horarios')

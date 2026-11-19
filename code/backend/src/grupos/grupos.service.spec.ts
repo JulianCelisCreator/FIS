@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ExternalDependenciesModule } from '../external-dependencies/external-dependencies.module.js';
 import { GruposService } from './grupos.service.js';
 
-describe('GruposService (HU-3.1: Configuración de grupos y aforo)', () => {
+describe('GruposService (HU-3.1 y HU-3.2)', () => {
   let service: GruposService;
 
   beforeEach(async () => {
@@ -161,5 +161,87 @@ describe('GruposService (HU-3.1: Configuración de grupos y aforo)', () => {
         pista: 'Pista Principal - El Salitre',
       }),
     ).toThrow(BadRequestException);
+  });
+
+  // ==========================================================================
+  // PRUEBAS HU-3.2: ASIGNACIÓN DE PROFESORES Y ESCENARIO BDD 3
+  // ==========================================================================
+
+  it('Escenario BDD 3: debe emitir alerta de traslape y bloquear la asignación cuando Profesor Person ya tiene clase los lunes a las 14:00 (DEP-M6-01)', () => {
+    // GRP-01 tiene horario el Lunes de 14:00 a 16:00, y Profesor Person (PROF-02) ya tiene clase los lunes a las 14:00 en DEP-M6-01
+    const disponibilidad = service.listarProfesoresConDisponibilidad('GRP-01');
+    const profesorPerson = disponibilidad.find(
+      (p) => p.profesorId === 'PROF-02',
+    );
+    expect(profesorPerson).toBeDefined();
+    expect(profesorPerson?.tieneConflicto).toBe(true);
+    expect(profesorPerson?.detalleConflicto).toContain('lunes a las 14:00');
+
+    expect(() =>
+      service.asignarProfesor('GRP-01', {
+        profesorId: 'PROF-02',
+        profesorNombre: 'Profesor Person',
+      }),
+    ).toThrow(BadRequestException);
+
+    expect(() =>
+      service.asignarProfesoresMultiple('GRP-01', {
+        profesoresIds: ['PROF-02'],
+      }),
+    ).toThrow(BadRequestException);
+  });
+
+  it('HU-3.2: debe permitir asignar múltiples profesores sin conflicto a un grupo y reflejarlo de inmediato en API-M3-02 (obtenerGruposPorProfesor)', () => {
+    // GRP-02 (Intermedio Sur B: Mar y Jue 14:00) tiene libres a Ana Gómez (PROF-03) y Luis Rojas (PROF-04)
+    const actualizado = service.asignarProfesoresMultiple('GRP-02', {
+      profesoresIds: ['PROF-03', 'PROF-04'],
+    });
+
+    expect(
+      actualizado.profesoresAsignados.some((p) => p.profesorId === 'PROF-04'),
+    ).toBe(true);
+
+    // API-M3-02: GET /api/v1/profesores/PROF-04/grupos
+    const gruposDeLuis = service.obtenerGruposPorProfesor('PROF-04');
+    expect(gruposDeLuis.some((g) => g.grupoId === 'GRP-02')).toBe(true);
+    for (const g of gruposDeLuis) {
+      expect(g.grupoId).toBeDefined();
+      expect(g.nombreGrupo).toBeDefined();
+      expect(g.rolDocente).toBeDefined();
+      expect(Array.isArray(g.horarios)).toBe(true);
+    }
+
+    // Si ahora creamos otro grupo con horario Martes 14:00-16:00 e intentamos asignar a Ana Gómez (PROF-03), debe bloquear por cruce entre grupos
+    const nuevoGrupoMartes = service.create({
+      nombre: 'Transición Sur Tarde',
+      nivelId: 'NIV-02',
+      categoriaId: 'CAT-02',
+      sedeId: 'SEDE-SUR-P2',
+      dias: ['Martes'],
+      aforoMax: 15,
+    });
+    service.agregarHorario(nuevoGrupoMartes.grupoId, {
+      dia: 'Martes',
+      horaInicio: '14:00',
+      horaFin: '16:00',
+      pista: 'Pista 2 · Sur',
+    });
+
+    expect(() =>
+      service.asignarProfesor(nuevoGrupoMartes.grupoId, {
+        profesorId: 'PROF-03',
+        profesorNombre: 'Ana Gómez',
+      }),
+    ).toThrow(BadRequestException);
+  });
+
+  it('HU-3.2: debe permitir quitar un profesor de un grupo y actualizar inmediatamente su perfil en API-M3-02', () => {
+    const antes = service.obtenerGruposPorProfesor('PROF-05');
+    expect(antes.some((g) => g.grupoId === 'GRP-02')).toBe(true);
+
+    service.desasignarProfesor('GRP-02', 'PROF-05');
+
+    const despues = service.obtenerGruposPorProfesor('PROF-05');
+    expect(despues.some((g) => g.grupoId === 'GRP-02')).toBe(false);
   });
 });
