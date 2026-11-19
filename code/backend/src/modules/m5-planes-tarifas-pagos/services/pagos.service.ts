@@ -224,10 +224,29 @@ export class PagosService {
     await this.patinadores.bloquear(tx, patinadorId);
   }
 
-  /** Emite el comprobante y lee la cartera ya recalculada con el nuevo pago. */
-  private async cerrarPago(tx: Consultor, pagoId: number, patinadorId: number) {
-    const comprobante = await this.pagos.emitirComprobante(tx, pagoId);
+  /** Emite el comprobante con sus datos históricos y lee la cartera recalculada. */
+  /** Emite el comprobante con sus datos históricos y lee la cartera recalculada. */
+  private async cerrarPago(
+    tx: Consultor,
+    pagoId: number,
+    patinadorId: number,
+  ) {
+    const datos = await this.pagos.obtenerDatosComprobante(tx, pagoId);
+
+    if (!datos) {
+      throw new Error(
+        `No se encontraron los datos del pago ${pagoId} para generar el comprobante.`,
+      );
+    }
+
+    const comprobante = await this.pagos.emitirComprobante(
+      tx,
+      pagoId,
+      datos,
+    );
+
     const estadoCartera = await this.pagos.estadoCartera(tx, patinadorId);
+
     return { pagoId, patinadorId, comprobante, estadoCartera };
   }
 }
