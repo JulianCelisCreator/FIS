@@ -1,0 +1,81 @@
+/* HU-M1-09 · Familia del menor. Solo disposición; colores y tipografía vienen de tokens.css y app.css. */
+
+.m1-familia__paneles {
+  align-items: start;
+}
+
+.m1-familia__contexto {
+  display: grid;
+  gap: 1rem;
+  align-items: end;
+}
+
+.m1-familia__contexto-texto {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.m1-familia__selector {
+  min-width: 0;
+}
+
+.m1-perfil__head,
+.m1-familia__card-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.m1-perfil__persona {
+  margin-top: 0.85rem;
+}
+
+.m1-familia__requisitos {
+  margin: 0.35rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.m1-familia__autorizacion > .vl-dl,
+.m1-perfil > .vl-dl {
+  margin-bottom: 1.25rem;
+}
+
+.m1-familia__autorizacion > * + * {
+  margin-top: 1rem;
+}
+
+.m1-familia__accion {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.m1-familia__texto-legal {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--ice);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+@media (min-width: 720px) {
+  .m1-familia__contexto {
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+  }
+}
+
+@media (max-width: 719px) {
+  .m1-familia__accion .vl-button {
+    width: 100%;
+  }
+
+  .m1-perfil__head,
+  .m1-familia__card-head {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}

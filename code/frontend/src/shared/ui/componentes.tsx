@@ -68,6 +68,12 @@ const ESTADOS: Record<string, Record<string, [string, Tono]>> = {
   cobro: { pendiente: ['Pendiente', 'warning'], pagado: ['Pagado', 'success'], anulado: ['Anulado', 'neutral'] },
   pago: { registrado: ['Registrado', 'success'], anulado: ['Anulado', 'neutral'] },
   cartera: { 'al-dia': ['Al día', 'success'], pendiente: ['Pendiente', 'warning'], vencido: ['Vencido', 'error'] },
+  autorizacion: {
+    registrada: ['Registrada', 'success'],
+    pendiente: ['Pendiente', 'warning'],
+    'no-aplica': ['No aplica', 'neutral'],
+  },
+  perfil: { bloqueado: ['Bloqueado', 'error'], habilitado: ['Habilitado', 'success'] },
 }
 
 export function Insignia({ entidad, estado }: { entidad: string; estado: string }) {

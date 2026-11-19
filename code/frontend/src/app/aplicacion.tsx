@@ -1,6 +1,7 @@
 import { Alerta } from '../shared/ui/componentes.tsx'
 import { useSesion } from '../shared/sesion/use-sesion.ts'
 import { useRuta } from '../shared/utils/use-ruta.ts'
+import { FamiliaMenor } from '../modules/m1-usuarios-acceso/components/familia-menor.tsx'
 import { NuevaCuenta } from '../modules/m1-usuarios-acceso/components/nueva-cuenta.tsx'
 import { PantallaAcceso } from '../modules/m1-usuarios-acceso/components/pantalla-acceso.tsx'
 import { AsignarCambiarPlan } from '../modules/m5-planes-tarifas-pagos/components/asignar-cambiar-plan.tsx'
@@ -21,6 +22,9 @@ const PANTALLAS = [
 
 /** Pantallas de M1 solo para el Administrador (HU-M1-01; la matriz de permisos llega con HU-M1-07). */
 const PANTALLAS_ADMINISTRADOR = [{ pagina: 'nueva-cuenta', texto: 'Nueva cuenta' }]
+
+/** HU-M1-09: el Administrador y el Acudiente consultan la autorización del menor. */
+const PANTALLA_FAMILIA = { pagina: 'familia-menor', texto: 'Familia del menor' }
 
 const PESTANAS_PAGO: PestanaPago[] = ['cobro', 'sesion', 'matricula']
 
@@ -44,7 +48,10 @@ export function Aplicacion() {
   // Sin sesión: ingreso de M1 (HU-M1-02), sin el marco interno ni la navegación por rol.
   if (!sesion) return <PantallaAcceso />
 
-  const usuarios = tieneRol('ADMINISTRADOR') ? PANTALLAS_ADMINISTRADOR : []
+  const usuarios = [
+    ...(tieneRol('ADMINISTRADOR') ? PANTALLAS_ADMINISTRADOR : []),
+    ...(tieneRol('ADMINISTRADOR') || tieneRol('ACUDIENTE') ? [PANTALLA_FAMILIA] : []),
+  ]
   const pagos = PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso))
   const permitidas = [...usuarios, ...pagos]
   const actual = pagina || permitidas[0]?.pagina || ''
@@ -75,6 +82,14 @@ export function Aplicacion() {
     )
   } else if (actual === 'nueva-cuenta') {
     contenido = <NuevaCuenta key={sesion.id} />
+  } else if (actual === 'familia-menor') {
+    const patinador = Number(parametros.get('patinador'))
+    contenido = (
+      <FamiliaMenor
+        key={`${sesion.id}-${parametros}`}
+        patinadorInicial={Number.isInteger(patinador) && patinador > 0 ? patinador : undefined}
+      />
+    )
   } else if (actual === 'planes') {
     contenido = <PlanesTarifas key={sesion.id} />
   } else if (actual === 'asignar-plan') {
