@@ -124,7 +124,7 @@ function CuentaDelPatinador({ patinador, esAcudiente }: { patinador: PatinadorM5
   if (!cuenta) return <p className="vl-text-caption" role="status">Cargando estado de cuenta…</p>
 
   const pendientes = cuenta.cobros.filter((cobro) => cobro.saldo > 0)
-  const masAntiguo = pendientes[0]
+  const masAntiguo = [...pendientes].sort((a, b) => a.fechaLimite.localeCompare(b.fechaLimite))[0]
   const desde = inicioDelPeriodo(periodo, hoy)
   const pagos = cuenta.pagos.filter((pago) => !desde || pago.fechaPago >= desde)
   const nombreCorto = patinador.nombre.split(' ')[0]
