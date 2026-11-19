@@ -34,4 +34,21 @@ export class SesionesRepository {
     );
     return (resultado.rowCount ?? 0) > 0;
   }
+
+  /**
+   * HU-M1-08: cierra las sesiones abiertas de la cuenta al cambiar la
+   * contraseña. Con exceptoTokenHash conserva la sesión desde la que se hizo
+   * el cambio. Devuelve cuántas cerró.
+   */
+  async cerrarDeUsuario(consultor: Consultor, usuarioId: number, exceptoTokenHash: string | null = null): Promise<number> {
+    const resultado = await consultor.query(
+      `UPDATE sesion
+          SET cerrada_en = now()
+        WHERE usuario_id = $1
+          AND cerrada_en IS NULL
+          AND ($2::text IS NULL OR refresh_token_hash <> $2)`,
+      [usuarioId, exceptoTokenHash],
+    );
+    return resultado.rowCount ?? 0;
+  }
 }
