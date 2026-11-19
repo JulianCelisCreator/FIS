@@ -22,6 +22,13 @@ export interface ContextoSesion {
   error: string | null
   /** Guarda la sesión que devolvió el ingreso (HU-M1-02). */
   establecerSesion: (sesion: Sesion) => void
+  /**
+   * Cierra la sesión en el servidor y vuelve al ingreso (HU-M1-03). Si el
+   * servidor no responde, lanza el error y la sesión sigue abierta.
+   */
+  cerrarSesion: () => Promise<void>
+  /** true justo después de cerrar sesión, para confirmarlo en el ingreso. */
+  sesionRecienCerrada: boolean
   tienePermiso: (permiso: string) => boolean
   tieneRol: (rol: Rol) => boolean
 }
