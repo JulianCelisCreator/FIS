@@ -78,6 +78,12 @@ const ESTADOS: Record<string, Record<string, [string, Tono]>> = {
     'no-aplica': ['No aplica', 'neutral'],
   },
   perfil: { bloqueado: ['Bloqueado', 'error'], habilitado: ['Habilitado', 'success'] },
+  grupo: {
+    'con-cupo': ['Con cupo', 'success'],
+    'alerta-90': ['Alerta al 90 %', 'warning'],
+    lleno: ['Lleno', 'error'],
+    desactivado: ['Desactivado', 'neutral'],
+  },
 }
 
 export function Insignia({ entidad, estado }: { entidad: string; estado: string }) {
