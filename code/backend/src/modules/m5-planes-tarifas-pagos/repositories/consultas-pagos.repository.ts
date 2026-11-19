@@ -257,7 +257,8 @@ export class ConsultasPagosRepository {
                 CROSS JOIN LATERAL (
                   SELECT COALESCE(sum(pc2.monto_aplicado), 0) AS total
                   FROM pago_cobro pc2 JOIN pago p2 ON p2.id = pc2.pago_id
-                  WHERE pc2.cobro_id = co.id AND p2.id < pg.id AND p2.estado = 'REGISTRADO'
+                  WHERE pc2.cobro_id = co.id AND p2.id < pg.id
+                    AND (p2.estado = 'REGISTRADO' OR p2.anulado_en > pg.registrado_en)
                 ) ant
                 WHERE pc.pago_id = pg.id
               ), '[]') AS cobros
