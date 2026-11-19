@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
@@ -8,15 +9,18 @@ import {
 import { G4SedesCarteraMockAdapter } from '../external-dependencies/adapters/g4-sedes-cartera.mock.adapter.js';
 import { M1UsuariosMockAdapter } from '../external-dependencies/adapters/m1-usuarios.mock.adapter.js';
 import { M2DeportivoMockAdapter } from '../external-dependencies/adapters/m2-deportivo.mock.adapter.js';
+import { M4CompetenciasMockAdapter } from '../external-dependencies/adapters/m4-competencias.mock.adapter.js';
 import { M6PersonalMockAdapter } from '../external-dependencies/adapters/m6-personal.mock.adapter.js';
 import {
   type IPuertoG4SedesCartera,
   type IPuertoM1Usuarios,
   type IPuertoM2Deportivo,
+  type IPuertoM4Competencias,
   type IPuertoM6Personal,
   PUERTO_G4_SEDES_CARTERA,
   PUERTO_M1_USUARIOS,
   PUERTO_M2_DEPORTIVO,
+  PUERTO_M4_COMPETENCIAS,
   PUERTO_M6_PERSONAL,
   type RegistroNotificacionM1,
 } from '../external-dependencies/interfaces/external-dependencies.interfaces.js';
@@ -28,7 +32,9 @@ import {
   UpdateGrupoDto,
 } from './dto/create-grupo.dto.js';
 import {
+  ActualizarEventoGlobalDto,
   CancelarHorarioDto,
+  CrearEventoGlobalDto,
   CreateHorarioDto,
   UpdateHorarioDto,
 } from './dto/create-horario.dto.js';
@@ -38,11 +44,13 @@ import {
   type DiaSemana,
   type EstadoCupoGrupo,
   type EvaluacionDisponibilidadProfesorM3,
+  type EventoCalendarioM3,
   Grupo,
   type GrupoAsignadoProfesorM3,
   type Horario,
   type InscripcionEstudianteGrupoM3,
   type ProfesorAsignadoGrupo,
+  type RespuestaCalendarioConsolidadoM3,
   type RespuestaOperacionHorarioM3,
   type ResultadoCambioGrupoM3,
   type RolDocenteGrupo,
@@ -58,16 +66,28 @@ const DIAS_VALIDOS: DiaSemana[] = [
   'Domingo',
 ];
 
+const FECHAS_OCTUBRE_POR_DIA: Record<DiaSemana, string[]> = {
+  Lunes: ['2026-10-05', '2026-10-12', '2026-10-19', '2026-10-26'],
+  Martes: ['2026-10-06', '2026-10-13', '2026-10-20', '2026-10-27'],
+  Miercoles: ['2026-10-07', '2026-10-14', '2026-10-21', '2026-10-28'],
+  Jueves: ['2026-10-08', '2026-10-15', '2026-10-22', '2026-10-29'],
+  Viernes: ['2026-10-09', '2026-10-16', '2026-10-23', '2026-10-30'],
+  Sabado: ['2026-10-10', '2026-10-17', '2026-10-24', '2026-10-31'],
+  Domingo: ['2026-10-11', '2026-10-18', '2026-10-25'],
+};
+
 @Injectable()
 export class GruposService {
   private readonly puertoM1: IPuertoM1Usuarios;
   private readonly puertoM2: IPuertoM2Deportivo;
   private readonly puertoG4: IPuertoG4SedesCartera;
+  private readonly puertoM4: IPuertoM4Competencias;
   private readonly puertoM6: IPuertoM6Personal;
 
   private grupos: Grupo[] = [];
   private contadorHorarios = 10;
   private inscripcionesEstudiantes: InscripcionEstudianteGrupoM3[] = [];
+  private eventosGlobalesClub: EventoCalendarioM3[] = [];
 
   constructor(
     @Optional()
@@ -82,11 +102,15 @@ export class GruposService {
     @Optional()
     @Inject(PUERTO_M6_PERSONAL)
     puertoM6?: IPuertoM6Personal,
+    @Optional()
+    @Inject(PUERTO_M4_COMPETENCIAS)
+    puertoM4?: IPuertoM4Competencias,
   ) {
     this.puertoM1 = puertoM1 ?? new M1UsuariosMockAdapter();
     this.puertoM2 = puertoM2 ?? new M2DeportivoMockAdapter();
     this.puertoG4 = puertoG4 ?? new G4SedesCarteraMockAdapter();
     this.puertoM6 = puertoM6 ?? new M6PersonalMockAdapter();
+    this.puertoM4 = puertoM4 ?? new M4CompetenciasMockAdapter();
 
     this.grupos = [
       this.construirGrupo({
@@ -269,7 +293,6 @@ export class GruposService {
         ],
         activo: true,
       }),
-      // Grupos adicionales de nivel Iniciación (NIV-01) alineados con wireframe HU-3.4
       this.construirGrupo({
         grupoId: 'GRP-04',
         nombre: 'Iniciación Norte B',
@@ -403,14 +426,43 @@ export class GruposService {
         estado: 'ACTIVO',
       },
     ];
+
+    this.eventosGlobalesClub = [
+      {
+        eventoId: 'EVT-INST-01',
+        tipo: 'EVENTO_INSTITUCIONAL',
+        titulo: 'Festivo · Jornada Institucional de Mantenimiento',
+        inicio: '2026-10-12T08:00:00Z',
+        fin: '2026-10-12T18:00:00Z',
+        ubicacion: 'Todas las sedes (Norte, Sur y El Salitre)',
+        sedeId: 'SEDE-NORTE-P1',
+        grupoId: null,
+        nombreGrupo: 'Todos los grupos del club',
+        categorias: ['Todas las categorías'],
+        descripcion:
+          'Fecha institucional de cierre de pistas por día festivo y revisión de seguridad.',
+        estado: 'PROGRAMADO',
+        editablePorAdmin: true,
+      },
+      {
+        eventoId: 'EVT-INST-02',
+        tipo: 'EVENTO_INSTITUCIONAL',
+        titulo: 'Reunión General de Acudientes y Entrega de Uniformes',
+        inicio: '2026-10-15T17:00:00Z',
+        fin: '2026-10-15T19:00:00Z',
+        ubicacion: 'Auditorio Principal · Sede Norte',
+        sedeId: 'SEDE-NORTE-P1',
+        grupoId: null,
+        nombreGrupo: 'Todos los grupos del club',
+        categorias: ['Todas las categorías'],
+        descripcion:
+          'Socialización del reglamento técnico de competencias y entrega de indumentaria.',
+        estado: 'PROGRAMADO',
+        editablePorAdmin: true,
+      },
+    ];
   }
 
-  /**
-   * Regla de aforo RF2.5 / RF-M3-02 (aritmética entera según design-system.md §9.2):
-   * - < 90% -> Con cupo (alerta90 = false)
-   * - >= 90% y < 100% -> Alerta al 90 % (alerta90 = true)
-   * - >= 100% -> Lleno (alerta90 = true, bloqueadoInscripcion = true)
-   */
   calcularMetricasAforo(ocupados: number, aforoMax: number): {
     alerta90: boolean;
     estadoCupo: EstadoCupoGrupo;
@@ -1495,17 +1547,12 @@ export class GruposService {
 
   /**
    * API-M3-04: GET /api/v1/grupos/{id}/estudiantes
-   * Devuelve [{ estudianteId, fechaInscripcion, estado }]
    */
   obtenerEstudiantesDeGrupo(grupoId: string): InscripcionEstudianteGrupoM3[] {
     this.findOne(grupoId);
     return this.inscripcionesEstudiantes.filter((i) => i.grupoId === grupoId);
   }
 
-  /**
-   * Lista los perfiles de prueba disponibles (Estudiante menor, Acudiente autorizado,
-   * Estudiante mayor de edad, Casos de bloqueo por autorización/póliza/cartera).
-   */
   listarPerfilesAutogestionHU34() {
     const perfiles = this.puertoM2.listarPerfilesDeportivos();
     return perfiles.map((p) => {
@@ -1535,11 +1582,6 @@ export class GruposService {
     });
   }
 
-  /**
-   * HU-3.4: Obtiene el contexto de elegibilidad y grupos filtrados por el nivel
-   * del estudiante (DEP-M2-03) y su plan activo (DEP-G4-02), evaluando las
-   * reglas de menor de edad (DEP-M1-03) y póliza vigente (DEP-M1-04).
-   */
   obtenerContextoAutogestionGrupo(
     estudianteId: string,
     actorRol: 'ESTUDIANTE' | 'ACUDIENTE' = 'ACUDIENTE',
@@ -1560,7 +1602,6 @@ export class GruposService {
     let puedeGestionarCambio = true;
     let motivoBloqueoActor: string | null = null;
 
-    // Regla 1: Bloqueo de cambios para menores de edad (solo acudiente autorizado - DEP-M1-03)
     if (validacionMenor.esMenorEdad && actorRol === 'ESTUDIANTE') {
       puedeGestionarCambio = false;
       motivoBloqueoActor =
@@ -1577,7 +1618,6 @@ export class GruposService {
       }
     }
 
-    // Regla 2: Verificar póliza médico-deportiva vigente (DEP-M1-04) y cartera al día (DEP-G4-02)
     if (puedeGestionarCambio && !poliza.polizaVigente) {
       puedeGestionarCambio = false;
       motivoBloqueoActor = `La póliza médico-deportiva del estudiante se encuentra vencida (${poliza.fechaVencimiento.slice(0, 10)} · DEP-M1-04).`;
@@ -1589,7 +1629,6 @@ export class GruposService {
       motivoBloqueoActor = `El estudiante presenta bloqueo en plan o cartera (${planCartera.estadoCartera} · DEP-G4-02). Debe estar al día en pagos para inscribirse o cambiar de grupo.`;
     }
 
-    // Catálogo filtrado por nivel deportivo (DEP-M2-03) y límite de clases semanales del plan (DEP-G4-02)
     const gruposElegibles = this.grupos
       .filter(
         (g) =>
@@ -1618,14 +1657,6 @@ export class GruposService {
     };
   }
 
-  /**
-   * HU-3.4: Ejecuta atómicamente la inscripción o el cambio de grupo aplicando las
-   * 4 reglas obligatorias:
-   * (1) Bloquear autogestión si es menor de edad (solo acudiente autorizado - DEP-M1-03)
-   * (2) Verificar póliza vigente (DEP-M1-04) y cartera al día / límite de clases (DEP-G4-02)
-   * (3) Revalidar atómicamente que el cupo destino no esté al 100% al confirmar
-   * (4) Liberar de inmediato el cupo del grupo anterior en caso de cambio
-   */
   inscribirOCambiarGrupoEstudiante(
     dto: InscribirCambiarGrupoDto,
   ): ResultadoCambioGrupoM3 {
@@ -1673,14 +1704,12 @@ export class GruposService {
       );
     }
 
-    // Regla 3: Revalidación atómica de cupo al confirmar (bloqueo al 100%)
     if (grupoDestino.ocupados >= grupoDestino.aforoMax) {
       throw new BadRequestException(
         `No hay cupos disponibles en el grupo «${grupoDestino.nombre}» (${grupoDestino.ocupados}/${grupoDestino.aforoMax} · 100% de aforo alcanzado).`,
       );
     }
 
-    // Regla 4: Liberación inmediata del cupo del grupo anterior en caso de cambio
     let grupoAnterior: Grupo | null = null;
     if (inscripcionAnterior) {
       inscripcionAnterior.estado = 'RETIRADO_CAMBIO';
@@ -1696,7 +1725,6 @@ export class GruposService {
       }
     }
 
-    // Ocupar cupo en el grupo destino y registrar inscripción activa con fecha ISO 8601
     grupoDestino.ocupados += 1;
     const grupoNuevoActualizado = this.sincronizarMetricas(grupoDestino);
 
@@ -1723,5 +1751,287 @@ export class GruposService {
       inscripcion: nuevaInscripcion,
       mensaje,
     };
+  }
+
+  // ==========================================================================
+  // HU-3.5: CALENDARIO CONSOLIDADO SEGMENTADO POR ROL Y API-M3-05
+  // ==========================================================================
+
+  private resolverGruposVisiblesParaSesion(
+    authorizationHeader?: string,
+    grupoIdFiltro?: string,
+  ): {
+    sesion: RespuestaCalendarioConsolidadoM3['sesion'];
+    gruposPermitidosIds: string[];
+  } {
+    const sesionM1 = this.puertoM1.validarSesion(authorizationHeader);
+    let gruposAsociadosIds: string[] = [];
+
+    if (sesionM1.rol === 'ADMIN') {
+      gruposAsociadosIds = this.grupos
+        .filter((g) => g.activo)
+        .map((g) => g.grupoId);
+    } else if (sesionM1.rol === 'PROFESOR') {
+      gruposAsociadosIds = this.obtenerGruposPorProfesor(sesionM1.userId).map(
+        (g) => g.grupoId,
+      );
+    } else {
+      const estId = sesionM1.estudianteVinculadoId ?? sesionM1.userId;
+      const insc = this.inscripcionesEstudiantes.find(
+        (i) => i.estudianteId === estId && i.estado === 'ACTIVO',
+      );
+      gruposAsociadosIds = insc ? [insc.grupoId] : ['GRP-01'];
+    }
+
+    const gruposPermitidosIds = grupoIdFiltro
+      ? gruposAsociadosIds.filter((id) => id === grupoIdFiltro)
+      : gruposAsociadosIds;
+
+    return {
+      sesion: {
+        userId: sesionM1.userId,
+        rol: sesionM1.rol,
+        nombreCompleto: sesionM1.nombreCompleto ?? sesionM1.userId,
+        gruposAsociadosIds,
+      },
+      gruposPermitidosIds,
+    };
+  }
+
+  /**
+   * API-M3-05: GET /api/v1/calendario
+   * Devuelve [{ eventoId, tipo, titulo, inicio, fin, ubicacion, ... }]
+   * consolidando entrenamientos (HU-3.3), competencias (DEP-M4-01) y eventos
+   * institucionales globales del club, filtrados por rol y pertenencia a grupo (DEP-M1-01).
+   */
+  obtenerEventosCalendario(
+    authorizationHeader?: string,
+    filtros?: {
+      tipo?: string;
+      grupoId?: string;
+      fechaInicio?: string;
+      fechaFin?: string;
+    },
+  ): EventoCalendarioM3[] {
+    const { sesion, gruposPermitidosIds } =
+      this.resolverGruposVisiblesParaSesion(
+        authorizationHeader,
+        filtros?.grupoId,
+      );
+
+    const eventos: EventoCalendarioM3[] = [];
+
+    // 1. Entrenamientos de los grupos asociados al usuario (HU-3.3)
+    for (const grupo of this.grupos) {
+      if (!grupo.activo) continue;
+      if (!gruposPermitidosIds.includes(grupo.grupoId)) continue;
+
+      for (const h of this.horariosActivosDelGrupo(grupo)) {
+        const dia = h.diaSemana ?? h.dia;
+        const fechasMes = FECHAS_OCTUBRE_POR_DIA[dia] ?? ['2026-10-05'];
+        for (const fecha of fechasMes) {
+          const inicioIso = `${fecha}T${h.horaInicio}:00Z`;
+          const finIso = `${fecha}T${h.horaFin}:00Z`;
+          eventos.push({
+            eventoId: `EVT-ENT-${h.horarioId ?? h.id}-${fecha}`,
+            tipo: 'ENTRENAMIENTO',
+            titulo: `Entrenamiento · ${grupo.nombre}`,
+            inicio: inicioIso,
+            fin: finIso,
+            ubicacion: `${h.pista} (Sede ${h.sedeNombre ?? grupo.sedeNombre})`,
+            sedeId: h.sedeId ?? grupo.sedeId,
+            grupoId: grupo.grupoId,
+            nombreGrupo: grupo.nombre,
+            categorias: [grupo.categoriaNombre],
+            descripcion: `Sesión de entrenamiento técnico nivel ${grupo.nivelNombre}. Entrenador: ${grupo.profesorNombre ?? 'Equipo técnico'}.`,
+            estado:
+              h.estado === 'REPROGRAMADO' ? 'REPROGRAMADO' : 'PROGRAMADO',
+            editablePorAdmin: false,
+          });
+        }
+      }
+    }
+
+    // 2. Competencias oficiales publicadas desde DEP-M4-01
+    const competenciasM4 = this.puertoM4.listarCompetenciasPublicadas(
+      filtros?.fechaInicio,
+      filtros?.fechaFin,
+    );
+    for (const comp of competenciasM4) {
+      const sede = this.puertoG4.obtenerSedePorId(comp.sedeId);
+      eventos.push({
+        eventoId: `EVT-COMP-${comp.competenciaId}`,
+        tipo: 'COMPETENCIA',
+        titulo: comp.titulo,
+        inicio: comp.fechaInicio,
+        fin: comp.fechaFin,
+        ubicacion: sede
+          ? `${sede.pista} · Sede ${sede.nombreSede}`
+          : comp.sedeId,
+        sedeId: comp.sedeId,
+        grupoId: null,
+        nombreGrupo: 'Grupos clasificados por categoría',
+        categorias: comp.categorias,
+        descripcion: `Competencia oficial publicada por Módulo 4 (DEP-M4-01). Categorías convocadas: ${comp.categorias.join(', ')}.`,
+        estado: 'PROGRAMADO',
+        editablePorAdmin: false,
+      });
+    }
+
+    // 3. Eventos globales e institucionales del club (editables exclusivamente por ADMIN)
+    for (const evtGlobal of this.eventosGlobalesClub) {
+      if (evtGlobal.estado === 'ANULADO') continue;
+      eventos.push({
+        ...evtGlobal,
+        editablePorAdmin: sesion.rol === 'ADMIN',
+      });
+    }
+
+    return eventos
+      .filter((ev) => {
+        if (filtros?.tipo && ev.tipo !== filtros.tipo) return false;
+        if (filtros?.fechaInicio && ev.fin < filtros.fechaInicio) return false;
+        if (filtros?.fechaFin && ev.inicio > filtros.fechaFin) return false;
+        return true;
+      })
+      .sort((a, b) => a.inicio.localeCompare(b.inicio));
+  }
+
+  obtenerCalendarioConContexto(
+    authorizationHeader?: string,
+    filtros?: {
+      tipo?: string;
+      grupoId?: string;
+      fechaInicio?: string;
+      fechaFin?: string;
+    },
+  ): RespuestaCalendarioConsolidadoM3 {
+    const { sesion } = this.resolverGruposVisiblesParaSesion(
+      authorizationHeader,
+      filtros?.grupoId,
+    );
+    const eventos = this.obtenerEventosCalendario(authorizationHeader, filtros);
+    return {
+      sesion,
+      eventos,
+    };
+  }
+
+  private exigirRolAdminCalendario(authorizationHeader?: string) {
+    const sesion = this.puertoM1.validarSesion(authorizationHeader);
+    if (sesion.rol !== 'ADMIN') {
+      throw new ForbiddenException(
+        `Acceso denegado: solo el rol ADMIN puede crear, editar o anular eventos institucionales globales (rol actual: ${sesion.rol} · DEP-M1-01).`,
+      );
+    }
+    return sesion;
+  }
+
+  /**
+   * HU-3.5: Crear un evento global del club (restringido exclusivamente a ADMIN).
+   */
+  crearEventoGlobal(
+    dto: CrearEventoGlobalDto,
+    authorizationHeader?: string,
+  ): EventoCalendarioM3 {
+    this.exigirRolAdminCalendario(authorizationHeader);
+
+    const titulo = dto.titulo?.trim();
+    if (!titulo) {
+      throw new BadRequestException(
+        'El título del evento global es obligatorio',
+      );
+    }
+    if (dto.inicio >= dto.fin) {
+      throw new BadRequestException(
+        'La fecha/hora de inicio debe ser anterior a la fecha/hora de fin',
+      );
+    }
+
+    const consecutivo = String(this.eventosGlobalesClub.length + 1).padStart(
+      2,
+      '0',
+    );
+    const nuevoEvento: EventoCalendarioM3 = {
+      eventoId: `EVT-INST-${consecutivo}`,
+      tipo: 'EVENTO_INSTITUCIONAL',
+      titulo,
+      inicio: dto.inicio,
+      fin: dto.fin,
+      ubicacion: dto.ubicacion.trim(),
+      sedeId: dto.sedeId ?? 'SEDE-NORTE-P1',
+      grupoId: null,
+      nombreGrupo: 'Todos los grupos del club',
+      categorias: ['Todas las categorías'],
+      descripcion:
+        dto.descripcion?.trim() ||
+        'Evento institucional global programado por la administración del club.',
+      estado: 'PROGRAMADO',
+      editablePorAdmin: true,
+    };
+
+    this.eventosGlobalesClub.push(nuevoEvento);
+    return nuevoEvento;
+  }
+
+  /**
+   * HU-3.5: Editar un evento global del club (restringido exclusivamente a ADMIN).
+   */
+  actualizarEventoGlobal(
+    eventoId: string,
+    dto: ActualizarEventoGlobalDto,
+    authorizationHeader?: string,
+  ): EventoCalendarioM3 {
+    this.exigirRolAdminCalendario(authorizationHeader);
+
+    const evento = this.eventosGlobalesClub.find(
+      (e) => e.eventoId === eventoId,
+    );
+    if (!evento) {
+      throw new NotFoundException(
+        `El evento institucional global ${eventoId} no existe`,
+      );
+    }
+
+    if (dto.titulo !== undefined) {
+      if (!dto.titulo.trim()) {
+        throw new BadRequestException('El título no puede estar vacío');
+      }
+      evento.titulo = dto.titulo.trim();
+    }
+    if (dto.inicio !== undefined) evento.inicio = dto.inicio;
+    if (dto.fin !== undefined) evento.fin = dto.fin;
+    if (evento.inicio >= evento.fin) {
+      throw new BadRequestException(
+        'La fecha/hora de inicio debe ser anterior a la fecha/hora de fin',
+      );
+    }
+    if (dto.ubicacion !== undefined) evento.ubicacion = dto.ubicacion.trim();
+    if (dto.descripcion !== undefined)
+      evento.descripcion = dto.descripcion.trim();
+
+    return evento;
+  }
+
+  /**
+   * HU-3.5: Anular un evento global del club sin borrado físico (restringido exclusivamente a ADMIN).
+   */
+  anularEventoGlobal(
+    eventoId: string,
+    authorizationHeader?: string,
+  ): EventoCalendarioM3 {
+    this.exigirRolAdminCalendario(authorizationHeader);
+
+    const evento = this.eventosGlobalesClub.find(
+      (e) => e.eventoId === eventoId,
+    );
+    if (!evento) {
+      throw new NotFoundException(
+        `El evento institucional global ${eventoId} no existe`,
+      );
+    }
+
+    evento.estado = 'ANULADO';
+    return evento;
   }
 }
