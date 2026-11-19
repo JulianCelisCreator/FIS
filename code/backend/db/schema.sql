@@ -600,6 +600,7 @@ CREATE TABLE comprobante (
   numero      TEXT NOT NULL UNIQUE
               DEFAULT 'CP-' || lpad(nextval('comprobante_numero_seq')::text, 6, '0'),
   emitido_en  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  datos JSONB,
   estado      TEXT NOT NULL DEFAULT 'VIGENTE' CHECK (estado IN ('VIGENTE','ANULADO')),
   anulado_en  TIMESTAMPTZ,
   archivo_url TEXT,                          -- PDF generado (M5-15, ≤ 5 s)

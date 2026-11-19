@@ -26,7 +26,7 @@ export function MarcoAplicacion({
   paginaActual: string
   children: ReactNode
 }) {
-  const { sesion, usuarios, cambiarUsuario } = useSesion()
+  const { sesion } = useSesion()
   const [esMovil, setEsMovil] = useState(() => window.matchMedia(CONSULTA_MOVIL).matches)
   const [menuAbierto, setMenuAbierto] = useState(false)
 
@@ -102,20 +102,6 @@ export function MarcoAplicacion({
                 </div>
               </div>
             )}
-            <label htmlFor="usuario-prueba">Usuario de prueba</label>
-            <select
-              id="usuario-prueba"
-              className="vl-select"
-              value={sesion?.id ?? ''}
-              onChange={(evento) => cambiarUsuario(evento.target.value ? Number(evento.target.value) : null)}
-            >
-              <option value="">Elige un usuario…</option>
-              {usuarios.map((usuario) => (
-                <option key={usuario.id} value={usuario.id}>
-                  {usuario.nombre} · {usuario.roles.map((rol) => NOMBRE_ROL[rol]).join(', ') || 'sin rol'}
-                </option>
-              ))}
-            </select>
           </div>
         </div>
       </aside>

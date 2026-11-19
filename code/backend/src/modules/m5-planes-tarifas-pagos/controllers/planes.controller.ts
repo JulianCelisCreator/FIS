@@ -11,7 +11,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { AutenticacionTemporalGuard } from '../../../common/auth/autenticacion-temporal.guard.js';
+import { AutenticacionGuard } from '../../../common/auth/autenticacion.guard.js';
 import { RequierePermiso, UsuarioActual } from '../../../common/auth/decoradores.js';
 import { PermisosGuard } from '../../../common/auth/permisos.guard.js';
 import type { UsuarioAutenticado } from '../../../common/auth/usuario-autenticado.js';
@@ -26,7 +26,7 @@ import { PermisoM5 } from '../enums/permiso-m5.enum.js';
 import { PlanesService } from '../services/planes.service.js';
 
 @Controller('m5/planes')
-@UseGuards(AutenticacionTemporalGuard, PermisosGuard)
+@UseGuards(AutenticacionGuard, PermisosGuard)
 export class PlanesController {
   constructor(private readonly planesService: PlanesService) {}
 

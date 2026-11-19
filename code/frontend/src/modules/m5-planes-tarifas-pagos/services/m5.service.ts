@@ -1,7 +1,10 @@
-import { pedir } from '../../../shared/services/cliente-api.ts'
+import { pedir, urlApi } from '../../../shared/services/cliente-api.ts'
 import type {
   CobroPendiente,
   DatosTransaccion,
+  EstadoCuenta,
+  FiltrosCartera,
+  FiltrosHistorial,
   PatinadorM5,
   PlanAdministrado,
   PlanDelPatinador,
@@ -12,6 +15,8 @@ import type {
   ResultadoMatricula,
   ResultadoPagoCobro,
   ResultadoPagoSesion,
+  RespuestaCartera,
+  RespuestaHistorial,
   TipoPlan,
 } from '../types/m5.types.ts'
 
@@ -101,4 +106,39 @@ export function pagarMatricula(
   datos: DatosTransaccion & { patinadorId: number; valorMatricula: number; valorGastosAdministrativos: number },
 ): Promise<ResultadoMatricula> {
   return pedir('/m5/pagos/matricula', { metodo: 'POST', cuerpo: datos })
+}
+
+// --- Consultas: cartera, historial, comprobantes y estado de cuenta ---
+
+/** Filtros → parámetros de consulta, sin los vacíos. */
+function aConsulta(filtros: object): Record<string, string | undefined> {
+  return Object.fromEntries(
+    Object.entries(filtros).map(([clave, valor]) => [clave, valor === undefined || valor === '' ? undefined : String(valor)]),
+  )
+}
+
+export function consultarCartera(filtros: FiltrosCartera): Promise<RespuestaCartera> {
+  return pedir('/m5/cartera', { consulta: aConsulta(filtros) })
+}
+
+export function historialPagos(filtros: FiltrosHistorial): Promise<RespuestaHistorial> {
+  return pedir('/m5/pagos', { consulta: aConsulta(filtros) })
+}
+
+export function estadoCuenta(patinadorId: number): Promise<EstadoCuenta> {
+  return pedir(`/m5/patinadores/${patinadorId}/estado-cuenta`)
+}
+
+/** Enlace de descarga del historial filtrado (la cookie de sesión viaja sola). */
+export function urlExportarHistorial(filtros: FiltrosHistorial, formato: 'pdf' | 'xlsx'): string {
+  const parametros = new URLSearchParams()
+  for (const [clave, valor] of Object.entries(aConsulta({ ...filtros, formato }))) {
+    if (valor !== undefined) parametros.set(clave, valor)
+  }
+  return urlApi(`/m5/pagos/exportar?${parametros}`)
+}
+
+/** Enlace al comprobante en PDF de un pago (RF-M5-15). */
+export function urlComprobante(pagoId: number): string {
+  return urlApi(`/m5/pagos/${pagoId}/comprobante.pdf`)
 }
