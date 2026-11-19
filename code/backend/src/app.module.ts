@@ -5,6 +5,7 @@ import { AppService } from './app.service.js';
 import { AuditoriaModule } from './common/auditoria/auditoria.module.js';
 import { AuthModule } from './common/auth/auth.module.js';
 import { BaseDatosModule } from './common/database/base-datos.module.js';
+import { M4CompetenciasResultadosModule } from './modules/m4-competencias-resultados/m4-competencias-resultados.module.js';
 import { M5PlanesTarifasPagosModule } from './modules/m5-planes-tarifas-pagos/m5-planes-tarifas-pagos.module.js';
 
 @Module({
@@ -13,6 +14,7 @@ import { M5PlanesTarifasPagosModule } from './modules/m5-planes-tarifas-pagos/m5
     BaseDatosModule,
     AuditoriaModule,
     AuthModule,
+    M4CompetenciasResultadosModule,
     M5PlanesTarifasPagosModule,
   ],
   controllers: [AppController],

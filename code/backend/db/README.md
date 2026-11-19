@@ -7,6 +7,7 @@ DDL de la base de datos de la plataforma (PostgreSQL 17), común a todos los mó
 | `schema.sql` | Todo el DDL: tablas, restricciones, índices, vistas, comentarios y catálogos semilla. |
 | `compose.yaml` | Contenedor de PostgreSQL que carga `schema.sql` al crearse. |
 | `datos-demo.sql` | Datos de demostración de M5 con los nombres de los wireframes (opcional, se cargan a mano). |
+| `m4-permisos.sql` | Permisos y asignaciones por rol del módulo M4 (ejecutar después de `schema.sql`). |
 
 ## Levantar la base
 
@@ -39,6 +40,16 @@ docker exec -i patinaje-db psql -U patinaje -d patinaje < db/datos-demo.sql
 ```
 
 PostgreSQL ejecuta `schema.sql` **solo cuando el volumen está vacío**. Si el archivo cambia, hay que recrear la base con `down -v` y volver a levantarla.
+
+## Permisos del Módulo M4
+
+Después de levantar una base nueva, ejecutar una vez:
+
+```bash
+psql -h localhost -U patinaje -d patinaje -f db/m4-permisos.sql
+```
+
+El script es idempotente y agrega los permisos M4 a `permiso` y `rol_permiso`. No recrea tablas ni altera los datos existentes.
 
 ## Convenciones
 
