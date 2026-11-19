@@ -13,3 +13,10 @@ export class RangoReporteDto {
   @IsString()
   hasta?: string;
 }
+
+/** Exportación (HU-6.5): mismo rango más el formato del archivo. */
+export class ExportarReporteDto extends RangoReporteDto {
+  @IsOptional()
+  @IsString()
+  formato?: string;
+}

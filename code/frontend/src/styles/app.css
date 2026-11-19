@@ -1260,3 +1260,17 @@ fieldset {
     flex: 1;
   }
 }
+
+/* Reportes financieros (M6): botones de exportación junto al título. */
+.app-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (max-width: 560px) {
+  .app-acciones,
+  .app-acciones .vl-button {
+    width: 100%;
+  }
+}
