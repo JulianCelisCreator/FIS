@@ -2,9 +2,12 @@ import { pedir } from '../../../shared/services/cliente-api.ts'
 import {
   CATALOGOS_M3_FALLBACK,
   GRUPOS_M3_FALLBACK,
+  PROFESORES_BASE_FALLBACK,
   type CatalogosConfiguracionM3,
   type CrearGrupoM3Payload,
   type EstadoCupoGrupoM3,
+  type EvaluacionDisponibilidadProfesorM3,
+  type GrupoAsignadoProfesorM3,
   type GrupoConfiguradoM3,
 } from '../types/m3.types.ts'
 
@@ -114,6 +117,8 @@ export async function crearGrupoM3(payload: CrearGrupoM3Payload): Promise<GrupoC
       bloqueadoInscripcion: metricas.bloqueadoInscripcion,
       profesorId: null,
       profesorNombre: null,
+      profesoresAsignados: [],
+      horarios: [],
       activo: true,
     }
     gruposMemoriaLocal = [...gruposMemoriaLocal, nuevo]
@@ -221,6 +226,210 @@ export async function inscribirEnGrupoM3(grupoId: string): Promise<GrupoConfigur
       ...metricas,
     }
     gruposMemoriaLocal = gruposMemoriaLocal.map((g) => (g.grupoId === grupoId ? actualizado : g))
+    return actualizado
+  }
+}
+
+// ============================================================================
+// HU-3.2: SERVICIOS DE ASIGNACIÓN DE PROFESORES Y API-M3-02
+// ============================================================================
+
+function obtenerGruposLocalPorProfesor(profesorId: string): GrupoAsignadoProfesorM3[] {
+  const resultado: GrupoAsignadoProfesorM3[] = []
+  for (const g of gruposMemoriaLocal) {
+    if (!g.activo) continue
+    const asig = g.profesoresAsignados?.find((p) => p.profesorId === profesorId)
+    if (asig || g.profesorId === profesorId) {
+      resultado.push({
+        grupoId: g.grupoId,
+        nombreGrupo: g.nombre,
+        rolDocente: asig?.rolDocente ?? 'TITULAR',
+        sedeNombre: g.sedeNombre,
+        nivelNombre: g.nivelNombre,
+        horarios: g.horarios ?? [],
+      })
+    }
+  }
+  return resultado
+}
+
+function evaluarConflictoLocal(grupoId: string, profesorId: string): string | null {
+  const grupo = gruposMemoriaLocal.find((g) => g.grupoId === grupoId)
+  if (!grupo) return null
+  const prof = PROFESORES_BASE_FALLBACK.find((p) => p.profesorId === profesorId)
+  if (!prof) return null
+
+  for (const h of grupo.horarios ?? []) {
+    const ext = prof.bloquesOcupadosExternos.find(
+      (b) => b.diaSemana === h.dia && h.horaInicio < b.horaFin && h.horaFin > b.horaInicio,
+    )
+    if (ext) {
+      return `${prof.nombreCompleto} ya tiene clase programada los ${h.dia.toLowerCase()} a las ${ext.horaInicio} (${ext.motivo}). Seleccione otro docente o franja.`
+    }
+  }
+
+  for (const otro of gruposMemoriaLocal) {
+    if (!otro.activo || otro.grupoId === grupo.grupoId) continue
+    const pertenece =
+      otro.profesorId === profesorId ||
+      Boolean(otro.profesoresAsignados?.some((p) => p.profesorId === profesorId))
+    if (!pertenece) continue
+    for (const hActual of grupo.horarios ?? []) {
+      const cruce = (otro.horarios ?? []).find(
+        (hOtro) =>
+          hOtro.dia === hActual.dia &&
+          hActual.horaInicio < hOtro.horaFin &&
+          hActual.horaFin > hOtro.horaInicio,
+      )
+      if (cruce) {
+        return `El profesor ${prof.nombreCompleto} ya tiene clase asignada en «${otro.nombre}» el ${hActual.dia} de ${cruce.horaInicio} a ${cruce.horaFin}. Seleccione otro docente o franja.`
+      }
+    }
+  }
+  return null
+}
+
+/**
+ * Lista los profesores activos (DEP-M1-02 + DEP-M6-01) evaluando en tiempo real
+ * si tienen traslape de horario frente al grupo seleccionado.
+ */
+export async function listarProfesoresConDisponibilidadM3(
+  grupoId?: string,
+): Promise<EvaluacionDisponibilidadProfesorM3[]> {
+  try {
+    return await pedir<EvaluacionDisponibilidadProfesorM3[]>('/v1/profesores', {
+      consulta: { grupoId },
+    })
+  } catch {
+    const grupo = gruposMemoriaLocal.find((g) => g.grupoId === grupoId)
+    return PROFESORES_BASE_FALLBACK.map((p) => {
+      const detalleConflicto = grupoId ? evaluarConflictoLocal(grupoId, p.profesorId) : null
+      const yaAsignadoAlGrupo = grupo
+        ? grupo.profesorId === p.profesorId ||
+          Boolean(grupo.profesoresAsignados?.some((a) => a.profesorId === p.profesorId))
+        : false
+      return {
+        profesorId: p.profesorId,
+        nombreCompleto: p.nombreCompleto,
+        especialidad: p.especialidad,
+        cargo: p.cargo,
+        estadoContrato: p.estadoContrato,
+        disponible: detalleConflicto === null,
+        tieneConflicto: detalleConflicto !== null,
+        yaAsignadoAlGrupo,
+        detalleConflicto,
+        gruposAsignados: obtenerGruposLocalPorProfesor(p.profesorId),
+      }
+    })
+  }
+}
+
+/**
+ * API-M3-02: GET /api/v1/profesores/{id}/grupos
+ * Devuelve [{ grupoId, nombreGrupo, rolDocente, horarios[] }]
+ */
+export async function obtenerGruposPorProfesorM3(
+  profesorId: string,
+): Promise<GrupoAsignadoProfesorM3[]> {
+  try {
+    return await pedir<GrupoAsignadoProfesorM3[]>(`/v1/profesores/${profesorId}/grupos`)
+  } catch {
+    return obtenerGruposLocalPorProfesor(profesorId)
+  }
+}
+
+/**
+ * HU-3.2: Asigna uno o varios profesores a un grupo con validación de traslape.
+ */
+export async function asignarProfesoresAGrupoM3(
+  grupoId: string,
+  profesoresIds: string[],
+): Promise<GrupoConfiguradoM3> {
+  try {
+    const actualizado = await pedir<GrupoConfiguradoM3>(`/v1/grupos/${grupoId}/profesores`, {
+      metodo: 'POST',
+      cuerpo: { profesoresIds },
+    })
+    gruposMemoriaLocal = gruposMemoriaLocal.map((g) =>
+      g.grupoId === grupoId ? actualizado : g,
+    )
+    return actualizado
+  } catch (error) {
+    if (error instanceof Error && error.message && !error.message.includes('No hay conexión')) {
+      throw error
+    }
+    const grupo = gruposMemoriaLocal.find((g) => g.grupoId === grupoId)
+    if (!grupo) throw new Error('Grupo no encontrado.')
+    for (const pid of profesoresIds) {
+      const conflicto = evaluarConflictoLocal(grupoId, pid)
+      if (conflicto) throw new Error(conflicto)
+    }
+    const asignados = [...(grupo.profesoresAsignados ?? [])]
+    for (const pid of profesoresIds) {
+      const prof = PROFESORES_BASE_FALLBACK.find((p) => p.profesorId === pid)
+      if (prof && !asignados.some((a) => a.profesorId === pid)) {
+        asignados.push({
+          profesorId: prof.profesorId,
+          nombreCompleto: prof.nombreCompleto,
+          rolDocente: asignados.length === 0 ? 'TITULAR' : 'ASISTENTE',
+          fechaAsignacion: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+        })
+      }
+    }
+    const actualizado: GrupoConfiguradoM3 = {
+      ...grupo,
+      profesorId: asignados[0]?.profesorId ?? null,
+      profesorNombre: asignados[0]?.nombreCompleto ?? null,
+      profesoresAsignados: asignados,
+    }
+    gruposMemoriaLocal = gruposMemoriaLocal.map((g) =>
+      g.grupoId === grupoId ? actualizado : g,
+    )
+    return actualizado
+  }
+}
+
+/**
+ * HU-3.2: Quita (desasigna) un profesor de un grupo actualizando de inmediato su agenda.
+ */
+export async function quitarProfesorDeGrupoM3(
+  grupoId: string,
+  profesorId: string,
+): Promise<GrupoConfiguradoM3> {
+  try {
+    const respuesta = await fetch(`/api/v1/grupos/${grupoId}/profesores/${profesorId}`, {
+      method: 'DELETE',
+      headers: { Accept: 'application/json' },
+    })
+    if (!respuesta.ok) {
+      const err = (await respuesta.json().catch(() => null)) as { message?: string } | null
+      throw new Error(err?.message ?? 'No se pudo quitar al profesor del grupo.')
+    }
+    const actualizado = (await respuesta.json()) as GrupoConfiguradoM3
+    gruposMemoriaLocal = gruposMemoriaLocal.map((g) =>
+      g.grupoId === grupoId ? actualizado : g,
+    )
+    return actualizado
+  } catch (error) {
+    if (error instanceof Error && error.message && !error.message.includes('Failed to fetch')) {
+      const grupo = gruposMemoriaLocal.find((g) => g.grupoId === grupoId)
+      if (!grupo) throw error
+    }
+    const grupo = gruposMemoriaLocal.find((g) => g.grupoId === grupoId)
+    if (!grupo) throw new Error('Grupo no encontrado.')
+    const asignados = (grupo.profesoresAsignados ?? []).filter((a) => a.profesorId !== profesorId)
+    if (asignados.length > 0 && !asignados.some((a) => a.rolDocente === 'TITULAR')) {
+      asignados[0].rolDocente = 'TITULAR'
+    }
+    const actualizado: GrupoConfiguradoM3 = {
+      ...grupo,
+      profesorId: asignados[0]?.profesorId ?? null,
+      profesorNombre: asignados[0]?.nombreCompleto ?? null,
+      profesoresAsignados: asignados,
+    }
+    gruposMemoriaLocal = gruposMemoriaLocal.map((g) =>
+      g.grupoId === grupoId ? actualizado : g,
+    )
     return actualizado
   }
 }

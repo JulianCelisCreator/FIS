@@ -1,4 +1,5 @@
 import {
+  ArrayMinSize,
   IsArray,
   IsBoolean,
   IsInt,
@@ -7,7 +8,11 @@ import {
   IsString,
   Min,
 } from 'class-validator';
-import type { CategoriaPatinaje, DiaSemana } from '../entities/grupo.entity.js';
+import type {
+  CategoriaPatinaje,
+  DiaSemana,
+  RolDocenteGrupo,
+} from '../entities/grupo.entity.js';
 
 export class CreateGrupoDto {
   @IsString({ message: 'El nombre del grupo es obligatorio' })
@@ -95,7 +100,25 @@ export class AsignarProfesorDto {
   @IsNotEmpty()
   profesorId!: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  profesorNombre!: string;
+  profesorNombre?: string;
+
+  @IsOptional()
+  @IsString()
+  rolDocente?: RolDocenteGrupo;
+}
+
+/**
+ * HU-3.2: Permite asignar uno o varios profesores a un grupo de clase específico.
+ */
+export class AsignarProfesoresMultipleDto {
+  @IsArray({ message: 'Debe enviar la lista de IDs de profesores a asignar' })
+  @ArrayMinSize(1, { message: 'Seleccione al menos un profesor para asignar' })
+  @IsString({ each: true })
+  profesoresIds!: string[];
+
+  @IsOptional()
+  @IsString()
+  rolDocente?: RolDocenteGrupo;
 }

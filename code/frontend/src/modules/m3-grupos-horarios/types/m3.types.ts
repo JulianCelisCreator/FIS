@@ -1,6 +1,7 @@
 /**
  * Tipos compartidos para el Módulo 3 (Grupos, Horarios y Programación - Grupo 2).
- * Alineados con API-M3-01 y las dependencias DEP-M2-01, DEP-M2-02 y DEP-G4-01.
+ * Alineados con API-M3-01, API-M3-02 y las dependencias DEP-M1-02, DEP-M2-01,
+ * DEP-M2-02, DEP-G4-01 y DEP-M6-01.
  */
 
 export type DiaSemanaM3 =
@@ -13,6 +14,49 @@ export type DiaSemanaM3 =
   | 'Domingo'
 
 export type EstadoCupoGrupoM3 = 'con-cupo' | 'alerta-90' | 'lleno'
+
+export type RolDocenteGrupoM3 = 'TITULAR' | 'ASISTENTE'
+
+export interface HorarioGrupoM3 {
+  id: string
+  dia: DiaSemanaM3
+  horaInicio: string
+  horaFin: string
+  pista: string
+}
+
+export interface ProfesorAsignadoGrupoM3 {
+  profesorId: string
+  nombreCompleto: string
+  rolDocente: RolDocenteGrupoM3
+  fechaAsignacion: string
+}
+
+/**
+ * Contrato oficial API-M3-02 (GET /api/v1/profesores/{id}/grupos)
+ * Respuesta JSON Base: [{ grupoId, nombreGrupo, rolDocente, horarios[] }]
+ */
+export interface GrupoAsignadoProfesorM3 {
+  grupoId: string
+  nombreGrupo: string
+  rolDocente: RolDocenteGrupoM3
+  sedeNombre?: string
+  nivelNombre?: string
+  horarios: HorarioGrupoM3[]
+}
+
+export interface EvaluacionDisponibilidadProfesorM3 {
+  profesorId: string
+  nombreCompleto: string
+  especialidad: string
+  cargo: string
+  estadoContrato: string
+  disponible: boolean
+  tieneConflicto: boolean
+  yaAsignadoAlGrupo: boolean
+  detalleConflicto: string | null
+  gruposAsignados: GrupoAsignadoProfesorM3[]
+}
 
 /** DEP-M2-01: Nivel técnico activo */
 export interface NivelTecnicoM2 {
@@ -62,6 +106,8 @@ export interface GrupoConfiguradoM3 {
   bloqueadoInscripcion: boolean
   profesorId: string | null
   profesorNombre: string | null
+  profesoresAsignados?: ProfesorAsignadoGrupoM3[]
+  horarios?: HorarioGrupoM3[]
   activo: boolean
 }
 
@@ -180,6 +226,24 @@ export const GRUPOS_M3_FALLBACK: GrupoConfiguradoM3[] = [
     bloqueadoInscripcion: false,
     profesorId: 'PROF-01',
     profesorNombre: 'Carlos Mendoza',
+    profesoresAsignados: [
+      {
+        profesorId: 'PROF-01',
+        nombreCompleto: 'Carlos Mendoza',
+        rolDocente: 'TITULAR',
+        fechaAsignacion: '2026-09-23T08:00:00Z',
+      },
+    ],
+    horarios: [
+      { id: 'HOR-00', dia: 'Lunes', horaInicio: '14:00', horaFin: '16:00', pista: 'Pista 1 · Norte' },
+      {
+        id: 'HOR-01',
+        dia: 'Martes',
+        horaInicio: '15:00',
+        horaFin: '17:00',
+        pista: 'Pista Principal - El Salitre',
+      },
+    ],
     activo: true,
   },
   {
@@ -205,6 +269,24 @@ export const GRUPOS_M3_FALLBACK: GrupoConfiguradoM3[] = [
     bloqueadoInscripcion: false,
     profesorId: 'PROF-03',
     profesorNombre: 'Ana Gómez',
+    profesoresAsignados: [
+      {
+        profesorId: 'PROF-03',
+        nombreCompleto: 'Ana Gómez',
+        rolDocente: 'TITULAR',
+        fechaAsignacion: '2026-09-23T08:30:00Z',
+      },
+      {
+        profesorId: 'PROF-05',
+        nombreCompleto: 'Carlos Díaz',
+        rolDocente: 'ASISTENTE',
+        fechaAsignacion: '2026-09-23T09:00:00Z',
+      },
+    ],
+    horarios: [
+      { id: 'HOR-02', dia: 'Martes', horaInicio: '14:00', horaFin: '16:00', pista: 'Pista 2 · Sur' },
+      { id: 'HOR-03', dia: 'Jueves', horaInicio: '14:00', horaFin: '16:00', pista: 'Pista 2 · Sur' },
+    ],
     activo: true,
   },
   {
@@ -230,6 +312,74 @@ export const GRUPOS_M3_FALLBACK: GrupoConfiguradoM3[] = [
     bloqueadoInscripcion: true,
     profesorId: 'PROF-04',
     profesorNombre: 'Luis Rojas',
+    profesoresAsignados: [
+      {
+        profesorId: 'PROF-04',
+        nombreCompleto: 'Luis Rojas',
+        rolDocente: 'TITULAR',
+        fechaAsignacion: '2026-09-23T10:00:00Z',
+      },
+    ],
+    horarios: [
+      { id: 'HOR-04', dia: 'Viernes', horaInicio: '16:00', horaFin: '18:00', pista: 'Pista 1 · Norte' },
+      { id: 'HOR-05', dia: 'Sabado', horaInicio: '08:00', horaFin: '10:00', pista: 'Pista 1 · Norte' },
+    ],
     activo: true,
+  },
+]
+
+export const PROFESORES_BASE_FALLBACK = [
+  {
+    profesorId: 'PROF-01',
+    nombreCompleto: 'Carlos Mendoza',
+    especialidad: 'Velocidad y Fondo',
+    cargo: 'Entrenador Principal de Velocidad',
+    estadoContrato: 'ACTIVO',
+    bloquesOcupadosExternos: [] as { diaSemana: DiaSemanaM3; horaInicio: string; horaFin: string; motivo: string }[],
+  },
+  {
+    profesorId: 'PROF-02',
+    nombreCompleto: 'Profesor Person',
+    especialidad: 'Iniciación y Técnica de Curva',
+    cargo: 'Entrenador de Iniciación (Profesor Person)',
+    estadoContrato: 'ACTIVO',
+    bloquesOcupadosExternos: [
+      {
+        diaSemana: 'Lunes' as DiaSemanaM3,
+        horaInicio: '14:00',
+        horaFin: '16:00',
+        motivo: 'Clase programada de fundamentación técnica (Lunes 14:00)',
+      },
+      {
+        diaSemana: 'Martes' as DiaSemanaM3,
+        horaInicio: '14:00',
+        horaFin: '16:00',
+        motivo: 'Sesión técnica asignada (Martes 14:00)',
+      },
+    ],
+  },
+  {
+    profesorId: 'PROF-03',
+    nombreCompleto: 'Ana Gómez',
+    especialidad: 'Transición e Intermedio',
+    cargo: 'Entrenadora de Transición e Intermedio',
+    estadoContrato: 'ACTIVO',
+    bloquesOcupadosExternos: [],
+  },
+  {
+    profesorId: 'PROF-04',
+    nombreCompleto: 'Luis Rojas',
+    especialidad: 'Velocidad Pura 200m/500m',
+    cargo: 'Entrenador de Velocidad Pura',
+    estadoContrato: 'ACTIVO',
+    bloquesOcupadosExternos: [],
+  },
+  {
+    profesorId: 'PROF-05',
+    nombreCompleto: 'Carlos Díaz',
+    especialidad: 'Preparación Física sobre Ruedas',
+    cargo: 'Entrenador Asistente',
+    estadoContrato: 'ACTIVO',
+    bloquesOcupadosExternos: [],
   },
 ]

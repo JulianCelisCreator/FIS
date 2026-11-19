@@ -110,7 +110,11 @@ const ESTADOS: Record<string, Record<string, [string, Tono]>> = {
     lleno: ['Lleno', 'error'],
     desactivado: ['Desactivado', 'neutral'],
   },
-
+  disponibilidad: {
+    libre: ['Libre', 'success'],
+    conflicto: ['Conflicto', 'error'],
+    asignado: ['Asignado', 'info'],
+  },
   prestamo: {
     activo: ['Activo', 'info'],
     devuelto: ['Devuelto', 'success'],
@@ -140,8 +144,7 @@ const ESTADOS: Record<string, Record<string, [string, Tono]>> = {
     devuelta: ['Devuelta', 'neutral'],
     ajustada: ['Ajustada', 'warning'],
   },
-};
-
+}
 
 export function Insignia({ entidad, estado }: { entidad: string; estado: string }) {
   const [texto, tono] = ESTADOS[entidad]?.[estado] ?? [estado, 'neutral']
