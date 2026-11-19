@@ -104,6 +104,7 @@ export function Aplicacion() {
   const permitidas = [
     ...usuarios,
     ...gruposHorarios,
+    ...pantallasPermitidas,
     ...misPagos,
     ...subpantallas.map((p) => ({ pagina: p, texto: p })),
   ]
