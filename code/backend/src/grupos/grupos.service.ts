@@ -3,9 +3,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { AsignarProfesorDto, CreateGrupoDto } from './dto/create-grupo.dto';
-import { CreateHorarioDto } from './dto/create-horario.dto';
-import { Grupo, Horario } from './entities/grupo.entity';
+import { AsignarProfesorDto, CreateGrupoDto } from './dto/create-grupo.dto.js';
+import { CreateHorarioDto } from './dto/create-horario.dto.js';
+import { Grupo, Horario } from './entities/grupo.entity.js';
 
 @Injectable()
 export class GruposService {

@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { GruposService } from './grupos.service';
+import { GruposService } from './grupos.service.js';
 
 describe('GruposService', () => {
   let service: GruposService;
