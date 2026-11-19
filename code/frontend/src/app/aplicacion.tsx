@@ -21,6 +21,7 @@ import { ConfiguracionGrupos } from '../modules/m3-grupos-horarios/components/co
 import { AsignacionProfesores } from '../modules/m3-grupos-horarios/components/asignacion-profesores.tsx'
 import { ProgramacionHorarios } from '../modules/m3-grupos-horarios/components/programacion-horarios.tsx'
 import { SeleccionCambioGrupo } from '../modules/m3-grupos-horarios/components/seleccion-cambio-grupo.tsx'
+import { CalendarioInteractivo } from '../modules/m3-grupos-horarios/components/calendario-interactivo.tsx'
 import { MarcoAplicacion } from './marco-aplicacion.tsx'
 
 /** Pantallas disponibles y el permiso que exige cada una. */
@@ -41,10 +42,15 @@ const PANTALLAS_M3_ADMIN = [
   { pagina: 'asignacion-profesores', texto: 'Asignación de profesores' },
   { pagina: 'horarios', texto: 'Programación de horarios' },
   { pagina: 'cambio-grupo', texto: 'Selección y cambio de grupo' },
+  { pagina: 'calendario', texto: 'Calendario interactivo' },
 ]
 const PANTALLA_M3_CAMBIO_GRUPO = {
   pagina: 'cambio-grupo',
   texto: 'Selección y cambio de grupo',
+}
+const PANTALLA_M3_CALENDARIO = {
+  pagina: 'calendario',
+  texto: 'Calendario interactivo',
 }
 /** Pantallas que no van en el menú: se abren desde otra y resaltan a su pantalla de origen. */
 const SUBPANTALLAS_ADMINISTRADOR: Record<string, string> = { 'nueva-cuenta': 'usuarios' }
@@ -77,7 +83,8 @@ export function Aplicacion() {
     (pagina === 'grupos' ||
       pagina === 'asignacion-profesores' ||
       pagina === 'horarios' ||
-      pagina === 'cambio-grupo')
+      pagina === 'cambio-grupo' ||
+      pagina === 'calendario')
   ) {
     return (
       <MarcoAplicacion
@@ -90,6 +97,8 @@ export function Aplicacion() {
           <ProgramacionHorarios />
         ) : pagina === 'cambio-grupo' ? (
           <SeleccionCambioGrupo />
+        ) : pagina === 'calendario' ? (
+          <CalendarioInteractivo />
         ) : (
           <ConfiguracionGrupos />
         )}
@@ -107,8 +116,8 @@ export function Aplicacion() {
   const gruposHorarios = tieneRol('ADMINISTRADOR')
     ? PANTALLAS_M3_ADMIN
     : tieneRol('ACUDIENTE') || tieneRol('PATINADOR')
-      ? [PANTALLA_M3_CAMBIO_GRUPO]
-      : []
+      ? [PANTALLA_M3_CAMBIO_GRUPO, PANTALLA_M3_CALENDARIO]
+      : [PANTALLA_M3_CALENDARIO]
   // «Mis pagos» es la vista del Acudiente y del Patinador (RF-M5-17 y 18); el backend acota los patinadores.
   const misPagos =
     tieneRol('ACUDIENTE') || tieneRol('PATINADOR')
@@ -165,6 +174,8 @@ export function Aplicacion() {
     contenido = <ProgramacionHorarios key={sesion.id} />
   } else if (actual === 'cambio-grupo') {
     contenido = <SeleccionCambioGrupo key={sesion.id} />
+  } else if (actual === 'calendario') {
+    contenido = <CalendarioInteractivo key={sesion.id} />
   } else if (actual === 'nueva-cuenta') {
     contenido = <NuevaCuenta key={sesion.id} />
   } else if (actual === 'familia-menor') {

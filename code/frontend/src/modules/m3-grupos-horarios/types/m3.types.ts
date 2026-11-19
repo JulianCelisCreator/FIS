@@ -1,6 +1,6 @@
 /**
  * Tipos compartidos para el Módulo 3 (Grupos, Horarios y Programación - Grupo 2).
- * Alineados con API-M3-01 a API-M3-04 y las dependencias DEP-M1-01 a DEP-M6-01.
+ * Alineados con API-M3-01 a API-M3-05 y las 12 dependencias DEP-M1-01 a DEP-M6-01.
  */
 
 export type DiaSemanaM3 =
@@ -19,6 +19,43 @@ export type RolDocenteGrupoM3 = 'TITULAR' | 'ASISTENTE'
 export type EstadoHorarioM3 = 'ACTIVO' | 'REPROGRAMADO' | 'CANCELADO'
 
 export type EstadoInscripcionGrupoM3 = 'ACTIVO' | 'RETIRADO_CAMBIO'
+
+export type RolExternoM1 = 'ADMIN' | 'PROFESOR' | 'ESTUDIANTE' | 'ACUDIENTE'
+
+export type TipoEventoCalendarioM3 =
+  | 'ENTRENAMIENTO'
+  | 'COMPETENCIA'
+  | 'EVENTO_INSTITUCIONAL'
+
+/**
+ * Contrato oficial API-M3-05 (GET /api/v1/calendario)
+ * Respuesta JSON Base: [{ eventoId, tipo, titulo, inicio, fin, ubicacion }]
+ */
+export interface EventoCalendarioM3 {
+  eventoId: string
+  tipo: TipoEventoCalendarioM3
+  titulo: string
+  inicio: string // ISO 8601: YYYY-MM-DDTHH:mm:ssZ
+  fin: string // ISO 8601: YYYY-MM-DDTHH:mm:ssZ
+  ubicacion: string
+  sedeId: string
+  grupoId: string | null
+  nombreGrupo: string | null
+  categorias: string[]
+  descripcion: string
+  estado: 'PROGRAMADO' | 'REPROGRAMADO' | 'ANULADO'
+  editablePorAdmin: boolean
+}
+
+export interface RespuestaCalendarioConsolidadoM3 {
+  sesion: {
+    userId: string
+    rol: RolExternoM1
+    nombreCompleto: string
+    gruposAsociadosIds: string[]
+  }
+  eventos: EventoCalendarioM3[]
+}
 
 /**
  * Contrato oficial API-M3-04 (GET /api/v1/grupos/{id}/estudiantes)

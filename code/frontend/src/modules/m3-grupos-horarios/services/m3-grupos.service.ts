@@ -9,13 +9,16 @@ import {
   type DiaSemanaM3,
   type EstadoCupoGrupoM3,
   type EvaluacionDisponibilidadProfesorM3,
+  type EventoCalendarioM3,
   type GrupoAsignadoProfesorM3,
   type GrupoConfiguradoM3,
   type HorarioGrupoM3,
   type InscripcionEstudianteGrupoM3,
   type RegistroNotificacionM1,
+  type RespuestaCalendarioConsolidadoM3,
   type RespuestaOperacionHorarioM3,
   type ResultadoCambioGrupoM3,
+  type RolExternoM1,
 } from '../types/m3.types.ts'
 
 let gruposMemoriaLocal: GrupoConfiguradoM3[] = [...GRUPOS_M3_FALLBACK]
@@ -55,6 +58,41 @@ let inscripcionesMemoriaLocal: InscripcionEstudianteGrupoM3[] = [
     nombreGrupo: 'Iniciación Norte B',
     fechaInscripcion: '2026-09-26T09:15:00Z',
     estado: 'ACTIVO',
+  },
+]
+
+let eventosGlobalesMemoriaLocal: EventoCalendarioM3[] = [
+  {
+    eventoId: 'EVT-INST-01',
+    tipo: 'EVENTO_INSTITUCIONAL',
+    titulo: 'Festivo · Jornada Institucional de Mantenimiento',
+    inicio: '2026-10-12T08:00:00Z',
+    fin: '2026-10-12T18:00:00Z',
+    ubicacion: 'Todas las sedes (Norte, Sur y El Salitre)',
+    sedeId: 'SEDE-NORTE-P1',
+    grupoId: null,
+    nombreGrupo: 'Todos los grupos del club',
+    categorias: ['Todas las categorías'],
+    descripcion:
+      'Fecha institucional de cierre de pistas por día festivo y revisión de seguridad.',
+    estado: 'PROGRAMADO',
+    editablePorAdmin: true,
+  },
+  {
+    eventoId: 'EVT-INST-02',
+    tipo: 'EVENTO_INSTITUCIONAL',
+    titulo: 'Reunión General de Acudientes y Entrega de Uniformes',
+    inicio: '2026-10-15T17:00:00Z',
+    fin: '2026-10-15T19:00:00Z',
+    ubicacion: 'Auditorio Principal · Sede Norte',
+    sedeId: 'SEDE-NORTE-P1',
+    grupoId: null,
+    nombreGrupo: 'Todos los grupos del club',
+    categorias: ['Todas las categorías'],
+    descripcion:
+      'Socialización del reglamento técnico de competencias y entrega de indumentaria.',
+    estado: 'PROGRAMADO',
+    editablePorAdmin: true,
   },
 ]
 
@@ -879,9 +917,6 @@ const DATOS_ESTUDIANTES_FALLBACK: Record<
   },
 }
 
-/**
- * Obtiene el contexto de elegibilidad y los grupos filtrados por nivel (DEP-M2-03) y plan (DEP-G4-02).
- */
 export async function obtenerContextoAutogestionM3(
   estudianteId: string,
   actorRol: 'ESTUDIANTE' | 'ACUDIENTE',
@@ -941,10 +976,6 @@ export async function obtenerContextoAutogestionM3(
   }
 }
 
-/**
- * Ejecuta la inscripción o el cambio de grupo con revalidación atómica de cupo y liberación
- * inmediata del cupo anterior.
- */
 export async function inscribirOCambiarGrupoM3(payload: {
   estudianteId: string
   grupoDestinoId: string
@@ -1018,9 +1049,6 @@ export async function inscribirOCambiarGrupoM3(payload: {
   }
 }
 
-/**
- * API-M3-04: GET /api/v1/grupos/{id}/estudiantes
- */
 export async function obtenerEstudiantesDeGrupoM3(
   grupoId: string,
 ): Promise<InscripcionEstudianteGrupoM3[]> {
@@ -1028,5 +1056,263 @@ export async function obtenerEstudiantesDeGrupoM3(
     return await pedir<InscripcionEstudianteGrupoM3[]>(`/v1/grupos/${grupoId}/estudiantes`)
   } catch {
     return inscripcionesMemoriaLocal.filter((i) => i.grupoId === grupoId)
+  }
+}
+
+// ============================================================================
+// HU-3.5: CALENDARIO CONSOLIDADO, SEGMENTACIÓN POR ROL Y API-M3-05
+// ============================================================================
+
+const FECHAS_OCTUBRE_LOCAL: Record<DiaSemanaM3, string[]> = {
+  Lunes: ['2026-10-05', '2026-10-12', '2026-10-19', '2026-10-26'],
+  Martes: ['2026-10-06', '2026-10-13', '2026-10-20', '2026-10-27'],
+  Miercoles: ['2026-10-07', '2026-10-14', '2026-10-21', '2026-10-28'],
+  Jueves: ['2026-10-08', '2026-10-15', '2026-10-22', '2026-10-29'],
+  Viernes: ['2026-10-09', '2026-10-16', '2026-10-23', '2026-10-30'],
+  Sabado: ['2026-10-10', '2026-10-17', '2026-10-24', '2026-10-31'],
+  Domingo: ['2026-10-11', '2026-10-18', '2026-10-25'],
+}
+
+const SESIONES_MOCK_LOCAL: Record<
+  string,
+  { userId: string; rol: RolExternoM1; nombreCompleto: string; gruposAsociadosIds: string[] }
+> = {
+  'mock-jwt-admin': {
+    userId: 'USR-ADMIN-01',
+    rol: 'ADMIN',
+    nombreCompleto: 'Daniela Martínez (Admin)',
+    gruposAsociadosIds: ['GRP-01', 'GRP-02', 'GRP-03', 'GRP-04', 'GRP-05', 'GRP-06'],
+  },
+  'mock-jwt-estudiante-menor': {
+    userId: 'EST-01',
+    rol: 'ESTUDIANTE',
+    nombreCompleto: 'Sofía Ramírez (Estudiante · Iniciación Norte A)',
+    gruposAsociadosIds: ['GRP-01'],
+  },
+  'mock-jwt-acudiente-01': {
+    userId: 'ACU-01',
+    rol: 'ACUDIENTE',
+    nombreCompleto: 'Carolina Ramírez (Acudiente de Sofía)',
+    gruposAsociadosIds: ['GRP-01'],
+  },
+  'mock-jwt-profesor-03': {
+    userId: 'PROF-03',
+    rol: 'PROFESOR',
+    nombreCompleto: 'Ana Gómez (Profesora · Intermedio Sur B)',
+    gruposAsociadosIds: ['GRP-02', 'GRP-05'],
+  },
+  'mock-jwt-profesor-04': {
+    userId: 'PROF-04',
+    rol: 'PROFESOR',
+    nombreCompleto: 'Luis Rojas (Profesor · Avanzado Norte C)',
+    gruposAsociadosIds: ['GRP-03'],
+  },
+}
+
+/**
+ * API-M3-05: GET /api/v1/calendario (y /v1/calendario/contexto)
+ */
+export async function obtenerCalendarioConsolidadoM3(
+  tokenSesion: string,
+  filtros?: { tipo?: string; grupoId?: string },
+): Promise<RespuestaCalendarioConsolidadoM3> {
+  try {
+    return await pedir<RespuestaCalendarioConsolidadoM3>('/v1/calendario/contexto', {
+      consulta: {
+        token: tokenSesion,
+        tipo: filtros?.tipo || undefined,
+        grupoId: filtros?.grupoId || undefined,
+      },
+    })
+  } catch {
+    const sesion = SESIONES_MOCK_LOCAL[tokenSesion] ?? SESIONES_MOCK_LOCAL['mock-jwt-admin']
+    const permitidos = filtros?.grupoId
+      ? sesion.gruposAsociadosIds.filter((id) => id === filtros.grupoId)
+      : sesion.gruposAsociadosIds
+
+    const eventos: EventoCalendarioM3[] = []
+    for (const g of gruposMemoriaLocal) {
+      if (!g.activo || !permitidos.includes(g.grupoId)) continue
+      for (const h of g.horarios ?? []) {
+        if (h.estado === 'CANCELADO') continue
+        const dia = h.diaSemana ?? h.dia
+        for (const fecha of FECHAS_OCTUBRE_LOCAL[dia] ?? ['2026-10-05']) {
+          eventos.push({
+            eventoId: `EVT-ENT-${h.horarioId ?? h.id}-${fecha}`,
+            tipo: 'ENTRENAMIENTO',
+            titulo: `Entrenamiento · ${g.nombre}`,
+            inicio: `${fecha}T${h.horaInicio}:00Z`,
+            fin: `${fecha}T${h.horaFin}:00Z`,
+            ubicacion: `${h.pista} (Sede ${g.sedeNombre})`,
+            sedeId: g.sedeId,
+            grupoId: g.grupoId,
+            nombreGrupo: g.nombre,
+            categorias: [g.categoriaNombre],
+            descripcion: `Sesión técnica nivel ${g.nivelNombre}. Entrenador: ${g.profesorNombre ?? 'Equipo docente'}.`,
+            estado: h.estado === 'REPROGRAMADO' ? 'REPROGRAMADO' : 'PROGRAMADO',
+            editablePorAdmin: false,
+          })
+        }
+      }
+    }
+
+    const competenciasFallback: EventoCalendarioM3[] = [
+      {
+        eventoId: 'EVT-COMP-COMP-01',
+        tipo: 'COMPETENCIA',
+        titulo: 'Torneo Regional de Velocidad',
+        inicio: '2026-10-10T09:00:00Z',
+        fin: '2026-10-10T16:00:00Z',
+        ubicacion: 'Pista 1 · Norte · Sede Norte',
+        sedeId: 'SEDE-NORTE-P1',
+        grupoId: null,
+        nombreGrupo: 'Intermedio, Avanzado',
+        categorias: ['CAT-02', 'CAT-03', 'CAT-04'],
+        descripcion: 'Competencia oficial publicada por Módulo 4 (DEP-M4-01).',
+        estado: 'PROGRAMADO',
+        editablePorAdmin: false,
+      },
+      {
+        eventoId: 'EVT-COMP-COMP-03',
+        tipo: 'COMPETENCIA',
+        titulo: 'Chequeo Técnico Clasificatorio',
+        inicio: '2026-10-17T08:30:00Z',
+        fin: '2026-10-17T12:30:00Z',
+        ubicacion: 'Pista 2 · Sur · Sede Sur',
+        sedeId: 'SEDE-SUR-P2',
+        grupoId: null,
+        nombreGrupo: 'Intermedio, Avanzado',
+        categorias: ['CAT-03', 'CAT-04', 'CAT-05'],
+        descripcion: 'Chequeo oficial de tiempos cronometrados (DEP-M4-01).',
+        estado: 'PROGRAMADO',
+        editablePorAdmin: false,
+      },
+      {
+        eventoId: 'EVT-COMP-COMP-02',
+        tipo: 'COMPETENCIA',
+        titulo: 'Festival Distrital de Escuelas',
+        inicio: '2026-10-24T08:00:00Z',
+        fin: '2026-10-24T14:00:00Z',
+        ubicacion: 'Pista Principal - El Salitre',
+        sedeId: 'SEDE-SALITRE-P1',
+        grupoId: null,
+        nombreGrupo: 'Semillero, Iniciación',
+        categorias: ['CAT-01', 'CAT-02'],
+        descripcion: 'Festival oficial de escuelas de patinaje (DEP-M4-01).',
+        estado: 'PROGRAMADO',
+        editablePorAdmin: false,
+      },
+    ]
+
+    eventos.push(...competenciasFallback)
+    for (const eg of eventosGlobalesMemoriaLocal) {
+      if (eg.estado === 'ANULADO') continue
+      eventos.push({ ...eg, editablePorAdmin: sesion.rol === 'ADMIN' })
+    }
+
+    return {
+      sesion,
+      eventos: eventos
+        .filter((e) => !filtros?.tipo || e.tipo === filtros.tipo)
+        .sort((a, b) => a.inicio.localeCompare(b.inicio)),
+    }
+  }
+}
+
+export async function crearEventoGlobalM3(
+  tokenSesion: string,
+  payload: {
+    titulo: string
+    inicio: string
+    fin: string
+    ubicacion: string
+    sedeId?: string
+    descripcion?: string
+  },
+): Promise<EventoCalendarioM3> {
+  try {
+    return await pedir<EventoCalendarioM3>('/v1/calendario/eventos-globales', {
+      metodo: 'POST',
+      consulta: { token: tokenSesion },
+      cuerpo: payload,
+    })
+  } catch (error) {
+    if (error instanceof Error && error.message && !error.message.includes('No hay conexión')) {
+      throw error
+    }
+    const sesion = SESIONES_MOCK_LOCAL[tokenSesion] ?? SESIONES_MOCK_LOCAL['mock-jwt-admin']
+    if (sesion.rol !== 'ADMIN') {
+      throw new Error('Acceso denegado: solo el rol ADMIN puede crear eventos globales.')
+    }
+    const nuevo: EventoCalendarioM3 = {
+      eventoId: `EVT-INST-0${eventosGlobalesMemoriaLocal.length + 1}`,
+      tipo: 'EVENTO_INSTITUCIONAL',
+      titulo: payload.titulo.trim(),
+      inicio: payload.inicio,
+      fin: payload.fin,
+      ubicacion: payload.ubicacion.trim(),
+      sedeId: payload.sedeId ?? 'SEDE-NORTE-P1',
+      grupoId: null,
+      nombreGrupo: 'Todos los grupos del club',
+      categorias: ['Todas las categorías'],
+      descripcion:
+        payload.descripcion?.trim() || 'Evento institucional global programado por Administración.',
+      estado: 'PROGRAMADO',
+      editablePorAdmin: true,
+    }
+    eventosGlobalesMemoriaLocal = [...eventosGlobalesMemoriaLocal, nuevo]
+    return nuevo
+  }
+}
+
+export async function actualizarEventoGlobalM3(
+  tokenSesion: string,
+  eventoId: string,
+  payload: {
+    titulo?: string
+    inicio?: string
+    fin?: string
+    ubicacion?: string
+    descripcion?: string
+  },
+): Promise<EventoCalendarioM3> {
+  try {
+    return await pedir<EventoCalendarioM3>(`/v1/calendario/eventos-globales/${eventoId}`, {
+      metodo: 'PATCH',
+      consulta: { token: tokenSesion },
+      cuerpo: payload,
+    })
+  } catch (error) {
+    if (error instanceof Error && error.message && !error.message.includes('No hay conexión')) {
+      throw error
+    }
+    const ev = eventosGlobalesMemoriaLocal.find((e) => e.eventoId === eventoId)
+    if (!ev) throw new Error('Evento global no encontrado.')
+    if (payload.titulo) ev.titulo = payload.titulo.trim()
+    if (payload.inicio) ev.inicio = payload.inicio
+    if (payload.fin) ev.fin = payload.fin
+    if (payload.ubicacion) ev.ubicacion = payload.ubicacion.trim()
+    if (payload.descripcion !== undefined) ev.descripcion = payload.descripcion.trim()
+    return ev
+  }
+}
+
+export async function anularEventoGlobalM3(
+  tokenSesion: string,
+  eventoId: string,
+): Promise<EventoCalendarioM3> {
+  try {
+    return await pedir<EventoCalendarioM3>(`/v1/calendario/eventos-globales/${eventoId}/anular`, {
+      metodo: 'PATCH',
+      consulta: { token: tokenSesion },
+    })
+  } catch (error) {
+    if (error instanceof Error && error.message && !error.message.includes('No hay conexión')) {
+      throw error
+    }
+    const ev = eventosGlobalesMemoriaLocal.find((e) => e.eventoId === eventoId)
+    if (!ev) throw new Error('Evento global no encontrado.')
+    ev.estado = 'ANULADO'
+    return ev
   }
 }

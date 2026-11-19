@@ -94,6 +94,10 @@ const ESTADOS: Record<string, Record<string, [string, Tono]>> = {
     reprogramado: ['Reprogramado', 'info'],
     cancelado: ['Anulado', 'neutral'],
   },
+  competencia: {
+    programada: ['Programada', 'info'],
+    cancelada: ['Cancelada', 'neutral'],
+  },
 }
 
 export function Insignia({ entidad, estado }: { entidad: string; estado: string }) {
