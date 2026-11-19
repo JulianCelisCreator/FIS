@@ -24,6 +24,7 @@ import {
   AsignarProfesorDto,
   AsignarProfesoresMultipleDto,
   CreateGrupoDto,
+  InscribirCambiarGrupoDto,
   UpdateGrupoDto,
 } from './dto/create-grupo.dto.js';
 import {
@@ -33,14 +34,17 @@ import {
 } from './dto/create-horario.dto.js';
 import {
   type CategoriaPatinaje,
+  type ContextoAutogestionGrupoM3,
   type DiaSemana,
   type EstadoCupoGrupo,
   type EvaluacionDisponibilidadProfesorM3,
   Grupo,
   type GrupoAsignadoProfesorM3,
   type Horario,
+  type InscripcionEstudianteGrupoM3,
   type ProfesorAsignadoGrupo,
   type RespuestaOperacionHorarioM3,
+  type ResultadoCambioGrupoM3,
   type RolDocenteGrupo,
 } from './entities/grupo.entity.js';
 
@@ -63,6 +67,7 @@ export class GruposService {
 
   private grupos: Grupo[] = [];
   private contadorHorarios = 10;
+  private inscripcionesEstudiantes: InscripcionEstudianteGrupoM3[] = [];
 
   constructor(
     @Optional()
@@ -264,6 +269,139 @@ export class GruposService {
         ],
         activo: true,
       }),
+      // Grupos adicionales de nivel Iniciación (NIV-01) alineados con wireframe HU-3.4
+      this.construirGrupo({
+        grupoId: 'GRP-04',
+        nombre: 'Iniciación Norte B',
+        nivelId: 'NIV-01',
+        categoriaId: 'CAT-02',
+        sedeId: 'SEDE-NORTE-P1',
+        dias: ['Martes', 'Jueves'],
+        aforoMax: 20,
+        ocupados: 9,
+        profesorId: 'PROF-01',
+        profesorNombre: 'Carlos Mendoza',
+        horarios: [
+          {
+            id: 'HOR-07',
+            horarioId: 'HOR-07',
+            grupoId: 'GRP-04',
+            nombreGrupo: 'Iniciación Norte B',
+            nivelNombre: 'Iniciación',
+            dia: 'Martes',
+            diaSemana: 'Martes',
+            horaInicio: '16:00',
+            horaFin: '18:00',
+            sedeId: 'SEDE-NORTE-P1',
+            sedeNombre: 'Norte',
+            pista: 'Pista 1 · Norte',
+            estado: 'ACTIVO',
+          },
+          {
+            id: 'HOR-08',
+            horarioId: 'HOR-08',
+            grupoId: 'GRP-04',
+            nombreGrupo: 'Iniciación Norte B',
+            nivelNombre: 'Iniciación',
+            dia: 'Jueves',
+            diaSemana: 'Jueves',
+            horaInicio: '16:00',
+            horaFin: '18:00',
+            sedeId: 'SEDE-NORTE-P1',
+            sedeNombre: 'Norte',
+            pista: 'Pista 1 · Norte',
+            estado: 'ACTIVO',
+          },
+        ],
+        activo: true,
+      }),
+      this.construirGrupo({
+        grupoId: 'GRP-05',
+        nombre: 'Iniciación Sur A',
+        nivelId: 'NIV-01',
+        categoriaId: 'CAT-02',
+        sedeId: 'SEDE-SUR-P2',
+        dias: ['Lunes', 'Miercoles'],
+        aforoMax: 20,
+        ocupados: 18,
+        profesorId: 'PROF-03',
+        profesorNombre: 'Ana Gómez',
+        horarios: [
+          {
+            id: 'HOR-09',
+            horarioId: 'HOR-09',
+            grupoId: 'GRP-05',
+            nombreGrupo: 'Iniciación Sur A',
+            nivelNombre: 'Iniciación',
+            dia: 'Lunes',
+            diaSemana: 'Lunes',
+            horaInicio: '18:00',
+            horaFin: '20:00',
+            sedeId: 'SEDE-SUR-P2',
+            sedeNombre: 'Sur',
+            pista: 'Pista 2 · Sur',
+            estado: 'ACTIVO',
+          },
+        ],
+        activo: true,
+      }),
+      this.construirGrupo({
+        grupoId: 'GRP-06',
+        nombre: 'Iniciación Norte C',
+        nivelId: 'NIV-01',
+        categoriaId: 'CAT-02',
+        sedeId: 'SEDE-NORTE-P1',
+        dias: ['Viernes', 'Sabado'],
+        aforoMax: 20,
+        ocupados: 20,
+        profesorId: 'PROF-01',
+        profesorNombre: 'Carlos Mendoza',
+        horarios: [
+          {
+            id: 'HOR-10',
+            horarioId: 'HOR-10',
+            grupoId: 'GRP-06',
+            nombreGrupo: 'Iniciación Norte C',
+            nivelNombre: 'Iniciación',
+            dia: 'Viernes',
+            diaSemana: 'Viernes',
+            horaInicio: '09:00',
+            horaFin: '11:00',
+            sedeId: 'SEDE-NORTE-P1',
+            sedeNombre: 'Norte',
+            pista: 'Pista 1 · Norte',
+            estado: 'ACTIVO',
+          },
+        ],
+        activo: true,
+      }),
+    ];
+
+    this.inscripcionesEstudiantes = [
+      {
+        estudianteId: 'EST-01',
+        nombreEstudiante: 'Sofía Ramírez',
+        grupoId: 'GRP-01',
+        nombreGrupo: 'Iniciación Norte A',
+        fechaInscripcion: '2026-09-23T14:00:00Z',
+        estado: 'ACTIVO',
+      },
+      {
+        estudianteId: 'EST-03',
+        nombreEstudiante: 'Mateo Valderrama',
+        grupoId: 'GRP-01',
+        nombreGrupo: 'Iniciación Norte A',
+        fechaInscripcion: '2026-09-25T10:30:00Z',
+        estado: 'ACTIVO',
+      },
+      {
+        estudianteId: 'EST-04',
+        nombreEstudiante: 'Valentina Torres',
+        grupoId: 'GRP-04',
+        nombreGrupo: 'Iniciación Norte B',
+        fechaInscripcion: '2026-09-26T09:15:00Z',
+        estado: 'ACTIVO',
+      },
     ];
   }
 
@@ -460,10 +598,6 @@ export class GruposService {
     return grupo;
   }
 
-  /**
-   * Catálogos consumidos de DEP-M2-01, DEP-M2-02 y DEP-G4-01 para el formulario
-   * de configuración de grupos (HU-3.1).
-   */
   obtenerCatalogosConfiguracion(authorizationHeader?: string) {
     const sesion = this.puertoM1.validarSesion(authorizationHeader);
     return {
@@ -477,7 +611,6 @@ export class GruposService {
 
   /**
    * API-M3-01: GET /api/v1/grupos
-   * Devuelve [{ grupoId, nombre, nivelId, categoriaId, sedeId, aforoMax, ocupados, alerta90, ... }]
    */
   findAll(authorizationHeader?: string): Grupo[] {
     this.puertoM1.validarSesion(authorizationHeader);
@@ -492,10 +625,6 @@ export class GruposService {
     return this.sincronizarMetricas(grupo);
   }
 
-  /**
-   * HU-3.1: Crear grupo validando campos obligatorios (nombre, nivel, sede, días, cupo)
-   * y asegurando que no exceda el aforo físico máximo de DEP-G4-01.
-   */
   create(createGrupoDto: CreateGrupoDto): Grupo {
     const nombre = createGrupoDto.nombre?.trim();
     if (!nombre) {
@@ -598,9 +727,6 @@ export class GruposService {
     return nuevoGrupo;
   }
 
-  /**
-   * Editar configuración de un grupo existente revalidando límites de DEP-G4-01 y aforo.
-   */
   actualizar(id: string, dto: UpdateGrupoDto): Grupo {
     const grupo = this.findOne(id);
 
@@ -683,18 +809,12 @@ export class GruposService {
     return this.sincronizarMetricas(grupo);
   }
 
-  /**
-   * Desactivar o reactivar un grupo (Regla de negocio 5: sin borrado físico).
-   */
   cambiarEstado(id: string, activo: boolean): Grupo {
     const grupo = this.findOne(id);
     grupo.activo = activo;
     return this.sincronizarMetricas(grupo);
   }
 
-  /**
-   * Escenario BDD 2: Valida y registra un cupo en el grupo, bloqueando al llegar al 100%.
-   */
   registrarInscripcionEnGrupo(grupoId: string): Grupo {
     const grupo = this.findOne(grupoId);
     if (!grupo.activo) {
@@ -726,10 +846,6 @@ export class GruposService {
     return grupo.horarios.filter((h) => h.estado !== 'CANCELADO');
   }
 
-  /**
-   * Evalúa si un profesor tiene conflicto de horario o restricción contractual (DEP-M6-01)
-   * frente a los horarios de un grupo objetivo, cruzando además contra otros grupos asignados.
-   */
   evaluarConflictoHorarioProfesor(
     grupo: Grupo,
     profesorId: string,
@@ -750,7 +866,6 @@ export class GruposService {
 
     const horariosGrupo = this.horariosActivosDelGrupo(grupo);
 
-    // 1. Cruzar horarios del grupo contra bloques ocupados externos y disponibilidad de DEP-M6-01
     if (infoPersonalM6) {
       for (const hActual of horariosGrupo) {
         const conflictoExterno = infoPersonalM6.bloquesOcupadosExternos?.find(
@@ -775,7 +890,6 @@ export class GruposService {
       }
     }
 
-    // 2. Cruzar horarios del grupo contra asignaciones previas en otros grupos activos
     const otrosGruposDelProfesor = this.grupos.filter(
       (g) =>
         g.activo &&
@@ -802,7 +916,6 @@ export class GruposService {
 
   /**
    * API-M3-02: GET /api/v1/profesores/{id}/grupos
-   * Devuelve [{ grupoId, nombreGrupo, rolDocente, horarios[] }]
    */
   obtenerGruposPorProfesor(profesorId: string): GrupoAsignadoProfesorM3[] {
     const resultado: GrupoAsignadoProfesorM3[] = [];
@@ -825,11 +938,6 @@ export class GruposService {
     return resultado;
   }
 
-  /**
-   * Lista todos los profesores activos de DEP-M1-02 enriquecidos con su disponibilidad
-   * laboral de DEP-M6-01, sus grupos asignados (API-M3-02) y la validación de conflicto
-   * en tiempo real frente al grupo consultado.
-   */
   listarProfesoresConDisponibilidad(
     grupoId?: string,
   ): EvaluacionDisponibilidadProfesorM3[] {
@@ -865,9 +973,6 @@ export class GruposService {
     });
   }
 
-  /**
-   * Obtiene el perfil actualizado y la agenda completa de un profesor específico.
-   */
   obtenerPerfilProfesor(profesorId: string) {
     const profM1 = this.puertoM1
       .listarProfesoresActivos()
@@ -891,10 +996,6 @@ export class GruposService {
     };
   }
 
-  /**
-   * HU-3.2: Asignar un profesor a un grupo validando conflictos en tiempo real
-   * contra otros grupos y DEP-M6-01 (Escenario BDD 3).
-   */
   asignarProfesor(grupoId: string, dto: AsignarProfesorDto): Grupo {
     const grupo = this.findOne(grupoId);
 
@@ -942,9 +1043,6 @@ export class GruposService {
     return this.sincronizarMetricas(grupo);
   }
 
-  /**
-   * HU-3.2: Asignar múltiples profesores en lote a un grupo específico.
-   */
   asignarProfesoresMultiple(
     grupoId: string,
     dto: AsignarProfesoresMultipleDto,
@@ -999,9 +1097,6 @@ export class GruposService {
     return this.sincronizarMetricas(grupo);
   }
 
-  /**
-   * HU-3.2: Quitar (desasignar) un profesor de un grupo actualizando de inmediato su agenda.
-   */
   desasignarProfesor(grupoId: string, profesorId: string): Grupo {
     const grupo = this.findOne(grupoId);
     const existia = grupo.profesoresAsignados.some(
@@ -1064,7 +1159,6 @@ export class GruposService {
       );
     }
 
-    // 1. Validar que el mismo grupo no tenga ya otra franja activa solapada en el mismo día
     const solapaEnMismoGrupo = this.horariosActivosDelGrupo(grupo).some(
       (h) =>
         h.id !== excluirHorarioId &&
@@ -1080,7 +1174,6 @@ export class GruposService {
       );
     }
 
-    // 2. Validar anti-solapamiento de pista/sede según capacidad física (DEP-G4-01)
     for (const otroGrupo of this.grupos) {
       if (!otroGrupo.activo || otroGrupo.grupoId === grupo.grupoId) continue;
 
@@ -1109,7 +1202,6 @@ export class GruposService {
       }
     }
 
-    // 3. Validar disponibilidad de los docentes asignados al grupo (DEP-M6-01 y otros grupos)
     for (const docente of grupo.profesoresAsignados) {
       const infoM6 = this.puertoM6.obtenerDisponibilidadDocente(
         docente.profesorId,
@@ -1160,8 +1252,6 @@ export class GruposService {
 
   /**
    * API-M3-03: GET /api/v1/horarios
-   * Filtrable por grupoId, sedeId o rango de fechas.
-   * Devuelve [{ horarioId, grupoId, diaSemana, horaInicio, horaFin, sedeId, estado, ... }]
    */
   listarHorarios(filtros?: {
     grupoId?: string;
@@ -1203,9 +1293,6 @@ export class GruposService {
     return this.puertoM1.listarNotificacionesEnviadas();
   }
 
-  /**
-   * Retrocompatible con pruebas previas: agrega una franja horaria a un grupo.
-   */
   agregarHorario(grupoId: string, dto: CreateHorarioDto): Horario {
     const respuesta = this.crearHorario({
       grupoId,
@@ -1219,10 +1306,6 @@ export class GruposService {
     return respuesta.horario;
   }
 
-  /**
-   * HU-3.3: Crear nueva franja horaria validando solapamientos de pista/sede (DEP-G4-01)
-   * y disponibilidad docente.
-   */
   crearHorario(dto: CreateHorarioDto): RespuestaOperacionHorarioM3 {
     const grupoId = dto.grupoId ?? 'GRP-01';
     const grupo = this.findOne(grupoId);
@@ -1277,11 +1360,6 @@ export class GruposService {
     };
   }
 
-  /**
-   * HU-3.3: Editar o reprogramar (ej. Drag & Drop) una franja horaria existente.
-   * Valida anti-solapamiento de pista/sede (DEP-G4-01) y dispara automáticamente
-   * la notificación de cambio en DEP-M1-05.
-   */
   actualizarHorario(
     horarioId: string,
     dto: UpdateHorarioDto,
@@ -1368,10 +1446,6 @@ export class GruposService {
     };
   }
 
-  /**
-   * HU-3.3: Anular / cancelar una franja horaria con motivo obligatorio (sin borrado físico)
-   * y disparar automáticamente la notificación a profesores y estudiantes en DEP-M1-05.
-   */
   cancelarHorario(
     horarioId: string,
     dto: CancelarHorarioDto,
@@ -1412,6 +1486,242 @@ export class GruposService {
     return {
       horario,
       notificacion,
+    };
+  }
+
+  // ==========================================================================
+  // HU-3.4: SELECCIÓN Y CAMBIO DE GRUPO POR PARTE DEL USUARIO Y API-M3-04
+  // ==========================================================================
+
+  /**
+   * API-M3-04: GET /api/v1/grupos/{id}/estudiantes
+   * Devuelve [{ estudianteId, fechaInscripcion, estado }]
+   */
+  obtenerEstudiantesDeGrupo(grupoId: string): InscripcionEstudianteGrupoM3[] {
+    this.findOne(grupoId);
+    return this.inscripcionesEstudiantes.filter((i) => i.grupoId === grupoId);
+  }
+
+  /**
+   * Lista los perfiles de prueba disponibles (Estudiante menor, Acudiente autorizado,
+   * Estudiante mayor de edad, Casos de bloqueo por autorización/póliza/cartera).
+   */
+  listarPerfilesAutogestionHU34() {
+    const perfiles = this.puertoM2.listarPerfilesDeportivos();
+    return perfiles.map((p) => {
+      const menor = this.puertoM1.validarMenorYAcudiente(p.estudianteId);
+      const poliza = this.puertoM1.validarPolizaVigente(p.estudianteId);
+      const plan = this.puertoG4.obtenerEstadoPlanYCartera(p.estudianteId);
+      const inscripcionActiva = this.inscripcionesEstudiantes.find(
+        (i) => i.estudianteId === p.estudianteId && i.estado === 'ACTIVO',
+      );
+      return {
+        estudianteId: p.estudianteId,
+        nombreCompleto: p.nombreCompleto,
+        nivelId: p.nivelId,
+        categoriaId: p.categoriaId,
+        esMenorEdad: menor.esMenorEdad,
+        edad: menor.edad,
+        acudienteId: menor.acudienteId,
+        nombreAcudiente: menor.nombreAcudiente,
+        tieneAutorizacion: menor.tieneAutorizacion,
+        polizaVigente: poliza.polizaVigente,
+        planActivo: plan.planActivo,
+        alDiaEnPagos: plan.alDiaEnPagos,
+        nombrePlan: plan.nombrePlan,
+        grupoActualId: inscripcionActiva?.grupoId ?? null,
+        grupoActualNombre: inscripcionActiva?.nombreGrupo ?? null,
+      };
+    });
+  }
+
+  /**
+   * HU-3.4: Obtiene el contexto de elegibilidad y grupos filtrados por el nivel
+   * del estudiante (DEP-M2-03) y su plan activo (DEP-G4-02), evaluando las
+   * reglas de menor de edad (DEP-M1-03) y póliza vigente (DEP-M1-04).
+   */
+  obtenerContextoAutogestionGrupo(
+    estudianteId: string,
+    actorRol: 'ESTUDIANTE' | 'ACUDIENTE' = 'ACUDIENTE',
+    acudienteId?: string,
+  ): ContextoAutogestionGrupoM3 {
+    const perfilDeportivo = this.puertoM2.obtenerPerfilDeportivo(estudianteId);
+    const validacionMenor = this.puertoM1.validarMenorYAcudiente(estudianteId);
+    const poliza = this.puertoM1.validarPolizaVigente(estudianteId);
+    const planCartera = this.puertoG4.obtenerEstadoPlanYCartera(estudianteId);
+
+    const inscripcionActiva = this.inscripcionesEstudiantes.find(
+      (i) => i.estudianteId === estudianteId && i.estado === 'ACTIVO',
+    );
+    const grupoActual = inscripcionActiva
+      ? this.grupos.find((g) => g.grupoId === inscripcionActiva.grupoId) ?? null
+      : null;
+
+    let puedeGestionarCambio = true;
+    let motivoBloqueoActor: string | null = null;
+
+    // Regla 1: Bloqueo de cambios para menores de edad (solo acudiente autorizado - DEP-M1-03)
+    if (validacionMenor.esMenorEdad && actorRol === 'ESTUDIANTE') {
+      puedeGestionarCambio = false;
+      motivoBloqueoActor =
+        'Cambio no permitido para menores de edad: solo el acudiente autorizado puede inscribir o cambiar de grupo (DEP-M1-03).';
+    } else if (validacionMenor.esMenorEdad && actorRol === 'ACUDIENTE') {
+      const acudienteEfectivo = acudienteId ?? validacionMenor.acudienteId;
+      if (
+        !validacionMenor.tieneAutorizacion ||
+        !validacionMenor.acudienteId ||
+        acudienteEfectivo !== validacionMenor.acudienteId
+      ) {
+        puedeGestionarCambio = false;
+        motivoBloqueoActor = `El estudiante menor de edad (${validacionMenor.nombreEstudiante}) no cuenta con autorización activa de su acudiente vinculado en DEP-M1-03.`;
+      }
+    }
+
+    // Regla 2: Verificar póliza médico-deportiva vigente (DEP-M1-04) y cartera al día (DEP-G4-02)
+    if (puedeGestionarCambio && !poliza.polizaVigente) {
+      puedeGestionarCambio = false;
+      motivoBloqueoActor = `La póliza médico-deportiva del estudiante se encuentra vencida (${poliza.fechaVencimiento.slice(0, 10)} · DEP-M1-04).`;
+    } else if (
+      puedeGestionarCambio &&
+      (!planCartera.planActivo || !planCartera.alDiaEnPagos)
+    ) {
+      puedeGestionarCambio = false;
+      motivoBloqueoActor = `El estudiante presenta bloqueo en plan o cartera (${planCartera.estadoCartera} · DEP-G4-02). Debe estar al día en pagos para inscribirse o cambiar de grupo.`;
+    }
+
+    // Catálogo filtrado por nivel deportivo (DEP-M2-03) y límite de clases semanales del plan (DEP-G4-02)
+    const gruposElegibles = this.grupos
+      .filter(
+        (g) =>
+          g.activo &&
+          g.nivelId === perfilDeportivo.nivelId &&
+          (planCartera.limiteClasesSemanales <= 0 ||
+            g.dias.length <= planCartera.limiteClasesSemanales),
+      )
+      .map((g) => this.sincronizarMetricas(g));
+
+    return {
+      estudianteId,
+      actorRol,
+      actorId:
+        actorRol === 'ACUDIENTE'
+          ? (acudienteId ?? validacionMenor.acudienteId ?? 'ACU-01')
+          : estudianteId,
+      perfilDeportivo,
+      validacionMenor,
+      poliza,
+      planCartera,
+      puedeGestionarCambio,
+      motivoBloqueoActor,
+      grupoActual: grupoActual ? this.sincronizarMetricas(grupoActual) : null,
+      gruposElegibles,
+    };
+  }
+
+  /**
+   * HU-3.4: Ejecuta atómicamente la inscripción o el cambio de grupo aplicando las
+   * 4 reglas obligatorias:
+   * (1) Bloquear autogestión si es menor de edad (solo acudiente autorizado - DEP-M1-03)
+   * (2) Verificar póliza vigente (DEP-M1-04) y cartera al día / límite de clases (DEP-G4-02)
+   * (3) Revalidar atómicamente que el cupo destino no esté al 100% al confirmar
+   * (4) Liberar de inmediato el cupo del grupo anterior en caso de cambio
+   */
+  inscribirOCambiarGrupoEstudiante(
+    dto: InscribirCambiarGrupoDto,
+  ): ResultadoCambioGrupoM3 {
+    const contexto = this.obtenerContextoAutogestionGrupo(
+      dto.estudianteId,
+      dto.actorRol,
+      dto.acudienteId,
+    );
+
+    if (!contexto.puedeGestionarCambio) {
+      throw new BadRequestException(
+        contexto.motivoBloqueoActor ??
+          'No cumple las validaciones requeridas para inscribir o cambiar de grupo',
+      );
+    }
+
+    const grupoDestino = this.findOne(dto.grupoDestinoId);
+    if (!grupoDestino.activo) {
+      throw new BadRequestException(
+        `El grupo «${grupoDestino.nombre}» no se encuentra activo`,
+      );
+    }
+
+    if (grupoDestino.nivelId !== contexto.perfilDeportivo.nivelId) {
+      throw new BadRequestException(
+        `El grupo «${grupoDestino.nombre}» (${grupoDestino.nivelNombre}) no corresponde al nivel técnico vigente del estudiante (${contexto.perfilDeportivo.nivelId} · DEP-M2-03).`,
+      );
+    }
+
+    if (
+      grupoDestino.dias.length > contexto.planCartera.limiteClasesSemanales
+    ) {
+      throw new BadRequestException(
+        `El grupo «${grupoDestino.nombre}» (${grupoDestino.dias.length} días/semana) supera el límite de clases semanales del plan activo (${contexto.planCartera.limiteClasesSemanales} días/semana · DEP-G4-02).`,
+      );
+    }
+
+    const inscripcionAnterior = this.inscripcionesEstudiantes.find(
+      (i) => i.estudianteId === dto.estudianteId && i.estado === 'ACTIVO',
+    );
+
+    if (inscripcionAnterior?.grupoId === grupoDestino.grupoId) {
+      throw new BadRequestException(
+        `El estudiante ya se encuentra inscrito en el grupo «${grupoDestino.nombre}»`,
+      );
+    }
+
+    // Regla 3: Revalidación atómica de cupo al confirmar (bloqueo al 100%)
+    if (grupoDestino.ocupados >= grupoDestino.aforoMax) {
+      throw new BadRequestException(
+        `No hay cupos disponibles en el grupo «${grupoDestino.nombre}» (${grupoDestino.ocupados}/${grupoDestino.aforoMax} · 100% de aforo alcanzado).`,
+      );
+    }
+
+    // Regla 4: Liberación inmediata del cupo del grupo anterior en caso de cambio
+    let grupoAnterior: Grupo | null = null;
+    if (inscripcionAnterior) {
+      inscripcionAnterior.estado = 'RETIRADO_CAMBIO';
+      const encontradoAnterior = this.grupos.find(
+        (g) => g.grupoId === inscripcionAnterior.grupoId,
+      );
+      if (encontradoAnterior) {
+        encontradoAnterior.ocupados = Math.max(
+          0,
+          encontradoAnterior.ocupados - 1,
+        );
+        grupoAnterior = this.sincronizarMetricas(encontradoAnterior);
+      }
+    }
+
+    // Ocupar cupo en el grupo destino y registrar inscripción activa con fecha ISO 8601
+    grupoDestino.ocupados += 1;
+    const grupoNuevoActualizado = this.sincronizarMetricas(grupoDestino);
+
+    const nuevaInscripcion: InscripcionEstudianteGrupoM3 = {
+      estudianteId: dto.estudianteId,
+      nombreEstudiante: contexto.perfilDeportivo.nombreCompleto,
+      grupoId: grupoNuevoActualizado.grupoId,
+      nombreGrupo: grupoNuevoActualizado.nombre,
+      fechaInscripcion: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+      estado: 'ACTIVO',
+    };
+    this.inscripcionesEstudiantes.unshift(nuevaInscripcion);
+
+    const tipoOperacion = grupoAnterior ? 'CAMBIO_GRUPO' : 'INSCRIPCION';
+    const mensaje = grupoAnterior
+      ? `Cambio confirmado: ${contexto.perfilDeportivo.nombreCompleto} pasó de «${grupoAnterior.nombre}» (${grupoAnterior.ocupados}/${grupoAnterior.aforoMax}) a «${grupoNuevoActualizado.nombre}» (${grupoNuevoActualizado.ocupados}/${grupoNuevoActualizado.aforoMax}). El cupo anterior fue liberado de inmediato.`
+      : `Inscripción confirmada: ${contexto.perfilDeportivo.nombreCompleto} quedó inscrito en «${grupoNuevoActualizado.nombre}» (${grupoNuevoActualizado.ocupados}/${grupoNuevoActualizado.aforoMax}).`;
+
+    return {
+      estudianteId: dto.estudianteId,
+      tipoOperacion,
+      grupoAnterior,
+      grupoNuevo: grupoNuevoActualizado,
+      inscripcion: nuevaInscripcion,
+      mensaje,
     };
   }
 }

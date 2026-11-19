@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ExternalDependenciesModule } from '../external-dependencies/external-dependencies.module.js';
 import { GruposService } from './grupos.service.js';
 
-describe('GruposService (HU-3.1, HU-3.2 y HU-3.3)', () => {
+describe('GruposService (HU-3.1, HU-3.2, HU-3.3 y HU-3.4)', () => {
   let service: GruposService;
 
   beforeEach(async () => {
@@ -37,9 +37,9 @@ describe('GruposService (HU-3.1, HU-3.2 y HU-3.3)', () => {
   it('Escenario BDD 1: Creación exitosa de grupo con nombre, nivel Iniciación, sede Norte, días y cupo 20', () => {
     const nuevo = service.create({
       nombre: 'Iniciación Norte D',
-      nivelId: 'NIV-01', // Iniciación
+      nivelId: 'NIV-01',
       categoriaId: 'CAT-02',
-      sedeId: 'SEDE-NORTE-P1', // Sede Norte
+      sedeId: 'SEDE-NORTE-P1',
       dias: ['Lunes', 'Miercoles'],
       aforoMax: 20,
     });
@@ -68,21 +68,19 @@ describe('GruposService (HU-3.1, HU-3.2 y HU-3.3)', () => {
       sedeId: 'SEDE-SUR-P2',
       dias: ['Martes', 'Jueves'],
       aforoMax: 20,
-      ocupados: 17, // 85% -> Con cupo (<90%)
+      ocupados: 17,
     });
 
     expect(grupo.alerta90).toBe(false);
     expect(grupo.estadoCupo).toBe('con-cupo');
     expect(grupo.bloqueadoInscripcion).toBe(false);
 
-    // Al inscribir al estudiante 18 (18/20 = 90%), activa alerta90 y estado warning
     const al90 = service.registrarInscripcionEnGrupo(grupo.grupoId);
     expect(al90.ocupados).toBe(18);
     expect(al90.alerta90).toBe(true);
     expect(al90.estadoCupo).toBe('alerta-90');
     expect(al90.bloqueadoInscripcion).toBe(false);
 
-    // Inscribir estudiantes 19 y 20 (20/20 = 100%)
     service.registrarInscripcionEnGrupo(grupo.grupoId);
     const al100 = service.registrarInscripcionEnGrupo(grupo.grupoId);
     expect(al100.ocupados).toBe(20);
@@ -90,14 +88,12 @@ describe('GruposService (HU-3.1, HU-3.2 y HU-3.3)', () => {
     expect(al100.estadoCupo).toBe('lleno');
     expect(al100.bloqueadoInscripcion).toBe(true);
 
-    // Cuando un estudiante o acudiente intenta inscribirse al 100% (20/20), bloquea la inscripción
     expect(() => service.registrarInscripcionEnGrupo(grupo.grupoId)).toThrow(
       BadRequestException,
     );
   });
 
   it('debe rechazar un grupo cuyo cupo exceda el aforo físico máximo de la sede (DEP-G4-01)', () => {
-    // SEDE-SUR-P2 tiene aforoMaximoFisico = 20 en DEP-G4-01
     expect(() =>
       service.create({
         nombre: 'Grupo Sobrecupo Sur',
@@ -266,7 +262,6 @@ describe('GruposService (HU-3.1, HU-3.2 y HU-3.3)', () => {
   });
 
   it('HU-3.3: debe bloquear el solapamiento de pista/sede entre dos grupos distintos (DEP-G4-01)', () => {
-    // GRP-01 ya ocupa Pista 1 · Norte (SEDE-NORTE-P1) los Lunes de 14:00 a 16:00
     expect(() =>
       service.crearHorario({
         grupoId: 'GRP-03',
@@ -312,5 +307,95 @@ describe('GruposService (HU-3.1, HU-3.2 y HU-3.3)', () => {
     expect(resultado.notificacion?.mensaje).toContain(
       'Mantenimiento preventivo',
     );
+  });
+
+  // ==========================================================================
+  // PRUEBAS HU-3.4: SELECCIÓN Y CAMBIO DE GRUPO Y API-M3-04
+  // ==========================================================================
+
+  it('HU-3.4: Regla 1 - debe bloquear autogestión de cambio de grupo si el estudiante es menor de edad (DEP-M1-03), permitiéndolo solo a su acudiente autorizado', () => {
+    // EST-01 (Sofía Ramírez, 10 años, menor de edad) intenta cambiar por sí misma como ESTUDIANTE
+    const contextoMenor = service.obtenerContextoAutogestionGrupo(
+      'EST-01',
+      'ESTUDIANTE',
+    );
+    expect(contextoMenor.puedeGestionarCambio).toBe(false);
+    expect(contextoMenor.motivoBloqueoActor).toContain('menores de edad');
+
+    expect(() =>
+      service.inscribirOCambiarGrupoEstudiante({
+        estudianteId: 'EST-01',
+        grupoDestinoId: 'GRP-04',
+        actorRol: 'ESTUDIANTE',
+      }),
+    ).toThrow(BadRequestException);
+
+    // EST-03 (Mateo Valderrama, menor sin autorización firmada en DEP-M1-03) también se bloquea
+    expect(() =>
+      service.inscribirOCambiarGrupoEstudiante({
+        estudianteId: 'EST-03',
+        grupoDestinoId: 'GRP-04',
+        actorRol: 'ACUDIENTE',
+        acudienteId: 'ACU-02',
+      }),
+    ).toThrow(BadRequestException);
+  });
+
+  it('HU-3.4: Regla 2 - debe bloquear inscripción o cambio si el estudiante no tiene póliza vigente (DEP-M1-04) o cartera al día (DEP-G4-02)', () => {
+    // EST-04 (Valentina Torres) tiene póliza vencida en DEP-M1-04 y cartera vencida en DEP-G4-02
+    expect(() =>
+      service.inscribirOCambiarGrupoEstudiante({
+        estudianteId: 'EST-04',
+        grupoDestinoId: 'GRP-05',
+        actorRol: 'ACUDIENTE',
+        acudienteId: 'ACU-03',
+      }),
+    ).toThrow(BadRequestException);
+  });
+
+  it('HU-3.4: Regla 3 (Escenario BDD 2) - debe revalidar atómicamente el cupo al confirmar y bloquear si el grupo destino está al 100% (20/20)', () => {
+    // GRP-06 (Iniciación Norte C) tiene 20/20 cupos ocupados (100% lleno)
+    expect(() =>
+      service.inscribirOCambiarGrupoEstudiante({
+        estudianteId: 'EST-01',
+        grupoDestinoId: 'GRP-06',
+        actorRol: 'ACUDIENTE',
+        acudienteId: 'ACU-01',
+      }),
+    ).toThrow(BadRequestException);
+  });
+
+  it('HU-3.4: Regla 4 y API-M3-04 - debe liberar de inmediato el cupo del grupo anterior al cambiar de grupo y reflejar la inscripción en obtenerEstudiantesDeGrupo()', () => {
+    // EST-01 (Sofía Ramírez) está inicialmente en GRP-01 (12/20 ocupados) y pasa a GRP-05 (Iniciación Sur A, 18/20 ocupados)
+    const antesGrp01 = service.findOne('GRP-01').ocupados;
+    const antesGrp05 = service.findOne('GRP-05').ocupados;
+    expect(antesGrp01).toBe(12);
+    expect(antesGrp05).toBe(18);
+
+    const resultado = service.inscribirOCambiarGrupoEstudiante({
+      estudianteId: 'EST-01',
+      grupoDestinoId: 'GRP-05',
+      actorRol: 'ACUDIENTE',
+      acudienteId: 'ACU-01',
+    });
+
+    expect(resultado.tipoOperacion).toBe('CAMBIO_GRUPO');
+    expect(resultado.grupoAnterior?.grupoId).toBe('GRP-01');
+    expect(resultado.grupoAnterior?.ocupados).toBe(11); // Cupo anterior liberado de inmediato (12 -> 11)
+    expect(resultado.grupoNuevo.grupoId).toBe('GRP-05');
+    expect(resultado.grupoNuevo.ocupados).toBe(19); // Nuevo cupo ocupado (18 -> 19)
+
+    // API-M3-04: GET /api/v1/grupos/GRP-05/estudiantes
+    const estudiantesGrp05 = service.obtenerEstudiantesDeGrupo('GRP-05');
+    expect(
+      estudiantesGrp05.some(
+        (e) => e.estudianteId === 'EST-01' && e.estado === 'ACTIVO',
+      ),
+    ).toBe(true);
+    for (const est of estudiantesGrp05) {
+      expect(est.estudianteId).toBeDefined();
+      expect(est.fechaInscripcion).toBeDefined();
+      expect(est.estado).toBeDefined();
+    }
   });
 });

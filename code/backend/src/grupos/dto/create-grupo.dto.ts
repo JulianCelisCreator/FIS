@@ -122,3 +122,25 @@ export class AsignarProfesoresMultipleDto {
   @IsString()
   rolDocente?: RolDocenteGrupo;
 }
+
+/**
+ * HU-3.4: Solicitud de inscripción o cambio de grupo por parte del usuario
+ * (Estudiante mayor de edad o Acudiente autorizado).
+ */
+export class InscribirCambiarGrupoDto {
+  @IsString({ message: 'El ID del estudiante es obligatorio' })
+  @IsNotEmpty({ message: 'El ID del estudiante no puede estar vacío' })
+  estudianteId!: string;
+
+  @IsString({ message: 'El grupo destino es obligatorio' })
+  @IsNotEmpty({ message: 'Debe seleccionar un grupo destino' })
+  grupoDestinoId!: string;
+
+  @IsString({ message: 'El rol del actor que realiza la solicitud es obligatorio' })
+  @IsNotEmpty()
+  actorRol!: 'ESTUDIANTE' | 'ACUDIENTE';
+
+  @IsOptional()
+  @IsString()
+  acudienteId?: string;
+}

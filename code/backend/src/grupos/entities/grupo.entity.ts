@@ -1,4 +1,10 @@
-import type { RegistroNotificacionM1 } from '../../external-dependencies/interfaces/external-dependencies.interfaces.js';
+import type {
+  EstadoPlanCarteraG4,
+  PerfilDeportivoEstudianteM2,
+  PolizaDeportivaM1,
+  RegistroNotificacionM1,
+  ValidacionMenorEdadM1,
+} from '../../external-dependencies/interfaces/external-dependencies.interfaces.js';
 
 export type CategoriaPatinaje =
   | 'Iniciacion'
@@ -21,6 +27,44 @@ export type EstadoCupoGrupo = 'con-cupo' | 'alerta-90' | 'lleno';
 export type RolDocenteGrupo = 'TITULAR' | 'ASISTENTE';
 
 export type EstadoHorarioM3 = 'ACTIVO' | 'REPROGRAMADO' | 'CANCELADO';
+
+export type EstadoInscripcionGrupoM3 = 'ACTIVO' | 'RETIRADO_CAMBIO';
+
+/**
+ * Contrato oficial API-M3-04 (GET /api/v1/grupos/{id}/estudiantes)
+ * Respuesta JSON Base: [{ estudianteId, fechaInscripcion, estado }]
+ */
+export interface InscripcionEstudianteGrupoM3 {
+  estudianteId: string;
+  nombreEstudiante: string;
+  grupoId: string;
+  nombreGrupo: string;
+  fechaInscripcion: string; // ISO 8601: YYYY-MM-DDTHH:mm:ssZ
+  estado: EstadoInscripcionGrupoM3;
+}
+
+export interface ContextoAutogestionGrupoM3 {
+  estudianteId: string;
+  actorRol: 'ESTUDIANTE' | 'ACUDIENTE';
+  actorId: string;
+  perfilDeportivo: PerfilDeportivoEstudianteM2;
+  validacionMenor: ValidacionMenorEdadM1;
+  poliza: PolizaDeportivaM1;
+  planCartera: EstadoPlanCarteraG4;
+  puedeGestionarCambio: boolean;
+  motivoBloqueoActor: string | null;
+  grupoActual: Grupo | null;
+  gruposElegibles: Grupo[];
+}
+
+export interface ResultadoCambioGrupoM3 {
+  estudianteId: string;
+  tipoOperacion: 'INSCRIPCION' | 'CAMBIO_GRUPO';
+  grupoAnterior: Grupo | null;
+  grupoNuevo: Grupo;
+  inscripcion: InscripcionEstudianteGrupoM3;
+  mensaje: string;
+}
 
 /**
  * Contrato oficial API-M3-03 (GET /api/v1/horarios)
