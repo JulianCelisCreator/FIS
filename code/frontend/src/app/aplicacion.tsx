@@ -115,7 +115,6 @@ export function Aplicacion() {
       texto: p,
     })),
   ];
-    ...pantallasPermitidas,
     ...misPagos,
     ...subpantallas.map((p) => ({ pagina: p, texto: p })),
   ]
