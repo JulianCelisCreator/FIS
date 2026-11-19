@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSesion } from '../../../shared/sesion/use-sesion.ts'
 import { NOMBRE_ROL, type Rol } from '../../../shared/sesion/sesion.types.ts'
-import { Alerta, Avatar, Campo, DialogoConfirmacion, Insignia } from '../../../shared/ui/componentes.tsx'
+import { Alerta, Avatar, Campo, DialogoConfirmacion, Insignia, ListaDatos } from '../../../shared/ui/componentes.tsx'
 import { Icono } from '../../../shared/ui/icono.tsx'
-import { desactivarCuenta, listarCuentas, reactivarCuenta, TAMANO_PAGINA } from '../services/cuentas.service.ts'
+import { cambiarRol, desactivarCuenta, listarCuentas, reactivarCuenta, TAMANO_PAGINA } from '../services/cuentas.service.ts'
 import {
   ESTADO_INSIGNIA,
   ESTADOS_CUENTA,
@@ -33,6 +33,7 @@ export function Usuarios() {
   const [respuesta, setRespuesta] = useState<{ clave: string; datos: PaginaCuentas | null; error: string | null } | null>(null)
   const [aviso, setAviso] = useState<Aviso>(null)
   const [porDesactivar, setPorDesactivar] = useState<CuentaListada | null>(null)
+  const [porCambiarRol, setPorCambiarRol] = useState<CuentaListada | null>(null)
 
   // El buscador espera 300 ms a que se deje de escribir; los filtros consultan de inmediato.
   useEffect(() => {
@@ -209,6 +210,7 @@ export function Usuarios() {
                         ) : (
                           <MenuCuenta
                             cuenta={cuenta}
+                            alCambiarRol={() => setPorCambiarRol(cuenta)}
                             alDesactivar={() => setPorDesactivar(cuenta)}
                             alReactivar={() => void reactivar(cuenta)}
                           />
@@ -250,6 +252,16 @@ export function Usuarios() {
         </>
       )}
 
+      {porCambiarRol && (
+        <DialogoCambiarRol
+          cuenta={porCambiarRol}
+          alCerrar={() => setPorCambiarRol(null)}
+          alCambiar={(rol) => {
+            recargar({ tono: 'success', texto: `${porCambiarRol.nombre} ahora tiene el rol ${NOMBRE_ROL[rol]}. Sus permisos cambian desde ya.` })
+            setPorCambiarRol(null)
+          }}
+        />
+      )}
       {porDesactivar && (
         <DialogoDesactivar
           cuenta={porDesactivar}
@@ -313,13 +325,102 @@ function DialogoDesactivar({
   )
 }
 
-/** Acciones por fila (IconButton + Menu): «Desactivar» o «Reactivar», nunca «Eliminar». */
+/**
+ * HU-M1-06: cambiar el rol. Muestra el rol actual y dice con claridad qué
+ * cambia antes de confirmar. El nuevo rol reemplaza al anterior.
+ */
+function DialogoCambiarRol({
+  cuenta,
+  alCerrar,
+  alCambiar,
+}: {
+  cuenta: CuentaListada
+  alCerrar: () => void
+  alCambiar: (rol: Rol) => void
+}) {
+  const [rol, setRol] = useState<Rol | ''>('')
+  const [enviando, setEnviando] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [intentado, setIntentado] = useState(false)
+  const actuales = cuenta.roles.map((r) => NOMBRE_ROL[r]).join(' y ') || 'Sin rol'
+  const mismoRol = cuenta.roles.length === 1 && cuenta.roles[0] === rol
+  const listo = rol !== '' && !mismoRol
+
+  const confirmar = async () => {
+    setIntentado(true)
+    if (!listo || enviando) {
+      document.getElementById('cambiar-rol')?.focus()
+      return
+    }
+    setEnviando(true)
+    setError(null)
+    try {
+      await cambiarRol(cuenta.id, rol)
+      alCambiar(rol)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'No se pudo cambiar el rol.')
+      setEnviando(false)
+    }
+  }
+
+  return (
+    <DialogoConfirmacion
+      abierto
+      variante="form"
+      titulo={`Cambiar el rol de ${cuenta.nombre}`}
+      textoConfirmar="Cambiar rol"
+      ocupado={enviando}
+      alConfirmar={() => void confirmar()}
+      alCancelar={alCerrar}
+    >
+      <div className="m1-rol">
+        <ListaDatos filas={[['Rol actual', actuales]]} />
+      </div>
+      <Campo
+        etiqueta="Nuevo rol"
+        id="cambiar-rol"
+        obligatorio
+        error={intentado && rol === '' ? 'Elige el nuevo rol' : intentado && mismoRol ? 'La cuenta ya tiene ese rol. Elige otro.' : null}
+      >
+        <select
+          id="cambiar-rol"
+          className="vl-select"
+          value={rol}
+          aria-invalid={intentado && !listo ? true : undefined}
+          aria-describedby={intentado && !listo ? 'cambiar-rol-error' : undefined}
+          onChange={(evento) => setRol(evento.target.value as Rol | '')}
+        >
+          <option value="">Elige un rol…</option>
+          {ROLES.map(([valor, texto]) => (
+            <option key={valor} value={valor}>{texto}</option>
+          ))}
+        </select>
+      </Campo>
+      {rol && mismoRol && !intentado && <p className="vl-text-body-sm">La cuenta ya tiene ese rol. Elige otro.</p>}
+      {listo && (
+        <p className="vl-text-body-sm" aria-live="polite">
+          {cuenta.nombre} pasará de <strong>{actuales}</strong> a <strong>{NOMBRE_ROL[rol]}</strong>. Desde su siguiente acción
+          verá y podrá hacer solo lo que permite ese rol.
+        </p>
+      )}
+      {error && (
+        <Alerta tono="error" titulo="No se pudo cambiar el rol">
+          <p>{error}</p>
+        </Alerta>
+      )}
+    </DialogoConfirmacion>
+  )
+}
+
+/** Acciones por fila (IconButton + Menu): «Cambiar rol» y «Desactivar» o «Reactivar», nunca «Eliminar». */
 function MenuCuenta({
   cuenta,
+  alCambiarRol,
   alDesactivar,
   alReactivar,
 }: {
   cuenta: CuentaListada
+  alCambiarRol: () => void
   alDesactivar: () => void
   alReactivar: () => void
 }) {
@@ -340,10 +441,12 @@ function MenuCuenta({
     }
   }, [abierto])
 
-  const acciones =
+  const acciones = [
+    { id: 'rol', texto: 'Cambiar rol', alElegir: alCambiarRol },
     cuenta.estado === 'DESACTIVADA'
-      ? [{ id: 'reactivar', texto: 'Reactivar', alElegir: alReactivar }]
-      : [{ id: 'desactivar', texto: 'Desactivar', alElegir: alDesactivar }]
+      ? { id: 'reactivar', texto: 'Reactivar', alElegir: alReactivar }
+      : { id: 'desactivar', texto: 'Desactivar', alElegir: alDesactivar },
+  ]
   const idMenu = `acciones-cuenta-${cuenta.id}`
 
   return (
