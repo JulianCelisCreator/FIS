@@ -7,6 +7,7 @@ DDL de la base de datos de la plataforma (PostgreSQL 17), común a todos los mó
 | `schema.sql` | Todo el DDL: tablas, restricciones, índices, vistas, comentarios y catálogos semilla. |
 | `compose.yaml` | Contenedor de PostgreSQL que carga `schema.sql` al crearse. |
 | `datos-demo.sql` | Datos de demostración de M5 con los nombres de los wireframes (opcional, se cargan a mano). |
+| `m2-permisos.sql` | Permisos y asignaciones por rol del módulo M2 (ejecutar después de `schema.sql`). |
 | `m4-permisos.sql` | Permisos y asignaciones por rol del módulo M4 (ejecutar después de `schema.sql`). |
 
 ## Levantar la base
@@ -63,6 +64,16 @@ psql -h localhost -U patinaje -d patinaje -f db/m4-permisos.sql
 ```
 
 El script es idempotente y agrega los permisos M4 a `permiso` y `rol_permiso`. No recrea tablas ni altera los datos existentes.
+
+## Permisos del Módulo M2
+
+Después de levantar una base nueva, ejecutar una vez:
+
+```bash
+psql -h localhost -U patinaje -d patinaje -f db/m2-permisos.sql
+```
+
+El script es idempotente y agrega permisos M2 para administrar patinadores y niveles, y para consultar el nivel propio o de perfiles vinculados.
 
 ## Convenciones
 

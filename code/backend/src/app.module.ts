@@ -6,6 +6,7 @@ import { AuditoriaModule } from './common/auditoria/auditoria.module.js';
 import { AuthModule } from './common/auth/auth.module.js';
 import { BaseDatosModule } from './common/database/base-datos.module.js';
 import { M1UsuariosAccesoModule } from './modules/m1-usuarios-acceso/m1-usuarios-acceso.module.js';
+import { M2GestionDeportivaModule } from './modules/m2-gestion-deportiva/m2-gestion-deportiva.module.js';
 import { M4CompetenciasResultadosModule } from './modules/m4-competencias-resultados/m4-competencias-resultados.module.js';
 import { M5PlanesTarifasPagosModule } from './modules/m5-planes-tarifas-pagos/m5-planes-tarifas-pagos.module.js';
 
@@ -16,6 +17,7 @@ import { M5PlanesTarifasPagosModule } from './modules/m5-planes-tarifas-pagos/m5
     AuditoriaModule,
     AuthModule,
     M1UsuariosAccesoModule,
+    M2GestionDeportivaModule,
     M4CompetenciasResultadosModule,
     M5PlanesTarifasPagosModule,
   ],

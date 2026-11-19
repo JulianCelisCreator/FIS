@@ -1063,6 +1063,7 @@ INSERT INTO parametro_sistema (clave, valor, descripcion) VALUES
 
 -- Permisos de M5 y M6 (los demás módulos agregan los suyos con el mismo formato).
 INSERT INTO permiso (codigo, modulo, descripcion) VALUES
+  ('M2_PATINADOR_GESTIONAR', 'M2', 'Registrar y actualizar perfiles deportivos de patinadores (M2-01, M2-02)'),
   ('M5_PLAN_GESTIONAR',        'M5', 'Crear, editar y desactivar planes; registrar tarifas (M5-01 a M5-04)'),
   ('M5_PLAN_CONSULTAR',        'M5', 'Consultar planes y tarifas vigentes (M5-05)'),
   ('M5_PLAN_ASIGNAR',          'M5', 'Asignar o cambiar el plan de un patinador (M5-06, M5-07)'),
