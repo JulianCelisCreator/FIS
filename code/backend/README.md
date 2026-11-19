@@ -15,7 +15,7 @@ pnpm install
 pnpm start:dev
 ```
 
-La API carga `.env` al arrancar. Toma el puerto de `PORT` (3000 por defecto) y la base de `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y `DB_PASSWORD`, que por defecto coinciden con el contenedor de `db/compose.yaml`. Si ya tienes un PostgreSQL local en el 5432, cambia `DB_PORT` (p. ej. a `5433`) en `.env`: el contenedor y la API usan el mismo valor. Otros comandos disponibles:
+La API carga `.env` al arrancar. Toma el puerto de `PORT` (3000 por defecto) y la base de `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y `DB_PASSWORD`, que por defecto coinciden con el contenedor de `db/compose.yaml`. Si ya tienes un PostgreSQL local en el 5432, cambia `DB_PORT` (p. ej. a `5432`) en `.env`: el contenedor y la API usan el mismo valor. Otros comandos disponibles:
 
 ```bash
 pnpm start       # Iniciar sin modo observación

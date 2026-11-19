@@ -12,13 +12,13 @@ services:
       TZ: America/Bogota
       PGTZ: America/Bogota
     ports:
-      - "${DB_PORT:-5433}:5432"
+      - '${DB_PORT:-5432}:5432'
     volumes:
       # Postgres ejecuta este script solo la primera vez, cuando el volumen está vacío.
       - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
       - patinaje-db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
       interval: 5s
       timeout: 5s
       retries: 10

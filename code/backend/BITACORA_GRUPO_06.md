@@ -194,7 +194,7 @@ y las actividades que todavía pertenecen a futuras entregas.
 - Los ajustes posteriores se registran como movimientos de tipo `AJUSTE`.
 - Se conservó el historial sin realizar eliminaciones físicas.
 - PostgreSQL local usa el puerto `5432`; Docker PostgreSQL quedó configurado en el
-  puerto `5433` para evitar conflictos en el entorno de desarrollo.
+  puerto `5432` para evitar conflictos en el entorno de desarrollo.
 
 ### 13. Verificaciones realizadas
 
@@ -220,7 +220,7 @@ y las actividades que todavía pertenecen a futuras entregas.
 **Qué se encontró**
 
 - PostgreSQL local ya estaba utilizando el puerto `5432`.
-- Se publicó PostgreSQL de Docker en el puerto `5433` para evitar interferencias.
+- Se publicó PostgreSQL de Docker en el puerto `5432` para evitar interferencias.
 - NestJS quedó configurado para consultar la instancia de Docker usada por el
   desarrollo.
 - El frontend contenía datos temporales de proveedores y uniformes.

@@ -1,7 +1,7 @@
 -- Migración M6 · 2026-11-11
 -- Aplica sobre una base ya creada los cambios hechos en schema.sql, sin borrar datos.
 -- Uso (desde code/backend):
---   psql -h localhost -p 5433 -U patinaje -d patinaje -f db/migraciones/2026-11-11-m6-implemento-y-telefono-personal.sql
+--   psql -h localhost -p 5432 -U patinaje -d patinaje -f db/migraciones/2026-11-11-m6-implemento-y-telefono-personal.sql
 -- Una base nueva no la necesita: schema.sql ya trae estos cambios.
 
 BEGIN;

@@ -2,7 +2,7 @@
 -- Aplica sobre una base ya creada el permiso nuevo de schema.sql, sin borrar datos.
 -- Solo el Administrador lo recibe (el Contador y los demás roles no ven el panel).
 -- Uso (desde code/backend):
---   psql -h localhost -p 5433 -U patinaje -d patinaje -f db/migraciones/2026-11-18-m6-permiso-panel.sql
+--   psql -h localhost -p 5432 -U patinaje -d patinaje -f db/migraciones/2026-11-18-m6-permiso-panel.sql
 
 BEGIN;
 

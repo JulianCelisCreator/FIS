@@ -1,7 +1,7 @@
 -- Migración M6 · 2026-11-11 · Devolución de ventas de uniformes (HU-6.7)
 -- Aplica sobre una base ya creada los cambios de schema.sql, sin borrar datos.
 -- Uso (desde code/backend):
---   psql -h localhost -p 5433 -U patinaje -d patinaje -f db/migraciones/2026-11-11-m6-devolucion-de-venta.sql
+--   psql -h localhost -p 5432 -U patinaje -d patinaje -f db/migraciones/2026-11-11-m6-devolucion-de-venta.sql
 
 BEGIN;
 
