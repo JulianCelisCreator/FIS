@@ -104,6 +104,8 @@ const ESTADOS: Record<string, Record<string, [string, Tono]>> = {
   },
 }
 
+}
+
 export function Insignia({ entidad, estado }: { entidad: string; estado: string }) {
   const [texto, tono] = ESTADOS[entidad]?.[estado] ?? [estado, 'neutral']
   return (
@@ -113,7 +115,6 @@ export function Insignia({ entidad, estado }: { entidad: string; estado: string 
     </span>
   )
 }
-
 /** Iniciales de una persona. */
 export function Avatar({ nombre, tamano = 'md' }: { nombre: string; tamano?: 'sm' | 'md' }) {
   const iniciales = nombre
