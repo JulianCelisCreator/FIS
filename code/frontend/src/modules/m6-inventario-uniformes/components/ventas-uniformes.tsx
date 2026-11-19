@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Alerta, Campo, DialogoConfirmacion, Insignia, ListaDatos } from '../../../shared/ui/componentes.tsx'
 import { formatoCop, formatoFecha, hoyEnClub } from '../../../shared/utils/formato.ts'
-import { enlace } from '../../../shared/utils/use-ruta.ts'
 import { MEDIOS_PAGO, type MedioPago } from '../../m5-planes-tarifas-pagos/types/m5.types.ts'
 import {
   consolidarItemsVenta,
   listarCompradoresVenta,
   listarInventario,
   listarVentas,
+  registrarDevolucion,
   registrarVenta,
 } from '../services/inventario.service.ts'
 import { textoTipoUniforme, type UniformeInventario } from '../types/inventario.types.ts'
@@ -15,9 +15,23 @@ import {
   TIPOS_VENDIBLES,
   type CompradorVenta,
   type DatosVenta,
+  type EstadoVenta,
   type TipoComprador,
   type VentaRegistrada,
 } from '../types/venta.types.ts'
+
+const INSIGNIA_VENTA: Record<EstadoVenta, string> = {
+  CONFIRMADA: 'confirmada',
+  DEVUELTA_PARCIAL: 'devuelta-parcial',
+  DEVUELTA: 'devuelta',
+}
+
+interface Devolucion {
+  venta: VentaRegistrada
+  motivo: string
+  medioReembolso: MedioPago | ''
+  cantidades: Record<number, number>
+}
 
 interface LineaFormulario {
   clave: number
@@ -155,6 +169,38 @@ export function VentasUniformes() {
     }
   }
 
+  const [devolucion, setDevolucion] = useState<Devolucion | null>(null)
+  const [errorDevolucion, setErrorDevolucion] = useState<string | null>(null)
+  const [avisoDevolucion, setAvisoDevolucion] = useState<string | null>(null)
+  const valorADevolver = devolucion
+    ? devolucion.venta.items.reduce((suma, item) => suma + (devolucion.cantidades[item.uniformeId] ?? 0) * item.valorUnitario, 0)
+    : 0
+
+  const confirmarDevolucion = async () => {
+    if (!devolucion) return
+    if (!devolucion.medioReembolso) return setErrorDevolucion('Elige el medio del reembolso.')
+    setOcupado(true)
+    setErrorDevolucion(null)
+    try {
+      const venta = await registrarDevolucion(devolucion.venta.id, {
+        motivo: devolucion.motivo,
+        medioReembolso: devolucion.medioReembolso,
+        items: Object.entries(devolucion.cantidades).map(([uniformeId, cantidad]) => ({ uniformeId: Number(uniformeId), cantidad })),
+      })
+      const ultima = venta.devoluciones[venta.devoluciones.length - 1]
+      setAvisoDevolucion(
+        `Devolución registrada en la venta #${venta.id}: ${formatoCop(ultima?.valorDevuelto ?? 0)}. Las unidades regresaron al inventario.` +
+        (ultima?.anulaPago ? ' Se devolvió toda la venta y su pago quedó anulado.' : ''),
+      )
+      setDevolucion(null)
+      setVersion((valor) => valor + 1)
+    } catch (e) {
+      setErrorDevolucion(e instanceof Error ? e.message : 'No se pudo registrar la devolución.')
+    } finally {
+      setOcupado(false)
+    }
+  }
+
   return (
     <div className="app-page">
       <header className="app-head">
@@ -168,12 +214,6 @@ export function VentasUniformes() {
         </div>
       </header>
 
-      <Alerta tono="info" titulo="Ventas de demostración local">
-        <p>
-          Patinadores, acudientes y existencias son ficticios y se reinician al recargar. La API real ya está disponible en
-          {' '}<code>/m6/ventas</code>; la pantalla cambiará a ella cuando M1 entregue el inicio de sesión.
-        </p>
-      </Alerta>
       {errorCarga && <Alerta tono="error" titulo="No se pudo cargar la información"><p>{errorCarga}</p></Alerta>}
       {errorVenta && <Alerta tono="error" titulo="La venta no se registró"><p>{errorVenta}</p></Alerta>}
 
@@ -368,14 +408,14 @@ export function VentasUniformes() {
       <section className="vl-stack" aria-labelledby="titulo-ventas">
         <div className="app-panel-head">
           <h2 id="titulo-ventas" className="vl-text-heading-h5">Ventas registradas</h2>
-          <a className="vl-link" href={enlace('historial-pagos')}>Ver historial de pagos</a>
         </div>
+        {avisoDevolucion && <Alerta tono="success"><p>{avisoDevolucion}</p></Alerta>}
         {ventas && ventas.length === 0 && <p className="vl-text-body-sm">Todavía no hay ventas registradas.</p>}
         {ventas && ventas.length > 0 && (
           <div className="vl-table-wrap">
             <table className="vl-table">
               <thead>
-                <tr><th>Fecha</th><th>Comprador</th><th>Uniformes</th><th>Medio</th><th>Total</th><th>Comprobante</th><th>Estado</th></tr>
+                <tr><th>Fecha</th><th>Comprador</th><th>Uniformes</th><th>Medio</th><th>Total</th><th>Comprobante</th><th>Estado</th><th>Acciones</th></tr>
               </thead>
               <tbody>
                 {ventas.map((venta) => (
@@ -387,15 +427,34 @@ export function VentasUniformes() {
                     </td>
                     <td data-label="Uniformes">
                       {venta.items.map((item) => (
-                        <p key={item.uniformeId}>{item.referencia} · talla {item.talla} × {item.cantidad}</p>
+                        <p key={item.uniformeId}>
+                          {item.referencia} · talla {item.talla} × {item.cantidad}
+                          {item.devuelto > 0 && <span className="vl-text-caption"> ({item.devuelto} devuelta{item.devuelto === 1 ? '' : 's'})</span>}
+                        </p>
                       ))}
                     </td>
                     <td data-label="Medio">{TEXTO_MEDIO[venta.medioPago]}</td>
-                    <td data-label="Total">{formatoCop(venta.total)}</td>
+                    <td data-label="Total">
+                      {formatoCop(venta.total)}
+                      {venta.valorDevuelto > 0 && <p className="vl-text-caption">Devuelto: {formatoCop(venta.valorDevuelto)}</p>}
+                    </td>
                     <td data-label="Comprobante">
                       <button className="vl-link" type="button" onClick={() => setComprobante(venta)}>{venta.comprobante}</button>
+                      {venta.estadoPago === 'ANULADO' && <p><Insignia entidad="pago" estado="anulado" /></p>}
                     </td>
-                    <td data-label="Estado"><Insignia entidad="venta" estado="confirmada" /></td>
+                    <td data-label="Estado"><Insignia entidad="venta" estado={INSIGNIA_VENTA[venta.estado]} /></td>
+                    <td data-label="Acciones">
+                      {venta.estado !== 'DEVUELTA' && venta.estadoPago === 'REGISTRADO' && (
+                        <button className="vl-button vl-button--secondary vl-button--sm" type="button"
+                          onClick={() => {
+                            setErrorDevolucion(null)
+                            setAvisoDevolucion(null)
+                            setDevolucion({ venta, motivo: '', medioReembolso: venta.medioPago, cantidades: {} })
+                          }}>
+                          Registrar devolución
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -427,6 +486,53 @@ export function VentasUniformes() {
             autorizado de inventario.
           </p>
         </Alerta>
+      </DialogoConfirmacion>
+
+      <DialogoConfirmacion
+        abierto={devolucion !== null}
+        titulo={devolucion ? `Devolución de la venta #${devolucion.venta.id}` : 'Devolución'}
+        textoConfirmar="Registrar devolución"
+        variante="form"
+        ocupado={ocupado}
+        alConfirmar={confirmarDevolucion}
+        alCancelar={() => setDevolucion(null)}
+      >
+        {devolucion && (
+          <>
+            <p className="vl-text-body-sm">
+              La venta no se modifica: la devolución queda como un registro aparte y las unidades regresan al inventario.
+              Si devuelves toda la venta de una vez, su pago se anula en el historial de pagos.
+            </p>
+            {errorDevolucion && <Alerta tono="error"><p>{errorDevolucion}</p></Alerta>}
+            {devolucion.venta.items.map((item) => {
+              const pendiente = item.cantidad - item.devuelto
+              return (
+                <Campo key={item.uniformeId} etiqueta={`${item.referencia} · talla ${item.talla}`} id={`devolver-${item.uniformeId}`}
+                  ayuda={`Vendidas ${item.cantidad} · por devolver ${pendiente} · ${formatoCop(item.valorUnitario)} c/u`}>
+                  <input id={`devolver-${item.uniformeId}`} className="vl-input" type="number" min={0} max={pendiente} step={1}
+                    disabled={pendiente === 0}
+                    value={devolucion.cantidades[item.uniformeId] ?? 0}
+                    onChange={(e) => setDevolucion({
+                      ...devolucion,
+                      cantidades: { ...devolucion.cantidades, [item.uniformeId]: Math.max(0, Math.min(pendiente, Number(e.target.value) || 0)) },
+                    })} />
+                </Campo>
+              )
+            })}
+            <Campo etiqueta="Medio del reembolso" id="devolucion-medio" obligatorio>
+              <select id="devolucion-medio" className="vl-select" value={devolucion.medioReembolso}
+                onChange={(e) => setDevolucion({ ...devolucion, medioReembolso: e.target.value as MedioPago })}>
+                <option value="">Elige el medio</option>
+                {MEDIOS_PAGO.map((medio) => <option key={medio.valor} value={medio.valor}>{medio.texto}</option>)}
+              </select>
+            </Campo>
+            <Campo etiqueta="Motivo de la devolución" id="devolucion-motivo" obligatorio>
+              <textarea id="devolucion-motivo" className="vl-input" rows={3} maxLength={500} value={devolucion.motivo}
+                onChange={(e) => setDevolucion({ ...devolucion, motivo: e.target.value })} />
+            </Campo>
+            <p className="vl-text-heading-h5">Valor a reembolsar: {formatoCop(valorADevolver)}</p>
+          </>
+        )}
       </DialogoConfirmacion>
 
       <DialogoConfirmacion

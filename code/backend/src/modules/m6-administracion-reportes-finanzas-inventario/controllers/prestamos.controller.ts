@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
-import { AutenticacionTemporalGuard } from '../../../common/auth/autenticacion-temporal.guard.js';
+import { AutenticacionGuard } from '../../../common/auth/autenticacion.guard.js';
 import { RequierePermiso, UsuarioActual } from '../../../common/auth/decoradores.js';
 import { PermisosGuard } from '../../../common/auth/permisos.guard.js';
 import type { UsuarioAutenticado } from '../../../common/auth/usuario-autenticado.js';
@@ -8,7 +8,7 @@ import { PermisoM6 } from '../enums/permiso-m6.enum.js';
 import { PrestamosService } from '../services/prestamos.service.js';
 
 @Controller('m6/prestamos')
-@UseGuards(AutenticacionTemporalGuard, PermisosGuard)
+@UseGuards(AutenticacionGuard, PermisosGuard)
 export class PrestamosController {
   constructor(private readonly prestamos: PrestamosService) {}
 

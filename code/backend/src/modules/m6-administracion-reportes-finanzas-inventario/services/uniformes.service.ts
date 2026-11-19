@@ -95,8 +95,24 @@ export class UniformesService {
     if (!anterior) throw new NotFoundException('Uniforme no encontrado');
     try {
       await this.baseDatos.transaccion(async (consultor) => {
+        const [bloqueado] = await consultor
+          .query<{ cantidad: number }>(
+            `SELECT cantidad_disponible AS cantidad FROM uniforme WHERE id = $1 FOR UPDATE`,
+            [id],
+          )
+          .then((r) => r.rows);
         const resultado = await this.uniformes.editar(id, dto, consultor);
-        if (!resultado) throw new NotFoundException('Uniforme no encontrado');
+        if (!resultado || !bloqueado) throw new NotFoundException('Uniforme no encontrado');
+        // Cambiar la cantidad desde la edición también deja su movimiento en el Kardex.
+        const diferencia =
+          dto.cantidadDisponible === undefined ? 0 : dto.cantidadDisponible - bloqueado.cantidad;
+        if (diferencia !== 0) {
+          await consultor.query(
+            `INSERT INTO movimiento_inventario (uniforme_id, tipo, cantidad, observacion, registrado_por)
+             VALUES ($1, 'AJUSTE', $2, 'Ajuste desde la edición de la referencia', $3)`,
+            [id, diferencia, usuario.id],
+          );
+        }
         await this.auditoria.registrar(consultor, {
           modulo: 'M6',
           tabla: 'uniforme',

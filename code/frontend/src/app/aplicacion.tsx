@@ -21,18 +21,24 @@ import { InventarioUniformes } from '../modules/m6-inventario-uniformes/componen
 import { PrestamosUniformes } from '../modules/m6-inventario-uniformes/components/prestamos-uniformes.tsx'
 import { VentasUniformes } from '../modules/m6-inventario-uniformes/components/ventas-uniformes.tsx'
 import { PERMISOS_M6 } from '../modules/m6-inventario-uniformes/types/inventario.types.ts'
+import { RegistroPersonal } from '../modules/m6-personal/components/registro-personal.tsx'
+import { PERMISOS_PERSONAL } from '../modules/m6-personal/types/personal.types.ts'
+import { ReportesFinancieros } from '../modules/m6-reportes/components/reportes-financieros.tsx'
+import { PERMISOS_REPORTES } from '../modules/m6-reportes/types/reportes.types.ts'
 import { MarcoAplicacion } from './marco-aplicacion.tsx'
 
 const PANTALLAS = [
-  { pagina: 'm4', texto: 'Competencias y resultados', permiso: PERMISOS_M4.consultar },
-  { pagina: 'planes', texto: 'Planes y tarifas', permiso: PERMISOS_M5.planGestionar },
-  { pagina: 'asignar-plan', texto: 'Asignar o cambiar plan', permiso: PERMISOS_M5.planAsignar },
-  { pagina: 'cartera', texto: 'Cartera', permiso: PERMISOS_M5.carteraConsultar },
-  { pagina: 'registrar-pago', texto: 'Registrar pago', permiso: PERMISOS_M5.pagoRegistrar },
-  { pagina: 'historial-pagos', texto: 'Historial de pagos', permiso: PERMISOS_M5.pagoHistorial },
+  { pagina: 'm4', texto: 'Competencias y resultados', grupo: 'Competencias y resultados', permiso: PERMISOS_M4.consultar },
+  { pagina: 'planes', texto: 'Planes y tarifas', grupo: 'Planes y pagos', permiso: PERMISOS_M5.planGestionar },
+  { pagina: 'asignar-plan', texto: 'Asignar o cambiar plan', grupo: 'Planes y pagos', permiso: PERMISOS_M5.planAsignar },
+  { pagina: 'cartera', texto: 'Cartera', grupo: 'Planes y pagos', permiso: PERMISOS_M5.carteraConsultar },
+  { pagina: 'registrar-pago', texto: 'Registrar pago', grupo: 'Planes y pagos', permiso: PERMISOS_M5.pagoRegistrar },
+  { pagina: 'historial-pagos', texto: 'Historial de pagos', grupo: 'Planes y pagos', permiso: PERMISOS_M5.pagoHistorial },
   { pagina: 'inventario', texto: 'Inventario de uniformes', grupo: 'Uniformes', permiso: PERMISOS_M6.inventarioGestionar },
   { pagina: 'ventas', texto: 'Venta de uniformes', grupo: 'Uniformes', permiso: PERMISOS_M6.inventarioGestionar },
   { pagina: 'prestamos', texto: 'Préstamos de implementos', grupo: 'Uniformes', permiso: PERMISOS_M6.inventarioGestionar },
+  { pagina: 'personal', texto: 'Personal', grupo: 'Administración', permiso: PERMISOS_PERSONAL.personalGestionar },
+  { pagina: 'reportes', texto: 'Reportes financieros', grupo: 'Administración', permiso: PERMISOS_REPORTES.reporteFinanciero },
 ]
 
 /** Pantallas de M1 solo para el Administrador (HU-M1-01 y 05; la matriz de permisos llega con HU-M1-07). */
@@ -73,16 +79,19 @@ export function Aplicacion() {
     tieneRol('ACUDIENTE') || tieneRol('PATINADOR')
       ? [{ pagina: 'mis-pagos', texto: tieneRol('ACUDIENTE') ? 'Pagos de mis patinadores' : 'Mis pagos' }]
       : []
-  const pagos = [...PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso)), ...misPagos]
+  const pantallasPermitidas = PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso))
   const subpantallas = tieneRol('ADMINISTRADOR') ? Object.keys(SUBPANTALLAS_ADMINISTRADOR) : []
-  const permitidas = [...usuarios, ...pagos, ...subpantallas.map((p) => ({ pagina: p, texto: p }))]
+  const permitidas = [...usuarios, ...pantallasPermitidas, ...misPagos, ...subpantallas.map((p) => ({ pagina: p, texto: p }))]
   const actual = pagina || permitidas[0]?.pagina || ''
   const navegacion = [
     { grupo: 'Usuarios', enlaces: usuarios },
-    { grupo: 'Planes y pagos', enlaces: pagos },
-    { grupo: 'Competencias y resultados', enlaces: permitidas.filter((p) => p.pagina === 'm4') },
-    { grupo: 'Planes y pagos', enlaces: permitidas.filter((p) => p.pagina !== 'm4') },
-    { grupo: 'Uniformes', enlaces: permitidas.filter((p) => ['inventario', 'ventas', 'prestamos'].includes(p.pagina)) },
+    ...['Competencias y resultados', 'Planes y pagos', 'Uniformes', 'Administración'].map((grupo) => ({
+      grupo,
+      enlaces: [
+        ...pantallasPermitidas.filter((pantalla) => pantalla.grupo === grupo),
+        ...(grupo === 'Planes y pagos' ? misPagos : []),
+      ],
+    })),
   ]
 
   let contenido
@@ -136,6 +145,10 @@ export function Aplicacion() {
     contenido = <VentasUniformes key={sesion.id} />
   } else if (actual === 'prestamos') {
     contenido = <PrestamosUniformes key={sesion.id} />
+  } else if (actual === 'personal') {
+    contenido = <RegistroPersonal key={sesion.id} />
+  } else if (actual === 'reportes') {
+    contenido = <ReportesFinancieros key={sesion.id} />
   } else if (actual === 'asignar-plan') {
     contenido = (
       <AsignarCambiarPlan

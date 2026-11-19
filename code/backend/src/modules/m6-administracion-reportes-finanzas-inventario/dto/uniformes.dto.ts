@@ -69,6 +69,12 @@ export class CrearUniformeDto {
   @Min(0)
   cantidadMinima = 0;
 
+  /** Tarifa sugerida por unidad y día para préstamos (solo implementos). */
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  tarifaPrestamoDia?: number;
+
   @IsOptional()
   @IsString()
   @Length(1, 1000)
@@ -125,6 +131,11 @@ export class EditarUniformeDto {
   @IsInt()
   @Min(0)
   cantidadMinima?: number;
+
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  tarifaPrestamoDia?: number;
 
   @IsOptional()
   @IsString()

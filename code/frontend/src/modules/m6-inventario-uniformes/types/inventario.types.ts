@@ -45,6 +45,8 @@ export interface Uniforme {
   activo: boolean
   actualizadoEn: string
   fotoUrl: string | null
+  /** Tarifa sugerida por unidad y día para préstamos (implementos). */
+  tarifaPrestamoDia: number
 }
 
 /** Referencia con su proveedor y el estado derivado del stock. */
@@ -63,6 +65,7 @@ export interface DatosUniforme {
   cantidadDisponible: number
   cantidadMinima: number
   fotoUrl?: string | null
+  tarifaPrestamoDia?: number
 }
 
 export interface DatosProveedor {

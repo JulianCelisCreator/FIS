@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
-import { AutenticacionTemporalGuard } from '../../../common/auth/autenticacion-temporal.guard.js';
+import { AutenticacionGuard } from '../../../common/auth/autenticacion.guard.js';
 import { RequierePermiso, UsuarioActual } from '../../../common/auth/decoradores.js';
 import { PermisosGuard } from '../../../common/auth/permisos.guard.js';
 import type { UsuarioAutenticado } from '../../../common/auth/usuario-autenticado.js';
-import { FiltrosVentasDto, RegistrarVentaDto } from '../dto/ventas.dto.js';
+import { FiltrosVentasDto, RegistrarDevolucionDto, RegistrarVentaDto } from '../dto/ventas.dto.js';
 import { PermisoM6 } from '../enums/permiso-m6.enum.js';
 import { VentasService } from '../services/ventas.service.js';
 
@@ -12,7 +12,7 @@ import { VentasService } from '../services/ventas.service.js';
  * No hay PATCH ni DELETE: una venta confirmada es inmutable.
  */
 @Controller('m6/ventas')
-@UseGuards(AutenticacionTemporalGuard, PermisosGuard)
+@UseGuards(AutenticacionGuard, PermisosGuard)
 @RequierePermiso(PermisoM6.INVENTARIO_GESTIONAR)
 export class VentasController {
   constructor(private readonly ventas: VentasService) {}
@@ -35,5 +35,15 @@ export class VentasController {
   @Post()
   registrar(@UsuarioActual() usuario: UsuarioAutenticado, @Body() dto: RegistrarVentaDto) {
     return this.ventas.registrar(usuario, dto);
+  }
+
+  /** Devolución total o parcial; la venta no se modifica. Responde la venta actualizada. */
+  @Post(':ventaId/devoluciones')
+  registrarDevolucion(
+    @UsuarioActual() usuario: UsuarioAutenticado,
+    @Param('ventaId', ParseIntPipe) ventaId: number,
+    @Body() dto: RegistrarDevolucionDto,
+  ) {
+    return this.ventas.registrarDevolucion(ventaId, usuario, dto);
   }
 }

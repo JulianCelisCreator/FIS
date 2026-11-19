@@ -2,7 +2,8 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { AuditoriaRepository } from '../../../common/auditoria/auditoria.repository.js';
 import type { UsuarioAutenticado } from '../../../common/auth/usuario-autenticado.js';
 import { BaseDatosService } from '../../../common/database/base-datos.service.js';
-import type { RegistrarVentaDto } from '../dto/ventas.dto.js';
+import type { RegistrarDevolucionDto, RegistrarVentaDto } from '../dto/ventas.dto.js';
+import { planearDevolucion } from '../utils/reglas-devolucion.js';
 import { RegistroFinancieroVentaRepository } from '../repositories/registro-financiero-venta.repository.js';
 import { VentasRepository } from '../repositories/ventas.repository.js';
 import { construirLineas, consolidarItems, describirVenta, ErrorReglaVenta } from '../utils/reglas-venta.js';
@@ -100,6 +101,58 @@ export class VentasService {
           usuarioId: usuario.id,
         });
         return id;
+      });
+      return this.detalle(ventaId);
+    } catch (error: unknown) {
+      throw this.traducirError(error);
+    }
+  }
+
+  /**
+   * Devolución total o parcial de una venta (HU-6.7: «cualquier corrección debe
+   * registrarse como devolución»). La venta no se modifica. En una transacción:
+   * registro de la devolución, reingreso del stock, Kardex DEVOLUCION, anulación
+   * del pago en M5 si se devuelve toda la venta de una vez, y auditoría.
+   */
+  async registrarDevolucion(ventaId: number, usuario: UsuarioAutenticado, dto: RegistrarDevolucionDto) {
+    try {
+      await this.baseDatos.transaccion(async (consultor) => {
+        const venta = await this.ventas.lineasParaDevolver(ventaId, consultor);
+        if (!venta) throw new NotFoundException('Venta no encontrada');
+        if (venta.estadoPago === 'ANULADO') {
+          throw new BadRequestException('El pago de esta venta está anulado; no admite devoluciones');
+        }
+        const plan = planearDevolucion(venta.lineas, dto.items);
+        const motivo = dto.motivo.trim();
+        const devolucionId = await this.ventas.crearDevolucion(
+          {
+            ventaId,
+            motivo,
+            medioReembolso: dto.medioReembolso,
+            valorDevuelto: plan.valorDevuelto,
+            anulaPago: plan.anulaPago,
+            usuarioId: usuario.id,
+          },
+          plan.lineas,
+          consultor,
+        );
+        if (plan.anulaPago) {
+          await this.registroFinanciero.anular(consultor, {
+            pagoId: venta.pagoId,
+            cobroId: venta.cobroId,
+            motivo: `Devolución total de la venta #${ventaId}: ${motivo}`,
+            usuarioId: usuario.id,
+          });
+        }
+        await this.auditoria.registrar(consultor, {
+          modulo: 'M6',
+          tabla: 'devolucion_venta',
+          registroId: devolucionId,
+          accion: 'CREAR',
+          valorNuevo: { ventaId, ...plan, medioReembolso: dto.medioReembolso },
+          motivo,
+          usuarioId: usuario.id,
+        });
       });
       return this.detalle(ventaId);
     } catch (error: unknown) {

@@ -532,7 +532,8 @@ CREATE TABLE cobro (
   asignacion_plan_id  BIGINT REFERENCES asignacion_plan(id),
   tarifa_id           BIGINT REFERENCES tarifa(id),
   concepto            TEXT NOT NULL CHECK (concepto IN ('MENSUALIDAD','SESION','MATRICULA',
-                                                        'GASTOS_ADMINISTRATIVOS','VENTA_UNIFORME')),
+                                                        'GASTOS_ADMINISTRATIVOS','VENTA_UNIFORME',
+                                                        'PRESTAMO_IMPLEMENTO')),  -- M6-08
   periodo             DATE,                  -- primer día del mes cobrado (mensualidades)
   descripcion         TEXT,
   valor               NUMERIC(14,2) NOT NULL CHECK (valor > 0),
@@ -762,7 +763,7 @@ CREATE TABLE personal (
   nombres             TEXT NOT NULL,
   apellidos           TEXT NOT NULL,
   correo_institucional TEXT NOT NULL,
-  telefono            TEXT,
+  telefono            TEXT NOT NULL,  -- obligatorio según RF-M6-02
   cargo               TEXT NOT NULL CHECK (cargo IN ('PROFESOR','CONTADOR','FISIOTERAPEUTA','ADMINISTRATIVO')),
   estado              TEXT NOT NULL DEFAULT 'ACTIVO' CHECK (estado IN ('ACTIVO','INACTIVO')),
   fecha_ingreso       DATE NOT NULL DEFAULT current_date,
@@ -791,13 +792,14 @@ COMMENT ON TABLE proveedor IS '[M6] Proveedores de uniformes (M6-06).';
 CREATE TABLE uniforme (
   id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   referencia          TEXT NOT NULL UNIQUE,  -- UNI-CHA-10 (incluye la talla)
-  tipo                TEXT NOT NULL CHECK (tipo IN ('CAMISETA','CHAQUETA','PANTALON','UNIFORME_COMPLETO')),
+  tipo                TEXT NOT NULL CHECK (tipo IN ('CAMISETA','CHAQUETA','PANTALON','UNIFORME_COMPLETO','IMPLEMENTO')),  -- IMPLEMENTO: solo préstamo (M6-08)
   talla               TEXT NOT NULL,
   proveedor_id        BIGINT REFERENCES proveedor(id),
   costo               NUMERIC(14,2) NOT NULL CHECK (costo >= 0),
   precio_venta        NUMERIC(14,2) NOT NULL CHECK (precio_venta >= 0),
   cantidad_disponible INTEGER NOT NULL DEFAULT 0 CHECK (cantidad_disponible >= 0),
   cantidad_minima     INTEGER NOT NULL DEFAULT 0 CHECK (cantidad_minima >= 0),
+  tarifa_prestamo_dia NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (tarifa_prestamo_dia >= 0),  -- sugerida por unidad y día (M6-08)
   foto_url            TEXT,
   activo              BOOLEAN NOT NULL DEFAULT true,
   creado_en           TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -841,13 +843,48 @@ COMMENT ON TABLE venta_detalle IS '[M6] Ítems de cada venta de uniformes (M6-07
 CREATE FUNCTION fn_venta_inmutable() RETURNS trigger
 LANGUAGE plpgsql AS $$
 BEGIN
-  RAISE EXCEPTION 'Una venta confirmada no puede modificarse; registra una devolución o un ajuste autorizado'
+  RAISE EXCEPTION 'Una venta o devolución confirmada no puede modificarse; registra una devolución o un ajuste autorizado'
     USING ERRCODE = 'P0001';
 END;
 $$;
 CREATE TRIGGER trg_venta_uniforme_inmutable BEFORE UPDATE OR DELETE ON venta_uniforme
   FOR EACH ROW EXECUTE FUNCTION fn_venta_inmutable();
 CREATE TRIGGER trg_venta_detalle_inmutable BEFORE UPDATE OR DELETE ON venta_detalle
+  FOR EACH ROW EXECUTE FUNCTION fn_venta_inmutable();
+
+-- Devolución de una venta (M6-07): total o parcial, solo el Administrador.
+-- La venta no se toca; las unidades regresan al stock (Kardex DEVOLUCION).
+-- Si una sola devolución cubre toda la venta, se anula su pago en M5 (anula_pago);
+-- si es parcial, el reembolso queda aquí y los reportes lo restan de los ingresos.
+CREATE TABLE devolucion_venta (
+  id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  venta_id        BIGINT NOT NULL REFERENCES venta_uniforme(id),
+  fecha           DATE NOT NULL DEFAULT current_date,
+  motivo          TEXT NOT NULL CHECK (btrim(motivo) <> ''),
+  valor_devuelto  NUMERIC(14,2) NOT NULL CHECK (valor_devuelto > 0),
+  medio_reembolso TEXT NOT NULL CHECK (medio_reembolso IN ('EFECTIVO','TRANSFERENCIA','CONSIGNACION')),
+  anula_pago      BOOLEAN NOT NULL DEFAULT false,
+  registrado_por  BIGINT NOT NULL REFERENCES usuario(id),
+  creado_en       TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX devolucion_venta_venta_idx ON devolucion_venta (venta_id);
+CREATE INDEX devolucion_venta_fecha_idx ON devolucion_venta (fecha);
+COMMENT ON TABLE devolucion_venta IS
+  '[M6] Devoluciones de ventas de uniformes (M6-07), totales o parciales. Corrigen una venta sin modificarla. anula_pago = la devolución cubrió toda la venta y se anuló el pago en M5; si no, valor_devuelto se resta de los ingresos en los reportes (M6-04).';
+
+CREATE TABLE devolucion_venta_detalle (
+  devolucion_id  BIGINT NOT NULL REFERENCES devolucion_venta(id),
+  uniforme_id    BIGINT NOT NULL REFERENCES uniforme(id),
+  cantidad       INTEGER NOT NULL CHECK (cantidad > 0),
+  valor_unitario NUMERIC(14,2) NOT NULL CHECK (valor_unitario > 0),
+  subtotal       NUMERIC(14,2) GENERATED ALWAYS AS (cantidad * valor_unitario) STORED,
+  PRIMARY KEY (devolucion_id, uniforme_id)
+);
+COMMENT ON TABLE devolucion_venta_detalle IS '[M6] Unidades devueltas por referencia, al valor unitario de la venta.';
+
+CREATE TRIGGER trg_devolucion_venta_inmutable BEFORE UPDATE OR DELETE ON devolucion_venta
+  FOR EACH ROW EXECUTE FUNCTION fn_venta_inmutable();
+CREATE TRIGGER trg_devolucion_venta_detalle_inmutable BEFORE UPDATE OR DELETE ON devolucion_venta_detalle
   FOR EACH ROW EXECUTE FUNCTION fn_venta_inmutable();
 
 CREATE TABLE prestamo_uniforme (
@@ -859,6 +896,13 @@ CREATE TABLE prestamo_uniforme (
   fecha_prestamo             DATE NOT NULL DEFAULT current_date,
   fecha_devolucion_prevista  DATE NOT NULL,
   estado_entrega             TEXT NOT NULL CHECK (estado_entrega IN ('NUEVO','BUEN_ESTADO','CON_DESGASTE')),
+  -- Cobro del préstamo: tarifa por unidad y día × cantidad × días previstos (mínimo 1).
+  -- Se copia al prestar; si el valor es 0 no se genera cobro en M5.
+  tarifa_dia                 NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (tarifa_dia >= 0),
+  dias_cobrados              INTEGER NOT NULL DEFAULT 1 CHECK (dias_cobrados >= 1),
+  valor_cobro                NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (valor_cobro >= 0),
+  cobro_id                   BIGINT UNIQUE REFERENCES cobro(id),  -- concepto PRESTAMO_IMPLEMENTO
+  CHECK ((valor_cobro > 0) = (cobro_id IS NOT NULL)),
   estado                     TEXT NOT NULL DEFAULT 'ACTIVO' CHECK (estado IN ('ACTIVO','DEVUELTO','PERDIDA_DANO')),
   fecha_recepcion            DATE,
   estado_recepcion           TEXT CHECK (estado_recepcion IN ('BUEN_ESTADO','CON_DESGASTE','DANADO')),
@@ -872,7 +916,7 @@ CREATE TABLE prestamo_uniforme (
 );
 CREATE INDEX prestamo_uniforme_activo_idx ON prestamo_uniforme (fecha_devolucion_prevista) WHERE estado = 'ACTIVO';
 COMMENT ON TABLE prestamo_uniforme IS
-  '[M6] Préstamo y devolución de uniformes (M6-08). «Vencido» no se guarda: es ACTIVO con fecha_devolucion_prevista pasada (v_prestamo_uniforme). Pérdida o daño exige observación justificativa.';
+  '[M6] Préstamo y devolución de implementos (M6-08). Solo se prestan implementos (decisión del grupo, higiene). «Vencido» no se guarda: es ACTIVO con fecha_devolucion_prevista pasada (v_prestamo_uniforme). Pérdida o daño exige observación justificativa. El préstamo genera un cobro PENDIENTE en M5 (concepto PRESTAMO_IMPLEMENTO) con fecha límite en la devolución prevista.';
 
 CREATE TABLE movimiento_inventario (
   id                 BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

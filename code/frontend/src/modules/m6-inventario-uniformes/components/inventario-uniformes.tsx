@@ -48,8 +48,8 @@ function contarReferencias(uniformes: UniformeInventario[], proveedorId: number)
 }
 
 /**
- * RF-M6-06: inventario de uniformes del Administrador. La API de M6 todavía no
- * existe, así que los datos vienen de un servicio de demostración en memoria.
+ * RF-M6-06: inventario de uniformes del Administrador. Usa la API /m6/uniformes
+ * con un usuario real y datos en memoria con el usuario «Demo local».
  */
 export function InventarioUniformes() {
   const [uniformes, setUniformes] = useState<UniformeInventario[] | null>(null)
@@ -175,9 +175,6 @@ export function InventarioUniformes() {
         </button>
       </header>
 
-      <Alerta tono="info" titulo="Inventario de demostración local">
-        <p>Los cambios son temporales, no modifican la base de datos y se reinician al recargar el navegador.</p>
-      </Alerta>
 
       {aviso && (
         <Alerta tono="success">

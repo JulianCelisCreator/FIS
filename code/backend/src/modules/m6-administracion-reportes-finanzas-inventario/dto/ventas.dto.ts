@@ -73,3 +73,23 @@ export class FiltrosVentasDto {
   @Length(1, 100)
   buscar?: string;
 }
+
+/**
+ * Devolución total o parcial de una venta (HU-6.7). El valor de cada unidad es
+ * el de la venta; el servidor lo calcula.
+ */
+export class RegistrarDevolucionDto {
+  @IsString({ message: 'Escribe el motivo de la devolución' })
+  @Length(3, 500, { message: 'Escribe el motivo de la devolución (3 a 500 caracteres)' })
+  motivo!: string;
+
+  @IsIn(MEDIOS_PAGO, { message: 'Elige el medio del reembolso' })
+  medioReembolso!: MedioPago;
+
+  @IsArray()
+  @ArrayMinSize(1, { message: 'Indica al menos una referencia a devolver' })
+  @ArrayMaxSize(50)
+  @ValidateNested({ each: true })
+  @Type(() => ItemVentaDto)
+  items!: ItemVentaDto[];
+}

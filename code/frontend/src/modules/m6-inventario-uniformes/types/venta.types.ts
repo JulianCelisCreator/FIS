@@ -38,7 +38,32 @@ export interface VentaRegistrada {
   estadoPago: 'REGISTRADO' | 'ANULADO'
   registradoPor: string
   registradoEn: string
-  items: LineaVenta[]
+  /** Derivado de las devoluciones; la venta en sí nunca se modifica. */
+  estado: EstadoVenta
+  valorDevuelto: number
+  items: (LineaVenta & { devuelto: number })[]
+  devoluciones: DevolucionRegistrada[]
+}
+
+export type EstadoVenta = 'CONFIRMADA' | 'DEVUELTA_PARCIAL' | 'DEVUELTA'
+
+export interface DevolucionRegistrada {
+  id: number
+  fecha: string
+  motivo: string
+  valorDevuelto: number
+  medioReembolso: MedioPago
+  /** La devolución cubrió toda la venta de una vez y se anuló el pago en M5. */
+  anulaPago: boolean
+  registradoPor: string
+  items: { uniformeId: number; referencia: string; talla: string; cantidad: number; subtotal: number }[]
+}
+
+/** Cuerpo de POST /m6/ventas/:id/devoluciones. */
+export interface DatosDevolucion {
+  motivo: string
+  medioReembolso: MedioPago
+  items: { uniformeId: number; cantidad: number }[]
 }
 
 /** Cuerpo de POST /m6/ventas. El valor unitario lo fija el servidor. */

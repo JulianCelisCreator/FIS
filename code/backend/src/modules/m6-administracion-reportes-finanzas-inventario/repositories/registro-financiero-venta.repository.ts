@@ -62,4 +62,31 @@ export class RegistroFinancieroVentaRepository {
 
     return { cobroId: cobro.id, pagoId: pago.id, comprobanteNumero: comprobante.numero, fecha: cobro.fecha };
   }
+
+  /**
+   * Devolución total de una venta: anula su pago, su comprobante y su cobro en
+   * M5 con el motivo (RF-M5-11; solo el Administrador registra devoluciones).
+   * Devuelve false si el pago ya estaba anulado.
+   */
+  async anular(
+    consultor: Consultor,
+    datos: { pagoId: number; cobroId: number; motivo: string; usuarioId: number },
+  ): Promise<boolean> {
+    const pago = await consultor.query(
+      `UPDATE pago SET estado = 'ANULADO', anulado_por = $2, anulado_en = now(), motivo_anulacion = $3
+       WHERE id = $1 AND estado = 'REGISTRADO'`,
+      [datos.pagoId, datos.usuarioId, datos.motivo],
+    );
+    if ((pago.rowCount ?? 0) === 0) return false;
+    await consultor.query(
+      `UPDATE comprobante SET estado = 'ANULADO', anulado_en = now() WHERE pago_id = $1`,
+      [datos.pagoId],
+    );
+    await consultor.query(
+      `UPDATE cobro SET estado = 'ANULADO', anulado_en = now(), motivo_anulacion = $2, actualizado_en = now()
+       WHERE id = $1`,
+      [datos.cobroId, datos.motivo],
+    );
+    return true;
+  }
 }
