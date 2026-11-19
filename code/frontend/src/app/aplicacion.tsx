@@ -104,14 +104,14 @@ export function Aplicacion() {
   const permitidas = [
     ...usuarios,
     ...gruposHorarios,
-    ...pagos,
+    ...misPagos,
     ...subpantallas.map((p) => ({ pagina: p, texto: p })),
   ]
   const actual = pagina || permitidas[0]?.pagina || ''
   const navegacion = [
     { grupo: 'Usuarios', enlaces: usuarios },
     { grupo: 'Grupos y horarios', enlaces: gruposHorarios },
-    { grupo: 'Planes y pagos', enlaces: pagos },
+    { grupo: 'Planes y pagos', enlaces: misPagos },
     { grupo: 'Competencias y resultados', enlaces: permitidas.filter((p) => p.pagina === 'm4') },
     { grupo: 'Planes y pagos', enlaces: permitidas.filter((p) => p.pagina !== 'm4') },
   ]
