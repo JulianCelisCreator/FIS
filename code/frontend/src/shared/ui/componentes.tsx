@@ -108,6 +108,7 @@ const ESTADOS: Record<string, Record<string, [string, Tono]>> = {
     ajustada: ['Ajustada', 'warning'],
   },
 }
+}
 
 export function Insignia({ entidad, estado }: { entidad: string; estado: string }) {
   const [texto, tono] = ESTADOS[entidad]?.[estado] ?? [estado, 'neutral']
