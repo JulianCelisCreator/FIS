@@ -1,7 +1,7 @@
 import {
   BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, Query, UseGuards,
 } from '@nestjs/common';
-import { AutenticacionTemporalGuard } from '../../../common/auth/autenticacion-temporal.guard.js';
+import { AutenticacionGuard } from '../../../common/auth/autenticacion.guard.js';
 import { RequierePermiso, UsuarioActual } from '../../../common/auth/decoradores.js';
 import type { UsuarioAutenticado } from '../../../common/auth/usuario-autenticado.js';
 import { PermisosGuard } from '../../../common/auth/permisos.guard.js';
@@ -14,7 +14,7 @@ import { PermisoM4 } from '../enums/permiso-m4.enum.js';
 import { M4Service } from '../services/m4.service.js';
 
 @Controller('m4')
-@UseGuards(AutenticacionTemporalGuard, PermisosGuard)
+@UseGuards(AutenticacionGuard, PermisosGuard)
 export class M4Controller {
   constructor(private readonly m4: M4Service) {}
 
