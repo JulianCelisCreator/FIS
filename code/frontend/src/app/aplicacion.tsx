@@ -119,31 +119,31 @@ export function Aplicacion() {
     ...subpantallas.map((p) => ({ pagina: p, texto: p })),
   ]
   const actual = pagina || permitidas[0]?.pagina || ''
- const navegacion = [
-  { grupo: 'Usuarios', enlaces: usuarios },
-  { grupo: 'Grupos y horarios', enlaces: gruposHorarios },
-
-  ...[
-    'Competencias y resultados',
-    'Planes y pagos',
-    'Uniformes',
-    'Administración',
-  ].map((grupo) => ({
-    grupo,
-    enlaces: [
-      ...pantallasPermitidas.filter(
-        (pantalla) => pantalla.grupo === grupo
-      ),
-      ...(grupo === 'Planes y pagos' ? misPagos : []),
-      ...(grupo === 'Competencias y resultados'
-        ? permitidas.filter((p) => p.pagina === 'm4')
-        : []),
-      ...(grupo === 'Planes y pagos'
-        ? permitidas.filter((p) => p.pagina !== 'm4')
-        : []),
-    ],
-  })),
-];
+  const navegacion = [
+    { grupo: 'Usuarios', enlaces: usuarios },
+    { grupo: 'Grupos y horarios', enlaces: gruposHorarios },
+  
+    ...[
+      'Competencias y resultados',
+      'Planes y pagos',
+      'Uniformes',
+      'Administración',
+    ].map((grupo) => ({
+      grupo,
+      enlaces: [
+        ...pantallasPermitidas.filter(
+          (pantalla) => pantalla.grupo === grupo
+        ),
+        ...(grupo === 'Planes y pagos' ? misPagos : []),
+        ...(grupo === 'Competencias y resultados'
+          ? permitidas.filter((p) => p.pagina === 'm4')
+          : []),
+        ...(grupo === 'Planes y pagos'
+          ? permitidas.filter((p) => p.pagina !== 'm4')
+          : []),
+      ],
+    })),
+  ];
 
   let contenido
   if (permitidas.length === 0) {
