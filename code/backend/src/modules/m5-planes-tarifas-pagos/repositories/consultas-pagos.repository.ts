@@ -182,8 +182,7 @@ export class ConsultasPagosRepository {
               s.saldo > 0 AND s.vencido_desde <= current_date AS vencido
        FROM v_saldo_cobro s JOIN cobro c ON c.id = s.cobro_id
        WHERE s.patinador_id = $1 AND s.estado <> 'ANULADO'
-       ORDER BY s.fecha_limite DESC, s.cobro_id DESC
-       LIMIT 36`,
+       ORDER BY s.fecha_limite DESC, s.cobro_id DESC`,
       [patinadorId],
     );
     return rows;
