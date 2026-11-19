@@ -150,6 +150,7 @@ export function DialogoConfirmacion({
   textoCancelar = 'Cancelar',
   variante = 'confirm',
   ocupado = false,
+  textoOcupado = 'Guardando…',
   alConfirmar,
   alCancelar,
   children,
@@ -160,6 +161,8 @@ export function DialogoConfirmacion({
   textoCancelar?: string
   variante?: 'confirm' | 'form'
   ocupado?: boolean
+  /** Texto del botón de confirmar mientras `ocupado` es true. */
+  textoOcupado?: string
   alConfirmar?: () => void
   alCancelar: () => void
   children: ReactNode
@@ -197,7 +200,7 @@ export function DialogoConfirmacion({
             aria-disabled={ocupado || undefined}
             onClick={() => !ocupado && alConfirmar?.()}
           >
-            {ocupado ? 'Guardando…' : textoConfirmar}
+            {ocupado ? textoOcupado : textoConfirmar}
           </button>
         )}
       </div>
