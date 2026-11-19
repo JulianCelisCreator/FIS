@@ -167,7 +167,7 @@ export class ConsultasPagosRepository {
         filtros.estado ?? null,
         patronBusqueda(filtros.buscar),
         filtros.patinadorId ?? null,
-        LIMITE_HISTORIAL,
+        filtros.patinadorId === undefined ? LIMITE_HISTORIAL : null,
       ],
     );
     return rows;
