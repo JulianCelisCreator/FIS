@@ -7,8 +7,9 @@ DDL de la base de datos de la plataforma (PostgreSQL 17), común a todos los mó
 | `schema.sql` | Todo el DDL: tablas, restricciones, índices, vistas, comentarios y catálogos semilla. |
 | `compose.yaml` | Contenedor de PostgreSQL que carga `schema.sql` al crearse. |
 | `datos-demo.sql` | Datos de demostración de M5 con los nombres de los wireframes (opcional, se cargan a mano). |
+| `m4-permisos.sql` | Permisos y asignaciones por rol del módulo M4 (ejecutar después de `schema.sql`). |
 | `datos-demo-m6.sql` | Datos de demostración de M6 (personal, proveedores, inventario, ventas con devoluciones y préstamos). Requiere `datos-demo.sql`. |
-| `migraciones/` | Scripts `ALTER` para aplicar cambios de `schema.sql` a una base ya creada sin borrar datos (`psql … -f db/migraciones/<archivo>.sql`). Una base nueva no los necesita. |
+| `migraciones/` | Scripts para aplicar cambios de `schema.sql` a una base ya creada sin borrar datos (`psql … -f db/migraciones/<archivo>.sql`). Una base nueva no los necesita. La migración `2026-11-19-m6-foto-uniforme.sql` agrega la foto de inventario. `2026-11-19-m6-ventas-formato-actual.sql` actualiza el formato anterior de ventas solo si no existen ventas; de lo contrario, requiere conciliación manual. |
 
 ## Levantar la base
 
@@ -49,6 +50,23 @@ UPDATE usuario SET contrasena_hash = '<hash de clave_demo>' WHERE contrasena_has
 ```
 
 PostgreSQL ejecuta `schema.sql` **solo cuando el volumen está vacío**. Si el archivo cambia, hay que recrear la base con `down -v` y volver a levantarla.
+
+Cambios del esquema que se pueden aplicar sin recrear la base:
+
+```sql
+-- HU-M1-09: versión del texto de la autorización del acudiente que se aceptó.
+ALTER TABLE autorizacion_acudiente ADD COLUMN IF NOT EXISTS version_texto TEXT NOT NULL DEFAULT 'v1';
+```
+
+## Permisos del Módulo M4
+
+Después de levantar una base nueva, ejecutar una vez:
+
+```bash
+psql -h localhost -U patinaje -d patinaje -f db/m4-permisos.sql
+```
+
+El script es idempotente y agrega los permisos M4 a `permiso` y `rol_permiso`. No recrea tablas ni altera los datos existentes.
 
 ## Convenciones
 

@@ -21,6 +21,9 @@ export const PERMISOS_M5 = {
   planGestionar: 'M5_PLAN_GESTIONAR',
   planAsignar: 'M5_PLAN_ASIGNAR',
   pagoRegistrar: 'M5_PAGO_REGISTRAR',
+  carteraConsultar: 'M5_CARTERA_CONSULTAR',
+  pagoHistorial: 'M5_PAGO_HISTORIAL',
+  comprobanteDescargar: 'M5_COMPROBANTE_DESCARGAR',
 } as const
 
 export const MEDIOS_PAGO: { valor: MedioPago; texto: string }[] = [
@@ -201,3 +204,110 @@ export interface ResultadoPagoSesion extends ResultadoPagoBase {
 }
 
 export type ResultadoMatricula = ResultadoPagoBase
+
+// --- Consultas (RF-M5-13, 15, 16, 17 y 18) ---
+
+/** GET /m5/cartera */
+export interface FilaCartera {
+  patinadorId: number
+  patinador: string
+  documento: string
+  esMenor: boolean
+  acudientes: string
+  planId: number | null
+  plan: string | null
+  estado: EstadoCartera
+  saldoPendiente: number
+  cobrosConSaldo: number
+  cobrosVencidos: number
+  vencimientoMasAntiguo: string | null
+}
+
+export interface RespuestaCartera {
+  resumen: {
+    saldoPendiente: number
+    cobrosConSaldo: number
+    alDia: number
+    pendiente: number
+    vencido: number
+    saldoVencido: number
+  }
+  patinadores: FilaCartera[]
+}
+
+export interface FiltrosCartera {
+  estado?: EstadoCartera
+  planId?: number
+  patinador?: string
+  acudiente?: string
+  venceDesde?: string
+  venceHasta?: string
+}
+
+/** Un pago del historial (GET /m5/pagos y estado de cuenta). */
+export interface PagoHistorial {
+  pagoId: number
+  fechaPago: string
+  comprobante: string | null
+  estadoComprobante: 'VIGENTE' | 'ANULADO' | null
+  patinadorId: number
+  patinador: string
+  acudientes: string
+  tipo: 'COBRO' | 'SESION' | 'MATRICULA' | 'VENTA_UNIFORME'
+  monto: number
+  medioPago: MedioPago
+  referencia: string | null
+  numeroSesiones: number | null
+  registradoPor: string
+  registradoEn: string
+  estado: 'REGISTRADO' | 'ANULADO'
+  anuladoPor: string | null
+  anuladoEn: string | null
+  motivoAnulacion: string | null
+  cobros: { concepto: string; descripcion: string | null; periodo: string | null; fechaLimite: string; montoAplicado: number }[]
+}
+
+export interface RespuestaHistorial {
+  pagos: PagoHistorial[]
+  total: number
+  registrados: number
+  limite: number
+}
+
+export interface FiltrosHistorial {
+  desde?: string
+  hasta?: string
+  medio?: MedioPago
+  estado?: 'REGISTRADO' | 'ANULADO'
+  buscar?: string
+}
+
+/** Un cobro del estado de cuenta (pagado o con saldo). */
+export interface CobroDeCuenta {
+  id: number
+  concepto: string
+  descripcion: string | null
+  periodo: string | null
+  valor: number
+  pagado: number
+  saldo: number
+  fechaLimite: string
+  vencidoDesde: string
+  vencido: boolean
+}
+
+/** GET /m5/patinadores/:id/estado-cuenta */
+export interface EstadoCuenta {
+  patinador: { id: number; nombre: string; documento: string; esMenor: boolean }
+  cartera: { estado: EstadoCartera; saldoPendiente: number; cobrosVencidos: number; vencimientoMasAntiguo: string | null }
+  plan: {
+    planId: number
+    nombre: string
+    periodicidad: Periodicidad
+    diaLimitePago: number | null
+    fechaInicio: string
+    tarifa: number | null
+  } | null
+  cobros: CobroDeCuenta[]
+  pagos: PagoHistorial[]
+}

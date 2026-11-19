@@ -113,6 +113,15 @@ Todas las solicitudes exigen la sesión de M1 (cookie httpOnly, `AutenticacionGu
 HU-M1-02) y el permiso de la ruta: `M6_INVENTARIO_GESTIONAR` para inventario, ventas
 y préstamos, y `M6_PERSONAL_GESTIONAR` para personal.
 
+## Reportes financieros (HU-6.4) y exportación (HU-6.5)
+
+Permiso `M6_REPORTE_FINANCIERO` (Administrador y Contador, solo lectura).
+
+- `GET /m6/reportes/:tipo?desde=AAAA-MM-DD&hasta=AAAA-MM-DD`, con `tipo` = `ingresos`, `pagos`, `cartera` o `movimientos-uniformes`.
+- `GET /m6/reportes/:tipo/exportar?formato=pdf|xlsx&desde&hasta`: descarga `Reporte_<Tipo>_<desde>_<hasta>.<ext>`.
+
+Las dos rutas usan el mismo objeto `Reporte` (columnas, filas y totales), así que el archivo tiene los mismos valores que la pantalla. Los archivos se generan en el servidor con `pdfkit` y `exceljs` (`utils/exportar-reporte.ts`).
+
 ## Reglas implementadas
 
 - No hay borrado físico.

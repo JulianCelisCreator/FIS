@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from 'react'
 import { Alerta, Campo } from '../../../shared/ui/componentes.tsx'
 import { formatoCop, formatoFecha, hoyEnClub } from '../../../shared/utils/formato.ts'
-import { generarReporte } from '../services/reportes.service.ts'
+import { descargarReporte, generarReporte } from '../services/reportes.service.ts'
 import {
   TIPOS_REPORTE,
   validarRango,
   type ErroresRango,
+  type FormatoExportacion,
   type FormatoValor,
   type Reporte,
   type TipoReporte,
@@ -42,6 +43,25 @@ export function ReportesFinancieros() {
   const [reporte, setReporte] = useState<Reporte | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [cargando, setCargando] = useState(false)
+  const [exportando, setExportando] = useState<FormatoExportacion | null>(null)
+  const [avisoExportacion, setAvisoExportacion] = useState<string | null>(null)
+  const [errorExportacion, setErrorExportacion] = useState<string | null>(null)
+
+  // HU-6.5: exporta el reporte que está en pantalla (mismo tipo y período).
+  const exportar = async (formato: FormatoExportacion) => {
+    if (!reporte || exportando) return
+    setExportando(formato)
+    setAvisoExportacion(null)
+    setErrorExportacion(null)
+    try {
+      const nombre = await descargarReporte(reporte, formato)
+      setAvisoExportacion(`Se descargó ${nombre}.`)
+    } catch (e) {
+      setErrorExportacion(e instanceof Error ? e.message : 'No se pudo generar el archivo.')
+    } finally {
+      setExportando(null)
+    }
+  }
 
   const generar = async (evento: FormEvent) => {
     evento.preventDefault()
@@ -51,6 +71,8 @@ export function ReportesFinancieros() {
     if (Object.keys(encontrados).length > 0) return
     setCargando(true)
     setError(null)
+    setAvisoExportacion(null)
+    setErrorExportacion(null)
     try {
       setReporte(await generarReporte(tipo, desde, hasta))
     } catch (e) {
@@ -69,7 +91,7 @@ export function ReportesFinancieros() {
         <div className="vl-stack">
           <nav className="vl-breadcrumb"><span>Administración</span><span>/</span><span>Reportes financieros</span></nav>
           <h1>Reportes financieros</h1>
-          <p className="vl-text-body-sm">Consulta ingresos, pagos, cartera y movimientos de uniformes de un período.</p>
+          <p className="vl-text-body-sm">Consulta ingresos, pagos, cartera y movimientos de uniformes de un período y expórtalos a PDF o Excel.</p>
         </div>
       </header>
 
@@ -105,7 +127,22 @@ export function ReportesFinancieros() {
                 {fechaHora.format(new Date(reporte.generadoEn))}
               </p>
             </div>
+            <div className="app-acciones" role="group" aria-label="Exportar reporte">
+              <button className="vl-button vl-button--secondary" type="button" onClick={() => exportar('pdf')}
+                aria-disabled={exportando !== null || undefined}>
+                {exportando === 'pdf' ? 'Generando PDF…' : 'Exportar PDF'}
+              </button>
+              <button className="vl-button vl-button--secondary" type="button" onClick={() => exportar('xlsx')}
+                aria-disabled={exportando !== null || undefined}>
+                {exportando === 'xlsx' ? 'Generando Excel…' : 'Exportar Excel'}
+              </button>
+            </div>
           </div>
+
+          {avisoExportacion && <Alerta tono="success"><p>{avisoExportacion}</p></Alerta>}
+          {errorExportacion && (
+            <Alerta tono="error" titulo="No se pudo exportar el reporte"><p>{errorExportacion}</p></Alerta>
+          )}
 
           {reporte.sinDatos && (
             <Alerta tono="info" titulo="Sin información en el período">

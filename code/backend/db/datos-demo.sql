@@ -73,6 +73,17 @@ BEGIN
     (u_carolina, p_mateo, 'madre', u_andrea),
     (u_luis, p_samuel, 'padre', u_andrea);
 
+  -- Autorización del acudiente y póliza (pantalla «Familia del menor») --------
+  -- Sofía: póliza vigente y autorización pendiente (Carolina puede registrarla).
+  -- Mateo: autorización registrada, pero sin póliza: su perfil sigue Bloqueado.
+  INSERT INTO poliza (patinador_id, aseguradora, numero_poliza, vigente_desde, vigente_hasta,
+                      estado_revision, registrado_por)
+  VALUES (p_sofia, 'Sura', 'POL-882341', current_date - interval '1 month',
+          current_date + interval '11 months', 'APROBADA', u_andrea);
+  INSERT INTO autorizacion_acudiente (patinador_id, acudiente_id, fecha_autorizacion,
+                                      version_texto, registrado_por)
+  VALUES (p_mateo, u_carolina, current_date - interval '5 days', 'v1', u_carolina);
+
   -- Planes y tarifas (planes.html) -----------------------------------------
   INSERT INTO plan (nombre, tipo, dias_por_semana, periodicidad, descripcion, creado_por)
   VALUES ('Clase suelta', 'DIA_UNICO', NULL, 'POR_SESION', 'Asistes el día que quieras. Pagas en la sede cada vez que vienes.', u_andrea)

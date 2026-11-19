@@ -4,6 +4,7 @@
 
 export type TipoReporte = 'ingresos' | 'pagos' | 'cartera' | 'movimientos-uniformes'
 export type FormatoValor = 'texto' | 'fecha' | 'cop' | 'numero'
+export type FormatoExportacion = 'pdf' | 'xlsx'
 
 export const TIPOS_REPORTE: { valor: TipoReporte; texto: string; ayuda: string }[] = [
   { valor: 'ingresos', texto: 'Ingresos', ayuda: 'Pagos registrados por concepto, menos reembolsos de devoluciones.' },
