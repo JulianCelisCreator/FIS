@@ -98,6 +98,7 @@ Si una capacidad necesita repositorios, políticas u otras carpetas, agrégalas 
 - **Autenticación:** sesión con cookie `httpOnly` que crea M1 al ingresar (`POST /m1/acceso/ingreso`). En la base solo se guarda el hash del token. Los controladores usan `@UseGuards(AutenticacionGuard, PermisosGuard)`, `@RequierePermiso(...)` y `@UsuarioActual()`; el usuario llega con sus roles y los permisos de esos roles.
 - **Auditoría:** `common/auditoria/AuditoriaRepository.registrar()` dentro de la misma transacción del cambio.
 - **Documentos:** `pdfkit` para los PDF (comprobantes e historial) y `exceljs` para los XLSX. Se generan en memoria y se envían con `StreamableFile`.
+- **Correo saliente:** `common/correo/CorreoService.enviar()`. Con `RESEND_API_KEY` en `.env` envía por [Resend](https://resend.com) desde `CORREO_REMITENTE`; sin dominio verificado en Resend solo llega al correo dueño de la cuenta. Sin clave no envía nada: escribe el correo en la consola de la API, para desarrollar sin correos reales.
 - **Tareas programadas:** `@nestjs/schedule`, con la zona horaria del club (`America/Bogota`).
 
 ### Flujo y dependencias
