@@ -5,6 +5,11 @@
 
 const BASE = '/api'
 
+/** URL completa de un recurso de la API, para enlaces de descarga (PDF, XLSX). */
+export function urlApi(ruta: string): string {
+  return `${BASE}${ruta}`
+}
+
 /** Error de la API con el mensaje en español que devuelve el backend. */
 export class ErrorApi extends Error {
   readonly estado: number

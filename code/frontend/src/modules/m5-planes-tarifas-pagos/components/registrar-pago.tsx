@@ -15,6 +15,7 @@ import {
   pagarMatricula,
   pagarSesiones,
   planesParaElegir,
+  urlComprobante,
 } from '../services/m5.service.ts'
 import {
   ESTADO_CARTERA_DS,
@@ -153,6 +154,7 @@ export function RegistrarPago({
 function PagoRegistrado({
   mensaje,
   comprobante,
+  pagoId,
   filas,
   estadoCartera,
   alTerminar,
@@ -160,6 +162,7 @@ function PagoRegistrado({
 }: {
   mensaje: string
   comprobante: string
+  pagoId: number
   filas: [string, ReactNode][]
   estadoCartera: EstadoCartera
   alTerminar: () => void
@@ -169,7 +172,12 @@ function PagoRegistrado({
     <section className="vl-card vl-stack" aria-labelledby="titulo-registrado">
       <h2 id="titulo-registrado" className="vl-text-heading-h4">Pago registrado</h2>
       <Alerta tono="success" titulo={mensaje}>
-        <p>Se generó el comprobante N.º {comprobante}.</p>
+        <p>
+          Se generó el comprobante N.º {comprobante}.{' '}
+          <a className="vl-link" href={urlComprobante(pagoId)} target="_blank" rel="noopener">
+            Ver comprobante (PDF)
+          </a>
+        </p>
       </Alerta>
       <ListaDatos
         filas={[
@@ -246,6 +254,7 @@ function PagoCobro({ patinador, alTerminar }: { patinador: PatinadorM5; alTermin
       <PagoRegistrado
         mensaje={resultado.pagoParcial ? 'Se registró un pago parcial' : 'El cobro quedó pagado'}
         comprobante={resultado.comprobante.numero}
+        pagoId={resultado.pagoId}
         estadoCartera={resultado.estadoCartera.estado}
         alTerminar={alTerminar}
         filas={[
@@ -376,6 +385,7 @@ function PagoSesion({ patinador, alTerminar }: { patinador: PatinadorM5; alTermi
       <PagoRegistrado
         mensaje="Se registró el pago de las sesiones"
         comprobante={resultado.comprobante.numero}
+        pagoId={resultado.pagoId}
         estadoCartera={resultado.estadoCartera.estado}
         alTerminar={alTerminar}
         filas={[
@@ -470,6 +480,7 @@ function PagoMatricula({ patinador, alTerminar }: { patinador: PatinadorM5; alTe
       <PagoRegistrado
         mensaje="Se registró el pago de la matrícula y los gastos administrativos"
         comprobante={resultado.comprobante.numero}
+        pagoId={resultado.pagoId}
         estadoCartera={resultado.estadoCartera.estado}
         alTerminar={alTerminar}
         filas={[

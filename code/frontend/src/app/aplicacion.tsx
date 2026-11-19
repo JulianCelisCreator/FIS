@@ -4,6 +4,9 @@ import { useRuta } from '../shared/utils/use-ruta.ts'
 import { NuevaCuenta } from '../modules/m1-usuarios-acceso/components/nueva-cuenta.tsx'
 import { PantallaAcceso } from '../modules/m1-usuarios-acceso/components/pantalla-acceso.tsx'
 import { AsignarCambiarPlan } from '../modules/m5-planes-tarifas-pagos/components/asignar-cambiar-plan.tsx'
+import { Cartera } from '../modules/m5-planes-tarifas-pagos/components/cartera.tsx'
+import { HistorialPagos } from '../modules/m5-planes-tarifas-pagos/components/historial-pagos.tsx'
+import { MisPagos } from '../modules/m5-planes-tarifas-pagos/components/mis-pagos.tsx'
 import { PlanesTarifas } from '../modules/m5-planes-tarifas-pagos/components/planes-tarifas.tsx'
 import {
   RegistrarPago,
@@ -16,7 +19,9 @@ import { MarcoAplicacion } from './marco-aplicacion.tsx'
 const PANTALLAS = [
   { pagina: 'planes', texto: 'Planes y tarifas', permiso: PERMISOS_M5.planGestionar },
   { pagina: 'asignar-plan', texto: 'Asignar o cambiar plan', permiso: PERMISOS_M5.planAsignar },
+  { pagina: 'cartera', texto: 'Cartera', permiso: PERMISOS_M5.carteraConsultar },
   { pagina: 'registrar-pago', texto: 'Registrar pago', permiso: PERMISOS_M5.pagoRegistrar },
+  { pagina: 'historial-pagos', texto: 'Historial de pagos', permiso: PERMISOS_M5.pagoHistorial },
 ]
 
 /** Pantallas de M1 solo para el Administrador (HU-M1-01; la matriz de permisos llega con HU-M1-07). */
@@ -45,7 +50,12 @@ export function Aplicacion() {
   if (!sesion) return <PantallaAcceso />
 
   const usuarios = tieneRol('ADMINISTRADOR') ? PANTALLAS_ADMINISTRADOR : []
-  const pagos = PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso))
+  // «Mis pagos» es la vista del Acudiente y del Patinador (RF-M5-17 y 18); el backend acota los patinadores.
+  const misPagos =
+    tieneRol('ACUDIENTE') || tieneRol('PATINADOR')
+      ? [{ pagina: 'mis-pagos', texto: tieneRol('ACUDIENTE') ? 'Pagos de mis patinadores' : 'Mis pagos' }]
+      : []
+  const pagos = [...PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso)), ...misPagos]
   const permitidas = [...usuarios, ...pagos]
   const actual = pagina || permitidas[0]?.pagina || ''
   const navegacion = [
@@ -77,6 +87,12 @@ export function Aplicacion() {
     contenido = <NuevaCuenta key={sesion.id} />
   } else if (actual === 'planes') {
     contenido = <PlanesTarifas key={sesion.id} />
+  } else if (actual === 'cartera') {
+    contenido = <Cartera key={sesion.id} />
+  } else if (actual === 'historial-pagos') {
+    contenido = <HistorialPagos key={sesion.id} />
+  } else if (actual === 'mis-pagos') {
+    contenido = <MisPagos key={sesion.id} />
   } else if (actual === 'asignar-plan') {
     contenido = (
       <AsignarCambiarPlan
