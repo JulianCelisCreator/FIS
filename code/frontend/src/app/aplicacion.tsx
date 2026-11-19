@@ -15,12 +15,15 @@ import {
   type PestanaPago,
 } from '../modules/m5-planes-tarifas-pagos/components/registrar-pago.tsx'
 import { PERMISOS_M5 } from '../modules/m5-planes-tarifas-pagos/types/m5.types.ts'
+import { NivelesPatinaje } from '../modules/m2-gestion-deportiva/components/niveles-patinaje.tsx'
+import { PERMISOS_M2 } from '../modules/m2-gestion-deportiva/types/m2.types.ts'
 import { M4Modulo } from '../modules/m4-competencias-resultados/components/m4-modulo.tsx'
 import { PERMISOS_M4 } from '../modules/m4-competencias-resultados/types/m4.types.ts'
 import { MarcoAplicacion } from './marco-aplicacion.tsx'
 
 /** Pantallas disponibles y el permiso que exige cada una. */
 const PANTALLAS = [
+  { pagina: 'm2-niveles', texto: 'Niveles de patinaje', permiso: PERMISOS_M2.nivelGestionar },
   { pagina: 'm4', texto: 'Competencias y resultados', permiso: PERMISOS_M4.consultar },
   { pagina: 'planes', texto: 'Planes y tarifas', permiso: PERMISOS_M5.planGestionar },
   { pagina: 'asignar-plan', texto: 'Asignar o cambiar plan', permiso: PERMISOS_M5.planAsignar },
@@ -68,15 +71,17 @@ export function Aplicacion() {
     tieneRol('ACUDIENTE') || tieneRol('PATINADOR')
       ? [{ pagina: 'mis-pagos', texto: tieneRol('ACUDIENTE') ? 'Pagos de mis patinadores' : 'Mis pagos' }]
       : []
-  const pagos = [...PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso)), ...misPagos]
+  const deportivas = PANTALLAS.filter((pantalla) => pantalla.pagina.startsWith('m2') && tienePermiso(pantalla.permiso))
+  const competencias = PANTALLAS.filter((pantalla) => pantalla.pagina === 'm4' && tienePermiso(pantalla.permiso))
+  const pagos = [...PANTALLAS.filter((pantalla) => !pantalla.pagina.startsWith('m2') && pantalla.pagina !== 'm4' && tienePermiso(pantalla.permiso)), ...misPagos]
   const subpantallas = tieneRol('ADMINISTRADOR') ? Object.keys(SUBPANTALLAS_ADMINISTRADOR) : []
-  const permitidas = [...usuarios, ...pagos, ...subpantallas.map((p) => ({ pagina: p, texto: p }))]
+  const permitidas = [...usuarios, ...deportivas, ...competencias, ...pagos, ...subpantallas.map((p) => ({ pagina: p, texto: p }))]
   const actual = pagina || permitidas[0]?.pagina || ''
   const navegacion = [
     { grupo: 'Usuarios', enlaces: usuarios },
+    { grupo: 'Gestión deportiva', enlaces: deportivas },
+    { grupo: 'Competencias y resultados', enlaces: competencias },
     { grupo: 'Planes y pagos', enlaces: pagos },
-    { grupo: 'Competencias y resultados', enlaces: permitidas.filter((p) => p.pagina === 'm4') },
-    { grupo: 'Planes y pagos', enlaces: permitidas.filter((p) => p.pagina !== 'm4') },
   ]
 
   let contenido
@@ -117,6 +122,8 @@ export function Aplicacion() {
     )
   } else if (actual === 'm4') {
     contenido = <M4Modulo key={sesion.id} />
+  } else if (actual === 'm2-niveles') {
+    contenido = <NivelesPatinaje key={sesion.id} />
   } else if (actual === 'planes') {
     contenido = <PlanesTarifas key={sesion.id} />
   } else if (actual === 'cartera') {
