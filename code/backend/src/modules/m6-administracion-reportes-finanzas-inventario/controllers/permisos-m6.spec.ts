@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { PERMISOS_KEY } from '../../../common/auth/decoradores.js';
 import { PermisoM6 } from '../enums/permiso-m6.enum.js';
+import { PanelController } from './panel.controller.js';
 import { PersonalController } from './personal.controller.js';
 import { PrestamosController } from './prestamos.controller.js';
 import { ProveedoresController } from './proveedores.controller.js';
@@ -19,6 +20,8 @@ const CONTROLADORES = [
   { controlador: PersonalController, permiso: PermisoM6.PERSONAL_GESTIONAR },
   // HU-6.4: el Contador sí tiene este permiso; consulta reportes pero no modifica nada.
   { controlador: ReportesController, permiso: PermisoM6.REPORTE_FINANCIERO },
+  // HU-6.1: el panel es solo del Administrador; el Contador no tiene este permiso.
+  { controlador: PanelController, permiso: PermisoM6.PANEL_CONSULTAR },
 ];
 
 describe('control de acceso de las rutas del M6', () => {

@@ -18,12 +18,15 @@ import { PersonalService } from './services/personal.service.js';
 import { ReportesController } from './controllers/reportes.controller.js';
 import { ReportesRepository } from './repositories/reportes.repository.js';
 import { ReportesService } from './services/reportes.service.js';
+import { PanelController } from './controllers/panel.controller.js';
+import { PanelRepository } from './repositories/panel.repository.js';
+import { PanelService } from './services/panel.service.js';
 
 /** M6 · Administración, reportes, finanzas e inventario. */
 @Module({
   controllers: [
     UniformesController, ProveedoresController, PrestamosController, VentasController,
-    PersonalController, ReportesController,
+    PersonalController, ReportesController, PanelController,
   ],
   providers: [
     PersonalRepository, PersonalService,
@@ -32,6 +35,7 @@ import { ReportesService } from './services/reportes.service.js';
     PrestamosRepository, PrestamosService,
     VentasRepository, VentasService, RegistroFinancieroVentaRepository,
     ReportesRepository, ReportesService,
+    PanelRepository, PanelService,
   ],
 })
 export class M6AdministracionReportesFinanzasInventarioModule {}

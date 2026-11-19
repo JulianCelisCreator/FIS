@@ -21,6 +21,8 @@ import { InventarioUniformes } from '../modules/m6-inventario-uniformes/componen
 import { PrestamosUniformes } from '../modules/m6-inventario-uniformes/components/prestamos-uniformes.tsx'
 import { VentasUniformes } from '../modules/m6-inventario-uniformes/components/ventas-uniformes.tsx'
 import { PERMISOS_M6 } from '../modules/m6-inventario-uniformes/types/inventario.types.ts'
+import { PanelAdministrativo } from '../modules/m6-panel/components/panel-administrativo.tsx'
+import { PERMISOS_PANEL } from '../modules/m6-panel/types/panel.types.ts'
 import { RegistroPersonal } from '../modules/m6-personal/components/registro-personal.tsx'
 import { PERMISOS_PERSONAL } from '../modules/m6-personal/types/personal.types.ts'
 import { ReportesFinancieros } from '../modules/m6-reportes/components/reportes-financieros.tsx'
@@ -28,6 +30,7 @@ import { PERMISOS_REPORTES } from '../modules/m6-reportes/types/reportes.types.t
 import { MarcoAplicacion } from './marco-aplicacion.tsx'
 
 const PANTALLAS = [
+  { pagina: 'panel', texto: 'Panel general', grupo: 'Administración', permiso: PERMISOS_PANEL.panelConsultar },
   { pagina: 'm4', texto: 'Competencias y resultados', grupo: 'Competencias y resultados', permiso: PERMISOS_M4.consultar },
   { pagina: 'planes', texto: 'Planes y tarifas', grupo: 'Planes y pagos', permiso: PERMISOS_M5.planGestionar },
   { pagina: 'asignar-plan', texto: 'Asignar o cambiar plan', grupo: 'Planes y pagos', permiso: PERMISOS_M5.planAsignar },
@@ -147,6 +150,8 @@ export function Aplicacion() {
     contenido = <PrestamosUniformes key={sesion.id} />
   } else if (actual === 'personal') {
     contenido = <RegistroPersonal key={sesion.id} />
+  } else if (actual === 'panel') {
+    contenido = <PanelAdministrativo key={sesion.id} />
   } else if (actual === 'reportes') {
     contenido = <ReportesFinancieros key={sesion.id} />
   } else if (actual === 'asignar-plan') {
