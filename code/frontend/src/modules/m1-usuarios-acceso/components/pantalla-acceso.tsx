@@ -7,11 +7,10 @@ import './pantalla-acceso.css'
 /**
  * HU-M1-02 · Ingreso. Pantalla pública, sin navegación interna ni datos de
  * patinadores. Sin pestaña «Registrarse»: las cuentas las crea el
- * Administrador (HU-M1-01).
+ * Administrador (HU-M1-01). Tras cerrar sesión (HU-M1-03) muestra la confirmación.
  */
 export function PantallaAcceso() {
-  const sesion = useSesion() as ReturnType<typeof useSesion> & { sesionRecienCerrada?: boolean }
-  const { sesionRecienCerrada = false } = sesion
+  const { sesionRecienCerrada } = useSesion()
 
   return (
     <div className="m1-acceso">
@@ -34,9 +33,10 @@ export function PantallaAcceso() {
             <h1>Ingresa a Velora</h1>
             <p className="vl-text-body-sm">Usa el correo y la contraseña de tu cuenta.</p>
           </header>
+          {/* HU-M1-03 CA-01: confirmación breve al volver al ingreso. */}
           {sesionRecienCerrada && (
-            <Alerta tono="success" titulo="Sesión cerrada">
-              Saliste de Velora. Ingresa de nuevo cuando quieras.
+            <Alerta tono="info" titulo="Cerraste sesión">
+              <p>Ingresa de nuevo cuando quieras.</p>
             </Alerta>
           )}
           <FormularioIngreso />

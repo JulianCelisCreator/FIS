@@ -4,9 +4,9 @@ import type { Rol, Sesion } from './sesion.types.ts'
 import { SesionContexto } from './use-sesion.ts'
 
 /**
- * Sesión del usuario (HU-M1-02 y HU-M1-03). El token vive en una cookie httpOnly que el
- * navegador envía solo; aquí se consulta GET /sesion al abrir la aplicación y
- * se guarda la sesión que devuelve el ingreso.
+ * Sesión del usuario (HU-M1-02 y HU-M1-03). El token vive en una cookie
+ * httpOnly que el navegador envía solo; aquí se consulta GET /sesion al abrir
+ * la aplicación, se guarda la sesión que devuelve el ingreso y se cierra.
  */
 export function ProveedorSesion({ children }: { children: ReactNode }) {
   const [sesion, setSesion] = useState<Sesion | null>(null)
@@ -35,16 +35,9 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
   }
 
   const cerrarSesion = async () => {
-    try {
-      await pedir<void>(
-        '/sesion',
-        { metodo: 'DELETE' } as unknown as Parameters<typeof pedir>[1],
-      )
-    } catch (e) {
-      // 401 = la sesión ya no existía en el servidor: el resultado es el mismo.
-      // Cualquier otro error (sin conexión, 5xx) deja la sesión abierta y se informa.
-      if (!(e instanceof ErrorApi && e.estado === 401)) throw e
-    }
+    // HU-M1-03 CA-03: la sesión se invalida en el servidor, no solo en el navegador.
+    // La API responde 204 aunque la sesión ya estuviera cerrada o vencida.
+    await pedir<null>('/m1/acceso/salida', { metodo: 'POST' })
     // La ruta de la sesión anterior no debe quedar para quien ingrese después.
     window.location.hash = ''
     setSesion(null)
@@ -52,20 +45,20 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
     setSesionRecienCerrada(true)
   }
 
-  const valorSesionContexto = {
-    sesion,
-    cargando,
-    error,
-    establecerSesion,
-    cerrarSesion,
-    sesionRecienCerrada,
-    tienePermiso: (permiso: string) => sesion?.permisos.includes(permiso) ?? false,
-    tieneRol: (rol: Rol) => sesion?.roles.includes(rol) ?? false,
-  } as unknown as Parameters<typeof SesionContexto.Provider>[0]['value']
-
   return (
-    <SesionContexto.Provider value={valorSesionContexto}>
+    <SesionContexto
+      value={{
+        sesion,
+        cargando,
+        error,
+        establecerSesion,
+        cerrarSesion,
+        sesionRecienCerrada,
+        tienePermiso: (permiso: string) => sesion?.permisos.includes(permiso) ?? false,
+        tieneRol: (rol: Rol) => sesion?.roles.includes(rol) ?? false,
+      }}
+    >
       {children}
-    </SesionContexto.Provider>
+    </SesionContexto>
   )
 }
