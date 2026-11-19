@@ -47,3 +47,18 @@ const fechaDeMarca = new Intl.DateTimeFormat('es-CO', {
 export function formatoFechaDeMarca(iso: string): string {
   return fechaDeMarca.format(new Date(iso))
 }
+
+const fechaHoraDeMarca = new Intl.DateTimeFormat('es-CO', {
+  timeZone: 'America/Bogota',
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+})
+
+/** Marca de tiempo ISO de la API → 'DD/MM/AAAA, HH:mm' en hora del club. */
+export function formatoFechaHoraDeMarca(iso: string): string {
+  return fechaHoraDeMarca.format(new Date(iso))
+}

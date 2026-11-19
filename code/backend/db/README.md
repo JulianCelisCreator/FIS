@@ -47,6 +47,13 @@ UPDATE usuario SET contrasena_hash = '<hash de clave_demo>' WHERE contrasena_has
 
 PostgreSQL ejecuta `schema.sql` **solo cuando el volumen está vacío**. Si el archivo cambia, hay que recrear la base con `down -v` y volver a levantarla.
 
+Cambios del esquema que se pueden aplicar sin recrear la base:
+
+```sql
+-- HU-M1-09: versión del texto de la autorización del acudiente que se aceptó.
+ALTER TABLE autorizacion_acudiente ADD COLUMN IF NOT EXISTS version_texto TEXT NOT NULL DEFAULT 'v1';
+```
+
 ## Permisos del Módulo M4
 
 Después de levantar una base nueva, ejecutar una vez:

@@ -1,6 +1,7 @@
 import { Alerta } from '../shared/ui/componentes.tsx'
 import { useSesion } from '../shared/sesion/use-sesion.ts'
 import { useRuta } from '../shared/utils/use-ruta.ts'
+import { FamiliaMenor } from '../modules/m1-usuarios-acceso/components/familia-menor.tsx'
 import { NuevaCuenta } from '../modules/m1-usuarios-acceso/components/nueva-cuenta.tsx'
 import { Usuarios } from '../modules/m1-usuarios-acceso/components/usuarios.tsx'
 import { PantallaAcceso } from '../modules/m1-usuarios-acceso/components/pantalla-acceso.tsx'
@@ -33,6 +34,9 @@ const PANTALLAS_ADMINISTRADOR = [{ pagina: 'usuarios', texto: 'Usuarios' }]
 /** Pantallas que no van en el menú: se abren desde otra y resaltan a su pantalla de origen. */
 const SUBPANTALLAS_ADMINISTRADOR: Record<string, string> = { 'nueva-cuenta': 'usuarios' }
 
+/** HU-M1-09: el Administrador y el Acudiente consultan la autorización del menor. */
+const PANTALLA_FAMILIA = { pagina: 'familia-menor', texto: 'Familia del menor' }
+
 const PESTANAS_PAGO: PestanaPago[] = ['cobro', 'sesion', 'matricula']
 
 /** Aplicación interna por roles (/app/): pantallas de M1 y M5. */
@@ -55,7 +59,10 @@ export function Aplicacion() {
   // Sin sesión: ingreso de M1 (HU-M1-02), sin el marco interno ni la navegación por rol.
   if (!sesion) return <PantallaAcceso />
 
-  const usuarios = tieneRol('ADMINISTRADOR') ? PANTALLAS_ADMINISTRADOR : []
+  const usuarios = [
+    ...(tieneRol('ADMINISTRADOR') ? PANTALLAS_ADMINISTRADOR : []),
+    ...(tieneRol('ADMINISTRADOR') || tieneRol('ACUDIENTE') ? [PANTALLA_FAMILIA] : []),
+  ]
   // «Mis pagos» es la vista del Acudiente y del Patinador (RF-M5-17 y 18); el backend acota los patinadores.
   const misPagos =
     tieneRol('ACUDIENTE') || tieneRol('PATINADOR')
@@ -100,6 +107,14 @@ export function Aplicacion() {
     contenido = <Usuarios key={sesion.id} />
   } else if (actual === 'nueva-cuenta') {
     contenido = <NuevaCuenta key={sesion.id} />
+  } else if (actual === 'familia-menor') {
+    const patinador = Number(parametros.get('patinador'))
+    contenido = (
+      <FamiliaMenor
+        key={`${sesion.id}-${parametros}`}
+        patinadorInicial={Number.isInteger(patinador) && patinador > 0 ? patinador : undefined}
+      />
+    )
   } else if (actual === 'm4') {
     contenido = <M4Modulo key={sesion.id} />
   } else if (actual === 'planes') {

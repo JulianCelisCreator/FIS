@@ -1184,3 +1184,33 @@ fieldset {
     padding: 1.25rem;
   }
 }
+
+/* Diálogo de formulario a pantalla completa en móvil (HU-M1-09). */
+@media (max-width: 640px) {
+  .vl-dialog--form[open] {
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: 1.25rem;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .vl-dialog--form[open] > .vl-stack {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .vl-dialog--form[open] .vl-dialog__actions {
+    flex-shrink: 0;
+    margin-top: 1rem;
+  }
+
+  .vl-dialog--form[open] .vl-dialog__actions .vl-button {
+    flex: 1 1 auto;
+  }
+}

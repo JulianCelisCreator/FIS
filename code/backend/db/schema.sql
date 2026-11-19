@@ -342,14 +342,15 @@ CREATE TABLE autorizacion_acudiente (
   patinador_id       BIGINT NOT NULL REFERENCES patinador(id),
   acudiente_id       BIGINT NOT NULL REFERENCES usuario(id),
   fecha_autorizacion DATE NOT NULL DEFAULT current_date,
+  version_texto      TEXT NOT NULL DEFAULT 'v1',  -- versión del texto aceptado (M1-09)
   revocada_en        TIMESTAMPTZ,
   registrado_por     BIGINT REFERENCES usuario(id),
-  creado_en          TIMESTAMPTZ NOT NULL DEFAULT now()
+  creado_en          TIMESTAMPTZ NOT NULL DEFAULT now()  -- fecha y hora del registro
 );
 CREATE UNIQUE INDEX autorizacion_acudiente_vigente_uk ON autorizacion_acudiente (patinador_id)
   WHERE revocada_en IS NULL;
 COMMENT ON TABLE autorizacion_acudiente IS
-  '[M1] Autorización general del acudiente para que el menor participe (M1-09). Sin autorización vigente el perfil del menor queda Bloqueado (ver v_perfil_patinador).';
+  '[M1] Autorización general del acudiente para que el menor participe (M1-09). Se guarda una sola vez con el acudiente, la fecha y hora, y la versión del texto aceptado; no se edita. Sin autorización vigente el perfil del menor queda Bloqueado (ver v_perfil_patinador).';
 
 CREATE TABLE poliza (
   id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
