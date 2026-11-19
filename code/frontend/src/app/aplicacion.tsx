@@ -17,9 +17,12 @@ import {
 import { PERMISOS_M5 } from '../modules/m5-planes-tarifas-pagos/types/m5.types.ts'
 import { M4Modulo } from '../modules/m4-competencias-resultados/components/m4-modulo.tsx'
 import { PERMISOS_M4 } from '../modules/m4-competencias-resultados/types/m4.types.ts'
+import { InventarioUniformes } from '../modules/m6-inventario-uniformes/components/inventario-uniformes.tsx'
+import { PrestamosUniformes } from '../modules/m6-inventario-uniformes/components/prestamos-uniformes.tsx'
+import { VentasUniformes } from '../modules/m6-inventario-uniformes/components/ventas-uniformes.tsx'
+import { PERMISOS_M6 } from '../modules/m6-inventario-uniformes/types/inventario.types.ts'
 import { MarcoAplicacion } from './marco-aplicacion.tsx'
 
-/** Pantallas disponibles y el permiso que exige cada una. */
 const PANTALLAS = [
   { pagina: 'm4', texto: 'Competencias y resultados', permiso: PERMISOS_M4.consultar },
   { pagina: 'planes', texto: 'Planes y tarifas', permiso: PERMISOS_M5.planGestionar },
@@ -27,6 +30,9 @@ const PANTALLAS = [
   { pagina: 'cartera', texto: 'Cartera', permiso: PERMISOS_M5.carteraConsultar },
   { pagina: 'registrar-pago', texto: 'Registrar pago', permiso: PERMISOS_M5.pagoRegistrar },
   { pagina: 'historial-pagos', texto: 'Historial de pagos', permiso: PERMISOS_M5.pagoHistorial },
+  { pagina: 'inventario', texto: 'Inventario de uniformes', grupo: 'Uniformes', permiso: PERMISOS_M6.inventarioGestionar },
+  { pagina: 'ventas', texto: 'Venta de uniformes', grupo: 'Uniformes', permiso: PERMISOS_M6.inventarioGestionar },
+  { pagina: 'prestamos', texto: 'Préstamos de implementos', grupo: 'Uniformes', permiso: PERMISOS_M6.inventarioGestionar },
 ]
 
 /** Pantallas de M1 solo para el Administrador (HU-M1-01 y 05; la matriz de permisos llega con HU-M1-07). */
@@ -39,9 +45,9 @@ const PANTALLA_FAMILIA = { pagina: 'familia-menor', texto: 'Familia del menor' }
 
 const PESTANAS_PAGO: PestanaPago[] = ['cobro', 'sesion', 'matricula']
 
-/** Aplicación interna por roles (/app/): pantallas de M1 y M5. */
+/** Aplicación interna con las pantallas de M1, M5 y M6 habilitadas por rol. */
 export function Aplicacion() {
-  const { sesion, cargando, error, tienePermiso, tieneRol } = useSesion()
+  const { sesion, cargando, tienePermiso, tieneRol } = useSesion()
   const { pagina, parametros } = useRuta()
 
   if (cargando) {
@@ -56,7 +62,6 @@ export function Aplicacion() {
     )
   }
 
-  // Sin sesión: ingreso de M1 (HU-M1-02), sin el marco interno ni la navegación por rol.
   if (!sesion) return <PantallaAcceso />
 
   const usuarios = [
@@ -77,6 +82,7 @@ export function Aplicacion() {
     { grupo: 'Planes y pagos', enlaces: pagos },
     { grupo: 'Competencias y resultados', enlaces: permitidas.filter((p) => p.pagina === 'm4') },
     { grupo: 'Planes y pagos', enlaces: permitidas.filter((p) => p.pagina !== 'm4') },
+    { grupo: 'Uniformes', enlaces: permitidas.filter((p) => ['inventario', 'ventas', 'prestamos'].includes(p.pagina)) },
   ]
 
   let contenido
@@ -84,7 +90,6 @@ export function Aplicacion() {
     contenido = (
       <div className="app-page">
         <h1>Hola, {sesion.nombre}</h1>
-        {error && <Alerta tono="error" titulo="Algo salió mal">{error}</Alerta>}
         <Alerta tono="info" titulo="Aún no hay pantallas para tu rol">
           <p>Las pantallas de tu rol se irán habilitando a medida que la escuela active los módulos.</p>
         </Alerta>
@@ -125,6 +130,12 @@ export function Aplicacion() {
     contenido = <HistorialPagos key={sesion.id} />
   } else if (actual === 'mis-pagos') {
     contenido = <MisPagos key={sesion.id} />
+  } else if (actual === 'inventario') {
+    contenido = <InventarioUniformes key={sesion.id} />
+  } else if (actual === 'ventas') {
+    contenido = <VentasUniformes key={sesion.id} />
+  } else if (actual === 'prestamos') {
+    contenido = <PrestamosUniformes key={sesion.id} />
   } else if (actual === 'asignar-plan') {
     contenido = (
       <AsignarCambiarPlan
