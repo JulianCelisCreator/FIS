@@ -81,7 +81,7 @@ export function Aplicacion() {
     { grupo: 'Usuarios', enlaces: usuarios },
     { grupo: 'Planes y pagos', enlaces: pagos },
     { grupo: 'Competencias y resultados', enlaces: permitidas.filter((p) => p.pagina === 'm4') },
-    { grupo: 'Planes y pagos', enlaces: permitidas.filter((p) => p.pagina !== 'm4') }
+    { grupo: 'Planes y pagos', enlaces: permitidas.filter((p) => p.pagina !== 'm4') },
     { grupo: 'Uniformes', enlaces: permitidas.filter((p) => ['inventario', 'ventas', 'prestamos'].includes(p.pagina)) },
   ]
 
