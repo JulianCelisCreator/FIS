@@ -26,9 +26,25 @@ export function MarcoAplicacion({
   paginaActual: string
   children: ReactNode
 }) {
-  const { sesion } = useSesion()
+  const { sesion, cerrarSesion } = useSesion()
   const [esMovil, setEsMovil] = useState(() => window.matchMedia(CONSULTA_MOVIL).matches)
   const [menuAbierto, setMenuAbierto] = useState(false)
+  const [saliendo, setSaliendo] = useState(false)
+  const [errorSalida, setErrorSalida] = useState<string | null>(null)
+
+  // HU-M1-03: sin diálogo de confirmación; si el servidor no responde, la
+  // sesión sigue abierta y se avisa, en vez de dejarla viva sin que se note.
+  const salir = async () => {
+    if (saliendo) return
+    setSaliendo(true)
+    setErrorSalida(null)
+    try {
+      await cerrarSesion()
+    } catch (error) {
+      setErrorSalida(error instanceof Error ? error.message : 'No se pudo cerrar la sesión. Intenta de nuevo.')
+      setSaliendo(false)
+    }
+  }
 
   useEffect(() => {
     const consulta = window.matchMedia(CONSULTA_MOVIL)
@@ -101,6 +117,22 @@ export function MarcoAplicacion({
                   <p className="vl-user__role">{rolesTexto}</p>
                 </div>
               </div>
+            )}
+            {sesion && (
+              <button
+                className="vl-button vl-button--sm vl-user__salir"
+                type="button"
+                aria-disabled={saliendo || undefined}
+                onClick={salir}
+              >
+                <Icono nombre="salir" />
+                {saliendo ? 'Cerrando sesión…' : 'Cerrar sesión'}
+              </button>
+            )}
+            {errorSalida && (
+              <p className="vl-user__error" role="alert">
+                {errorSalida}
+              </p>
             )}
           </div>
         </div>

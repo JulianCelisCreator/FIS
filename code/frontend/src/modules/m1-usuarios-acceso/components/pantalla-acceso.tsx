@@ -1,3 +1,5 @@
+import { useSesion } from '../../../shared/sesion/use-sesion.ts'
+import { Alerta } from '../../../shared/ui/componentes.tsx'
 import { MarcaVelora } from '../../../shared/ui/marca-velora.tsx'
 import { FormularioIngreso } from './formulario-ingreso.tsx'
 import './pantalla-acceso.css'
@@ -5,9 +7,11 @@ import './pantalla-acceso.css'
 /**
  * HU-M1-02 · Ingreso. Pantalla pública, sin navegación interna ni datos de
  * patinadores. Sin pestaña «Registrarse»: las cuentas las crea el
- * Administrador (HU-M1-01).
+ * Administrador (HU-M1-01). Tras cerrar sesión (HU-M1-03) muestra la confirmación.
  */
 export function PantallaAcceso() {
+  const { sesionRecienCerrada } = useSesion()
+
   return (
     <div className="m1-acceso">
       <aside className="m1-acceso__pista">
@@ -29,6 +33,12 @@ export function PantallaAcceso() {
             <h1>Ingresa a Velora</h1>
             <p className="vl-text-body-sm">Usa el correo y la contraseña de tu cuenta.</p>
           </header>
+          {/* HU-M1-03 CA-01: confirmación breve al volver al ingreso. */}
+          {sesionRecienCerrada && (
+            <Alerta tono="info" titulo="Cerraste sesión">
+              <p>Ingresa de nuevo cuando quieras.</p>
+            </Alerta>
+          )}
           <FormularioIngreso />
         </div>
       </main>

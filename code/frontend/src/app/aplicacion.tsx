@@ -14,10 +14,13 @@ import {
   type PestanaPago,
 } from '../modules/m5-planes-tarifas-pagos/components/registrar-pago.tsx'
 import { PERMISOS_M5 } from '../modules/m5-planes-tarifas-pagos/types/m5.types.ts'
+import { M4Modulo } from '../modules/m4-competencias-resultados/components/m4-modulo.tsx'
+import { PERMISOS_M4 } from '../modules/m4-competencias-resultados/types/m4.types.ts'
 import { MarcoAplicacion } from './marco-aplicacion.tsx'
 
 /** Pantallas disponibles y el permiso que exige cada una. */
 const PANTALLAS = [
+  { pagina: 'm4', texto: 'Competencias y resultados', permiso: PERMISOS_M4.consultar },
   { pagina: 'planes', texto: 'Planes y tarifas', permiso: PERMISOS_M5.planGestionar },
   { pagina: 'asignar-plan', texto: 'Asignar o cambiar plan', permiso: PERMISOS_M5.planAsignar },
   { pagina: 'cartera', texto: 'Cartera', permiso: PERMISOS_M5.carteraConsultar },
@@ -65,6 +68,8 @@ export function Aplicacion() {
   const navegacion = [
     { grupo: 'Usuarios', enlaces: usuarios },
     { grupo: 'Planes y pagos', enlaces: pagos },
+    { grupo: 'Competencias y resultados', enlaces: permitidas.filter((p) => p.pagina === 'm4') },
+    { grupo: 'Planes y pagos', enlaces: permitidas.filter((p) => p.pagina !== 'm4') },
   ]
 
   let contenido
@@ -83,7 +88,11 @@ export function Aplicacion() {
       <div className="app-page">
         <h1>Sin acceso</h1>
         <Alerta tono="warning" titulo="No tienes acceso a esta pantalla">
-          <p>Usa el menú para ir a las pantallas de tu rol.</p>
+          <p>
+            {permitidas.length > 0
+              ? 'Usa el menú para ir a las pantallas de tu rol.'
+              : 'Tu rol no tiene pantallas habilitadas.'}
+          </p>
         </Alerta>
       </div>
     )
@@ -91,6 +100,8 @@ export function Aplicacion() {
     contenido = <Usuarios key={sesion.id} />
   } else if (actual === 'nueva-cuenta') {
     contenido = <NuevaCuenta key={sesion.id} />
+  } else if (actual === 'm4') {
+    contenido = <M4Modulo key={sesion.id} />
   } else if (actual === 'planes') {
     contenido = <PlanesTarifas key={sesion.id} />
   } else if (actual === 'cartera') {
