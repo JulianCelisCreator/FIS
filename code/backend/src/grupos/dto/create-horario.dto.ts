@@ -66,3 +66,54 @@ export class CancelarHorarioDto {
   @IsNotEmpty({ message: 'Debe describir el motivo de la anulación de la franja' })
   motivo!: string;
 }
+
+/**
+ * HU-3.5: Creación de evento global / fecha institucional (exclusivo para ADMIN).
+ */
+export class CrearEventoGlobalDto {
+  @IsString({ message: 'El título del evento global es obligatorio' })
+  @IsNotEmpty({ message: 'El título del evento global no puede estar vacío' })
+  titulo!: string;
+
+  @IsString({ message: 'La fecha/hora de inicio en ISO 8601 es obligatoria' })
+  @IsNotEmpty()
+  inicio!: string;
+
+  @IsString({ message: 'La fecha/hora de fin en ISO 8601 es obligatoria' })
+  @IsNotEmpty()
+  fin!: string;
+
+  @IsString({ message: 'La ubicación o sede es obligatoria' })
+  @IsNotEmpty()
+  ubicacion!: string;
+
+  @IsOptional()
+  @IsString()
+  sedeId?: string;
+
+  @IsOptional()
+  @IsString()
+  descripcion?: string;
+}
+
+export class ActualizarEventoGlobalDto {
+  @IsOptional()
+  @IsString()
+  titulo?: string;
+
+  @IsOptional()
+  @IsString()
+  inicio?: string;
+
+  @IsOptional()
+  @IsString()
+  fin?: string;
+
+  @IsOptional()
+  @IsString()
+  ubicacion?: string;
+
+  @IsOptional()
+  @IsString()
+  descripcion?: string;
+}

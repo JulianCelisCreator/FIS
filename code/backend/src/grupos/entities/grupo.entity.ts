@@ -1,4 +1,11 @@
-import type { RegistroNotificacionM1 } from '../../external-dependencies/interfaces/external-dependencies.interfaces.js';
+import type {
+  EstadoPlanCarteraG4,
+  PerfilDeportivoEstudianteM2,
+  PolizaDeportivaM1,
+  RegistroNotificacionM1,
+  RolExternoM1,
+  ValidacionMenorEdadM1,
+} from '../../external-dependencies/interfaces/external-dependencies.interfaces.js';
 
 export type CategoriaPatinaje =
   | 'Iniciacion'
@@ -22,10 +29,82 @@ export type RolDocenteGrupo = 'TITULAR' | 'ASISTENTE';
 
 export type EstadoHorarioM3 = 'ACTIVO' | 'REPROGRAMADO' | 'CANCELADO';
 
+export type EstadoInscripcionGrupoM3 = 'ACTIVO' | 'RETIRADO_CAMBIO';
+
+export type TipoEventoCalendarioM3 =
+  | 'ENTRENAMIENTO'
+  | 'COMPETENCIA'
+  | 'EVENTO_INSTITUCIONAL';
+
+/**
+ * Contrato oficial API-M3-05 (GET /api/v1/calendario)
+ * Respuesta JSON Base: [{ eventoId, tipo, titulo, inicio, fin, ubicacion }]
+ */
+export interface EventoCalendarioM3 {
+  eventoId: string;
+  tipo: TipoEventoCalendarioM3;
+  titulo: string;
+  inicio: string; // ISO 8601: YYYY-MM-DDTHH:mm:ssZ
+  fin: string; // ISO 8601: YYYY-MM-DDTHH:mm:ssZ
+  ubicacion: string;
+  sedeId: string;
+  grupoId: string | null;
+  nombreGrupo: string | null;
+  categorias: string[];
+  descripcion: string;
+  estado: 'PROGRAMADO' | 'REPROGRAMADO' | 'ANULADO';
+  editablePorAdmin: boolean;
+}
+
+export interface RespuestaCalendarioConsolidadoM3 {
+  sesion: {
+    userId: string;
+    rol: RolExternoM1;
+    nombreCompleto: string;
+    gruposAsociadosIds: string[];
+  };
+  eventos: EventoCalendarioM3[];
+}
+
+/**
+ * Contrato oficial API-M3-04 (GET /api/v1/grupos/{id}/estudiantes)
+ * Respuesta JSON Base: [{ estudianteId, fechaInscripcion, estado }]
+ */
+export interface InscripcionEstudianteGrupoM3 {
+  estudianteId: string;
+  nombreEstudiante: string;
+  grupoId: string;
+  nombreGrupo: string;
+  fechaInscripcion: string; // ISO 8601: YYYY-MM-DDTHH:mm:ssZ
+  estado: EstadoInscripcionGrupoM3;
+}
+
+export interface ContextoAutogestionGrupoM3 {
+  estudianteId: string;
+  actorRol: 'ESTUDIANTE' | 'ACUDIENTE';
+  actorId: string;
+  perfilDeportivo: PerfilDeportivoEstudianteM2;
+  validacionMenor: ValidacionMenorEdadM1;
+  poliza: PolizaDeportivaM1;
+  planCartera: EstadoPlanCarteraG4;
+  puedeGestionarCambio: boolean;
+  motivoBloqueoActor: string | null;
+  grupoActual: Grupo | null;
+  gruposElegibles: Grupo[];
+}
+
+export interface ResultadoCambioGrupoM3 {
+  estudianteId: string;
+  tipoOperacion: 'INSCRIPCION' | 'CAMBIO_GRUPO';
+  grupoAnterior: Grupo | null;
+  grupoNuevo: Grupo;
+  inscripcion: InscripcionEstudianteGrupoM3;
+  mensaje: string;
+}
+
 /**
  * Contrato oficial API-M3-03 (GET /api/v1/horarios)
  * Respuesta JSON Base: [{ horarioId, grupoId, diaSemana, horaInicio, horaFin, sedeId, estado }]
- * Mantiene además id, dia y pista para retrocompatibilidad.
  */
 export interface Horario {
   id: string;
@@ -83,8 +162,7 @@ export interface EvaluacionDisponibilidadProfesorM3 {
 }
 
 /**
- * Contrato oficial API-M3-01 (GET /api/v1/grupos) enriquecido con metadatos
- * para el frontend del Módulo 3 y retrocompatibilidad con pruebas unitarias.
+ * Contrato oficial API-M3-01 (GET /api/v1/grupos)
  */
 export class Grupo {
   grupoId!: string;
