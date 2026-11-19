@@ -7,21 +7,22 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   AsignarProfesorDto,
   AsignarProfesoresMultipleDto,
   CambiarEstadoGrupoDto,
   CreateGrupoDto,
+  InscribirCambiarGrupoDto,
   UpdateGrupoDto,
 } from './dto/create-grupo.dto.js';
 import { CreateHorarioDto } from './dto/create-horario.dto.js';
 import { GruposService } from './grupos.service.js';
 
 /**
- * Controlador de Grupos (HU-3.1 y HU-3.2).
- * Expone API-M3-01 en GET /api/v1/grupos, y soporta además /v1/grupos y /grupos
- * para compatibilidad directa y a través del proxy /api de Vite.
+ * Controlador de Grupos (HU-3.1, HU-3.2 y HU-3.4).
+ * Expone API-M3-01 en GET /api/v1/grupos y API-M3-04 en GET /api/v1/grupos/{id}/estudiantes.
  */
 @Controller(['api/v1/grupos', 'v1/grupos', 'grupos'])
 export class GruposController {
@@ -37,6 +38,41 @@ export class GruposController {
   @Get('catalogos')
   obtenerCatalogos(@Headers('authorization') authorization?: string) {
     return this.gruposService.obtenerCatalogosConfiguracion(authorization);
+  }
+
+  /** HU-3.4: Lista los perfiles de estudiantes y acudientes para selección/cambio de grupo */
+  @Get('autogestion/perfiles')
+  listarPerfilesAutogestion() {
+    return this.gruposService.listarPerfilesAutogestionHU34();
+  }
+
+  /** HU-3.4: Consulta filtrada de grupos elegibles y estado actual del estudiante */
+  @Get('autogestion/:estudianteId')
+  obtenerContextoAutogestion(
+    @Param('estudianteId') estudianteId: string,
+    @Query('actorRol') actorRol?: 'ESTUDIANTE' | 'ACUDIENTE',
+    @Query('acudienteId') acudienteId?: string,
+  ) {
+    return this.gruposService.obtenerContextoAutogestionGrupo(
+      estudianteId,
+      actorRol ?? 'ACUDIENTE',
+      acudienteId,
+    );
+  }
+
+  /** HU-3.4: Inscribir o cambiar de grupo validando menor de edad, póliza, cartera y cupo atómico */
+  @Post('autogestion/cambiar')
+  inscribirOCambiarGrupo(@Body() dto: InscribirCambiarGrupoDto) {
+    return this.gruposService.inscribirOCambiarGrupoEstudiante(dto);
+  }
+
+  /**
+   * API-M3-04: GET /api/v1/grupos/{id}/estudiantes
+   * Consultar la lista de estudiantes inscritos en un grupo y su estado.
+   */
+  @Get(':id/estudiantes')
+  obtenerEstudiantesDeGrupo(@Param('id') id: string) {
+    return this.gruposService.obtenerEstudiantesDeGrupo(id);
   }
 
   @Get(':id')

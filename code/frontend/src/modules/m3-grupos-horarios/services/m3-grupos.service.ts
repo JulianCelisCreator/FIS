@@ -4,6 +4,7 @@ import {
   GRUPOS_M3_FALLBACK,
   PROFESORES_BASE_FALLBACK,
   type CatalogosConfiguracionM3,
+  type ContextoAutogestionGrupoM3,
   type CrearGrupoM3Payload,
   type DiaSemanaM3,
   type EstadoCupoGrupoM3,
@@ -11,8 +12,10 @@ import {
   type GrupoAsignadoProfesorM3,
   type GrupoConfiguradoM3,
   type HorarioGrupoM3,
+  type InscripcionEstudianteGrupoM3,
   type RegistroNotificacionM1,
   type RespuestaOperacionHorarioM3,
+  type ResultadoCambioGrupoM3,
 } from '../types/m3.types.ts'
 
 let gruposMemoriaLocal: GrupoConfiguradoM3[] = [...GRUPOS_M3_FALLBACK]
@@ -26,6 +29,32 @@ let notificacionesMemoriaLocal: RegistroNotificacionM1[] = [
     canal: 'EMAIL_PUSH',
     fechaEnvio: '2026-10-01T08:00:00Z',
     estadoEnvio: 'ENVIADO',
+  },
+]
+let inscripcionesMemoriaLocal: InscripcionEstudianteGrupoM3[] = [
+  {
+    estudianteId: 'EST-01',
+    nombreEstudiante: 'Sofía Ramírez',
+    grupoId: 'GRP-01',
+    nombreGrupo: 'Iniciación Norte A',
+    fechaInscripcion: '2026-09-23T14:00:00Z',
+    estado: 'ACTIVO',
+  },
+  {
+    estudianteId: 'EST-03',
+    nombreEstudiante: 'Mateo Valderrama',
+    grupoId: 'GRP-01',
+    nombreGrupo: 'Iniciación Norte A',
+    fechaInscripcion: '2026-09-25T10:30:00Z',
+    estado: 'ACTIVO',
+  },
+  {
+    estudianteId: 'EST-04',
+    nombreEstudiante: 'Valentina Torres',
+    grupoId: 'GRP-04',
+    nombreGrupo: 'Iniciación Norte B',
+    fechaInscripcion: '2026-09-26T09:15:00Z',
+    estado: 'ACTIVO',
   },
 ]
 
@@ -51,10 +80,6 @@ function recalcularGrupoLocal(
   }
 }
 
-/**
- * API-M3-01: GET /api/v1/grupos
- * Obtiene los grupos configurados con aforo máximo, ocupados y alerta90.
- */
 export async function listarGruposM3(): Promise<GrupoConfiguradoM3[]> {
   try {
     const lista = await pedir<GrupoConfiguradoM3[]>('/v1/grupos')
@@ -65,9 +90,6 @@ export async function listarGruposM3(): Promise<GrupoConfiguradoM3[]> {
   }
 }
 
-/**
- * Obtiene los catálogos de niveles (DEP-M2-01), categorías (DEP-M2-02) y sedes (DEP-G4-01).
- */
 export async function obtenerCatalogosGruposM3(): Promise<CatalogosConfiguracionM3> {
   try {
     return await pedir<CatalogosConfiguracionM3>('/v1/grupos/catalogos')
@@ -76,9 +98,6 @@ export async function obtenerCatalogosGruposM3(): Promise<CatalogosConfiguracion
   }
 }
 
-/**
- * HU-3.1: Crea un grupo validando campos obligatorios y límite físico de sede (DEP-G4-01).
- */
 export async function crearGrupoM3(payload: CrearGrupoM3Payload): Promise<GrupoConfiguradoM3> {
   try {
     const creado = await pedir<GrupoConfiguradoM3>('/v1/grupos', {
@@ -442,9 +461,6 @@ export async function quitarProfesorDeGrupoM3(
 // HU-3.3: PROGRAMACIÓN DE HORARIOS, ANTI-SOLAPAMIENTO Y NOTIFICACIONES DEP-M1-05
 // ============================================================================
 
-/**
- * API-M3-03: GET /api/v1/horarios
- */
 export async function listarHorariosM3(filtros?: {
   grupoId?: string
   sedeId?: string
@@ -717,5 +733,300 @@ export async function anularHorarioM3(
     }
     notificacionesMemoriaLocal = [notif, ...notificacionesMemoriaLocal]
     return { horario: horarioActual, notificacion: notif }
+  }
+}
+
+// ============================================================================
+// HU-3.4: SELECCIÓN Y CAMBIO DE GRUPO POR PARTE DEL USUARIO Y API-M3-04
+// ============================================================================
+
+const DATOS_ESTUDIANTES_FALLBACK: Record<
+  string,
+  {
+    perfilDeportivo: ContextoAutogestionGrupoM3['perfilDeportivo']
+    validacionMenor: ContextoAutogestionGrupoM3['validacionMenor']
+    poliza: ContextoAutogestionGrupoM3['poliza']
+    planCartera: ContextoAutogestionGrupoM3['planCartera']
+  }
+> = {
+  'EST-01': {
+    perfilDeportivo: {
+      estudianteId: 'EST-01',
+      nombreCompleto: 'Sofía Ramírez',
+      nivelId: 'NIV-01',
+      categoriaId: 'CAT-02',
+      estadoDeportivo: 'ACTIVO',
+    },
+    validacionMenor: {
+      estudianteId: 'EST-01',
+      nombreEstudiante: 'Sofía Ramírez',
+      edad: 10,
+      esMenorEdad: true,
+      acudienteId: 'ACU-01',
+      nombreAcudiente: 'Carolina Ramírez',
+      tieneAutorizacion: true,
+    },
+    poliza: {
+      estudianteId: 'EST-01',
+      polizaVigente: true,
+      fechaVencimiento: '2026-12-31T23:59:59Z',
+      numeroPoliza: 'POL-SURA-882341',
+    },
+    planCartera: {
+      estudianteId: 'EST-01',
+      nombrePlan: 'Mensual 3 días/semana',
+      planActivo: true,
+      alDiaEnPagos: true,
+      estadoCartera: 'AL_DIA',
+      limiteClasesSemanales: 3,
+    },
+  },
+  'EST-02': {
+    perfilDeportivo: {
+      estudianteId: 'EST-02',
+      nombreCompleto: 'Juan Pablo González',
+      nivelId: 'NIV-03',
+      categoriaId: 'CAT-05',
+      estadoDeportivo: 'ACTIVO',
+    },
+    validacionMenor: {
+      estudianteId: 'EST-02',
+      nombreEstudiante: 'Juan Pablo González',
+      edad: 19,
+      esMenorEdad: false,
+      acudienteId: null,
+      nombreAcudiente: null,
+      tieneAutorizacion: true,
+    },
+    poliza: {
+      estudianteId: 'EST-02',
+      polizaVigente: true,
+      fechaVencimiento: '2026-11-30T23:59:59Z',
+      numeroPoliza: 'POL-BOLIVAR-991204',
+    },
+    planCartera: {
+      estudianteId: 'EST-02',
+      nombrePlan: 'Mensual 6 días/semana',
+      planActivo: true,
+      alDiaEnPagos: true,
+      estadoCartera: 'AL_DIA',
+      limiteClasesSemanales: 6,
+    },
+  },
+  'EST-03': {
+    perfilDeportivo: {
+      estudianteId: 'EST-03',
+      nombreCompleto: 'Mateo Valderrama',
+      nivelId: 'NIV-01',
+      categoriaId: 'CAT-02',
+      estadoDeportivo: 'ACTIVO',
+    },
+    validacionMenor: {
+      estudianteId: 'EST-03',
+      nombreEstudiante: 'Mateo Valderrama',
+      edad: 9,
+      esMenorEdad: true,
+      acudienteId: 'ACU-02',
+      nombreAcudiente: 'Roberto Valderrama',
+      tieneAutorizacion: false,
+    },
+    poliza: {
+      estudianteId: 'EST-03',
+      polizaVigente: true,
+      fechaVencimiento: '2026-12-15T23:59:59Z',
+      numeroPoliza: 'POL-SURA-443120',
+    },
+    planCartera: {
+      estudianteId: 'EST-03',
+      nombrePlan: 'Mensual 3 días/semana',
+      planActivo: true,
+      alDiaEnPagos: true,
+      estadoCartera: 'AL_DIA',
+      limiteClasesSemanales: 3,
+    },
+  },
+  'EST-04': {
+    perfilDeportivo: {
+      estudianteId: 'EST-04',
+      nombreCompleto: 'Valentina Torres',
+      nivelId: 'NIV-01',
+      categoriaId: 'CAT-03',
+      estadoDeportivo: 'ACTIVO',
+    },
+    validacionMenor: {
+      estudianteId: 'EST-04',
+      nombreEstudiante: 'Valentina Torres',
+      edad: 12,
+      esMenorEdad: true,
+      acudienteId: 'ACU-03',
+      nombreAcudiente: 'Marcela Torres',
+      tieneAutorizacion: true,
+    },
+    poliza: {
+      estudianteId: 'EST-04',
+      polizaVigente: false,
+      fechaVencimiento: '2026-01-15T23:59:59Z',
+      numeroPoliza: 'POL-SURA-102938',
+    },
+    planCartera: {
+      estudianteId: 'EST-04',
+      nombrePlan: 'Mensual 3 días/semana',
+      planActivo: true,
+      alDiaEnPagos: false,
+      estadoCartera: 'VENCIDO',
+      limiteClasesSemanales: 3,
+    },
+  },
+}
+
+/**
+ * Obtiene el contexto de elegibilidad y los grupos filtrados por nivel (DEP-M2-03) y plan (DEP-G4-02).
+ */
+export async function obtenerContextoAutogestionM3(
+  estudianteId: string,
+  actorRol: 'ESTUDIANTE' | 'ACUDIENTE',
+  acudienteId?: string,
+): Promise<ContextoAutogestionGrupoM3> {
+  try {
+    return await pedir<ContextoAutogestionGrupoM3>(`/v1/grupos/autogestion/${estudianteId}`, {
+      consulta: {
+        actorRol,
+        acudienteId,
+      },
+    })
+  } catch {
+    const info = DATOS_ESTUDIANTES_FALLBACK[estudianteId] ?? DATOS_ESTUDIANTES_FALLBACK['EST-01']
+    const insc = inscripcionesMemoriaLocal.find(
+      (i) => i.estudianteId === estudianteId && i.estado === 'ACTIVO',
+    )
+    const grupoActual = insc
+      ? gruposMemoriaLocal.find((g) => g.grupoId === insc.grupoId) ?? null
+      : null
+
+    let puedeGestionarCambio = true
+    let motivoBloqueoActor: string | null = null
+
+    if (info.validacionMenor.esMenorEdad && actorRol === 'ESTUDIANTE') {
+      puedeGestionarCambio = false
+      motivoBloqueoActor =
+        'Cambio no permitido para menores de edad: solo el acudiente autorizado puede inscribir o cambiar de grupo (DEP-M1-03).'
+    } else if (info.validacionMenor.esMenorEdad && !info.validacionMenor.tieneAutorizacion) {
+      puedeGestionarCambio = false
+      motivoBloqueoActor = `El estudiante menor de edad (${info.validacionMenor.nombreEstudiante}) no cuenta con autorización activa de su acudiente vinculado en DEP-M1-03.`
+    } else if (!info.poliza.polizaVigente) {
+      puedeGestionarCambio = false
+      motivoBloqueoActor = `La póliza médico-deportiva del estudiante se encuentra vencida (${info.poliza.fechaVencimiento.slice(0, 10)} · DEP-M1-04).`
+    } else if (!info.planCartera.planActivo || !info.planCartera.alDiaEnPagos) {
+      puedeGestionarCambio = false
+      motivoBloqueoActor = `El estudiante presenta bloqueo en plan o cartera (${info.planCartera.estadoCartera} · DEP-G4-02).`
+    }
+
+    const gruposElegibles = gruposMemoriaLocal.filter(
+      (g) =>
+        g.activo &&
+        g.nivelId === info.perfilDeportivo.nivelId &&
+        g.dias.length <= info.planCartera.limiteClasesSemanales,
+    )
+
+    return {
+      estudianteId,
+      actorRol,
+      actorId: actorRol === 'ACUDIENTE' ? (acudienteId ?? 'ACU-01') : estudianteId,
+      ...info,
+      puedeGestionarCambio,
+      motivoBloqueoActor,
+      grupoActual,
+      gruposElegibles,
+    }
+  }
+}
+
+/**
+ * Ejecuta la inscripción o el cambio de grupo con revalidación atómica de cupo y liberación
+ * inmediata del cupo anterior.
+ */
+export async function inscribirOCambiarGrupoM3(payload: {
+  estudianteId: string
+  grupoDestinoId: string
+  actorRol: 'ESTUDIANTE' | 'ACUDIENTE'
+  acudienteId?: string
+}): Promise<ResultadoCambioGrupoM3> {
+  try {
+    return await pedir<ResultadoCambioGrupoM3>('/v1/grupos/autogestion/cambiar', {
+      metodo: 'POST',
+      cuerpo: payload,
+    })
+  } catch (error) {
+    if (error instanceof Error && error.message && !error.message.includes('No hay conexión')) {
+      throw error
+    }
+    const contexto = await obtenerContextoAutogestionM3(
+      payload.estudianteId,
+      payload.actorRol,
+      payload.acudienteId,
+    )
+    if (!contexto.puedeGestionarCambio) {
+      throw new Error(contexto.motivoBloqueoActor ?? 'Cambio bloqueado por validaciones.')
+    }
+    const destino = gruposMemoriaLocal.find((g) => g.grupoId === payload.grupoDestinoId)
+    if (!destino) throw new Error('Grupo destino no encontrado.')
+    if (destino.ocupados >= destino.aforoMax) {
+      throw new Error(
+        `No hay cupos disponibles en el grupo «${destino.nombre}» (${destino.ocupados}/${destino.aforoMax} · 100 % de aforo alcanzado).`,
+      )
+    }
+
+    let grupoAnterior: GrupoConfiguradoM3 | null = null
+    const inscAnt = inscripcionesMemoriaLocal.find(
+      (i) => i.estudianteId === payload.estudianteId && i.estado === 'ACTIVO',
+    )
+    if (inscAnt) {
+      inscAnt.estado = 'RETIRADO_CAMBIO'
+      const gAnt = gruposMemoriaLocal.find((g) => g.grupoId === inscAnt.grupoId)
+      if (gAnt) {
+        gAnt.ocupados = Math.max(0, gAnt.ocupados - 1)
+        gAnt.inscritosActuales = gAnt.ocupados
+        Object.assign(gAnt, recalcularGrupoLocal(gAnt.ocupados, gAnt.aforoMax, gAnt.activo))
+        grupoAnterior = { ...gAnt }
+      }
+    }
+
+    destino.ocupados += 1
+    destino.inscritosActuales = destino.ocupados
+    Object.assign(destino, recalcularGrupoLocal(destino.ocupados, destino.aforoMax, destino.activo))
+
+    const nuevaInsc: InscripcionEstudianteGrupoM3 = {
+      estudianteId: payload.estudianteId,
+      nombreEstudiante: contexto.perfilDeportivo.nombreCompleto,
+      grupoId: destino.grupoId,
+      nombreGrupo: destino.nombre,
+      fechaInscripcion: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+      estado: 'ACTIVO',
+    }
+    inscripcionesMemoriaLocal = [nuevaInsc, ...inscripcionesMemoriaLocal]
+
+    return {
+      estudianteId: payload.estudianteId,
+      tipoOperacion: grupoAnterior ? 'CAMBIO_GRUPO' : 'INSCRIPCION',
+      grupoAnterior,
+      grupoNuevo: { ...destino },
+      inscripcion: nuevaInsc,
+      mensaje: grupoAnterior
+        ? `Cambio confirmado: pasó de «${grupoAnterior.nombre}» (${grupoAnterior.ocupados}/${grupoAnterior.aforoMax}) a «${destino.nombre}» (${destino.ocupados}/${destino.aforoMax}). El cupo anterior fue liberado de inmediato.`
+        : `Inscripción confirmada en «${destino.nombre}» (${destino.ocupados}/${destino.aforoMax}).`,
+    }
+  }
+}
+
+/**
+ * API-M3-04: GET /api/v1/grupos/{id}/estudiantes
+ */
+export async function obtenerEstudiantesDeGrupoM3(
+  grupoId: string,
+): Promise<InscripcionEstudianteGrupoM3[]> {
+  try {
+    return await pedir<InscripcionEstudianteGrupoM3[]>(`/v1/grupos/${grupoId}/estudiantes`)
+  } catch {
+    return inscripcionesMemoriaLocal.filter((i) => i.grupoId === grupoId)
   }
 }
