@@ -18,6 +18,7 @@ import { PERMISOS_M5 } from '../modules/m5-planes-tarifas-pagos/types/m5.types.t
 import { M4Modulo } from '../modules/m4-competencias-resultados/components/m4-modulo.tsx'
 import { PERMISOS_M4 } from '../modules/m4-competencias-resultados/types/m4.types.ts'
 import { ConfiguracionGrupos } from '../modules/m3-grupos-horarios/components/configuracion-grupos.tsx'
+import { AsignacionProfesores } from '../modules/m3-grupos-horarios/components/asignacion-profesores.tsx'
 import { MarcoAplicacion } from './marco-aplicacion.tsx'
 
 /** Pantallas disponibles y el permiso que exige cada una. */
@@ -33,7 +34,10 @@ const PANTALLAS = [
 /** Pantallas de M1 solo para el Administrador (HU-M1-01 y 05; la matriz de permisos llega con HU-M1-07). */
 const PANTALLAS_ADMINISTRADOR = [{ pagina: 'usuarios', texto: 'Usuarios' }]
 /** Pantallas del Módulo 3 (Grupos, horarios y programación) para Administrador. */
-const PANTALLAS_M3_ADMIN = [{ pagina: 'grupos', texto: 'Configuración de grupos' }]
+const PANTALLAS_M3_ADMIN = [
+  { pagina: 'grupos', texto: 'Configuración de grupos' },
+  { pagina: 'asignacion-profesores', texto: 'Asignación de profesores' },
+]
 /** Pantallas que no van en el menú: se abren desde otra y resaltan a su pantalla de origen. */
 const SUBPANTALLAS_ADMINISTRADOR: Record<string, string> = { 'nueva-cuenta': 'usuarios' }
 
@@ -60,13 +64,13 @@ export function Aplicacion() {
   }
 
   // Modo directo para demostración de Módulo 3 si no hay sesión activa en BD M1
-  if (!sesion && pagina === 'grupos') {
+  if (!sesion && (pagina === 'grupos' || pagina === 'asignacion-profesores')) {
     return (
       <MarcoAplicacion
         navegacion={[{ grupo: 'Grupos y horarios', enlaces: PANTALLAS_M3_ADMIN }]}
-        paginaActual="grupos"
+        paginaActual={pagina}
       >
-        <ConfiguracionGrupos />
+        {pagina === 'asignacion-profesores' ? <AsignacionProfesores /> : <ConfiguracionGrupos />}
       </MarcoAplicacion>
     )
   }
@@ -129,6 +133,8 @@ export function Aplicacion() {
     contenido = <Usuarios key={sesion.id} />
   } else if (actual === 'grupos') {
     contenido = <ConfiguracionGrupos key={sesion.id} />
+  } else if (actual === 'asignacion-profesores') {
+    contenido = <AsignacionProfesores key={sesion.id} />
   } else if (actual === 'nueva-cuenta') {
     contenido = <NuevaCuenta key={sesion.id} />
   } else if (actual === 'familia-menor') {
