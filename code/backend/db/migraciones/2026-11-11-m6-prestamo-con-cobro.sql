@@ -2,7 +2,7 @@
 -- Aplica sobre una base ya creada los cambios de schema.sql, sin borrar datos.
 -- Requiere antes 2026-11-11-m6-implemento-y-telefono-personal.sql.
 -- Uso (desde code/backend):
---   psql -h localhost -p 5433 -U patinaje -d patinaje -f db/migraciones/2026-11-11-m6-prestamo-con-cobro.sql
+--   psql -h localhost -p 5432 -U patinaje -d patinaje -f db/migraciones/2026-11-11-m6-prestamo-con-cobro.sql
 
 BEGIN;
 

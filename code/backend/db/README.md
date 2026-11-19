@@ -8,7 +8,7 @@ DDL de la base de datos de la plataforma (PostgreSQL 17), común a todos los mó
 | `compose.yaml` | Contenedor de PostgreSQL que carga `schema.sql` al crearse. |
 | `datos-demo.sql` | Datos de demostración de M5 con los nombres de los wireframes (opcional, se cargan a mano). |
 | `datos-demo-m6.sql` | Datos de demostración de M6 (personal, proveedores, inventario, ventas con devoluciones y préstamos). Requiere `datos-demo.sql`. |
-| `migraciones/` | Scripts `ALTER` para aplicar cambios de `schema.sql` a una base ya creada sin borrar datos (`psql … -f db/migraciones/<archivo>.sql`). Una base nueva no los necesita. |
+| `migraciones/` | Scripts para aplicar cambios de `schema.sql` a una base ya creada sin borrar datos (`psql … -f db/migraciones/<archivo>.sql`). Una base nueva no los necesita. La migración `2026-11-19-m6-foto-uniforme.sql` agrega la foto de inventario. `2026-11-19-m6-ventas-formato-actual.sql` actualiza el formato anterior de ventas solo si no existen ventas; de lo contrario, requiere conciliación manual. |
 
 ## Levantar la base
 

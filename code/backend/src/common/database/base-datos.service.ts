@@ -17,7 +17,7 @@ pg.types.setTypeParser(pg.types.builtins.NUMERIC, (valor: string) => Number(valo
 export class BaseDatosService implements OnApplicationShutdown {
   private readonly pool = new pg.Pool({
     host: process.env.DB_HOST ?? '127.0.0.1',
-    port: Number(process.env.DB_PORT ?? 5433),
+    port: Number(process.env.DB_PORT ?? 5432),
     database: process.env.DB_NAME ?? 'patinaje',
     user: process.env.DB_USER ?? 'patinaje',
     password: process.env.DB_PASSWORD ?? 'patinaje_dev',
