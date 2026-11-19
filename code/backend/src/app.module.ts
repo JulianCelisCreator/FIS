@@ -22,4 +22,4 @@ import { M5PlanesTarifasPagosModule } from './modules/m5-planes-tarifas-pagos/m5
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
