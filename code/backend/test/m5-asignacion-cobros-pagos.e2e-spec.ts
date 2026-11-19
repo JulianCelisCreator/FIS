@@ -6,6 +6,7 @@ import { AppModule } from './../src/app.module.js';
 import { configurarAplicacion } from './../src/configurar-aplicacion.js';
 import { BaseDatosService } from './../src/common/database/base-datos.service.js';
 import { hoyEnClub } from './../src/common/utils/fecha-club.js';
+import { abrirSesionDePrueba } from './utils/sesion-prueba.js';
 import {
   primerDiaDelMes,
   primerDiaMesSiguiente,
@@ -22,7 +23,9 @@ describe.skipIf(!process.env.DB_HOST)('M5 asignación, cobros y pagos (e2e)', ()
   const hoy = hoyEnClub();
   const ids: Record<string, number> = {};
 
-  const como = (usuario: string) => ({ 'x-usuario-id': String(ids[usuario]) });
+  const cookies: Record<string, string> = {};
+  // Cada usuario de prueba entra con una sesión real de M1 (cookie velora_sesion).
+  const como = (usuario: string) => ({ Cookie: cookies[usuario] });
   const http = () => request(app.getHttpServer());
 
   async function crearUsuario(clave: string, roles: string[]): Promise<number> {
@@ -36,6 +39,7 @@ describe.skipIf(!process.env.DB_HOST)('M5 asignación, cobros y pagos (e2e)', ()
       [id, roles],
     );
     ids[clave] = id;
+    cookies[clave] = await abrirSesionDePrueba(baseDatos, id);
     return id;
   }
 
@@ -501,17 +505,12 @@ describe.skipIf(!process.env.DB_HOST)('M5 asignación, cobros y pagos (e2e)', ()
     });
   });
 
-  describe('sesión temporal', () => {
+  describe('sesión', () => {
     it('devuelve el usuario actual con nombre, roles y permisos', async () => {
       const res = await http().get('/sesion').set(como('contador')).expect(200);
       expect(res.body).toMatchObject({ id: ids.contador, nombre: 'contador Prueba', roles: ['CONTADOR'] });
       expect(res.body.permisos).toContain('M5_PAGO_REGISTRAR');
       expect(res.body.permisos).not.toContain('M5_PAGO_ANULAR');
-    });
-
-    it('lista los usuarios de prueba sin autenticación (solo desarrollo)', async () => {
-      const res = await http().get('/sesion/usuarios').expect(200);
-      expect(res.body.map((u: { id: number }) => u.id)).toContain(ids.admin);
     });
   });
 
