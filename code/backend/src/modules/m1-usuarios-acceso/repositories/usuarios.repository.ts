@@ -27,6 +27,31 @@ export interface UsuarioParaIngreso {
   contrasenaHash: string;
 }
 
+export type EstadoUsuario = 'POR_REGISTRAR' | 'ACTIVA' | 'DESACTIVADA';
+
+/** Fila del listado «Usuarios» (HU-M1-05). */
+export interface CuentaListada {
+  id: number;
+  nombre: string;
+  correo: string;
+  roles: Rol[];
+  estado: EstadoUsuario;
+  ultimoIngresoEn: Date | null;
+}
+
+export interface FiltrosListadoCuentas {
+  buscar?: string;
+  rol?: Rol;
+  estado?: EstadoUsuario;
+  limite: number;
+  desplazamiento: number;
+}
+
+/** Escapa los comodines de LIKE para que la búsqueda trate % y _ como texto. */
+function patronBusqueda(texto: string): string {
+  return `%${texto.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+}
+
 /** Código de PostgreSQL para una violación de índice único. */
 const VIOLACION_UNICA = '23505';
 
@@ -97,6 +122,79 @@ export class UsuariosRepository {
 
   async registrarIngreso(consultor: Consultor, usuarioId: number): Promise<void> {
     await consultor.query(`UPDATE usuario SET ultimo_ingreso_en = now() WHERE id = $1`, [usuarioId]);
+  }
+
+  /**
+   * HU-M1-05 CA-01: cuentas filtradas y paginadas en el servidor, con el total
+   * de coincidencias para la paginación. Orden estable por nombre e id.
+   */
+  async listar(consultor: Consultor, filtros: FiltrosListadoCuentas): Promise<{ cuentas: CuentaListada[]; total: number }> {
+    const { rows } = await consultor.query<CuentaListada & { total: number }>(
+      `SELECT u.id, u.nombres || ' ' || u.apellidos AS nombre, u.correo, u.estado,
+              u.ultimo_ingreso_en AS "ultimoIngresoEn",
+              COALESCE(array_agg(r.codigo ORDER BY r.codigo) FILTER (WHERE r.id IS NOT NULL), '{}') AS roles,
+              count(*) OVER () AS total
+       FROM usuario u
+       LEFT JOIN usuario_rol ur ON ur.usuario_id = u.id
+       LEFT JOIN rol r          ON r.id = ur.rol_id
+       WHERE ($1::text IS NULL
+              OR (u.nombres || ' ' || u.apellidos) ILIKE $1 ESCAPE '\\'
+              OR u.correo ILIKE $1 ESCAPE '\\')
+         AND ($2::text IS NULL OR u.estado = $2)
+         AND ($3::text IS NULL OR EXISTS (
+               SELECT 1 FROM usuario_rol ur2 JOIN rol r2 ON r2.id = ur2.rol_id
+               WHERE ur2.usuario_id = u.id AND r2.codigo = $3))
+       GROUP BY u.id
+       ORDER BY u.nombres, u.apellidos, u.id
+       LIMIT $4 OFFSET $5`,
+      [
+        filtros.buscar ? patronBusqueda(filtros.buscar) : null,
+        filtros.estado ?? null,
+        filtros.rol ?? null,
+        filtros.limite,
+        filtros.desplazamiento,
+      ],
+    );
+    const total = rows[0]?.total ?? 0;
+    return { cuentas: rows.map(({ total: _total, ...cuenta }) => cuenta), total };
+  }
+
+  /** Una cuenta con su estado y roles, bloqueada para actualizarla en la misma transacción. */
+  async buscarParaActualizar(consultor: Consultor, usuarioId: number): Promise<CuentaListada | null> {
+    const { rows } = await consultor.query<CuentaListada>(
+      `SELECT u.id, u.nombres || ' ' || u.apellidos AS nombre, u.correo, u.estado,
+              u.ultimo_ingreso_en AS "ultimoIngresoEn",
+              COALESCE((SELECT array_agg(r.codigo ORDER BY r.codigo)
+                        FROM usuario_rol ur JOIN rol r ON r.id = ur.rol_id
+                        WHERE ur.usuario_id = u.id), '{}') AS roles
+       FROM usuario u
+       WHERE u.id = $1
+       FOR UPDATE OF u`,
+      [usuarioId],
+    );
+    return rows[0] ?? null;
+  }
+
+  async cambiarEstado(consultor: Consultor, usuarioId: number, estado: EstadoUsuario): Promise<void> {
+    await consultor.query(`UPDATE usuario SET estado = $2 WHERE id = $1`, [usuarioId, estado]);
+  }
+
+  /**
+   * Estado que tenía la cuenta antes de su última desactivación, según la
+   * auditoría (HU-M1-05 CA-04: al reactivar vuelve a ese estado). null si no
+   * hay registro, p. ej. si se desactivó por fuera de la aplicación.
+   */
+  async estadoAntesDeDesactivar(consultor: Consultor, usuarioId: number): Promise<EstadoUsuario | null> {
+    const { rows } = await consultor.query<{ estado: EstadoUsuario | null }>(
+      `SELECT valor_anterior->>'estado' AS estado
+       FROM auditoria
+       WHERE modulo = 'M1' AND tabla = 'usuario' AND registro_id = $1 AND accion = 'DESACTIVAR'
+       ORDER BY creado_en DESC, id DESC
+       LIMIT 1`,
+      [usuarioId],
+    );
+    const estado = rows[0]?.estado ?? null;
+    return estado === 'ACTIVA' || estado === 'POR_REGISTRAR' ? estado : null;
   }
 
   async asignarRol(consultor: Consultor, usuarioId: number, rol: Rol, asignadoPor: number): Promise<void> {

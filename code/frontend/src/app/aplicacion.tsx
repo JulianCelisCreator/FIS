@@ -2,6 +2,7 @@ import { Alerta } from '../shared/ui/componentes.tsx'
 import { useSesion } from '../shared/sesion/use-sesion.ts'
 import { useRuta } from '../shared/utils/use-ruta.ts'
 import { NuevaCuenta } from '../modules/m1-usuarios-acceso/components/nueva-cuenta.tsx'
+import { Usuarios } from '../modules/m1-usuarios-acceso/components/usuarios.tsx'
 import { PantallaAcceso } from '../modules/m1-usuarios-acceso/components/pantalla-acceso.tsx'
 import { AsignarCambiarPlan } from '../modules/m5-planes-tarifas-pagos/components/asignar-cambiar-plan.tsx'
 import { Cartera } from '../modules/m5-planes-tarifas-pagos/components/cartera.tsx'
@@ -27,8 +28,10 @@ const PANTALLAS = [
   { pagina: 'historial-pagos', texto: 'Historial de pagos', permiso: PERMISOS_M5.pagoHistorial },
 ]
 
-/** Pantallas de M1 solo para el Administrador (HU-M1-01; la matriz de permisos llega con HU-M1-07). */
-const PANTALLAS_ADMINISTRADOR = [{ pagina: 'nueva-cuenta', texto: 'Nueva cuenta' }]
+/** Pantallas de M1 solo para el Administrador (HU-M1-01 y 05; la matriz de permisos llega con HU-M1-07). */
+const PANTALLAS_ADMINISTRADOR = [{ pagina: 'usuarios', texto: 'Usuarios' }]
+/** Pantallas que no van en el menú: se abren desde otra y resaltan a su pantalla de origen. */
+const SUBPANTALLAS_ADMINISTRADOR: Record<string, string> = { 'nueva-cuenta': 'usuarios' }
 
 const PESTANAS_PAGO: PestanaPago[] = ['cobro', 'sesion', 'matricula']
 
@@ -59,7 +62,8 @@ export function Aplicacion() {
       ? [{ pagina: 'mis-pagos', texto: tieneRol('ACUDIENTE') ? 'Pagos de mis patinadores' : 'Mis pagos' }]
       : []
   const pagos = [...PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso)), ...misPagos]
-  const permitidas = [...usuarios, ...pagos]
+  const subpantallas = tieneRol('ADMINISTRADOR') ? Object.keys(SUBPANTALLAS_ADMINISTRADOR) : []
+  const permitidas = [...usuarios, ...pagos, ...subpantallas.map((p) => ({ pagina: p, texto: p }))]
   const actual = pagina || permitidas[0]?.pagina || ''
   const navegacion = [
     { grupo: 'Usuarios', enlaces: usuarios },
@@ -92,6 +96,8 @@ export function Aplicacion() {
         </Alerta>
       </div>
     )
+  } else if (actual === 'usuarios') {
+    contenido = <Usuarios key={sesion.id} />
   } else if (actual === 'nueva-cuenta') {
     contenido = <NuevaCuenta key={sesion.id} />
   } else if (actual === 'm4') {
@@ -124,7 +130,7 @@ export function Aplicacion() {
   }
 
   return (
-    <MarcoAplicacion navegacion={navegacion} paginaActual={actual}>
+    <MarcoAplicacion navegacion={navegacion} paginaActual={SUBPANTALLAS_ADMINISTRADOR[actual] ?? actual}>
       {contenido}
     </MarcoAplicacion>
   )
