@@ -17,6 +17,7 @@ import {
 import { PERMISOS_M5 } from '../modules/m5-planes-tarifas-pagos/types/m5.types.ts'
 import { M4Modulo } from '../modules/m4-competencias-resultados/components/m4-modulo.tsx'
 import { PERMISOS_M4 } from '../modules/m4-competencias-resultados/types/m4.types.ts'
+import { ConfiguracionGrupos } from '../modules/m3-grupos-horarios/components/configuracion-grupos.tsx'
 import { InventarioUniformes } from '../modules/m6-inventario-uniformes/components/inventario-uniformes.tsx'
 import { PrestamosUniformes } from '../modules/m6-inventario-uniformes/components/prestamos-uniformes.tsx'
 import { VentasUniformes } from '../modules/m6-inventario-uniformes/components/ventas-uniformes.tsx'
@@ -46,6 +47,8 @@ const PANTALLAS = [
 
 /** Pantallas de M1 solo para el Administrador (HU-M1-01 y 05; la matriz de permisos llega con HU-M1-07). */
 const PANTALLAS_ADMINISTRADOR = [{ pagina: 'usuarios', texto: 'Usuarios' }]
+/** Pantallas del Módulo 3 (Grupos, horarios y programación) para Administrador. */
+const PANTALLAS_M3_ADMIN = [{ pagina: 'grupos', texto: 'Configuración de grupos' }]
 /** Pantallas que no van en el menú: se abren desde otra y resaltan a su pantalla de origen. */
 const SUBPANTALLAS_ADMINISTRADOR: Record<string, string> = { 'nueva-cuenta': 'usuarios' }
 
@@ -71,12 +74,26 @@ export function Aplicacion() {
     )
   }
 
+  // Modo directo para demostración de Módulo 3 si no hay sesión activa en BD M1
+  if (!sesion && pagina === 'grupos') {
+    return (
+      <MarcoAplicacion
+        navegacion={[{ grupo: 'Grupos y horarios', enlaces: PANTALLAS_M3_ADMIN }]}
+        paginaActual="grupos"
+      >
+        <ConfiguracionGrupos />
+      </MarcoAplicacion>
+    )
+  }
+
+  // Sin sesión: ingreso de M1 (HU-M1-02), sin el marco interno ni la navegación por rol.
   if (!sesion) return <PantallaAcceso />
 
   const usuarios = [
     ...(tieneRol('ADMINISTRADOR') ? PANTALLAS_ADMINISTRADOR : []),
     ...(tieneRol('ADMINISTRADOR') || tieneRol('ACUDIENTE') ? [PANTALLA_FAMILIA] : []),
   ]
+  const gruposHorarios = tieneRol('ADMINISTRADOR') ? PANTALLAS_M3_ADMIN : []
   // «Mis pagos» es la vista del Acudiente y del Patinador (RF-M5-17 y 18); el backend acota los patinadores.
   const misPagos =
     tieneRol('ACUDIENTE') || tieneRol('PATINADOR')
@@ -84,17 +101,20 @@ export function Aplicacion() {
       : []
   const pantallasPermitidas = PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso))
   const subpantallas = tieneRol('ADMINISTRADOR') ? Object.keys(SUBPANTALLAS_ADMINISTRADOR) : []
-  const permitidas = [...usuarios, ...pantallasPermitidas, ...misPagos, ...subpantallas.map((p) => ({ pagina: p, texto: p }))]
+  const permitidas = [
+    ...usuarios,
+    ...gruposHorarios,
+    ...pantallasPermitidas,
+    ...misPagos,
+    ...subpantallas.map((p) => ({ pagina: p, texto: p })),
+  ]
   const actual = pagina || permitidas[0]?.pagina || ''
   const navegacion = [
     { grupo: 'Usuarios', enlaces: usuarios },
-    ...['Competencias y resultados', 'Planes y pagos', 'Uniformes', 'Administración'].map((grupo) => ({
-      grupo,
-      enlaces: [
-        ...pantallasPermitidas.filter((pantalla) => pantalla.grupo === grupo),
-        ...(grupo === 'Planes y pagos' ? misPagos : []),
-      ],
-    })),
+    { grupo: 'Grupos y horarios', enlaces: gruposHorarios },
+    { grupo: 'Planes y pagos', enlaces: misPagos },
+    { grupo: 'Competencias y resultados', enlaces: permitidas.filter((p) => p.pagina === 'm4') },
+    { grupo: 'Planes y pagos', enlaces: permitidas.filter((p) => p.pagina !== 'm4') },
   ]
 
   let contenido
@@ -122,6 +142,8 @@ export function Aplicacion() {
     )
   } else if (actual === 'usuarios') {
     contenido = <Usuarios key={sesion.id} />
+  } else if (actual === 'grupos') {
+    contenido = <ConfiguracionGrupos key={sesion.id} />
   } else if (actual === 'nueva-cuenta') {
     contenido = <NuevaCuenta key={sesion.id} />
   } else if (actual === 'familia-menor') {
