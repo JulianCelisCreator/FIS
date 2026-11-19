@@ -34,4 +34,4 @@ export class SesionesRepository {
     );
     return (resultado.rowCount ?? 0) > 0;
   }
-}
+}47
