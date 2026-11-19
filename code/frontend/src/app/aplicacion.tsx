@@ -115,14 +115,17 @@ export function Aplicacion() {
       texto: p,
     })),
   ];
-    ...misPagos,
-    ...subpantallas.map((p) => ({ pagina: p, texto: p })),
-  ]
-  const actual = pagina || permitidas[0]?.pagina || ''
-  const navegacion = [
-    { grupo: 'Usuarios', enlaces: usuarios },
-    { grupo: 'Grupos y horarios', enlaces: gruposHorarios },
   
+  const actual = pagina || permitidas[0]?.pagina || '';
+  const navegacion = [
+    {
+      grupo: 'Usuarios',
+      enlaces: usuarios,
+    },
+    {
+      grupo: 'Grupos y horarios',
+      enlaces: gruposHorarios,
+    },
     ...[
       'Competencias y resultados',
       'Planes y pagos',
