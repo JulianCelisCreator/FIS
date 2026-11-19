@@ -4,6 +4,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { BaseDatosService } from '../database/base-datos.service.js';
 import { COOKIE_SESION, hashTokenSesion, leerCookie } from './token-sesion.js';
 import type { Rol, SolicitudAutenticada } from './usuario-autenticado.js';
@@ -21,7 +22,11 @@ export class AutenticacionGuard implements CanActivate {
   constructor(private readonly baseDatos: BaseDatosService) {}
 
   async canActivate(contexto: ExecutionContext): Promise<boolean> {
-    const solicitud = contexto.switchToHttp().getRequest<SolicitudAutenticada>();
+    const http = contexto.switchToHttp();
+    const solicitud = http.getRequest<SolicitudAutenticada>();
+    // HU-M1-03 CA-02: lo privado nunca queda en caché, así que tras cerrar
+    // sesión el botón «atrás» no puede volver a mostrar datos de la cuenta.
+    http.getResponse<Response>().setHeader('Cache-Control', 'no-store');
     const token = leerCookie(solicitud.headers.cookie, COOKIE_SESION);
     if (!token) throw new UnauthorizedException(MENSAJE_SIN_SESION);
 

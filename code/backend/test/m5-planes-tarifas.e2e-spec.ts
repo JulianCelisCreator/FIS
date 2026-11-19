@@ -6,6 +6,7 @@ import { AppModule } from './../src/app.module.js';
 import { configurarAplicacion } from './../src/configurar-aplicacion.js';
 import { BaseDatosService } from './../src/common/database/base-datos.service.js';
 import { hoyEnClub } from './../src/common/utils/fecha-club.js';
+import { abrirSesionDePrueba } from './utils/sesion-prueba.js';
 import {
   primerDiaMesSiguiente,
   sumarDias,
@@ -20,7 +21,9 @@ describe.skipIf(!process.env.DB_HOST)('M5 planes y tarifas (e2e)', () => {
   const hoy = hoyEnClub();
   const ids: Record<string, number> = {};
 
-  const como = (usuario: string) => ({ 'x-usuario-id': String(ids[usuario]) });
+  const cookies: Record<string, string> = {};
+  // Cada usuario de prueba entra con una sesión real de M1 (cookie velora_sesion).
+  const como = (usuario: string) => ({ Cookie: cookies[usuario] });
   const http = () => request(app.getHttpServer());
   const nombre = (base: string) => `${base} ${sufijo}`;
 
@@ -35,6 +38,7 @@ describe.skipIf(!process.env.DB_HOST)('M5 planes y tarifas (e2e)', () => {
       [id, rol],
     );
     ids[clave] = id;
+    cookies[clave] = await abrirSesionDePrueba(baseDatos, id);
   }
 
   beforeAll(async () => {
