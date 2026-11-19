@@ -22,6 +22,7 @@
   --app-fs-subheading: 1.35rem;
   --app-fs-heading-compact: 1.85rem;
   --app-fs-heading: 2.25rem;
+  --app-fs-display: 3rem;
 }
 
 /* --------------------------------------------------------------------------
@@ -351,6 +352,62 @@ p {
   align-items: start;
 }
 
+.app-stats {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+}
+
+.app-stat {
+  min-width: 0;
+  padding: 1rem;
+  background: var(--chalk);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.app-stat dt {
+  color: var(--muted);
+  font-size: var(--app-fs-caption);
+  font-weight: 600;
+}
+
+.app-stat dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.5rem;
+  margin: 0.35rem 0 0;
+}
+
+.app-stat__valor {
+  font-family: var(--font-mono);
+  font-size: 1.65rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.app-stat__nota {
+  color: var(--muted);
+  font-size: var(--app-fs-caption);
+}
+
+.app-stat--alerta {
+  border-color: var(--alert-ink);
+}
+
+.app-stat--alerta .app-stat__valor {
+  color: var(--alert-ink);
+}
+
+.app-cols--2,
+.app-cols--4 {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .app-actions {
   display: flex;
   flex-wrap: wrap;
@@ -367,6 +424,59 @@ p {
   background: var(--chalk);
   border: 1px solid var(--line);
   border-radius: var(--radius);
+}
+
+.app-panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.app-proveedores {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-proveedor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  min-width: 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+}
+
+.app-proveedor__datos {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.app-proveedor__linea {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+}
+
+.app-proveedor__nombre {
+  font-weight: 700;
+}
+
+.app-proveedor__meta {
+  margin: 0.2rem 0;
+  overflow-wrap: anywhere;
+  font-size: var(--app-fs-small);
+}
+
+.app-proveedor__acciones {
+  flex: 0 0 auto;
 }
 
 .vl-card--selectable {
@@ -826,6 +936,8 @@ fieldset {
 
 .vl-table-wrap {
   container-type: inline-size;
+  max-width: 100%;
+  overflow-x: auto;
   background: var(--chalk);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -1055,6 +1167,210 @@ fieldset {
   min-width: min(100%, 16rem);
 }
 
+.app-tabla-inventario {
+  min-width: 1060px;
+  table-layout: fixed;
+}
+
+.app-tabla-inventario th:nth-child(1),
+.app-tabla-inventario td:nth-child(1) {
+  width: 21%;
+}
+
+.app-tabla-inventario th:nth-child(2),
+.app-tabla-inventario td:nth-child(2) {
+  width: 9%;
+}
+
+.app-tabla-inventario th:nth-child(3),
+.app-tabla-inventario td:nth-child(3) {
+  width: 6%;
+}
+
+.app-tabla-inventario th:nth-child(4),
+.app-tabla-inventario td:nth-child(4) {
+  width: 14%;
+}
+
+.app-tabla-inventario th:nth-child(5),
+.app-tabla-inventario td:nth-child(5),
+.app-tabla-inventario th:nth-child(6),
+.app-tabla-inventario td:nth-child(6) {
+  width: 10%;
+}
+
+.app-tabla-inventario th:nth-child(7),
+.app-tabla-inventario td:nth-child(7) {
+  width: 9%;
+}
+
+.app-tabla-inventario th:nth-child(8),
+.app-tabla-inventario td:nth-child(8) {
+  width: 7%;
+}
+
+.app-tabla-inventario th:nth-child(9),
+.app-tabla-inventario td:nth-child(9) {
+  width: 9%;
+}
+
+.app-tabla-inventario th:nth-child(10),
+.app-tabla-inventario td:nth-child(10) {
+  width: 5%;
+}
+
+.app-producto {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.app-producto__foto,
+.app-producto__sin-foto {
+  display: grid;
+  flex: 0 0 4.5rem;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  color: var(--muted);
+  background: var(--ice);
+  border: 1px solid var(--line);
+  object-fit: cover;
+}
+
+.app-producto__sin-foto {
+  font-size: var(--app-fs-tag);
+  text-align: center;
+}
+
+.app-referencia {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 600;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.app-celda-apilada {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.app-stock-bajo {
+  color: var(--alert-ink);
+  font-weight: 700;
+}
+
+.app-table-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.app-table-footer > p {
+  margin: 0;
+}
+
+.app-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.app-pagination__estado {
+  color: var(--muted);
+  font-size: var(--app-fs-caption);
+  font-variant-numeric: tabular-nums;
+}
+
+@container (max-width: 1100px) {
+  .app-tabla-inventario {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    table-layout: auto;
+  }
+
+  .app-tabla-inventario thead {
+    display: none;
+  }
+
+  .app-tabla-inventario tbody {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .app-tabla-inventario tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem 1rem;
+    min-width: 0;
+    padding: 0.85rem;
+    background: var(--chalk);
+    border: 1px solid var(--line);
+  }
+
+  .app-tabla-inventario tbody tr:nth-child(even) td {
+    background: transparent;
+  }
+
+  .app-tabla-inventario td {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    min-width: 0;
+    width: auto;
+    padding: 0.2rem;
+    border: 0;
+    text-align: left;
+  }
+
+  .app-tabla-inventario td:nth-child(n) {
+    width: auto;
+  }
+
+  .app-tabla-inventario td::before {
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: var(--app-fs-tag);
+    letter-spacing: 0.08em;
+    text-align: left;
+    text-transform: uppercase;
+    content: attr(data-label);
+  }
+
+  .app-tabla-inventario td:first-child {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .app-tabla-inventario td:first-child .app-producto {
+    flex: 1 1 0;
+    width: 100%;
+  }
+
+  .app-tabla-inventario td:last-child {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    justify-content: flex-end;
+    border-top: 1px solid var(--line);
+    padding-top: 0.5rem;
+  }
+
+  .app-tabla-inventario .vl-num {
+    text-align: left;
+  }
+}
+
 /* Menú de acciones por fila. */
 .app-row-menu {
   position: relative;
@@ -1129,18 +1445,26 @@ fieldset {
    -------------------------------------------------------------------------- */
 
 @media (min-width: 768px) {
+  .app-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .app-cols--4 {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 1100px) {
+  .app-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
   .app-cols--2 {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .app-cols--4 {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -1212,5 +1536,680 @@ fieldset {
 
   .vl-dialog--form[open] .vl-dialog__actions .vl-button {
     flex: 1 1 auto;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Inventario de uniformes (M6): resumen, proveedores, formularios y pie de tabla
+   -------------------------------------------------------------------------- */
+
+.app-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 1px;
+  margin: 0;
+  overflow: hidden;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.app-stat {
+  padding: 0.9rem 1rem;
+  background: var(--chalk);
+}
+
+.app-stat dt {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-tag);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.app-stat dd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem 0.5rem;
+  align-items: baseline;
+  margin: 0.3rem 0 0;
+}
+
+.app-stat__valor {
+  font-family: var(--font-display);
+  font-size: var(--app-fs-subheading);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.app-stat__nota {
+  color: var(--muted);
+  font-size: var(--app-fs-caption);
+}
+
+.app-stat--alerta .app-stat__valor {
+  color: var(--alert-ink);
+}
+
+/* --------------------------------------------------------------------------
+   Panel general (M6): tablero de ingresos, pendientes, operación y atajos.
+   -------------------------------------------------------------------------- */
+
+/* Fecha de generación y recarga del panel, a la derecha del encabezado. */
+.app-panel-frescura {
+  display: grid;
+  gap: 0.6rem;
+  justify-items: start;
+}
+
+.app-panel-frescura__icono {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* El ingreso del período es el tablero principal; los pendientes, su costado. */
+.app-panel-hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.app-scoreboard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.5rem;
+  color: var(--white);
+  background: var(--rink-deep);
+  border: 1px solid var(--rink);
+  border-radius: var(--radius);
+}
+
+.app-scoreboard__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.app-scoreboard__periodo {
+  color: var(--muted-on-dark);
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-label);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.app-scoreboard__enlace {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  color: var(--white);
+  font-size: var(--app-fs-caption);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 0.25em;
+  transition: color 0.18s var(--ease);
+}
+
+.app-scoreboard__enlace:hover {
+  color: var(--signal);
+}
+
+.app-scoreboard__valor {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-display);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.app-scoreboard__filtro {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: end;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line-dark);
+}
+
+.app-scoreboard__filtro .vl-field {
+  flex: 1 1 9rem;
+  gap: 0.3rem;
+}
+
+.app-scoreboard .vl-field__label {
+  color: var(--muted-on-dark);
+  font-size: var(--app-fs-label);
+}
+
+.app-scoreboard .vl-field__error {
+  color: var(--signal);
+}
+
+.app-scoreboard .vl-input {
+  min-height: 40px;
+  border-color: var(--line);
+}
+
+.app-scoreboard .vl-button {
+  min-height: 40px;
+}
+
+.app-scoreboard__nota {
+  color: var(--muted-on-dark);
+  font-size: var(--app-fs-caption);
+}
+
+/* Lista de pendientes con la acción que los resuelve. */
+.app-attention {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.app-attention__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+
+.app-attention__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-attention__item {
+  display: grid;
+  gap: 0.45rem;
+  padding-block: 0.9rem;
+  border-top: 1px solid var(--line);
+}
+
+.app-attention__contenido {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+}
+
+.app-attention__contenido > .vl-icono {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: 0.15rem;
+  flex: none;
+}
+
+.app-attention__item--error .app-attention__contenido > .vl-icono {
+  color: var(--alert-ink);
+}
+
+.app-attention__item--warning .app-attention__contenido > .vl-icono {
+  color: var(--ink);
+}
+
+.app-attention__item--info .app-attention__contenido > .vl-icono {
+  color: var(--rink-bright);
+}
+
+.app-attention__titulo {
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.app-attention__detalle {
+  margin-top: 0.1rem;
+  color: var(--muted);
+  font-size: var(--app-fs-caption);
+}
+
+.app-attention__accion {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: center;
+  justify-self: start;
+  margin-left: 1.8rem;
+  color: var(--rink-bright);
+  font-size: var(--app-fs-caption);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.app-attention__accion:hover {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.app-flecha {
+  flex: none;
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.app-attention__vacio {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-top: 0.75rem;
+  padding: 1rem;
+  background: rgba(111, 242, 178, 0.16);
+  border: 1px solid var(--ok-ink);
+  border-radius: var(--radius);
+}
+
+.app-attention__vacio > .vl-icono {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: none;
+  color: var(--ok-ink);
+}
+
+.app-attention__vacio-titulo {
+  font-weight: 700;
+}
+
+/* Indicadores operativos: cuatro fichas con borde propio (sin celdas vacías). */
+.app-panel-head--seccion {
+  margin-bottom: 0.9rem;
+}
+
+.app-panel-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 0;
+}
+
+.app-panel-kpi {
+  padding: 1.15rem 1.25rem;
+  background: var(--chalk);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.app-panel-kpi dt {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-tag);
+  letter-spacing: 0.1em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.app-panel-kpi__icono {
+  flex: none;
+  width: 1.4rem;
+  height: 1.4rem;
+  color: var(--ink-soft);
+}
+
+.app-panel-kpi dd {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0.65rem 0 0;
+}
+
+.app-panel-kpi__valor {
+  font-family: var(--font-display);
+  font-size: var(--app-fs-subheading);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.app-panel-kpi__nota {
+  color: var(--muted);
+  font-size: var(--app-fs-caption);
+}
+
+.app-panel-kpi--alerta {
+  border-color: var(--alert-ink);
+}
+
+.app-panel-kpi--alerta .app-panel-kpi__icono,
+.app-panel-kpi--alerta .app-panel-kpi__valor {
+  color: var(--alert-ink);
+}
+
+/* Atajos a las tareas que siguen después de leer el panel. */
+.app-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-shortcut {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 1.15rem 1.25rem;
+  text-decoration: none;
+}
+
+.app-shortcut__icono {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--rink-bright);
+}
+
+.app-shortcut__texto {
+  display: grid;
+  flex: 1;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.app-shortcut__titulo {
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.app-shortcut__nota {
+  color: var(--muted);
+  font-size: var(--app-fs-caption);
+}
+
+.app-shortcut__flecha {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.2rem;
+  color: var(--muted);
+  transition:
+    color 0.18s var(--ease),
+    transform 0.18s var(--ease);
+}
+
+.app-shortcut:hover .app-shortcut__flecha {
+  color: var(--ink);
+  transform: translateX(2px);
+}
+
+/* Esqueleto de la primera carga. */
+.app-panel-esqueleto {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.app-esqueleto {
+  min-height: 6rem;
+  background: var(--ice-deep);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  animation: app-latido 1.4s var(--ease) infinite alternate;
+}
+
+.app-esqueleto--tablero,
+.app-esqueleto--lado {
+  min-height: 300px;
+}
+
+.app-esqueleto--fila {
+  grid-column: 1 / -1;
+  min-height: 8.5rem;
+}
+
+@keyframes app-latido {
+  from {
+    opacity: 0.55;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (min-width: 1100px) {
+  .app-panel-hero {
+    grid-template-columns: minmax(0, 1.6fr) minmax(19rem, 1fr);
+  }
+
+  .app-panel-kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .app-shortcuts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .app-panel-esqueleto {
+    grid-template-columns: minmax(0, 1.6fr) minmax(19rem, 1fr);
+  }
+}
+
+@media (max-width: 559px) {
+  .app-scoreboard {
+    padding: 1.15rem;
+  }
+
+  .app-scoreboard__valor {
+    font-size: var(--app-fs-heading);
+  }
+
+  .app-scoreboard__filtro .vl-button {
+    flex: 1 1 100%;
+  }
+
+  .app-shortcuts {
+    grid-template-columns: 1fr;
+  }
+}
+
+.app-panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-proveedores {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-proveedor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 0.8rem;
+  border-top: 1px solid var(--line);
+}
+
+.app-proveedor:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.app-proveedor:last-child {
+  padding-bottom: 0;
+}
+
+.app-proveedor__datos {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.app-proveedor__linea {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.6rem;
+  align-items: center;
+}
+
+.app-proveedor__nombre {
+  font-weight: 600;
+}
+
+.app-proveedor__meta {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.app-proveedor__acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Formularios de dos columnas en el diálogo; una columna en pantallas angostas. */
+.app-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.app-form-grid__ancho {
+  grid-column: 1 / -1;
+}
+
+.app-referencia {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.app-producto {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.app-producto__foto {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: var(--stroke-sm) solid var(--border-primary);
+  background: var(--surface-primary);
+}
+
+.app-producto__foto--formulario {
+  width: 120px;
+  height: 120px;
+  margin-top: 0.5rem;
+}
+
+.app-producto__foto--prestamo {
+  width: 80px;
+  height: 80px;
+}
+
+.app-producto__sin-foto {
+  width: 52px;
+  height: 52px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: var(--radius-md);
+  border: var(--stroke-sm) dashed var(--border-primary);
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  text-align: center;
+}
+
+.app-producto--prestamo {
+  width: fit-content;
+}
+
+/* La tabla de inventario tiene más columnas: reduce el espacio lateral. */
+.app-tabla-inventario th,
+.app-tabla-inventario td {
+  padding-inline: 0.65rem;
+}
+
+/* La insignia de mínimo es larga: en la tabla puede partirse en dos líneas. */
+.app-tabla-inventario .vl-badge {
+  white-space: normal;
+}
+
+.app-stock-bajo {
+  color: var(--alert-ink);
+  font-weight: 700;
+}
+
+/* Número y su nota («Bajo mínimo», «Proveedor inactivo») en una sola celda. */
+.app-celda-apilada {
+  display: inline-grid;
+  gap: 0.05rem;
+  justify-items: start;
+}
+
+@container (max-width: 899px) {
+  .vl-table .app-celda-apilada {
+    justify-items: end;
+  }
+}
+
+.app-table-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.app-pagination__estado {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-label);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 560px) {
+  .app-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .app-proveedor__acciones {
+    width: 100%;
+  }
+
+  .app-proveedor__acciones .vl-button {
+    flex: 1;
+  }
+}
+
+/* Reportes financieros (M6): botones de exportación junto al título. */
+.app-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (max-width: 560px) {
+  .app-acciones,
+  .app-acciones .vl-button {
+    width: 100%;
   }
 }

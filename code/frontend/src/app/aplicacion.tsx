@@ -19,16 +19,31 @@ import { M4Modulo } from '../modules/m4-competencias-resultados/components/m4-mo
 import { PERMISOS_M4 } from '../modules/m4-competencias-resultados/types/m4.types.ts'
 import { ConfiguracionGrupos } from '../modules/m3-grupos-horarios/components/configuracion-grupos.tsx'
 import { AsignacionProfesores } from '../modules/m3-grupos-horarios/components/asignacion-profesores.tsx'
+import { InventarioUniformes } from '../modules/m6-inventario-uniformes/components/inventario-uniformes.tsx'
+import { PrestamosUniformes } from '../modules/m6-inventario-uniformes/components/prestamos-uniformes.tsx'
+import { VentasUniformes } from '../modules/m6-inventario-uniformes/components/ventas-uniformes.tsx'
+import { PERMISOS_M6 } from '../modules/m6-inventario-uniformes/types/inventario.types.ts'
+import { PanelAdministrativo } from '../modules/m6-panel/components/panel-administrativo.tsx'
+import { PERMISOS_PANEL } from '../modules/m6-panel/types/panel.types.ts'
+import { RegistroPersonal } from '../modules/m6-personal/components/registro-personal.tsx'
+import { PERMISOS_PERSONAL } from '../modules/m6-personal/types/personal.types.ts'
+import { ReportesFinancieros } from '../modules/m6-reportes/components/reportes-financieros.tsx'
+import { PERMISOS_REPORTES } from '../modules/m6-reportes/types/reportes.types.ts'
 import { MarcoAplicacion } from './marco-aplicacion.tsx'
 
-/** Pantallas disponibles y el permiso que exige cada una. */
 const PANTALLAS = [
-  { pagina: 'm4', texto: 'Competencias y resultados', permiso: PERMISOS_M4.consultar },
-  { pagina: 'planes', texto: 'Planes y tarifas', permiso: PERMISOS_M5.planGestionar },
-  { pagina: 'asignar-plan', texto: 'Asignar o cambiar plan', permiso: PERMISOS_M5.planAsignar },
-  { pagina: 'cartera', texto: 'Cartera', permiso: PERMISOS_M5.carteraConsultar },
-  { pagina: 'registrar-pago', texto: 'Registrar pago', permiso: PERMISOS_M5.pagoRegistrar },
-  { pagina: 'historial-pagos', texto: 'Historial de pagos', permiso: PERMISOS_M5.pagoHistorial },
+  { pagina: 'panel', texto: 'Panel general', grupo: 'Administración', permiso: PERMISOS_PANEL.panelConsultar },
+  { pagina: 'm4', texto: 'Competencias y resultados', grupo: 'Competencias y resultados', permiso: PERMISOS_M4.consultar },
+  { pagina: 'planes', texto: 'Planes y tarifas', grupo: 'Planes y pagos', permiso: PERMISOS_M5.planGestionar },
+  { pagina: 'asignar-plan', texto: 'Asignar o cambiar plan', grupo: 'Planes y pagos', permiso: PERMISOS_M5.planAsignar },
+  { pagina: 'cartera', texto: 'Cartera', grupo: 'Planes y pagos', permiso: PERMISOS_M5.carteraConsultar },
+  { pagina: 'registrar-pago', texto: 'Registrar pago', grupo: 'Planes y pagos', permiso: PERMISOS_M5.pagoRegistrar },
+  { pagina: 'historial-pagos', texto: 'Historial de pagos', grupo: 'Planes y pagos', permiso: PERMISOS_M5.pagoHistorial },
+  { pagina: 'inventario', texto: 'Inventario de uniformes', grupo: 'Uniformes', permiso: PERMISOS_M6.inventarioGestionar },
+  { pagina: 'ventas', texto: 'Venta de uniformes', grupo: 'Uniformes', permiso: PERMISOS_M6.inventarioGestionar },
+  { pagina: 'prestamos', texto: 'Préstamos de implementos', grupo: 'Uniformes', permiso: PERMISOS_M6.inventarioGestionar },
+  { pagina: 'personal', texto: 'Personal', grupo: 'Administración', permiso: PERMISOS_PERSONAL.personalGestionar },
+  { pagina: 'reportes', texto: 'Reportes financieros', grupo: 'Administración', permiso: PERMISOS_REPORTES.reporteFinanciero },
 ]
 
 /** Pantallas de M1 solo para el Administrador (HU-M1-01 y 05; la matriz de permisos llega con HU-M1-07). */
@@ -46,9 +61,9 @@ const PANTALLA_FAMILIA = { pagina: 'familia-menor', texto: 'Familia del menor' }
 
 const PESTANAS_PAGO: PestanaPago[] = ['cobro', 'sesion', 'matricula']
 
-/** Aplicación interna por roles (/app/): pantallas de M1 y M5. */
+/** Aplicación interna con las pantallas de M1, M5 y M6 habilitadas por rol. */
 export function Aplicacion() {
-  const { sesion, cargando, error, tienePermiso, tieneRol } = useSesion()
+  const { sesion, cargando, tienePermiso, tieneRol } = useSesion()
   const { pagina, parametros } = useRuta()
 
   if (cargando) {
@@ -88,29 +103,49 @@ export function Aplicacion() {
     tieneRol('ACUDIENTE') || tieneRol('PATINADOR')
       ? [{ pagina: 'mis-pagos', texto: tieneRol('ACUDIENTE') ? 'Pagos de mis patinadores' : 'Mis pagos' }]
       : []
-  const pagos = [...PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso)), ...misPagos]
+  const pantallasPermitidas = PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso))
   const subpantallas = tieneRol('ADMINISTRADOR') ? Object.keys(SUBPANTALLAS_ADMINISTRADOR) : []
   const permitidas = [
     ...usuarios,
     ...gruposHorarios,
     ...pagos,
-    ...subpantallas.map((p) => ({ pagina: p, texto: p })),
-  ]
+    ...pantallasPermitidas,
+    ...misPagos,
+    ...subpantallas.map((p) => ({
+      pagina: p,
+      texto: p,
+    })),
+  ];
   const actual = pagina || permitidas[0]?.pagina || ''
   const navegacion = [
     { grupo: 'Usuarios', enlaces: usuarios },
     { grupo: 'Grupos y horarios', enlaces: gruposHorarios },
-    { grupo: 'Planes y pagos', enlaces: pagos },
-    { grupo: 'Competencias y resultados', enlaces: permitidas.filter((p) => p.pagina === 'm4') },
-    { grupo: 'Planes y pagos', enlaces: permitidas.filter((p) => p.pagina !== 'm4') },
-  ]
+
+    ...['Competencias y resultados', 'Planes y pagos', 'Uniformes', 'Administración'].map((grupo) => ({
+      grupo,
+      enlaces: [
+        ...pantallasPermitidas.filter(
+          (pantalla) => pantalla.grupo === grupo
+        ),
+        ...(grupo === 'Planes y pagos' ? misPagos : []),
+        ...(grupo === 'Competencias y resultados'
+          ? permitidas.filter((p) => p.pagina === 'm4')
+          : []),
+      ],
+    })),
+
+    {
+      grupo: 'Otros planes y pagos',
+      enlaces: permitidas.filter((p) => p.pagina !== 'm4'),
+    },
+  ];
+  
 
   let contenido
   if (permitidas.length === 0) {
     contenido = (
       <div className="app-page">
         <h1>Hola, {sesion.nombre}</h1>
-        {error && <Alerta tono="error" titulo="Algo salió mal">{error}</Alerta>}
         <Alerta tono="info" titulo="Aún no hay pantallas para tu rol">
           <p>Las pantallas de tu rol se irán habilitando a medida que la escuela active los módulos.</p>
         </Alerta>
@@ -155,6 +190,18 @@ export function Aplicacion() {
     contenido = <HistorialPagos key={sesion.id} />
   } else if (actual === 'mis-pagos') {
     contenido = <MisPagos key={sesion.id} />
+  } else if (actual === 'inventario') {
+    contenido = <InventarioUniformes key={sesion.id} />
+  } else if (actual === 'ventas') {
+    contenido = <VentasUniformes key={sesion.id} />
+  } else if (actual === 'prestamos') {
+    contenido = <PrestamosUniformes key={sesion.id} />
+  } else if (actual === 'personal') {
+    contenido = <RegistroPersonal key={sesion.id} />
+  } else if (actual === 'panel') {
+    contenido = <PanelAdministrativo key={sesion.id} />
+  } else if (actual === 'reportes') {
+    contenido = <ReportesFinancieros key={sesion.id} />
   } else if (actual === 'asignar-plan') {
     contenido = (
       <AsignarCambiarPlan

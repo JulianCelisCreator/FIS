@@ -88,6 +88,24 @@ const ESTADOS: Record<string, Record<string, [string, Tono]>> = {
     libre: ['Libre', 'success'],
     conflicto: ['Conflicto', 'error'],
     asignado: ['Asignado', 'info'],
+  prestamo: {
+    activo: ['Activo', 'info'],
+    devuelto: ['Devuelto', 'success'],
+    vencido: ['Vencido', 'error'],
+    'perdida-dano': ['Pérdida o daño', 'error'],
+  },
+  uniforme: {
+    'stock-normal': ['Stock normal', 'success'],
+    'alerta-minimo': ['Alerta por cantidad mínima', 'warning'],
+    inactiva: ['Inactiva', 'neutral'],
+  },
+  proveedor: { activo: ['Activo', 'success'], inactivo: ['Inactivo', 'neutral'] },
+  personal: { activo: ['Activo', 'success'], inactivo: ['Inactivo', 'neutral'] },
+  venta: {
+    confirmada: ['Confirmada', 'success'],
+    'devuelta-parcial': ['Devuelta en parte', 'warning'],
+    devuelta: ['Devuelta', 'neutral'],
+    ajustada: ['Ajustada', 'warning'],
   },
 }
 
