@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-08T00:00:00.000Z",
+  "title": "Design System: Velora",
+  "extensions": {
+    "colorMeta": {
+      "rink": { "role": "primary", "displayName": "Rink Blue", "canonical": "#0a2f8f", "tonalRamp": ["#030d28", "#061b52", "#0a2f8f", "#1f5cff", "#4d7dff", "#8fb0ff", "#c9d8ff", "#edf3ff"] },
+      "signal": { "role": "primary", "displayName": "Signal Yellow", "canonical": "#ffd21e", "tonalRamp": ["#5c4a00", "#8a6f00", "#d9a900", "#ffd21e", "#ffe066", "#ffed9e", "#fff6cc", "#fffbe8"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#071433", "tonalRamp": ["#030a1a", "#071433", "#33456e", "#526489", "#8593b3", "#b8c7e8", "#dbe6ff", "#f8faff"] },
+      "chalk": { "role": "neutral", "displayName": "Chalk", "canonical": "#f8faff", "tonalRamp": ["#dbe6ff", "#edf3ff", "#f8faff", "#ffffff", "#ffffff", "#ffffff", "#ffffff", "#ffffff"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Titular del hero y de secciones; siempre Archivo 800." },
+      "label": { "displayName": "Label", "purpose": "Botones, etiquetas, tiempos y cifras en Spline Sans Mono." }
+    },
+    "shadows": [
+      { "name": "panel", "value": "0 30px 70px rgba(3, 13, 40, 0.35)", "purpose": "Tablero de cronometraje principal y diálogos. Única sombra del sistema." }
+    ],
+    "motion": [
+      { "name": "ease", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Curva por defecto para transiciones de estado y menú móvil." },
+      { "name": "duration-state", "value": "0.18s", "purpose": "Cambios de color en botones y enlaces." },
+      { "name": "duration-menu", "value": "0.22s", "purpose": "Panel de navegación móvil y acordeones." }
+    ],
+    "breakpoints": [
+      { "name": "lg", "value": "1200px" },
+      { "name": "nav", "value": "980px" },
+      { "name": "md", "value": "860px" },
+      { "name": "sm", "value": "720px" },
+      { "name": "xs", "value": "520px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "CTA principal, p. ej. Solicitar demo.",
+      "html": "<button class=\"ds-btn-primary\">Solicitar demo</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0.72rem 1.25rem; border: 1px solid #ffd21e; border-radius: 2px; background: #ffd21e; color: #030d28; font-family: 'Archivo', 'Arial Narrow', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-primary:hover { background: #f7f9ff; border-color: #f7f9ff; } .ds-btn-primary:focus-visible { outline: 3px solid #ffd21e; outline-offset: 3px; box-shadow: 0 0 0 5px #030d28; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Acción secundaria sobre fondo rink.",
+      "html": "<button class=\"ds-btn-ghost\">Ver módulos</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0.72rem 1.25rem; border: 1px solid rgba(244, 248, 255, 0.58); border-radius: 2px; background: transparent; color: #f7f9ff; font-family: 'Archivo', 'Arial Narrow', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: color 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-ghost:hover { color: #ffd21e; border-color: #ffd21e; } .ds-btn-ghost:focus-visible { outline: 3px solid #ffd21e; outline-offset: 3px; box-shadow: 0 0 0 5px #030d28; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Timing Tower",
+    "overview": "La landing es una torre de cronometraje sobre una pista azul. La pista y los parciales son la estructura y la prueba: el visitante entiende la operación de la escuela como una medición, no como una planilla ni como un hero genérico de SaaS. El sistema es preciso, denso en datos reales y sobrio en decoración; la energía viene del contraste entre el azul de pista y el amarillo de señal.",
+    "keyCharacteristics": [
+      "Fondo azul de pista (rink) con líneas de carril finas y marcas de medición.",
+      "Tipografía industrial ancha y pesada en titulares; números y etiquetas en mono tabular.",
+      "Amarillo de señal como único acento de acción.",
+      "Paneles, parrillas y líneas en lugar de tarjetas con sombra.",
+      "Movimiento sobrio; se suspende con prefers-reduced-motion."
+    ],
+    "rules": [
+      { "name": "The One Signal Rule", "body": "El amarillo de señal se usa en el CTA y en un número muy limitado de marcas por pantalla. Su rareza es el punto.", "section": "colors" },
+      { "name": "The Measured Line Rule", "body": "Las separaciones son líneas de 1–2 px con transparencias de blanco sobre rink, no sombras.", "section": "colors" },
+      { "name": "The Tabular Time Rule", "body": "Los tiempos y cifras de cartera se muestran en mono tabular para que las columnas se alineen. Los montos van en COP.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Las superficies son planas en reposo. Solo el tablero principal y los diálogos elevan.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do usar signal solo en el CTA principal y en las marcas de regla y foco.",
+      "Do rotular todos los datos de ejemplo como \"Datos de muestra\".",
+      "Do usar mono tabular para tiempos MM:SS.mmm y montos en COP.",
+      "Do mantener el estado comunicado con texto o icono, no solo con color.",
+      "Do respetar prefers-reduced-motion y dejar el foco visible."
+    ],
+    "donts": [
+      "Don't usar gradientes morados, glassmorphism, neón ni brillos.",
+      "Don't usar naranja de atletismo como acento.",
+      "Don't usar tarjetas redondeadas con sombra como contenedor principal.",
+      "Don't inventar logo, fotografías, testimonios ni métricas.",
+      "Don't usar sombras en reposo fuera del tablero principal y los diálogos."
+    ]
+  }
+}

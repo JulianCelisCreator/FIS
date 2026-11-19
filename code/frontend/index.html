@@ -1,13 +1,118 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#061b52" />
+    <meta
+      name="description"
+      content="Mide el rendimiento de tu escuela de patinaje: progreso, tiempos, cupos, cartera y reportes en una sola pista, con permisos por rol."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_CO" />
+    <meta property="og:title" content="Velora — Rendimiento para escuelas de patinaje" />
+    <meta
+      property="og:description"
+      content="La pista no miente. Tiempos, progreso, cupos, cartera y reportes de tu club en una sola plataforma, con reglas y permisos claros."
+    />
+    <meta name="twitter:card" content="summary" />
+    <title>Velora — Rendimiento para escuelas de patinaje</title>
+    <style>
+      .nojs {
+        max-width: 72ch;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 4rem;
+        color: #071433;
+        background: #f8faff;
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        line-height: 1.6;
+      }
+
+      .nojs h1,
+      .nojs h2 {
+        margin: 0 0 0.75rem;
+        font-family: 'Arial Narrow', Arial, sans-serif;
+        line-height: 1.05;
+      }
+
+      .nojs h1 {
+        margin-top: 2rem;
+        font-size: 2.6rem;
+      }
+
+      .nojs h2 {
+        margin-top: 2rem;
+        font-size: 1.3rem;
+      }
+
+      .nojs p,
+      .nojs ul {
+        margin: 0 0 1rem;
+      }
+
+      .nojs ul {
+        padding-left: 1.25rem;
+      }
+
+      .nojs .nojs-brand {
+        color: #0a2f8f;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .nojs .nojs-note {
+        padding-top: 1rem;
+        border-top: 1px solid #b8c7e8;
+        color: #526489;
+        font-size: 0.9rem;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <main class="nojs">
+        <p class="nojs-brand">Velora · control de pista</p>
+        <h1>La pista no miente.</h1>
+        <p>
+          Cada tiempo, cada cupo y cada pago dejan rastro. Velora reúne en una
+          sola pista el progreso deportivo, la operación de la escuela y la
+          información administrativa del club.
+        </p>
+        <h2>Seis módulos, una sola pista</h2>
+        <ul>
+          <li>Atletas y grupos: progreso deportivo y tiempos por prueba.</li>
+          <li>Inscripciones y cupos: validación de póliza, cartera y autorización.</li>
+          <li>Cobros y cartera: estados pendiente, en mora y al día.</li>
+          <li>Préstamos: equipamiento con trazabilidad de devolución.</li>
+          <li>Eventos y resultados: series, carriles y tiempos en MM:SS.mmm.</li>
+          <li>Reportes y permisos: una sola fuente de verdad por rol.</li>
+        </ul>
+        <h2>Seis roles, cada uno con su carril</h2>
+        <ul>
+          <li>Dirección general</li>
+          <li>Coordinación deportiva</li>
+          <li>Entrenador</li>
+          <li>Administración</li>
+          <li>Cobros</li>
+          <li>Atleta</li>
+        </ul>
+        <h2>Reglas antes que parches</h2>
+        <p>
+          Póliza vigente, cartera al día, autorización del acudiente y sanción
+          activa se validan antes de inscribir. El cupo se avisa al llegar al
+          90% y ningún rol puede saltarse una regla para “agilizar” el proceso.
+        </p>
+        <p class="nojs-note">
+          Datos de muestra. La demo interactiva se habilita cuando exista un
+          canal de contacto aprobado. No se publican precios, testimonios ni
+          resultados reales.
+        </p>
+      </main>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
