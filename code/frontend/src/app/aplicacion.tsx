@@ -3,25 +3,36 @@ import { useSesion } from '../shared/sesion/use-sesion.ts'
 import { useRuta } from '../shared/utils/use-ruta.ts'
 import { FamiliaMenor } from '../modules/m1-usuarios-acceso/components/familia-menor.tsx'
 import { NuevaCuenta } from '../modules/m1-usuarios-acceso/components/nueva-cuenta.tsx'
+import { Usuarios } from '../modules/m1-usuarios-acceso/components/usuarios.tsx'
 import { PantallaAcceso } from '../modules/m1-usuarios-acceso/components/pantalla-acceso.tsx'
 import { AsignarCambiarPlan } from '../modules/m5-planes-tarifas-pagos/components/asignar-cambiar-plan.tsx'
+import { Cartera } from '../modules/m5-planes-tarifas-pagos/components/cartera.tsx'
+import { HistorialPagos } from '../modules/m5-planes-tarifas-pagos/components/historial-pagos.tsx'
+import { MisPagos } from '../modules/m5-planes-tarifas-pagos/components/mis-pagos.tsx'
 import { PlanesTarifas } from '../modules/m5-planes-tarifas-pagos/components/planes-tarifas.tsx'
 import {
   RegistrarPago,
   type PestanaPago,
 } from '../modules/m5-planes-tarifas-pagos/components/registrar-pago.tsx'
 import { PERMISOS_M5 } from '../modules/m5-planes-tarifas-pagos/types/m5.types.ts'
+import { M4Modulo } from '../modules/m4-competencias-resultados/components/m4-modulo.tsx'
+import { PERMISOS_M4 } from '../modules/m4-competencias-resultados/types/m4.types.ts'
 import { MarcoAplicacion } from './marco-aplicacion.tsx'
 
 /** Pantallas disponibles y el permiso que exige cada una. */
 const PANTALLAS = [
+  { pagina: 'm4', texto: 'Competencias y resultados', permiso: PERMISOS_M4.consultar },
   { pagina: 'planes', texto: 'Planes y tarifas', permiso: PERMISOS_M5.planGestionar },
   { pagina: 'asignar-plan', texto: 'Asignar o cambiar plan', permiso: PERMISOS_M5.planAsignar },
+  { pagina: 'cartera', texto: 'Cartera', permiso: PERMISOS_M5.carteraConsultar },
   { pagina: 'registrar-pago', texto: 'Registrar pago', permiso: PERMISOS_M5.pagoRegistrar },
+  { pagina: 'historial-pagos', texto: 'Historial de pagos', permiso: PERMISOS_M5.pagoHistorial },
 ]
 
-/** Pantallas de M1 solo para el Administrador (HU-M1-01; la matriz de permisos llega con HU-M1-07). */
-const PANTALLAS_ADMINISTRADOR = [{ pagina: 'nueva-cuenta', texto: 'Nueva cuenta' }]
+/** Pantallas de M1 solo para el Administrador (HU-M1-01 y 05; la matriz de permisos llega con HU-M1-07). */
+const PANTALLAS_ADMINISTRADOR = [{ pagina: 'usuarios', texto: 'Usuarios' }]
+/** Pantallas que no van en el menú: se abren desde otra y resaltan a su pantalla de origen. */
+const SUBPANTALLAS_ADMINISTRADOR: Record<string, string> = { 'nueva-cuenta': 'usuarios' }
 
 /** HU-M1-09: el Administrador y el Acudiente consultan la autorización del menor. */
 const PANTALLA_FAMILIA = { pagina: 'familia-menor', texto: 'Familia del menor' }
@@ -52,12 +63,20 @@ export function Aplicacion() {
     ...(tieneRol('ADMINISTRADOR') ? PANTALLAS_ADMINISTRADOR : []),
     ...(tieneRol('ADMINISTRADOR') || tieneRol('ACUDIENTE') ? [PANTALLA_FAMILIA] : []),
   ]
-  const pagos = PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso))
-  const permitidas = [...usuarios, ...pagos]
+  // «Mis pagos» es la vista del Acudiente y del Patinador (RF-M5-17 y 18); el backend acota los patinadores.
+  const misPagos =
+    tieneRol('ACUDIENTE') || tieneRol('PATINADOR')
+      ? [{ pagina: 'mis-pagos', texto: tieneRol('ACUDIENTE') ? 'Pagos de mis patinadores' : 'Mis pagos' }]
+      : []
+  const pagos = [...PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso)), ...misPagos]
+  const subpantallas = tieneRol('ADMINISTRADOR') ? Object.keys(SUBPANTALLAS_ADMINISTRADOR) : []
+  const permitidas = [...usuarios, ...pagos, ...subpantallas.map((p) => ({ pagina: p, texto: p }))]
   const actual = pagina || permitidas[0]?.pagina || ''
   const navegacion = [
     { grupo: 'Usuarios', enlaces: usuarios },
     { grupo: 'Planes y pagos', enlaces: pagos },
+    { grupo: 'Competencias y resultados', enlaces: permitidas.filter((p) => p.pagina === 'm4') },
+    { grupo: 'Planes y pagos', enlaces: permitidas.filter((p) => p.pagina !== 'm4') },
   ]
 
   let contenido
@@ -76,10 +95,16 @@ export function Aplicacion() {
       <div className="app-page">
         <h1>Sin acceso</h1>
         <Alerta tono="warning" titulo="No tienes acceso a esta pantalla">
-          <p>Usa el menú para ir a las pantallas de tu rol.</p>
+          <p>
+            {permitidas.length > 0
+              ? 'Usa el menú para ir a las pantallas de tu rol.'
+              : 'Tu rol no tiene pantallas habilitadas.'}
+          </p>
         </Alerta>
       </div>
     )
+  } else if (actual === 'usuarios') {
+    contenido = <Usuarios key={sesion.id} />
   } else if (actual === 'nueva-cuenta') {
     contenido = <NuevaCuenta key={sesion.id} />
   } else if (actual === 'familia-menor') {
@@ -90,8 +115,16 @@ export function Aplicacion() {
         patinadorInicial={Number.isInteger(patinador) && patinador > 0 ? patinador : undefined}
       />
     )
+  } else if (actual === 'm4') {
+    contenido = <M4Modulo key={sesion.id} />
   } else if (actual === 'planes') {
     contenido = <PlanesTarifas key={sesion.id} />
+  } else if (actual === 'cartera') {
+    contenido = <Cartera key={sesion.id} />
+  } else if (actual === 'historial-pagos') {
+    contenido = <HistorialPagos key={sesion.id} />
+  } else if (actual === 'mis-pagos') {
+    contenido = <MisPagos key={sesion.id} />
   } else if (actual === 'asignar-plan') {
     contenido = (
       <AsignarCambiarPlan
@@ -112,7 +145,7 @@ export function Aplicacion() {
   }
 
   return (
-    <MarcoAplicacion navegacion={navegacion} paginaActual={actual}>
+    <MarcoAplicacion navegacion={navegacion} paginaActual={SUBPANTALLAS_ADMINISTRADOR[actual] ?? actual}>
       {contenido}
     </MarcoAplicacion>
   )

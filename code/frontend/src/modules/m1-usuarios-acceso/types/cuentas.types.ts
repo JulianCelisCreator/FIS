@@ -11,6 +11,45 @@ export const ROLES_CUENTA: { rol: RolCuenta; texto: string }[] = [
   { rol: 'FISIOTERAPEUTA', texto: 'Fisioterapeuta' },
 ]
 
+export type EstadoCuenta = 'POR_REGISTRAR' | 'ACTIVA' | 'DESACTIVADA'
+
+/** Estado para la insignia del catálogo (entidad «cuenta»). */
+export const ESTADO_INSIGNIA: Record<EstadoCuenta, string> = {
+  POR_REGISTRAR: 'por-registrar',
+  ACTIVA: 'activa',
+  DESACTIVADA: 'desactivada',
+}
+
+export const ESTADOS_CUENTA: { estado: EstadoCuenta; texto: string }[] = [
+  { estado: 'ACTIVA', texto: 'Activa' },
+  { estado: 'POR_REGISTRAR', texto: 'Por registrar' },
+  { estado: 'DESACTIVADA', texto: 'Desactivada' },
+]
+
+/** Fila del listado «Usuarios» (GET /m1/cuentas, HU-M1-05). */
+export interface CuentaListada {
+  id: number
+  nombre: string
+  correo: string
+  roles: Rol[]
+  estado: EstadoCuenta
+  ultimoIngresoEn: string | null
+}
+
+export interface PaginaCuentas {
+  cuentas: CuentaListada[]
+  total: number
+  pagina: number
+  tamano: number
+}
+
+export interface FiltrosCuentas {
+  buscar?: string
+  rol?: Rol
+  estado?: EstadoCuenta
+  pagina: number
+}
+
 /** Cuerpo de POST /m1/cuentas. */
 export interface DatosCuenta {
   nombres: string
