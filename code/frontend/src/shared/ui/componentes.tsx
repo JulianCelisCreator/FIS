@@ -89,6 +89,11 @@ const ESTADOS: Record<string, Record<string, [string, Tono]>> = {
     conflicto: ['Conflicto', 'error'],
     asignado: ['Asignado', 'info'],
   },
+  horario: {
+    activo: ['Programado', 'success'],
+    reprogramado: ['Reprogramado', 'info'],
+    cancelado: ['Anulado', 'neutral'],
+  },
 }
 
 export function Insignia({ entidad, estado }: { entidad: string; estado: string }) {

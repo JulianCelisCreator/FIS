@@ -1,7 +1,7 @@
 /**
  * Tipos compartidos para el Módulo 3 (Grupos, Horarios y Programación - Grupo 2).
- * Alineados con API-M3-01, API-M3-02 y las dependencias DEP-M1-02, DEP-M2-01,
- * DEP-M2-02, DEP-G4-01 y DEP-M6-01.
+ * Alineados con API-M3-01, API-M3-02, API-M3-03 y las dependencias DEP-M1-02,
+ * DEP-M1-05, DEP-M2-01, DEP-M2-02, DEP-G4-01 y DEP-M6-01.
  */
 
 export type DiaSemanaM3 =
@@ -17,12 +17,43 @@ export type EstadoCupoGrupoM3 = 'con-cupo' | 'alerta-90' | 'lleno'
 
 export type RolDocenteGrupoM3 = 'TITULAR' | 'ASISTENTE'
 
+export type EstadoHorarioM3 = 'ACTIVO' | 'REPROGRAMADO' | 'CANCELADO'
+
+/**
+ * Contrato oficial API-M3-03 (GET /api/v1/horarios)
+ * Respuesta JSON Base: [{ horarioId, grupoId, diaSemana, horaInicio, horaFin, sedeId, estado }]
+ */
 export interface HorarioGrupoM3 {
   id: string
+  horarioId?: string
+  grupoId?: string
+  nombreGrupo?: string
+  nivelNombre?: string
   dia: DiaSemanaM3
+  diaSemana?: DiaSemanaM3
   horaInicio: string
   horaFin: string
+  sedeId?: string
+  sedeNombre?: string
   pista: string
+  estado?: EstadoHorarioM3
+  motivoCancelacion?: string | null
+}
+
+/** DEP-M1-05: Registro auditable de notificación enviada */
+export interface RegistroNotificacionM1 {
+  notificacionId: string
+  destinatariosIds: string[]
+  asunto: string
+  mensaje: string
+  canal: 'EMAIL_PUSH'
+  fechaEnvio: string // ISO 8601: YYYY-MM-DDTHH:mm:ssZ
+  estadoEnvio: 'ENVIADO'
+}
+
+export interface RespuestaOperacionHorarioM3 {
+  horario: HorarioGrupoM3
+  notificacion: RegistroNotificacionM1 | null
 }
 
 export interface ProfesorAsignadoGrupoM3 {
@@ -235,13 +266,50 @@ export const GRUPOS_M3_FALLBACK: GrupoConfiguradoM3[] = [
       },
     ],
     horarios: [
-      { id: 'HOR-00', dia: 'Lunes', horaInicio: '14:00', horaFin: '16:00', pista: 'Pista 1 · Norte' },
+      {
+        id: 'HOR-00',
+        horarioId: 'HOR-00',
+        grupoId: 'GRP-01',
+        nombreGrupo: 'Iniciación Norte A',
+        nivelNombre: 'Iniciación',
+        dia: 'Lunes',
+        diaSemana: 'Lunes',
+        horaInicio: '14:00',
+        horaFin: '16:00',
+        sedeId: 'SEDE-NORTE-P1',
+        sedeNombre: 'Norte',
+        pista: 'Pista 1 · Norte',
+        estado: 'ACTIVO',
+      },
       {
         id: 'HOR-01',
+        horarioId: 'HOR-01',
+        grupoId: 'GRP-01',
+        nombreGrupo: 'Iniciación Norte A',
+        nivelNombre: 'Iniciación',
         dia: 'Martes',
+        diaSemana: 'Martes',
         horaInicio: '15:00',
         horaFin: '17:00',
+        sedeId: 'SEDE-SALITRE-P1',
+        sedeNombre: 'El Salitre',
         pista: 'Pista Principal - El Salitre',
+        estado: 'ACTIVO',
+      },
+      {
+        id: 'HOR-06',
+        horarioId: 'HOR-06',
+        grupoId: 'GRP-01',
+        nombreGrupo: 'Iniciación Norte A',
+        nivelNombre: 'Iniciación',
+        dia: 'Miercoles',
+        diaSemana: 'Miercoles',
+        horaInicio: '08:00',
+        horaFin: '10:00',
+        sedeId: 'SEDE-NORTE-P1',
+        sedeNombre: 'Norte',
+        pista: 'Pista 1 · Norte',
+        estado: 'ACTIVO',
       },
     ],
     activo: true,
@@ -284,8 +352,36 @@ export const GRUPOS_M3_FALLBACK: GrupoConfiguradoM3[] = [
       },
     ],
     horarios: [
-      { id: 'HOR-02', dia: 'Martes', horaInicio: '14:00', horaFin: '16:00', pista: 'Pista 2 · Sur' },
-      { id: 'HOR-03', dia: 'Jueves', horaInicio: '14:00', horaFin: '16:00', pista: 'Pista 2 · Sur' },
+      {
+        id: 'HOR-02',
+        horarioId: 'HOR-02',
+        grupoId: 'GRP-02',
+        nombreGrupo: 'Intermedio Sur B',
+        nivelNombre: 'Intermedio',
+        dia: 'Martes',
+        diaSemana: 'Martes',
+        horaInicio: '14:00',
+        horaFin: '16:00',
+        sedeId: 'SEDE-SUR-P2',
+        sedeNombre: 'Sur',
+        pista: 'Pista 2 · Sur',
+        estado: 'ACTIVO',
+      },
+      {
+        id: 'HOR-03',
+        horarioId: 'HOR-03',
+        grupoId: 'GRP-02',
+        nombreGrupo: 'Intermedio Sur B',
+        nivelNombre: 'Intermedio',
+        dia: 'Jueves',
+        diaSemana: 'Jueves',
+        horaInicio: '14:00',
+        horaFin: '16:00',
+        sedeId: 'SEDE-SUR-P2',
+        sedeNombre: 'Sur',
+        pista: 'Pista 2 · Sur',
+        estado: 'ACTIVO',
+      },
     ],
     activo: true,
   },
@@ -321,8 +417,36 @@ export const GRUPOS_M3_FALLBACK: GrupoConfiguradoM3[] = [
       },
     ],
     horarios: [
-      { id: 'HOR-04', dia: 'Viernes', horaInicio: '16:00', horaFin: '18:00', pista: 'Pista 1 · Norte' },
-      { id: 'HOR-05', dia: 'Sabado', horaInicio: '08:00', horaFin: '10:00', pista: 'Pista 1 · Norte' },
+      {
+        id: 'HOR-04',
+        horarioId: 'HOR-04',
+        grupoId: 'GRP-03',
+        nombreGrupo: 'Avanzado Norte C',
+        nivelNombre: 'Avanzado',
+        dia: 'Viernes',
+        diaSemana: 'Viernes',
+        horaInicio: '14:00',
+        horaFin: '16:00',
+        sedeId: 'SEDE-NORTE-P1',
+        sedeNombre: 'Norte',
+        pista: 'Pista 1 · Norte',
+        estado: 'ACTIVO',
+      },
+      {
+        id: 'HOR-05',
+        horarioId: 'HOR-05',
+        grupoId: 'GRP-03',
+        nombreGrupo: 'Avanzado Norte C',
+        nivelNombre: 'Avanzado',
+        dia: 'Sabado',
+        diaSemana: 'Sabado',
+        horaInicio: '08:00',
+        horaFin: '10:00',
+        sedeId: 'SEDE-NORTE-P1',
+        sedeNombre: 'Norte',
+        pista: 'Pista 1 · Norte',
+        estado: 'ACTIVO',
+      },
     ],
     activo: true,
   },
@@ -335,7 +459,12 @@ export const PROFESORES_BASE_FALLBACK = [
     especialidad: 'Velocidad y Fondo',
     cargo: 'Entrenador Principal de Velocidad',
     estadoContrato: 'ACTIVO',
-    bloquesOcupadosExternos: [] as { diaSemana: DiaSemanaM3; horaInicio: string; horaFin: string; motivo: string }[],
+    bloquesOcupadosExternos: [] as {
+      diaSemana: DiaSemanaM3
+      horaInicio: string
+      horaFin: string
+      motivo: string
+    }[],
   },
   {
     profesorId: 'PROF-02',
