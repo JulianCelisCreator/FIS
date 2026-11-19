@@ -7,6 +7,7 @@ DDL de la base de datos de la plataforma (PostgreSQL 17), común a todos los mó
 | `schema.sql` | Todo el DDL: tablas, restricciones, índices, vistas, comentarios y catálogos semilla. |
 | `compose.yaml` | Contenedor de PostgreSQL que carga `schema.sql` al crearse. |
 | `datos-demo.sql` | Datos de demostración de M5 con los nombres de los wireframes (opcional, se cargan a mano). |
+| `m4-permisos.sql` | Permisos y asignaciones por rol del módulo M4 (ejecutar después de `schema.sql`). |
 
 ## Levantar la base
 
@@ -38,7 +39,30 @@ Para cargar los datos de demostración sobre una base recién creada:
 docker exec -i patinaje-db psql -U patinaje -d patinaje < db/datos-demo.sql
 ```
 
+Los usuarios de demostración ingresan en `/app/` con su correo y la contraseña `Velora2026`. Si cargaste los datos antes de que existiera el inicio de sesión (contraseña `demo`), actualízalos sin recrear la base copiando el hash de `clave_demo` de `datos-demo.sql`:
+
+```sql
+UPDATE usuario SET contrasena_hash = '<hash de clave_demo>' WHERE contrasena_hash = 'demo';
+```
+
 PostgreSQL ejecuta `schema.sql` **solo cuando el volumen está vacío**. Si el archivo cambia, hay que recrear la base con `down -v` y volver a levantarla.
+
+Cambios del esquema que se pueden aplicar sin recrear la base:
+
+```sql
+-- HU-M1-09: versión del texto de la autorización del acudiente que se aceptó.
+ALTER TABLE autorizacion_acudiente ADD COLUMN IF NOT EXISTS version_texto TEXT NOT NULL DEFAULT 'v1';
+```
+
+## Permisos del Módulo M4
+
+Después de levantar una base nueva, ejecutar una vez:
+
+```bash
+psql -h localhost -U patinaje -d patinaje -f db/m4-permisos.sql
+```
+
+El script es idempotente y agrega los permisos M4 a `permiso` y `rol_permiso`. No recrea tablas ni altera los datos existentes.
 
 ## Convenciones
 

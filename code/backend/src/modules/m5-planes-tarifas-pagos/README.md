@@ -14,12 +14,17 @@ Módulo del Grupo 04. Por ahora implementa:
 | RF-M5-08 | Generación automática de cobros mensuales |
 | RF-M5-09 | Registro manual de pago de un cobro (total o parcial) |
 | RF-M5-10 | Registro manual de pago por sesión (plan de día único) |
+| RF-M5-13 | Consulta de cartera con filtros combinables |
+| RF-M5-15 | Descarga del comprobante de pago en PDF |
+| RF-M5-16 | Historial de pagos con filtros y exportación PDF/XLSX |
+| RF-M5-17 | Pagos de los patinadores del acudiente |
+| RF-M5-18 | Pagos del patinador mayor de edad |
 
 Además, cada pago emite su comprobante (RF-M5-14) y devuelve el estado de cartera recalculado (RF-M5-12), que se leen de la base (`comprobante`, `v_estado_cartera`).
 
 ## Endpoints
 
-Todos exigen la cabecera `x-usuario-id` (ver [Autenticación temporal](#autenticación-temporal)). Fechas en `AAAA-MM-DD`, montos en COP.
+Todos exigen una sesión iniciada (ver [Autenticación](#autenticación)). Fechas en `AAAA-MM-DD`, montos en COP.
 
 | Método y ruta | Permiso | Quién |
 | --- | --- | --- |
@@ -39,8 +44,11 @@ Todos exigen la cabecera `x-usuario-id` (ver [Autenticación temporal](#autentic
 | `POST /m5/pagos/cobro` | `M5_PAGO_REGISTRAR` | Administrador, Contador |
 | `POST /m5/pagos/sesion` | `M5_PAGO_REGISTRAR` | Administrador, Contador |
 | `POST /m5/pagos/matricula` | `M5_PAGO_REGISTRAR` | Administrador, Contador |
-
-Además, `GET /sesion` (usuario actual con roles y permisos) y `GET /sesion/usuarios` (usuarios de prueba, solo en desarrollo) sirven a la aplicación mientras M1 no tenga inicio de sesión.
+| `GET /m5/cartera?estado=&planId=&patinador=&acudiente=&venceDesde=&venceHasta=` | `M5_CARTERA_CONSULTAR` | Administrador, Contador |
+| `GET /m5/pagos?desde=&hasta=&medio=&estado=&buscar=` | `M5_PAGO_HISTORIAL` | Administrador, Contador |
+| `GET /m5/pagos/exportar?formato=pdf\|xlsx&…filtros` | `M5_PAGO_HISTORIAL` | Administrador, Contador |
+| `GET /m5/pagos/:id/comprobante.pdf` | `M5_COMPROBANTE_DESCARGAR` | Administrador, Contador, acudiente propio, patinador mayor |
+| `GET /m5/patinadores/:id/estado-cuenta` | — | Administrador, Contador, acudiente propio, patinador mayor |
 
 Los permisos de cada rol están en `rol_permiso` (sembrados en `db/schema.sql`). El permiso habilita la acción; el rol define sobre qué patinadores (`validators/acceso-patinador.validator.ts`).
 
@@ -159,9 +167,17 @@ Errores: `400` datos inválidos, `401` sin usuario, `403` sin permiso o patinado
 
 Las asignaciones y los cambios se registran en `auditoria`.
 
-## Autenticación temporal
+### Consultas (RF-M5-13, 15, 16, 17 y 18)
 
-M1 todavía no implementa el inicio de sesión (M1-02). Mientras tanto, `common/auth/autenticacion-temporal.guard.ts` identifica al usuario por la cabecera `x-usuario-id` y carga sus roles y permisos desde la base. **Es solo para desarrollo:** se niega a funcionar con `NODE_ENV=production`. Cuando M1 entregue la autenticación real, se reemplaza ese guard; los controladores ya reciben el usuario con `@UsuarioActual()` y no cambian.
+- **Cartera:** una fila por patinador activo con su estado (`v_estado_cartera`), saldo, cobros vencidos, vencimiento más antiguo, plan actual y acudientes. Todos los filtros se combinan; el patinador se busca por nombre o documento y el acudiente por nombre. Ordena Vencido → Pendiente → Al día y, dentro de cada estado, por saldo. El resumen (cartera pendiente, conteos y saldo vencido) es de toda la escuela, no del filtro. El estado se calcula al consultar: no hay una «última revisión» que mostrar.
+- **Historial:** incluye los pagos anulados con su motivo, pero el total los excluye. `buscar` encuentra por patinador, documento, acudiente o número de comprobante. Devuelve como máximo 500 pagos (`limite`), del más reciente al más antiguo.
+- **Exportación:** el mismo historial filtrado, en PDF (`pdfkit`, horizontal, con el total) o XLSX (`exceljs`, con fechas y montos como valores reales, filtro automático y la fila «Total sin anulados»). El nombre es `historial-pagos-AAAA-MM-DD.pdf|xlsx`.
+- **Comprobante PDF:** se arma con los datos vigentes del pago: número, fecha, patinador, documento, acudiente, plan, periodo (o sesiones), medio y referencia, y por cobro su valor, los pagos anteriores, este pago y el saldo restante. Si el pago está anulado, lo dice con el motivo. Lleva la nota «Soporte interno de pago. No es factura electrónica.» y se genera en menos de 5 s.
+- **Estado de cuenta:** la vista «Mis pagos» del acudiente y del patinador mayor: cartera, plan con tarifa vigente, cobros (pagados y con saldo) y pagos. Un patinador menor no ve sus pagos; los consulta su acudiente.
+
+## Autenticación
+
+Los controladores usan `AutenticacionGuard` (`common/auth/`), que lee la cookie de sesión que crea M1 al ingresar (`POST /m1/acceso/ingreso`, RF-M1-02). El usuario llega con `@UsuarioActual()`, con sus roles y los permisos de esos roles. Los usuarios de `db/datos-demo.sql` ingresan con la contraseña `Velora2026`.
 
 ## Supuestos para confirmar
 
@@ -175,7 +191,7 @@ M1 todavía no implementa el inicio de sesión (M1-02). Mientras tanto, `common/
 ## Pruebas
 
 ```bash
-pnpm test        # reglas puras: cálculo de cobros y acceso por rol
+pnpm test        # reglas puras: cálculo de cobros, acceso por rol y documentos PDF/XLSX
 pnpm test:e2e    # flujos completos contra PostgreSQL (necesita DB_HOST)
 ```
 

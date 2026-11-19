@@ -5,7 +5,7 @@
 --   docker exec -i patinaje-db psql -U patinaje -d patinaje < db/datos-demo.sql
 --
 -- Las fechas son relativas al mes actual para que la demo siempre tenga sentido.
--- Usuarios (cabecera x-usuario-id o selector de la aplicación):
+-- Usuarios (ingresan en /app/ con su correo y la contraseña Velora2026):
 --   Andrea López (Administradora) · Martha Gómez (Contadora)
 --   Carolina Torres (Acudiente de Sofía y Mateo) · Luis Herrera (Acudiente de Samuel)
 --   Juan Pablo González (Patinador mayor) · Sofía Ramírez Torres (Patinadora menor)
@@ -21,6 +21,8 @@ DECLARE
 
   u_andrea bigint; u_martha bigint; u_carolina bigint; u_luis bigint;
   u_juan bigint;   u_sofia bigint;
+  -- Contraseña de todos los usuarios demo: Velora2026 (hash scrypt, ver m1-usuarios-acceso/utils/contrasena.ts).
+  clave_demo text := 'scrypt$16384$8$1$htSWvut4WlWb0zwCPaPFIA==$+Elg9ogTo6L9e57jxLeb6SF7/r6iJeO3NBKbGQQV35XRcUEiLLq0LSWSXyLskG1GPQLYaAlK3yk5MTf6vXXGCQ==';
   p_sofia bigint;  p_mateo bigint; p_samuel bigint; p_juan bigint; p_valentina bigint;
   pl_clase bigint; pl_formacion bigint; pl_competencia bigint; pl_alto bigint; pl_viejo bigint;
   t_formacion bigint; t_competencia bigint;
@@ -30,17 +32,17 @@ DECLARE
 BEGIN
   -- Usuarios ---------------------------------------------------------------
   INSERT INTO usuario (nombres, apellidos, correo, contrasena_hash, correo_verificado_en)
-  VALUES ('Andrea', 'López', 'andrea.lopez@escuela.com', 'demo', now()) RETURNING id INTO u_andrea;
+  VALUES ('Andrea', 'López', 'andrea.lopez@escuela.com', clave_demo, now()) RETURNING id INTO u_andrea;
   INSERT INTO usuario (nombres, apellidos, correo, contrasena_hash, correo_verificado_en)
-  VALUES ('Martha', 'Gómez', 'martha.gomez@escuela.com', 'demo', now()) RETURNING id INTO u_martha;
+  VALUES ('Martha', 'Gómez', 'martha.gomez@escuela.com', clave_demo, now()) RETURNING id INTO u_martha;
   INSERT INTO usuario (nombres, apellidos, correo, contrasena_hash, correo_verificado_en)
-  VALUES ('Carolina', 'Torres', 'carolina.torres@example.com', 'demo', now()) RETURNING id INTO u_carolina;
+  VALUES ('Carolina', 'Torres', 'carolina.torres@example.com', clave_demo, now()) RETURNING id INTO u_carolina;
   INSERT INTO usuario (nombres, apellidos, correo, contrasena_hash, correo_verificado_en)
-  VALUES ('Luis', 'Herrera', 'luis.herrera@example.com', 'demo', now()) RETURNING id INTO u_luis;
+  VALUES ('Luis', 'Herrera', 'luis.herrera@example.com', clave_demo, now()) RETURNING id INTO u_luis;
   INSERT INTO usuario (nombres, apellidos, correo, contrasena_hash, correo_verificado_en)
-  VALUES ('Juan Pablo', 'González', 'juan.gonzalez@example.com', 'demo', now()) RETURNING id INTO u_juan;
+  VALUES ('Juan Pablo', 'González', 'juan.gonzalez@example.com', clave_demo, now()) RETURNING id INTO u_juan;
   INSERT INTO usuario (nombres, apellidos, correo, contrasena_hash, correo_verificado_en)
-  VALUES ('Sofía', 'Ramírez Torres', 'sofia.ramirez@example.com', 'demo', now()) RETURNING id INTO u_sofia;
+  VALUES ('Sofía', 'Ramírez Torres', 'sofia.ramirez@example.com', clave_demo, now()) RETURNING id INTO u_sofia;
 
   INSERT INTO usuario_rol (usuario_id, rol_id)
   SELECT x.u, r.id FROM (VALUES
@@ -70,6 +72,17 @@ BEGIN
     (u_carolina, p_sofia, 'madre', u_andrea),
     (u_carolina, p_mateo, 'madre', u_andrea),
     (u_luis, p_samuel, 'padre', u_andrea);
+
+  -- Autorización del acudiente y póliza (pantalla «Familia del menor») --------
+  -- Sofía: póliza vigente y autorización pendiente (Carolina puede registrarla).
+  -- Mateo: autorización registrada, pero sin póliza: su perfil sigue Bloqueado.
+  INSERT INTO poliza (patinador_id, aseguradora, numero_poliza, vigente_desde, vigente_hasta,
+                      estado_revision, registrado_por)
+  VALUES (p_sofia, 'Sura', 'POL-882341', current_date - interval '1 month',
+          current_date + interval '11 months', 'APROBADA', u_andrea);
+  INSERT INTO autorizacion_acudiente (patinador_id, acudiente_id, fecha_autorizacion,
+                                      version_texto, registrado_por)
+  VALUES (p_mateo, u_carolina, current_date - interval '5 days', 'v1', u_carolina);
 
   -- Planes y tarifas (planes.html) -----------------------------------------
   INSERT INTO plan (nombre, tipo, dias_por_semana, periodicidad, descripcion, creado_por)
