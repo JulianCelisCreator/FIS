@@ -1,0 +1,7 @@
+export enum PermisoM6 {
+  REPORTE_FINANCIERO = 'M6_REPORTE_FINANCIERO',
+  PERSONAL_GESTIONAR = 'M6_PERSONAL_GESTIONAR',
+  INVENTARIO_GESTIONAR = 'M6_INVENTARIO_GESTIONAR',
+  /** HU-6.1: solo el Administrador (el seed le da todos los permisos). */
+  PANEL_CONSULTAR = 'M6_PANEL_CONSULTAR',
+}
