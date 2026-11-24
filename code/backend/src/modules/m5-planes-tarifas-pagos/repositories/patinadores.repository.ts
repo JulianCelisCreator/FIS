@@ -22,6 +22,8 @@ export interface PatinadorResumen {
   } | null;
   tieneCambioProgramado: boolean;
   matriculaPagada: boolean;
+  /** Valor de la clase de valoración pagada (se abona a la matrícula), o null. */
+  valoracionPagada: number | null;
   estadoCartera: 'AL_DIA' | 'PENDIENTE' | 'VENCIDO';
 }
 
@@ -73,6 +75,9 @@ export class PatinadoresRepository {
               (SELECT count(DISTINCT c.concepto) = 2 FROM cobro c
                 WHERE c.patinador_id = p.id AND c.estado = 'PAGADO'
                   AND c.concepto IN ('MATRICULA', 'GASTOS_ADMINISTRATIVOS')) AS "matriculaPagada",
+              (SELECT c.valor FROM cobro c
+                WHERE c.patinador_id = p.id AND c.concepto = 'VALORACION' AND c.estado = 'PAGADO'
+                ORDER BY c.id DESC LIMIT 1) AS "valoracionPagada",
               ec.estado AS "estadoCartera"
        FROM patinador p
        JOIN v_estado_cartera ec ON ec.patinador_id = p.id
