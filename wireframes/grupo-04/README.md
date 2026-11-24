@@ -2,9 +2,7 @@
 
 ## Integrantes
 
-- 
-- 
-- 
+- Julian Celis
 
 ## Herramienta usada
 
@@ -26,14 +24,32 @@ Módulo 5: **Planes, Tarifas y Pagos** (sección 4.5 del documento de requerimie
 
 | Página | Carpeta | Requisitos | Estado |
 | ------ | ------- | ---------- | ------ |
-| Planes y tarifas (admin) | `planes/` | RF-M5-01 a 05 | Borrador |
-| Oferta de planes | `oferta-planes/` | RF-M5-05 | Borrador |
-| Asignar / cambiar plan | `asignar-plan/` | RF-M5-06, 07, 08 | Borrador |
-| Cartera | `cartera/` | RF-M5-12, 13 | Borrador |
-| Registrar pago (cobro y por sesión) | `registrar-pago/` | RF-M5-09, 10, 14 | Borrador |
-| Historial de pagos | `historial-pagos/` | RF-M5-11, 15, 16 | Borrador |
-| Comprobante de pago | `comprobante/` | RF-M5-14, 15 | Borrador |
-| Pagos del acudiente / Mis pagos (patinador) | `mis-pagos/` | RF-M5-15, 17, 18 | Borrador |
+| Planes y tarifas (admin) | `planes/` | RF-M5-01 a 05 | Implementado |
+| Oferta de planes | `oferta-planes/` | RF-M5-05 | Implementado |
+| Asignar / cambiar plan | `asignar-plan/` | RF-M5-06, 07, 08 | Implementado |
+| Cartera | `cartera/` | RF-M5-12, 13 | Implementado |
+| Registrar pago (cobro y por sesión) | `registrar-pago/` | RF-M5-09, 10, 14 | Implementado |
+| Historial de pagos | `historial-pagos/` | RF-M5-11, 15, 16 | Implementado |
+| Comprobante de pago | `comprobante/` | RF-M5-14, 15 | Implementado |
+| Pagos del acudiente / Mis pagos (patinador) | `mis-pagos/` | RF-M5-15, 17, 18 | Implementado |
+
+Todas las páginas están implementadas en la aplicación (`code/frontend/src/modules/m5-planes-tarifas-pagos/`). La especificación, los criterios de aceptación y la trazabilidad RF → código → prueba están en [`docs/specs/m5-planes-tarifas-pagos.md`](../../docs/specs/m5-planes-tarifas-pagos.md).
+
+## Capturas
+
+Cada carpeta tiene la captura de escritorio (`<pagina>.png`, 1280 px) y la de móvil (`<pagina>-movil.png`, 375 px), de página completa. También se revisó 768 px; ninguna página tiene desplazamiento horizontal.
+
+| Página | Escritorio (1280 px) | Móvil (375 px) |
+| ------ | -------------------- | -------------- |
+| Planes y tarifas | [planes.png](planes/planes.png) | [planes-movil.png](planes/planes-movil.png) |
+| Oferta de planes | [oferta-planes.png](oferta-planes/oferta-planes.png) | [oferta-planes-movil.png](oferta-planes/oferta-planes-movil.png) |
+| Asignar / cambiar plan | [asignar-plan.png](asignar-plan/asignar-plan.png) | [asignar-plan-movil.png](asignar-plan/asignar-plan-movil.png) |
+| Cartera | [cartera.png](cartera/cartera.png) | [cartera-movil.png](cartera/cartera-movil.png) |
+| Registrar pago | [registrar-pago.png](registrar-pago/registrar-pago.png) | [registrar-pago-movil.png](registrar-pago/registrar-pago-movil.png) |
+| Historial de pagos | [historial-pagos.png](historial-pagos/historial-pagos.png) | [historial-pagos-movil.png](historial-pagos/historial-pagos-movil.png) |
+| Comprobante | [comprobante.png](comprobante/comprobante.png) | [comprobante-movil.png](comprobante/comprobante-movil.png) |
+| Pagos del acudiente | [mis-pagos.png](mis-pagos/mis-pagos.png) | [mis-pagos-movil.png](mis-pagos/mis-pagos-movil.png) |
+| Mis pagos (patinador) | [mis-pagos-patinador.png](mis-pagos/mis-pagos-patinador.png) | [mis-pagos-patinador-movil.png](mis-pagos/mis-pagos-patinador-movil.png) |
 
 En `assets/` hay dos archivos compartidos:
 
@@ -69,7 +85,7 @@ En `assets/` hay dos archivos compartidos:
 - **Los pagos no se editan ni se borran**: en el historial, los anulados siguen en la lista con su estado Anulado y su `AuditEntry`, y no suman al total. El botón «Anular» solo aparece para el Administrador.
 - **Estados solo con `StatusBadge`** (ícono más texto), nunca con un color elegido por el equipo.
 - **El Acudiente y el Patinador tienen una vista propia, de solo lectura**, con el estado y el saldo arriba. El acudiente cambia de patinador con el selector «Viendo a» de la barra superior.
-- **Responsive**: el DS resuelve el móvil. Por debajo de 1024 px la navegación pasa a un menú desplegable, las tablas se vuelven tarjetas y los filtros se abren en un panel. Revisado en 375 y 1280 px.
+- **Responsive**: el DS resuelve el móvil. Por debajo de 1024 px la navegación pasa a un menú desplegable, las tablas se vuelven tarjetas y los filtros se abren en un panel. Revisado en 375, 768 y 1280 px.
 - La tarjeta «Notas del wireframe» y las líneas `RF-M5-xx` son anotaciones para la revisión; no forman parte de la interfaz.
 
 ## Brechas del Design System encontradas
