@@ -1090,6 +1090,37 @@ fieldset {
   color: var(--alert-ink);
 }
 
+/* Oferta de planes (RF-M5-05): tarjetas en rejilla, una columna en móvil. */
+.app-oferta {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1rem;
+  margin-inline: 0;
+  margin-bottom: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-oferta__plan {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.app-oferta__precio {
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-subheading);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.app-oferta__precio span {
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: var(--app-fs-small);
+  font-weight: 400;
+}
+
 /* Tablero de cifras (cartera y estado de cuenta): celdas planas separadas por línea de 1 px. */
 .app-tablero {
   display: grid;

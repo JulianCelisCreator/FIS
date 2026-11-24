@@ -24,6 +24,7 @@ export const PERMISOS_M5 = {
   carteraConsultar: 'M5_CARTERA_CONSULTAR',
   pagoHistorial: 'M5_PAGO_HISTORIAL',
   pagoAnular: 'M5_PAGO_ANULAR',
+  planConsultar: 'M5_PLAN_CONSULTAR',
   comprobanteDescargar: 'M5_COMPROBANTE_DESCARGAR',
 } as const
 

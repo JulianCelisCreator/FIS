@@ -9,6 +9,7 @@ import { AsignarCambiarPlan } from '../modules/m5-planes-tarifas-pagos/component
 import { Cartera } from '../modules/m5-planes-tarifas-pagos/components/cartera.tsx'
 import { HistorialPagos } from '../modules/m5-planes-tarifas-pagos/components/historial-pagos.tsx'
 import { MisPagos } from '../modules/m5-planes-tarifas-pagos/components/mis-pagos.tsx'
+import { OfertaPlanes } from '../modules/m5-planes-tarifas-pagos/components/oferta-planes.tsx'
 import { PlanesTarifas } from '../modules/m5-planes-tarifas-pagos/components/planes-tarifas.tsx'
 import {
   RegistrarPago,
@@ -103,6 +104,11 @@ export function Aplicacion() {
     tieneRol('ACUDIENTE') || tieneRol('PATINADOR')
       ? [{ pagina: 'mis-pagos', texto: tieneRol('ACUDIENTE') ? 'Pagos de mis patinadores' : 'Mis pagos' }]
       : []
+  // «Planes de la escuela» (RF-M5-05): quien consulta planes sin gestionarlos (Contador, Acudiente, Patinador).
+  const ofertaPlanes =
+    tienePermiso(PERMISOS_M5.planConsultar) && !tienePermiso(PERMISOS_M5.planGestionar)
+      ? [{ pagina: 'oferta-planes', texto: 'Planes de la escuela' }]
+      : []
   const pantallasPermitidas = PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso))
   const subpantallas = tieneRol('ADMINISTRADOR') ? Object.keys(SUBPANTALLAS_ADMINISTRADOR) : []
   const permitidas = [
@@ -110,6 +116,7 @@ export function Aplicacion() {
     ...gruposHorarios,
     ...pantallasPermitidas,
     ...misPagos,
+    ...ofertaPlanes,
     ...subpantallas.map((p) => ({
       pagina: p,
       texto: p,
@@ -138,7 +145,7 @@ export function Aplicacion() {
           (pantalla) => pantalla.grupo === grupo
         ),
         // Cada pantalla va solo en su grupo; «Mis pagos» no tiene permiso propio y se agrega aparte.
-        ...(grupo === 'Planes y pagos' ? misPagos : []),
+        ...(grupo === 'Planes y pagos' ? [...ofertaPlanes, ...misPagos] : []),
       ],
     })),
   ];
@@ -186,6 +193,8 @@ export function Aplicacion() {
     contenido = <M4Modulo key={sesion.id} />
   } else if (actual === 'planes') {
     contenido = <PlanesTarifas key={sesion.id} />
+  } else if (actual === 'oferta-planes') {
+    contenido = <OfertaPlanes key={sesion.id} />
   } else if (actual === 'cartera') {
     contenido = <Cartera key={sesion.id} />
   } else if (actual === 'historial-pagos') {

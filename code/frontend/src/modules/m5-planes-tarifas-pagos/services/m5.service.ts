@@ -76,6 +76,11 @@ export async function planesParaElegir(esAdministrador: boolean): Promise<PlanOf
   return oferta.planes.map((plan) => ({ ...plan, asignable: true }))
 }
 
+/** RF-M5-05: planes activos con tarifa vigente, la misma vista para todos los roles. */
+export function ofertaDePlanes(): Promise<{ fecha: string; planes: Omit<PlanOfertado, 'asignable'>[] }> {
+  return pedir('/m5/planes/oferta')
+}
+
 export function planDelPatinador(patinadorId: number): Promise<PlanDelPatinador> {
   return pedir(`/m5/patinadores/${patinadorId}/plan`)
 }
