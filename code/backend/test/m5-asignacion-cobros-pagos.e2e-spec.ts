@@ -190,14 +190,14 @@ describe.skipIf(!process.env.DB_HOST)('M5 asignación, cobros y pagos (e2e)', ()
       expect(res.body.primerCobro.valor).toBe(valorPrimeraMensualidad(180000, hoy));
       expect(res.body.primerCobro.periodo).toBe(primerDiaDelMes(hoy));
       expect(res.body.primerCobro.fechaLimite >= hoy).toBe(true);
-      expect(res.body.primerCobro.vencidoDesde).toBe(sumarDias(res.body.primerCobro.fechaLimite, 5));
-      // Mes siguiente completo: se paga hasta el día 5 y pasa a «Vencido» desde el día 10.
+      expect(res.body.primerCobro.vencidoDesde).toBe(sumarDias(res.body.primerCobro.fechaLimite, 1));
+      // Mes siguiente completo: se paga hasta el día 5 y pasa a «Vencido» desde el día 6.
       const siguiente = primerDiaMesSiguiente(hoy);
       expect(res.body.siguienteCobro).toEqual({
         periodo: siguiente,
         valor: 180000,
         fechaLimite: sumarDias(siguiente, 4),
-        vencidoDesde: sumarDias(siguiente, 9),
+        vencidoDesde: sumarDias(siguiente, 5),
       });
       ids.cobroMayor = res.body.primerCobro.id;
     });
@@ -447,10 +447,10 @@ describe.skipIf(!process.env.DB_HOST)('M5 asignación, cobros y pagos (e2e)', ()
     });
   });
 
-  describe('mora con días de gracia (RF-M5-12)', () => {
-    it('el cobro pasa a vencido cuando se cumplen los días de gracia tras la fecha límite', async () => {
+  describe('mora (RF-M5-12)', () => {
+    it('el cobro pasa a vencido el día siguiente a su fecha límite', async () => {
       const patinador = await crearPatinador('mora', '1995-03-01');
-      for (const diasAtras of [4, 5]) {
+      for (const diasAtras of [0, 1]) {
         await baseDatos.consultar(
           `INSERT INTO cobro (patinador_id, concepto, descripcion, valor, fecha_limite)
            VALUES ($1, 'SESION', $2, 10000, $3)`,
@@ -464,8 +464,8 @@ describe.skipIf(!process.env.DB_HOST)('M5 asignación, cobros y pagos (e2e)', ()
       expect(
         res.body.cobros.map((c: { descripcion: string; vencido: boolean }) => [c.descripcion, c.vencido]),
       ).toEqual([
-        ['Vence hace 5 días', true],
-        ['Vence hace 4 días', false],
+        ['Vence hace 1 días', true],
+        ['Vence hace 0 días', false],
       ]);
     });
   });
