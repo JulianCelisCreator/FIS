@@ -14,6 +14,8 @@ import {
   pagarCobro,
   pagarMatricula,
   pagarSesiones,
+  pagarValoracion,
+  parametrosPago,
   planesParaElegir,
   urlComprobante,
 } from '../services/m5.service.ts'
@@ -23,6 +25,7 @@ import {
   PERMISOS_M5,
   type CobroPendiente,
   type EstadoCartera,
+  type ParametrosPago,
   type PatinadorM5,
   type ValoresTransaccion,
 } from '../types/m5.types.ts'
@@ -31,24 +34,49 @@ import { CamposTransaccion } from './campos-transaccion.tsx'
 import { DatosPatinador, SelectorPatinador } from './selector-patinador.tsx'
 import { usePatinadores } from './use-patinadores.ts'
 
-export type PestanaPago = 'cobro' | 'sesion' | 'matricula'
+export type PestanaPago = 'cobro' | 'sesion' | 'valoracion' | 'matricula'
 
 const PESTANAS: { id: PestanaPago; texto: string }[] = [
-  { id: 'cobro', texto: 'Pago de un cobro mensual' },
+  { id: 'cobro', texto: 'Pago de un cobro' },
   { id: 'sesion', texto: 'Pago por sesión' },
+  { id: 'valoracion', texto: 'Clase de valoración' },
   { id: 'matricula', texto: 'Matrícula y gastos administrativos' },
 ]
 
 const FILTRO: Record<PestanaPago, (p: PatinadorM5) => boolean> = {
   cobro: () => true,
   sesion: (p) => p.planActual?.periodicidad === 'POR_SESION',
+  valoracion: (p) => !p.matriculaPagada && p.valoracionPagada === null,
   matricula: (p) => !p.matriculaPagada,
 }
 
 const SIN_RESULTADOS: Record<PestanaPago, string> = {
   cobro: 'No se encontraron patinadores.',
   sesion: 'No hay patinadores con plan de día único activo.',
+  valoracion: 'No hay patinadores pendientes de valoración (sin matrícula ni valoración pagada).',
   matricula: 'No hay patinadores con la matrícula pendiente.',
+}
+
+/** Día anterior a una fecha AAAA-MM-DD. */
+function diaAnterior(iso: string): string {
+  const fecha = new Date(`${iso}T00:00:00Z`)
+  fecha.setUTCDate(fecha.getUTCDate() - 1)
+  return fecha.toISOString().slice(0, 10)
+}
+
+/** Valores provisionales (valoración y recargos) que define la escuela en sus parámetros. */
+function useParametrosPago(): ParametrosPago | null {
+  const [parametros, setParametros] = useState<ParametrosPago | null>(null)
+  useEffect(() => {
+    let vigente = true
+    parametrosPago()
+      .then((datos) => vigente && setParametros(datos))
+      .catch(() => undefined)
+    return () => {
+      vigente = false
+    }
+  }, [])
+  return parametros
 }
 
 function textoMedio(medio: string): string {
@@ -142,6 +170,9 @@ export function RegistrarPago({
         )}
         {patinador && pestana === 'cobro' && <PagoCobro key={patinador.id} patinador={patinador} alTerminar={reiniciar} />}
         {patinador && pestana === 'sesion' && <PagoSesion key={patinador.id} patinador={patinador} alTerminar={reiniciar} />}
+        {patinador && pestana === 'valoracion' && (
+          <PagoValoracion key={patinador.id} patinador={patinador} alTerminar={reiniciar} />
+        )}
         {patinador && pestana === 'matricula' && (
           <PagoMatricula key={patinador.id} patinador={patinador} alTerminar={reiniciar} />
         )}
@@ -349,6 +380,8 @@ function PagoSesion({ patinador, alTerminar }: { patinador: PatinadorM5; alTermi
   const [tarifa, setTarifa] = useState<number | null>(null)
   const [sesiones, setSesiones] = useState(1)
   const [transaccion, setTransaccion] = useState(transaccionVacia(hoy))
+  const [fechaClase, setFechaClase] = useState(hoy)
+  const parametros = useParametrosPago()
   const [intentado, setIntentado] = useState(false)
   const [enviando, setEnviando] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -363,7 +396,16 @@ function PagoSesion({ patinador, alTerminar }: { patinador: PatinadorM5; alTermi
 
   const errorSesiones = Number.isInteger(sesiones) && sesiones >= 1 && sesiones <= 31 ? null : 'Indica entre 1 y 31 sesiones.'
   const errores = erroresTransaccion(transaccion, hoy)
-  const valido = errorSesiones === null && Object.keys(errores).length === 0
+  // Día de gracia: la clase de ayer se puede pagar hoy con recargo; antes de eso, ya no.
+  const diaDeGracia = Boolean(transaccion.fechaPago) && fechaClase === diaAnterior(transaccion.fechaPago)
+  const errorFechaClase = !fechaClase
+    ? 'Indica la fecha de la clase.'
+    : transaccion.fechaPago && fechaClase < diaAnterior(transaccion.fechaPago)
+      ? 'Una sesión atrasada solo se puede pagar hasta el día siguiente a la clase.'
+      : null
+  const valorSesiones = tarifa === null ? null : tarifa * sesiones
+  const recargo = diaDeGracia && valorSesiones !== null && parametros ? Math.round((valorSesiones * parametros.recargoSesionPct) / 100) : 0
+  const valido = errorSesiones === null && errorFechaClase === null && Object.keys(errores).length === 0
 
   const enviar = async (evento: FormEvent) => {
     evento.preventDefault()
@@ -372,7 +414,9 @@ function PagoSesion({ patinador, alTerminar }: { patinador: PatinadorM5; alTermi
     setEnviando(true)
     setError(null)
     try {
-      setResultado(await pagarSesiones({ patinadorId: patinador.id, numeroSesiones: sesiones, ...aDatosTransaccion(transaccion) }))
+      setResultado(
+        await pagarSesiones({ patinadorId: patinador.id, numeroSesiones: sesiones, fechaClase, ...aDatosTransaccion(transaccion) }),
+      )
     } catch (e) {
       setError((e as Error).message)
     } finally {
@@ -390,7 +434,8 @@ function PagoSesion({ patinador, alTerminar }: { patinador: PatinadorM5; alTermi
         alTerminar={alTerminar}
         filas={[
           ['Patinador', patinador.nombre],
-          ['Sesiones', `${resultado.numeroSesiones} × ${formatoCop(resultado.valorSesion)}`],
+          ['Sesiones', `${resultado.numeroSesiones} × ${formatoCop(resultado.valorSesion)} · clase del ${formatoFecha(resultado.fechaClase)}`],
+          ...(resultado.recargo > 0 ? [['Recargo (pagó al día siguiente)', formatoCop(resultado.recargo)] as [string, ReactNode]] : []),
           ['Monto', `${formatoCop(resultado.monto)} · ${textoMedio(transaccion.medioPago)}`],
         ]}
       />
@@ -417,12 +462,38 @@ function PagoSesion({ patinador, alTerminar }: { patinador: PatinadorM5; alTermi
           onChange={(evento) => setSesiones(Number(evento.target.value))}
         />
       </Campo>
+      <Campo
+        etiqueta="Fecha de la clase"
+        id="fecha-clase"
+        obligatorio
+        ayuda="Se paga el día de la clase o antes. La clase de ayer se puede pagar hoy con recargo (día de gracia)."
+        error={intentado || errorFechaClase?.startsWith('Una sesión') ? errorFechaClase : null}
+      >
+        <input
+          id="fecha-clase"
+          className="vl-input"
+          type="date"
+          min={transaccion.fechaPago ? diaAnterior(transaccion.fechaPago) : undefined}
+          value={fechaClase}
+          onChange={(evento) => setFechaClase(evento.target.value)}
+        />
+      </Campo>
       <CamposTransaccion valores={transaccion} alCambiar={setTransaccion} hoy={hoy} errores={intentado ? errores : {}} />
-      {tarifa !== null && errorSesiones === null && (
-        <p className="vl-text-body-sm">
-          Se crea un cobro por <strong>{formatoCop(tarifa * sesiones)}</strong> que queda pagado de una vez, sin saldo, y se genera el
-          comprobante.
-        </p>
+      {valorSesiones !== null && errorSesiones === null && errorFechaClase === null && (
+        <>
+          {diaDeGracia && (
+            <Alerta tono="warning" titulo="Pago en el día de gracia">
+              <p>
+                La clase fue el día anterior al pago: se suma un recargo del {parametros?.recargoSesionPct ?? '—'} %
+                ({formatoCop(recargo)}).
+              </p>
+            </Alerta>
+          )}
+          <p className="vl-text-body-sm">
+            Se crea un cobro por <strong>{formatoCop(valorSesiones + recargo)}</strong> que queda pagado de una vez, sin saldo, y se
+            genera el comprobante.
+          </p>
+        </>
       )}
       {error && <Alerta tono="error" titulo="No se pudo registrar el pago">{error}</Alerta>}
       <div className="app-actions">
@@ -452,6 +523,8 @@ function PagoMatricula({ patinador, alTerminar }: { patinador: PatinadorM5; alTe
   const errorGastos = gastos && gastos > 0 ? null : 'Ingresa un valor mayor que cero para los gastos administrativos.'
   const errores = erroresTransaccion(transaccion, hoy)
   const valido = !errorMatricula && !errorGastos && Object.keys(errores).length === 0
+  // La clase de valoración pagada se descuenta de la matrícula (provisional, reunión del 19/11/2026).
+  const abono = patinador.valoracionPagada && matricula ? Math.min(patinador.valoracionPagada, matricula - 1) : 0
 
   const enviar = async (evento: FormEvent) => {
     evento.preventDefault()
@@ -485,6 +558,9 @@ function PagoMatricula({ patinador, alTerminar }: { patinador: PatinadorM5; alTe
         alTerminar={alTerminar}
         filas={[
           ['Patinador', patinador.nombre],
+          ...(resultado.abonoValoracion > 0
+            ? [['Abono de la clase de valoración', `− ${formatoCop(resultado.abonoValoracion)}`] as [string, ReactNode]]
+            : []),
           ['Total registrado', `${formatoCop(resultado.monto)} · ${textoMedio(transaccion.medioPago)}`],
         ]}
       >
@@ -526,7 +602,14 @@ function PagoMatricula({ patinador, alTerminar }: { patinador: PatinadorM5; alTe
           onBlur={() => gastos !== null && setGastosTexto(formatoCop(gastos))}
         />
       </Campo>
-      <ListaDatos filas={[['Total matrícula + gastos administrativos', formatoCop((matricula ?? 0) + (gastos ?? 0))]]} />
+      <ListaDatos
+        filas={[
+          ...(patinador.valoracionPagada
+            ? [['Abono de la clase de valoración', `− ${formatoCop(abono || patinador.valoracionPagada)}`] as [string, ReactNode]]
+            : []),
+          ['Total a pagar', formatoCop(Math.max((matricula ?? 0) - abono, 0) + (gastos ?? 0))],
+        ]}
+      />
       <CamposTransaccion valores={transaccion} alCambiar={setTransaccion} hoy={hoy} errores={intentado ? errores : {}} />
       {error && <Alerta tono="error" titulo="No se pudo registrar el pago">{error}</Alerta>}
       <div className="app-actions">
@@ -535,6 +618,68 @@ function PagoMatricula({ patinador, alTerminar }: { patinador: PatinadorM5; alTe
         )}
         <button className="vl-button vl-button--primary" type="submit" disabled={enviando}>
           {enviando ? 'Registrando…' : 'Registrar matrícula y gastos'}
+        </button>
+      </div>
+    </form>
+  )
+}
+
+/** Clase de valoración previa a la inscripción; su valor se abona a la matrícula (reunión del 19/11/2026). */
+function PagoValoracion({ patinador, alTerminar }: { patinador: PatinadorM5; alTerminar: () => void }) {
+  const hoy = hoyEnClub()
+  const parametros = useParametrosPago()
+  const [transaccion, setTransaccion] = useState(transaccionVacia(hoy))
+  const [intentado, setIntentado] = useState(false)
+  const [enviando, setEnviando] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [resultado, setResultado] = useState<Awaited<ReturnType<typeof pagarValoracion>> | null>(null)
+  const errores = erroresTransaccion(transaccion, hoy)
+
+  const enviar = async (evento: FormEvent) => {
+    evento.preventDefault()
+    setIntentado(true)
+    if (Object.keys(errores).length > 0) return
+    setEnviando(true)
+    setError(null)
+    try {
+      setResultado(await pagarValoracion({ patinadorId: patinador.id, ...aDatosTransaccion(transaccion) }))
+    } catch (e) {
+      setError((e as Error).message)
+    } finally {
+      setEnviando(false)
+    }
+  }
+
+  if (resultado) {
+    return (
+      <PagoRegistrado
+        mensaje="Se registró la clase de valoración"
+        comprobante={resultado.comprobante.numero}
+        pagoId={resultado.pagoId}
+        estadoCartera={resultado.estadoCartera.estado}
+        alTerminar={alTerminar}
+        filas={[
+          ['Patinador', patinador.nombre],
+          ['Monto', `${formatoCop(resultado.monto)} · ${textoMedio(transaccion.medioPago)}`],
+        ]}
+      >
+        <p className="vl-text-body-sm">Si se inscribe, este valor se descuenta de la matrícula.</p>
+      </PagoRegistrado>
+    )
+  }
+
+  return (
+    <form className="vl-card vl-stack" aria-labelledby="titulo-valoracion" onSubmit={enviar} noValidate>
+      <h2 id="titulo-valoracion" className="vl-text-heading-h4">2. Datos del pago</h2>
+      <ListaDatos filas={[['Clase de valoración', parametros ? formatoCop(parametros.valorValoracion) : '—']]} />
+      <Alerta tono="info" titulo="Se abona a la matrícula">
+        <p>La valoración se paga una sola vez, antes de inscribirse. Si la persona se inscribe, su valor se descuenta de la matrícula.</p>
+      </Alerta>
+      <CamposTransaccion valores={transaccion} alCambiar={setTransaccion} hoy={hoy} errores={intentado ? errores : {}} />
+      {error && <Alerta tono="error" titulo="No se pudo registrar el pago">{error}</Alerta>}
+      <div className="app-actions">
+        <button className="vl-button vl-button--primary" type="submit" disabled={enviando}>
+          {enviando ? 'Registrando…' : 'Registrar valoración'}
         </button>
       </div>
     </form>

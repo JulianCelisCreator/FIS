@@ -210,8 +210,8 @@ function CuentaDelPatinador({ patinador, esAcudiente }: { patinador: PatinadorM5
       <Alerta tono="info" titulo="¿Cómo pagar?">
         <p>
           Acércate a la sede o haz una transferencia y envía el soporte a la administración. La escuela registra el pago; no
-          hay pagos en línea. Los cobros mensuales se pagan hasta su fecha límite y, si queda saldo, se marcan «Vencido»
-          después de los días de gracia.
+          hay pagos en línea. Las mensualidades se pagan del día 1 al 5 y desde el día 6 se marcan «Vencido». Si un mes
+          queda sin pagar, desde el mes siguiente se cobra un recargo por mora y al tercer mes se cancela el plan.
         </p>
       </Alerta>
 

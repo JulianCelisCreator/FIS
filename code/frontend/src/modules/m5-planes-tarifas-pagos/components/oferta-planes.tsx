@@ -80,11 +80,13 @@ export function OfertaPlanes() {
               {plan.descripcion && <p className="vl-text-body-sm">{plan.descripcion}</p>}
               {plan.periodicidad === 'MENSUAL' ? (
                 <p className="vl-text-body-sm">
-                  Pago del día 1 al {plan.diaLimitePago ?? 5} de cada mes; si queda saldo, pasa a «Vencido» después de los
-                  días de gracia.
+                  Pago del día 1 al {plan.diaLimitePago ?? 5} de cada mes; si queda saldo, pasa a «Vencido» desde el día
+                  siguiente.
                 </p>
               ) : (
-                !plan.descripcion && <p className="vl-text-body-sm">Se paga en la sede el día de la clase.</p>
+                <p className="vl-text-body-sm">
+                  Se paga el día de la clase o antes; la clase de ayer se puede pagar hoy con recargo.
+                </p>
               )}
             </li>
           ))}

@@ -19,6 +19,8 @@ import type {
   RespuestaHistorial,
   TipoPlan,
   ResultadoAnulacion,
+  ResultadoValoracion,
+  ParametrosPago,
 } from '../types/m5.types.ts'
 
 // --- Planes y tarifas (RF-M5-01 a RF-M5-05) ---
@@ -103,9 +105,19 @@ export function pagarCobro(datos: DatosTransaccion & { cobroId: number; monto: n
 }
 
 export function pagarSesiones(
-  datos: DatosTransaccion & { patinadorId: number; numeroSesiones: number },
+  datos: DatosTransaccion & { patinadorId: number; numeroSesiones: number; fechaClase?: string },
 ): Promise<ResultadoPagoSesion> {
   return pedir('/m5/pagos/sesion', { metodo: 'POST', cuerpo: datos })
+}
+
+/** Clase de valoración previa a la inscripción; se abona a la matrícula. */
+export function pagarValoracion(datos: DatosTransaccion & { patinadorId: number }): Promise<ResultadoValoracion> {
+  return pedir('/m5/pagos/valoracion', { metodo: 'POST', cuerpo: datos })
+}
+
+/** Valor de la valoración y porcentajes de recargo vigentes. */
+export function parametrosPago(): Promise<ParametrosPago> {
+  return pedir('/m5/pagos/parametros')
 }
 
 export function pagarMatricula(
