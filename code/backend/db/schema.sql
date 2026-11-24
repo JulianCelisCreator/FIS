@@ -518,6 +518,7 @@ CREATE TABLE asignacion_plan (
   fecha_fin             DATE CHECK (fecha_fin IS NULL OR fecha_fin >= fecha_inicio),
   asignacion_anterior_id BIGINT REFERENCES asignacion_plan(id),  -- cambio de plan (M5-07)
   motivo_cambio         TEXT,
+  motivo_fin            TEXT,                -- p. ej. cancelación por no pago (reunión 19/11)
   asignado_por          BIGINT NOT NULL REFERENCES usuario(id),  -- Adm, acudiente o patinador mayor
   creado_en             TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -533,7 +534,10 @@ CREATE TABLE cobro (
   tarifa_id           BIGINT REFERENCES tarifa(id),
   concepto            TEXT NOT NULL CHECK (concepto IN ('MENSUALIDAD','SESION','MATRICULA',
                                                         'GASTOS_ADMINISTRATIVOS','VENTA_UNIFORME',
-                                                        'PRESTAMO_IMPLEMENTO')),  -- M6-08
+                                                        'PRESTAMO_IMPLEMENTO',   -- M6-08
+                                                        'VALORACION','RECARGO_MORA')),  -- M5 (reunión 19/11)
+  -- Recargo por mora: cobro (mensualidad o sesión) que lo originó.
+  cobro_origen_id     BIGINT REFERENCES cobro(id),
   periodo             DATE,                  -- primer día del mes cobrado (mensualidades)
   descripcion         TEXT,
   valor               NUMERIC(14,2) NOT NULL CHECK (valor > 0),
@@ -553,6 +557,9 @@ CREATE TABLE cobro (
 -- Evita generar dos veces la mensualidad del mismo mes (el proceso del día 1 es reintentable).
 CREATE UNIQUE INDEX cobro_mensualidad_uk ON cobro (asignacion_plan_id, periodo)
   WHERE concepto = 'MENSUALIDAD' AND estado <> 'ANULADO';
+-- Un solo recargo por mora mensual por cada mensualidad (el proceso diario es reintentable).
+CREATE UNIQUE INDEX cobro_recargo_uk ON cobro (cobro_origen_id)
+  WHERE concepto = 'RECARGO_MORA' AND estado <> 'ANULADO';
 CREATE INDEX cobro_patinador_idx ON cobro (patinador_id, estado, fecha_limite);
 COMMENT ON TABLE cobro IS
   '[M5] Obligaciones de pago (M5-08). Las mensualidades las genera el sistema el día 1; también se registran sesiones, matrícula, gastos administrativos y venta de uniformes (M6-07). Estado PAGADO cuando los pagos aplicados cubren el valor; el saldo está en v_saldo_cobro.';
@@ -1122,7 +1129,10 @@ INSERT INTO rol (codigo, nombre, descripcion) VALUES
 INSERT INTO parametro_sistema (clave, valor, descripcion) VALUES
   ('alerta_aforo_porcentaje',          '90',    'M3-02: % de ocupación que dispara la alerta del grupo'),
   ('dia_generacion_cobros',            '1',     'M5-08: día del mes en que se generan las mensualidades'),
-  ('dias_gracia_mora',                 '4',     'M5-12: días después de la fecha límite antes de pasar a Vencido (límite día 5 → vencido desde el día 10)'),
+  ('dias_gracia_mora',                 '0',     'M5-12: días después de la fecha límite antes de pasar a Vencido (límite día 5 → vencido desde el día 6)'),
+  ('recargo_mora_mensual_pct',         '10',    'M5-12: % de la mensualidad que se cobra como recargo si llega al mes siguiente sin pagar (provisional)'),
+  ('recargo_sesion_pct',               '10',    'M5-10: % por sesión si se paga al día siguiente de la clase (día de gracia, provisional)'),
+  ('valor_clase_valoracion',           '10000', 'M5: valor de la clase de valoración; se abona a la matrícula si se inscribe (provisional)'),
   ('observaciones_visibles_patinador', 'false', 'M2-23: si el club permite al patinador ver las observaciones'),
   ('zona_horaria',                     'America/Bogota', 'Zona horaria del club');
 

@@ -9,7 +9,7 @@ DDL de la base de datos de la plataforma (PostgreSQL 17), común a todos los mó
 | `datos-demo.sql` | Datos de demostración de M5 con los nombres de los wireframes (opcional, se cargan a mano). |
 | `m4-permisos.sql` | Permisos y asignaciones por rol del módulo M4 (ejecutar después de `schema.sql`). |
 | `datos-demo-m6.sql` | Datos de demostración de M6 (personal, proveedores, inventario, ventas con devoluciones y préstamos). Requiere `datos-demo.sql`. |
-| `migraciones/` | Scripts para aplicar cambios de `schema.sql` a una base ya creada sin borrar datos (`psql … -f db/migraciones/<archivo>.sql`). Una base nueva no los necesita. La migración `2026-11-19-m6-foto-uniforme.sql` agrega la foto de inventario. `2026-11-19-m6-ventas-formato-actual.sql` actualiza el formato anterior de ventas solo si no existen ventas; de lo contrario, requiere conciliación manual. |
+| `migraciones/` | Scripts para aplicar cambios de `schema.sql` a una base ya creada sin borrar datos (`psql … -f db/migraciones/<archivo>.sql`). Una base nueva no los necesita. La migración `2026-11-19-m6-foto-uniforme.sql` agrega la foto de inventario. `2026-11-19-m6-ventas-formato-actual.sql` actualiza el formato anterior de ventas solo si no existen ventas; de lo contrario, requiere conciliación manual. `2026-11-23-m5-reglas-del-cliente.sql` aplica las reglas de pago de la reunión con el cliente (día límite 5, recargos por mora, clase de valoración y cancelación por no pago). |
 
 ## Levantar la base
 
