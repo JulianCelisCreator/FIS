@@ -95,6 +95,35 @@ export class CobrosRepository {
     await consultor.query(`UPDATE cobro SET estado = 'PAGADO' WHERE id = $1`, [cobroId]);
   }
 
+  /** Bloquea varios cobros en orden de id, para no generar bloqueos cruzados. */
+  async bloquear(consultor: Consultor, cobroIds: number[]): Promise<void> {
+    await consultor.query('SELECT id FROM cobro WHERE id = ANY($1::bigint[]) ORDER BY id FOR UPDATE', [cobroIds]);
+  }
+
+  /**
+   * Recalcula el estado con los pagos que siguen registrados: si le queda
+   * saldo vuelve a PENDIENTE (RF-M5-11). Un cobro anulado no cambia.
+   */
+  async recalcularEstado(consultor: Consultor, cobroId: number): Promise<'PENDIENTE' | 'PAGADO' | 'ANULADO'> {
+    const { rows } = await consultor.query<{ estado: 'PENDIENTE' | 'PAGADO' | 'ANULADO' }>(
+      `UPDATE cobro c
+       SET estado = CASE WHEN s.saldo <= 0 THEN 'PAGADO' ELSE 'PENDIENTE' END
+       FROM v_saldo_cobro s
+       WHERE c.id = $1 AND s.cobro_id = c.id AND c.estado <> 'ANULADO'
+       RETURNING c.estado`,
+      [cobroId],
+    );
+    return rows[0]?.estado ?? 'ANULADO';
+  }
+
+  /** Anula un cobro con su motivo (el de sesiones que nace y muere con su pago). */
+  async anular(consultor: Consultor, cobroId: number, motivo: string): Promise<void> {
+    await consultor.query(
+      `UPDATE cobro SET estado = 'ANULADO', anulado_en = now(), motivo_anulacion = $2 WHERE id = $1`,
+      [cobroId, motivo],
+    );
+  }
+
   /** Cobros con saldo, del vencimiento más antiguo al más reciente. */
   async pendientes(consultor: Consultor, patinadorId: number): Promise<CobroPendiente[]> {
     const { rows } = await consultor.query<CobroPendiente>(

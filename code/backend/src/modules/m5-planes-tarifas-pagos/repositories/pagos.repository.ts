@@ -13,6 +13,23 @@ export interface NuevoPago {
   registradoPor: number;
 }
 
+/** Pago bloqueado para anularlo (RF-M5-11). */
+export interface PagoParaAnular {
+  id: number;
+  patinadorId: number;
+  tipo: 'COBRO' | 'SESION' | 'MATRICULA' | 'VENTA_UNIFORME';
+  monto: number;
+  estado: 'REGISTRADO' | 'ANULADO';
+  comprobante: string | null;
+}
+
+/** Cobro al que se aplicó un pago. */
+export interface CobroDelPago {
+  id: number;
+  concepto: string;
+  montoAplicado: number;
+}
+
 export interface DatosComprobante {
   fechaPago: string;
   patinador: {
@@ -198,6 +215,49 @@ export class PagosRepository {
     );
 
     return rows[0];
+  }
+
+  /** Bloquea el pago hasta el fin de la transacción: dos anulaciones simultáneas no se pisan. */
+  async bloquearParaAnular(consultor: Consultor, pagoId: number): Promise<PagoParaAnular | null> {
+    const { rows } = await consultor.query<PagoParaAnular>(
+      `SELECT p.id, p.patinador_id AS "patinadorId", p.tipo, p.monto, p.estado, c.numero AS comprobante
+       FROM pago p LEFT JOIN comprobante c ON c.pago_id = p.id
+       WHERE p.id = $1
+       FOR UPDATE OF p`,
+      [pagoId],
+    );
+    return rows[0] ?? null;
+  }
+
+  /** Cobros a los que se aplicó el pago. */
+  async cobrosDelPago(consultor: Consultor, pagoId: number): Promise<CobroDelPago[]> {
+    const { rows } = await consultor.query<CobroDelPago>(
+      `SELECT c.id, c.concepto, pc.monto_aplicado AS "montoAplicado"
+       FROM pago_cobro pc JOIN cobro c ON c.id = pc.cobro_id
+       WHERE pc.pago_id = $1
+       ORDER BY c.fecha_limite, c.id`,
+      [pagoId],
+    );
+    return rows;
+  }
+
+  /** Marca el pago como anulado; el registro se conserva (no hay borrado físico). */
+  async anular(consultor: Consultor, pagoId: number, usuarioId: number, motivo: string): Promise<void> {
+    await consultor.query(
+      `UPDATE pago
+       SET estado = 'ANULADO', anulado_por = $2, anulado_en = now(), motivo_anulacion = $3
+       WHERE id = $1`,
+      [pagoId, usuarioId, motivo],
+    );
+  }
+
+  /** El comprobante del pago anulado también queda anulado (RF-M5-14). */
+  async anularComprobante(consultor: Consultor, pagoId: number): Promise<void> {
+    await consultor.query(
+      `UPDATE comprobante SET estado = 'ANULADO', anulado_en = now()
+       WHERE pago_id = $1 AND estado = 'VIGENTE'`,
+      [pagoId],
+    );
   }
 
   /** Estado de cartera recalculado (vista v_estado_cartera, RF-M5-12). */
