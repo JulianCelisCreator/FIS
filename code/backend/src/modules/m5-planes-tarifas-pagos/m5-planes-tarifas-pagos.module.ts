@@ -46,5 +46,6 @@ import { PlanesService } from './services/planes.service.js';
     PatinadoresRepository,
     PlanesRepository,
   ],
+  exports: [CobrosRepository, PagosRepository],
 })
 export class M5PlanesTarifasPagosModule {}

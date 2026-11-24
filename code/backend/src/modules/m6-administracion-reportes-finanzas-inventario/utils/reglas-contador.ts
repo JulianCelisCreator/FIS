@@ -1,7 +1,8 @@
 // Reglas de asignación del rol Contador (HU-6.3).
+import { Rol } from '../../../common/auth/usuario-autenticado.js';
 import { ErrorReglaPersonal } from './reglas-personal.js';
 
-export const ROL_CONTADOR = 'CONTADOR';
+export const ROL_CONTADOR: Rol = Rol.CONTADOR;
 
 export interface PersonaParaRol {
   estado: 'ACTIVO' | 'INACTIVO';

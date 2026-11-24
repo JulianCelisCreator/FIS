@@ -26,7 +26,6 @@ import { RolesService } from './services/roles.service.js';
     SesionesRepository,
     AutorizacionesRepository,
   ],
-  // M4 (RF-M4-09) reutiliza la validación de la autorización sin pasar por la pantalla.
-  exports: [AutorizacionesService],
+  exports: [AutorizacionesService, UsuariosRepository],
 })
 export class M1UsuariosAccesoModule {}

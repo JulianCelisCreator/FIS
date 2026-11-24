@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { M1UsuariosAccesoModule } from '../m1-usuarios-acceso/m1-usuarios-acceso.module.js';
+import { M5PlanesTarifasPagosModule } from '../m5-planes-tarifas-pagos/m5-planes-tarifas-pagos.module.js';
 import { UniformesController } from './controllers/uniformes.controller.js';
 import { UniformesRepository } from './repositories/uniformes.repository.js';
 import { UniformesService } from './services/uniformes.service.js';
@@ -24,6 +26,7 @@ import { PanelService } from './services/panel.service.js';
 
 /** M6 · Administración, reportes, finanzas e inventario. */
 @Module({
+  imports: [M1UsuariosAccesoModule, M5PlanesTarifasPagosModule],
   controllers: [
     UniformesController, ProveedoresController, PrestamosController, VentasController,
     PersonalController, ReportesController, PanelController,

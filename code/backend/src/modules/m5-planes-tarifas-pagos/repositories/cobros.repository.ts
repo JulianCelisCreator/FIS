@@ -6,7 +6,8 @@ export type ConceptoCobro =
   | 'SESION'
   | 'MATRICULA'
   | 'GASTOS_ADMINISTRATIVOS'
-  | 'VENTA_UNIFORME';
+  | 'VENTA_UNIFORME'
+  | 'PRESTAMO_IMPLEMENTO';
 
 export interface NuevoCobro {
   patinadorId: number;

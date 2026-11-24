@@ -21,6 +21,7 @@ export interface VentaRegistrada {
   medioPago: MedioPago;
   referenciaPago: string | null;
   total: number;
+  pagoId: number;
   comprobante: string;
   estadoPago: 'REGISTRADO' | 'ANULADO';
   registradoPor: string;
@@ -50,7 +51,7 @@ const SELECT_VENTA = `
          CASE WHEN v.comprador_tipo = 'ACUDIENTE' THEN cu.nombres || ' ' || cu.apellidos
               ELSE pt.nombres || ' ' || pt.apellidos END AS comprador,
          v.medio_pago AS "medioPago", pg.referencia AS "referenciaPago",
-         v.total, cp.numero AS comprobante, pg.estado AS "estadoPago",
+         v.total, v.pago_id AS "pagoId", cp.numero AS comprobante, pg.estado AS "estadoPago",
          ru.nombres || ' ' || ru.apellidos AS "registradoPor",
          v.creado_en AS "registradoEn",
          CASE WHEN dv.unidades IS NULL THEN 'CONFIRMADA'

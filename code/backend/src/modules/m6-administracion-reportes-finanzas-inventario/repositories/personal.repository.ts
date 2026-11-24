@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { BaseDatosService } from '../../../common/database/base-datos.service.js';
-import type { Consultor } from '../../../common/database/base-datos.service.js';
+import type { Rol } from '../../../common/auth/usuario-autenticado.js';
+import { BaseDatosService, type Consultor } from '../../../common/database/base-datos.service.js';
+import type { DisponibilidadPersonalM6 } from '../../../external-dependencies/interfaces/external-dependencies.interfaces.js';
+import { UsuariosRepository } from '../../m1-usuarios-acceso/repositories/usuarios.repository.js';
 import type {
   Cargo,
   CrearPersonalDto,
@@ -65,7 +67,10 @@ const COLUMNAS = `
 /** Ficha laboral del personal (HU-6.2). Las credenciales y roles son de M1. */
 @Injectable()
 export class PersonalRepository {
-  constructor(private readonly baseDatos: BaseDatosService) {}
+  constructor(
+    private readonly baseDatos: BaseDatosService,
+    private readonly usuariosM1: UsuariosRepository,
+  ) {}
 
   async listar(filtros: FiltrosPersonalDto): Promise<PaginaPersonal> {
     const condiciones: string[] = [];
@@ -228,14 +233,47 @@ export class PersonalRepository {
     return fila ?? null;
   }
 
-  /** Asigna un rol de M1 a la cuenta (tabla usuario_rol). */
-  async asignarRol(usuarioId: number, rol: string, asignadoPor: number, consultor: Consultor) {
-    await consultor.query(
-      `INSERT INTO usuario_rol (usuario_id, rol_id, asignado_por)
-       SELECT $1, r.id, $3 FROM rol r WHERE r.codigo = $2
-       ON CONFLICT (usuario_id, rol_id) DO NOTHING`,
-      [usuarioId, rol, asignadoPor],
+  async asignarRol(usuarioId: number, rol: Rol, asignadoPor: number, consultor: Consultor) {
+    await this.usuariosM1.asignarRol(consultor, usuarioId, rol, asignadoPor);
+  }
+
+  /** DEP-M6-01: disponibilidad y horarios asignados (M3) del personal docente. */
+  async disponibilidadDocentes(personalId?: number): Promise<DisponibilidadPersonalM6[]> {
+    const filas = await this.baseDatos.consultar<{
+      id: number;
+      cargo: string;
+      estado: EstadoPersonal;
+      bloques: NonNullable<DisponibilidadPersonalM6['bloquesOcupadosExternos']>;
+    }>(
+      `SELECT p.id, p.cargo, p.estado,
+              COALESCE((
+                SELECT json_agg(json_build_object(
+                  'diaSemana', CASE h.dia_semana
+                    WHEN 1 THEN 'Lunes' WHEN 2 THEN 'Martes' WHEN 3 THEN 'Miercoles'
+                    WHEN 4 THEN 'Jueves' WHEN 5 THEN 'Viernes' WHEN 6 THEN 'Sabado' ELSE 'Domingo' END,
+                  'horaInicio', to_char(h.hora_inicio, 'HH24:MI'),
+                  'horaFin', to_char(h.hora_fin, 'HH24:MI'),
+                  'motivo', g.nombre
+                ) ORDER BY h.dia_semana, h.hora_inicio)
+                FROM grupo_profesor gp
+                JOIN grupo g ON g.id = gp.grupo_id AND g.activo
+                JOIN horario h ON h.grupo_id = g.id AND h.activo
+                WHERE gp.profesor_id = p.usuario_id AND gp.hasta IS NULL
+              ), '[]'::json) AS bloques
+       FROM personal p
+       WHERE p.cargo = 'PROFESOR'
+         ${personalId === undefined ? '' : 'AND p.id = $1'}
+       ORDER BY p.id`,
+      personalId === undefined ? [] : [personalId],
     );
+    const dias = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'] as const;
+    return filas.map((fila) => ({
+      personalId: String(fila.id),
+      cargo: fila.cargo,
+      estadoContrato: fila.estado === 'ACTIVO' ? 'ACTIVO' : 'FINALIZADO',
+      disponibilidad: dias.map((diaSemana) => ({ diaSemana, horaInicio: '07:00', horaFin: '19:00' })),
+      bloquesOcupadosExternos: fila.bloques,
+    }));
   }
 
   /** Retira un rol de la cuenta. Devuelve si la cuenta lo tenía. */

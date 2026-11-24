@@ -44,6 +44,17 @@ export class PersonalController {
     return this.personal.cuentasDisponibles(filtros.buscar);
   }
 
+  /** DEP-M6-01: disponibilidad docente para M3 (Grupos y horarios). */
+  @Get('disponibilidad')
+  listarDisponibilidad() {
+    return this.personal.listarDisponibilidadDocentes();
+  }
+
+  @Get(':personalId/disponibilidad')
+  disponibilidadDocente(@Param('personalId', ParseIntPipe) personalId: number) {
+    return this.personal.disponibilidadDocente(personalId);
+  }
+
   @Get(':personalId')
   detalle(@Param('personalId', ParseIntPipe) personalId: number) {
     return this.personal.detalle(personalId);
