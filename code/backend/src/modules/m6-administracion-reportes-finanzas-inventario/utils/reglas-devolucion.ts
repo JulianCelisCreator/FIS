@@ -1,8 +1,6 @@
-// Reglas de la devolución de una venta de uniformes (HU-6.7 / RF-M6-07), sin
-// acceso a base de datos para poder probarlas de forma aislada.
+// Reglas de devolución de ventas de uniformes (HU-6.7).
 import { ErrorReglaVenta } from './reglas-venta.js';
 
-/** Línea vendida con lo que ya se devolvió antes. */
 export interface LineaVendida {
   uniformeId: number;
   referencia: string;
@@ -29,19 +27,10 @@ export interface LineaDevolucion {
 export interface PlanDevolucion {
   lineas: LineaDevolucion[];
   valorDevuelto: number;
-  /** Con esta devolución ya no quedan unidades por devolver. */
   completa: boolean;
-  /**
-   * Se anula el pago en M5 solo si esta devolución cubre la venta entera de una
-   * vez (sin devoluciones previas): así el ingreso no se descuenta dos veces.
-   */
   anulaPago: boolean;
 }
 
-/**
- * Valida las cantidades a devolver contra lo vendido y lo ya devuelto, y arma
- * las líneas al valor unitario de la venta.
- */
 export function planearDevolucion(vendidas: LineaVendida[], items: ItemDevolucion[]): PlanDevolucion {
   if (items.length === 0) {
     throw new ErrorReglaVenta('Indica al menos una referencia a devolver');

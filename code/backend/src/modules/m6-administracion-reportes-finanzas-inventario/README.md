@@ -122,6 +122,12 @@ Permiso `M6_REPORTE_FINANCIERO` (Administrador y Contador, solo lectura).
 
 Las dos rutas usan el mismo objeto `Reporte` (columnas, filas y totales), así que el archivo tiene los mismos valores que la pantalla. Los archivos se generan en el servidor con `pdfkit` y `exceljs` (`utils/exportar-reporte.ts`).
 
+## Panel general administrativo (HU-6.1)
+
+Permiso `M6_PANEL_CONSULTAR` (solo Administrador).
+
+- `GET /m6/panel?desde=AAAA-MM-DD&hasta=AAAA-MM-DD`: indicadores consolidados del panel.
+
 ## Reglas implementadas
 
 - No hay borrado físico.

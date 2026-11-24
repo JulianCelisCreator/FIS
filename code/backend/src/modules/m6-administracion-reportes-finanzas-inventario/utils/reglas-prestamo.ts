@@ -1,10 +1,7 @@
-// Reglas de negocio del préstamo de implementos (HU-6.8 / RF-M6-08), sin acceso a
-// base de datos para poder probarlas de forma aislada.
+// Reglas de negocio del préstamo de implementos (HU-6.8).
 
-/** Único tipo de inventario que se presta; las prendas solo se venden (higiene). */
 export const TIPO_PRESTABLE = 'IMPLEMENTO';
 
-/** Datos de la referencia leídos (y bloqueados) dentro de la transacción. */
 export interface UniformePrestable {
   tipo: string;
   cantidadDisponible: number;
@@ -18,7 +15,6 @@ export interface RecepcionSolicitada {
 export class ErrorReglaPrestamo extends Error {
   constructor(
     mensaje: string,
-    /** NO_ENCONTRADO se responde como 404; INVALIDO como 400. */
     readonly motivo: 'NO_ENCONTRADO' | 'INVALIDO' = 'INVALIDO',
   ) {
     super(mensaje);
@@ -26,10 +22,6 @@ export class ErrorReglaPrestamo extends Error {
   }
 }
 
-/**
- * Valida que la referencia pueda prestarse: existe y está activa (si no, llega
- * `null`), es un implemento y tiene existencias suficientes.
- */
 export function validarPrestamo<T extends UniformePrestable>(
   uniforme: T | null,
   cantidad: number,
@@ -66,18 +58,12 @@ export function validarRecepcion(recepcion: RecepcionSolicitada): void {
 }
 
 export interface CobroPrestamo {
-  /** Días cobrados: de la fecha del préstamo a la devolución prevista, mínimo 1. */
   dias: number;
-  /** tarifa por unidad y día × cantidad × días. 0 = no se genera cobro. */
   valor: number;
 }
 
 const MS_DIA = 86_400_000;
 
-/**
- * Valor del préstamo (decisión del grupo, 11/11/2026): tarifa por unidad y día
- * × cantidad × días previstos. Las fechas son 'YYYY-MM-DD' en hora del club.
- */
 export function calcularCobroPrestamo(
   tarifaDia: number,
   cantidad: number,
@@ -96,7 +82,6 @@ export function calcularCobroPrestamo(
     throw new ErrorReglaPrestamo('La fecha prevista debe ser hoy o posterior');
   }
   const dias = Math.max(1, Math.round((fin - inicio) / MS_DIA));
-  // Redondeo a centavos para no arrastrar errores de punto flotante.
   const valor = Math.round(tarifaDia * cantidad * dias * 100) / 100;
   if (!Number.isFinite(valor) || valor > 999_999_999_999) {
     throw new ErrorReglaPrestamo('El valor del préstamo supera el máximo permitido');
@@ -104,10 +89,6 @@ export function calcularCobroPrestamo(
   return { dias, valor };
 }
 
-/**
- * Unidades que vuelven al stock al cerrar el préstamo: todas si se devuelve,
- * ninguna si hubo pérdida o daño (no regresan automáticamente al inventario).
- */
 export function unidadesQueRegresan(
   estado: RecepcionSolicitada['estado'],
   cantidad: number,

@@ -1,12 +1,10 @@
-// Reglas de negocio de la venta de uniformes (HU-6.7 / RF-M6-07), sin acceso a
-// base de datos para poder probarlas de forma aislada.
+// Reglas de negocio de venta de uniformes (HU-6.7).
 
 export interface ItemSolicitado {
   uniformeId: number;
   cantidad: number;
 }
 
-/** Datos de la referencia leídos (y bloqueados) dentro de la transacción. */
 export interface UniformeVendible {
   id: number;
   referencia: string;
@@ -47,11 +45,6 @@ export function consolidarItems(items: ItemSolicitado[]): ItemSolicitado[] {
     .sort((a, b) => a.uniformeId - b.uniformeId);
 }
 
-/**
- * Valida cada línea contra el inventario y calcula valores. Bloquea la venta si
- * la referencia no existe, está inactiva, no es vendible, no tiene precio o si
- * la cantidad supera las existencias (criterio 3 de HU-6.7).
- */
 export function construirLineas(
   items: ItemSolicitado[],
   uniformes: UniformeVendible[],

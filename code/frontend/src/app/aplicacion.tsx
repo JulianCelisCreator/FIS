@@ -156,8 +156,8 @@ export function Aplicacion() {
   } else if (!permitidas.some((pantalla) => pantalla.pagina === actual)) {
     contenido = (
       <div className="app-page">
-        <h1>Sin acceso</h1>
-        <Alerta tono="warning" titulo="No tienes acceso a esta pantalla">
+        <h1>Acceso no autorizado</h1>
+        <Alerta tono="warning" titulo="Acceso no autorizado">
           <p>
             {permitidas.length > 0
               ? 'Usa el menú para ir a las pantallas de tu rol.'

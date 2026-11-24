@@ -1,7 +1,4 @@
-// Reglas de los reportes financieros (HU-6.4 / RF-M6-04), sin acceso a base de
-// datos para poder probarlas de forma aislada. Cada reporte se arma con el mismo
-// formato (columnas, filas y totales declarados) para que la pantalla y la
-// exportación (HU-6.5) muestren exactamente los mismos valores.
+// Reglas de los reportes financieros (HU-6.4).
 
 export const TIPOS_REPORTE = ['ingresos', 'pagos', 'cartera', 'movimientos-uniformes'] as const;
 export type TipoReporte = (typeof TIPOS_REPORTE)[number];
@@ -120,11 +117,6 @@ export interface Reembolsos {
   valor: number;
 }
 
-/**
- * Ingresos = pagos registrados en el período (los anulados no cuentan,
- * RF-M5-11) − reembolsos de devoluciones parciales de ventas. Una devolución
- * total anula el pago en M5, así que ya no suma y no se resta otra vez.
- */
 export function reporteIngresos(
   encabezado: Encabezado,
   conceptos: IngresoPorConcepto[],
@@ -234,11 +226,6 @@ export interface CarteraPatinador {
   saldoVencido: number;
 }
 
-/**
- * Cartera a la fecha final (decisión del grupo, 18/11): cobros no anulados
- * emitidos hasta esa fecha menos los pagos registrados hasta esa fecha. Un
- * cobro está vencido cuando pasaron los días de gracia de M5 (M5-12).
- */
 export function reporteCartera(encabezado: Encabezado, cartera: CarteraPatinador[]): Reporte {
   const filas = cartera
     .filter((fila) => fila.saldo > 0)

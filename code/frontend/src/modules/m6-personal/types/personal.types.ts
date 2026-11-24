@@ -56,6 +56,7 @@ export interface PaginaPersonal {
 export interface FiltrosPersonal {
   buscar?: string
   estado?: EstadoPersonal | ''
+  cargo?: Cargo | ''
   pagina?: number
 }
 

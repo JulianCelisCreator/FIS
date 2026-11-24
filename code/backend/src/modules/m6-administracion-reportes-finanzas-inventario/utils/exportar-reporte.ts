@@ -1,8 +1,4 @@
-// Exportación de reportes financieros a PDF y XLSX (HU-6.5 / RF-M6-05). Recibe
-// el mismo objeto Reporte que muestra la pantalla (HU-6.4), así que el archivo
-// tiene exactamente los mismos valores. Contenido: título, período, fecha y
-// hora de generación, notas, totales y detalle. Solo los datos del reporte:
-// nada de documentos ni contactos de patinadores o acudientes (Ley 1581).
+// Exportación de reportes financieros a PDF y XLSX (HU-6.5).
 import ExcelJS from 'exceljs';
 import PDFDocument from 'pdfkit';
 import type { FormatoValor, Reporte, TipoReporte } from './reglas-reporte.js';

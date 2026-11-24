@@ -30,10 +30,7 @@ function formatear(valor: string | number | null | undefined, formato: FormatoVa
   return String(valor)
 }
 
-/**
- * Reportes financieros (HU-6.4 / RF-M6-04) para Administrador y Contador.
- * Solo consulta: el tipo y el rango se eligen aquí y el servidor calcula todo.
- */
+/** Reportes financieros y exportación (HU-6.4, HU-6.5). */
 export function ReportesFinancieros() {
   const hoy = hoyEnClub()
   const [tipo, setTipo] = useState<TipoReporte>('ingresos')
@@ -47,7 +44,6 @@ export function ReportesFinancieros() {
   const [avisoExportacion, setAvisoExportacion] = useState<string | null>(null)
   const [errorExportacion, setErrorExportacion] = useState<string | null>(null)
 
-  // HU-6.5: exporta el reporte que está en pantalla (mismo tipo y período).
   const exportar = async (formato: FormatoExportacion) => {
     if (!reporte || exportando) return
     setExportando(formato)

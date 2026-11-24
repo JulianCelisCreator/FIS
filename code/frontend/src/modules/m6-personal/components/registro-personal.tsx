@@ -16,6 +16,7 @@ import {
   nombreCompleto,
   textoCargo,
   validarDatosPersonal,
+  type Cargo,
   type CuentaDisponible,
   type DatosPersonal,
   type EstadoPersonal,
@@ -41,6 +42,7 @@ export function RegistroPersonal() {
   const [pagina, setPagina] = useState<PaginaPersonal | null>(null)
   const [buscar, setBuscar] = useState('')
   const [estado, setEstado] = useState<EstadoPersonal | ''>('')
+  const [cargo, setCargo] = useState<Cargo | ''>('')
   const [numeroPagina, setNumeroPagina] = useState(1)
   const [version, setVersion] = useState(0)
   const [error, setError] = useState<string | null>(null)
@@ -59,7 +61,7 @@ export function RegistroPersonal() {
   useEffect(() => {
     let vigente = true
     const espera = setTimeout(() => {
-      listarPersonal({ buscar, estado, pagina: numeroPagina })
+      listarPersonal({ buscar, estado, cargo, pagina: numeroPagina })
         .then((resultado) => vigente && (setPagina(resultado), setError(null)))
         .catch((e: Error) => vigente && setError(e.message))
     }, 250)
@@ -67,7 +69,7 @@ export function RegistroPersonal() {
       vigente = false
       clearTimeout(espera)
     }
-  }, [buscar, estado, numeroPagina, version])
+  }, [buscar, estado, cargo, numeroPagina, version])
 
   const dialogoAbierto = edicion !== null
   useEffect(() => {
@@ -213,6 +215,13 @@ export function RegistroPersonal() {
             <option value="">Activos e inactivos</option>
             <option value="ACTIVO">Activos</option>
             <option value="INACTIVO">Inactivos</option>
+          </select>
+        </Campo>
+        <Campo etiqueta="Cargo" id="personal-filtro-cargo">
+          <select id="personal-filtro-cargo" className="vl-select" value={cargo}
+            onChange={(e) => { setCargo(e.target.value as Cargo | ''); setNumeroPagina(1) }}>
+            <option value="">Todos los cargos</option>
+            {CARGOS.map((opcion) => <option key={opcion.valor} value={opcion.valor}>{opcion.texto}</option>)}
           </select>
         </Campo>
       </div>

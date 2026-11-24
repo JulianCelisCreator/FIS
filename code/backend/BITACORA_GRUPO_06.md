@@ -6,7 +6,7 @@ y las actividades que todavía pertenecen a futuras entregas.
 
 ---
 
-## 🏃 Sprint 1 (Semana 1) — Personal e inventario
+## Sprint 1 (Semana 1) — Personal e inventario
 
 - **Período:** 29 de octubre de 2026 – 05 de noviembre de 2026
 - **Objetivo del Sprint:** Dejar lista la base de datos y funcionando los
@@ -281,7 +281,7 @@ y las actividades que todavía pertenecen a futuras entregas.
 
 ---
 
-## 🏃 Sprint 2 (Semana 2) — Implementado el 11/11 (ver «Cierre de los Sprints 1 y 2»)
+## Sprint 2 (Semana 2) — Implementado el 11/11 (ver «Cierre de los Sprints 1 y 2»)
 
 - **Período del adelanto documentado:** 09 de noviembre de 2026.
 - **Esfuerzo estimado del sprint:** 41 horas.
@@ -480,7 +480,7 @@ y las actividades que todavía pertenecen a futuras entregas.
 
 ---
 
-## 📅 Plan de sprints y estado
+## Plan de sprints y estado
 
 - **Sprint 1 (Semana 1, 26 h) — Implementado:** HU-6.6 (Inventario de
   uniformes) y HU-6.2 (Personal, completada el 11/11). Objetivo: dejar lista la
@@ -824,11 +824,16 @@ Las ramas están apiladas en ese orden sobre `hu/HU-M6-07-registro-de-venta-de-u
 - Sprint 3: los reportes (HU-6.4) deben restar `devolucion_venta.valor_devuelto`
   de los ingresos cuando `anula_pago = false`.
 
+## Sprint 3 (14 al 23 de noviembre de 2026)
+
+- **Historias:** HU-6.4 (Reportes), HU-6.5 (Exportación PDF/Excel) y HU-6.1 (Panel administrativo).
+- **Integración:** rutas de M6 conectadas a la sesión real de M1 (`AutenticacionGuard` y `PermisosGuard`) y datos semilla en `db/datos-demo-m6.sql`.
+- **HU-6.4 y HU-6.5:** endpoints `GET /m6/reportes/:tipo` y `GET /m6/reportes/:tipo/exportar` (`ingresos`, `pagos`, `cartera`, `movimientos-uniformes`) con generación de PDF y XLSX en el servidor y pantalla `reportes-financieros.tsx`.
+- **HU-6.1:** endpoint `GET /m6/panel` (permiso `M6_PANEL_CONSULTAR`, solo Administrador) y pantalla `panel-administrativo.tsx` con los 6 indicadores consolidados (patinadores, grupos, profesores, cartera pendiente, ingresos del período y unidades disponibles).
+- **Ajustes finales:** tarjeta KPI de cartera pendiente en el panel general (`HU-6.1`), filtro por cargo en la vista de personal (`HU-6.2`) y mensaje `Acceso no autorizado` para rutas restringidas (`HU-6.3`).
+
 ## Estado final de esta bitácora
 
-**Última actualización:** 11 de noviembre de 2026.
+**Última actualización:** 23 de noviembre de 2026.
 
-Los Sprints 1 y 2 están implementados (HU-6.2, HU-6.3, HU-6.6, HU-6.7 con
-devolución y HU-6.8 con cobro), pendientes de verificarse contra la base de
-datos y de revisar los criterios de aceptación con el grupo. Sigue el Sprint 3:
-HU-6.4 (Reportes), HU-6.5 (Exportación) y HU-6.1 (Panel).
+Los Sprints 1, 2 y 3 del Módulo 6 (`HU-6.1` a `HU-6.8`) están implementados en backend y frontend.

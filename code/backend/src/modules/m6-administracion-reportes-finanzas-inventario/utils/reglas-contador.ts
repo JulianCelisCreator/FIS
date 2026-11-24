@@ -1,5 +1,4 @@
-// Reglas de la asignación del rol Contador (HU-6.3 / RF-M6-03), sin acceso a
-// base de datos para poder probarlas de forma aislada.
+// Reglas de asignación del rol Contador (HU-6.3).
 import { ErrorReglaPersonal } from './reglas-personal.js';
 
 export const ROL_CONTADOR = 'CONTADOR';
@@ -14,12 +13,6 @@ export interface CuentaParaRol {
   roles: string[];
 }
 
-/**
- * El rol Contador solo se asigna a una persona activa del registro de personal
- * con una cuenta de M1 vinculada que no esté desactivada. Una cuenta «Por
- * registrar» se acepta (cambio #3: el Contador entra con contraseña temporal);
- * el rol funciona cuando la cuenta se active.
- */
 export function validarAsignacionContador(
   persona: PersonaParaRol | null,
   cuenta: CuentaParaRol | null,

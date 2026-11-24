@@ -18,15 +18,7 @@ export interface AsientoRegistrado {
   fecha: string;
 }
 
-/**
- * Punto de integración M6 → M5 para la venta de uniformes (RF-M6-07 delega el
- * ingreso, el pago y el comprobante a M5). Mientras M5 no publique su servicio,
- * escribe directamente en sus tablas con las mismas reglas del esquema:
- * un cobro VENTA_UNIFORME ya PAGADO, un pago REGISTRADO por el total, su
- * aplicación al cobro y el comprobante con consecutivo CP-xxxxxx (RF-M5-14).
- * Recibe el consultor de la transacción de la venta: si algo falla aquí, tampoco
- * se descuenta el inventario. Cuando M5 entregue su API, solo cambia esta clase.
- */
+/** Integración financiera M6 → M5 para ventas y devoluciones de uniformes (HU-6.7). */
 @Injectable()
 export class RegistroFinancieroVentaRepository {
   async registrar(consultor: Consultor, asiento: AsientoVenta): Promise<AsientoRegistrado> {
@@ -63,11 +55,7 @@ export class RegistroFinancieroVentaRepository {
     return { cobroId: cobro.id, pagoId: pago.id, comprobanteNumero: comprobante.numero, fecha: cobro.fecha };
   }
 
-  /**
-   * Devolución total de una venta: anula su pago, su comprobante y su cobro en
-   * M5 con el motivo (RF-M5-11; solo el Administrador registra devoluciones).
-   * Devuelve false si el pago ya estaba anulado.
-   */
+  /** Anula pago, comprobante y cobro en M5 cuando hay devolución total. */
   async anular(
     consultor: Consultor,
     datos: { pagoId: number; cobroId: number; motivo: string; usuarioId: number },
