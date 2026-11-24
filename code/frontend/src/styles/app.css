@@ -1085,6 +1085,11 @@ fieldset {
   cursor: pointer;
 }
 
+/* Acción destructiva en texto (Anular): rojo de alerta, nunca el amarillo de señal. */
+.app-boton-enlace--peligro {
+  color: var(--alert-ink);
+}
+
 /* Tablero de cifras (cartera y estado de cuenta): celdas planas separadas por línea de 1 px. */
 .app-tablero {
   display: grid;

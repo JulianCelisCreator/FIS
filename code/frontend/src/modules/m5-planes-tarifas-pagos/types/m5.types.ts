@@ -23,6 +23,7 @@ export const PERMISOS_M5 = {
   pagoRegistrar: 'M5_PAGO_REGISTRAR',
   carteraConsultar: 'M5_CARTERA_CONSULTAR',
   pagoHistorial: 'M5_PAGO_HISTORIAL',
+  pagoAnular: 'M5_PAGO_ANULAR',
   comprobanteDescargar: 'M5_COMPROBANTE_DESCARGAR',
 } as const
 
@@ -310,4 +311,15 @@ export interface EstadoCuenta {
   } | null
   cobros: CobroDeCuenta[]
   pagos: PagoHistorial[]
+}
+
+/** PATCH /m5/pagos/:id/anular (RF-M5-11) */
+export interface ResultadoAnulacion {
+  pagoId: number
+  patinadorId: number
+  estado: 'ANULADO'
+  comprobante: string | null
+  motivo: string
+  cobros: { cobroId: number; montoDevuelto: number; estado: 'PENDIENTE' | 'PAGADO' | 'ANULADO' }[]
+  estadoCartera: { estado: EstadoCartera; saldoPendiente: number }
 }
