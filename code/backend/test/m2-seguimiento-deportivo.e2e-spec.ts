@@ -299,7 +299,7 @@ describe.skipIf(!process.env.DB_HOST)('M2 seguimiento deportivo (e2e): RF-M2-07 
       expect(admin.body.trayectoria.filter((e: { tipo: string }) => e.tipo === 'CATEGORIA').length).toBeGreaterThanOrEqual(3);
       expect(admin.body.evaluaciones.length).toBeGreaterThanOrEqual(3);
       const fechas = admin.body.trayectoria.map((e: { desde: string }) => e.desde);
-      expect([...fechas].sort()).toEqual(fechas);
+      expect([...fechas].sort((a: string, b: string) => a.localeCompare(b))).toEqual(fechas);
       await http().get(`/m2/patinadores/${ids.ana}/historial`).set(como('profe')).expect(200);
       const propio = await http().get(`/m2/patinadores/${ids.ana}/historial`).set(como('usuarioAna')).expect(200);
       expect(propio.body).not.toHaveProperty('evaluaciones');
