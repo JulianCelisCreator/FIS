@@ -159,7 +159,7 @@ export class AsignacionesRepository {
       `INSERT INTO propuesta_cambio_categoria
          (patinador_id, categoria_actual_id, categoria_propuesta_id, justificacion, fecha_efectiva, estado,
           propuesta_por, resuelta_por, resuelta_en)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, CASE WHEN $8::boolean THEN $7 END, CASE WHEN $8::boolean THEN now() END)
+       VALUES ($1, $2, $3, $4, $5::date, $6, $7::bigint, CASE WHEN $8::boolean THEN $7::bigint END, CASE WHEN $8::boolean THEN now() END)
        RETURNING id`,
       [datos.patinadorId, datos.actualId, datos.propuestaId, datos.justificacion, datos.fechaEfectiva,
         datos.estado, datos.propuestaPor, resuelta],

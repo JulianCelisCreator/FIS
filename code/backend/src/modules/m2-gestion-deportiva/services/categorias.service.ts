@@ -57,15 +57,16 @@ export class CategoriasService {
   }
 
   async actualizar(id: number, dto: EditarCategoriaDto, usuario: UsuarioAutenticado): Promise<CategoriaClub> {
-    if (Object.keys(dto).length === 0) throw new BadRequestException('Indica al menos un cambio para guardar');
+    // Los campos declarados de un DTO existen siempre (valen undefined si no se enviaron): se compara con undefined.
+    if (Object.values(dto).every((valor) => valor === undefined)) throw new BadRequestException('Indica al menos un cambio para guardar');
     try {
       return await this.baseDatos.transaccion(async (db) => {
         const anterior = await this.categorias.buscar(db, id);
         if (!anterior) throw new NotFoundException('No se encontró la categoría solicitada');
 
         const edadMinima = dto.edadMinima ?? anterior.edadMinima;
-        const edadMaxima = Object.hasOwn(dto, 'edadMaxima') ? (dto.edadMaxima ?? null) : anterior.edadMaxima;
-        const nivelMinimoId = Object.hasOwn(dto, 'nivelMinimoId') ? (dto.nivelMinimoId ?? null) : (anterior.nivelMinimo?.id ?? null);
+        const edadMaxima = dto.edadMaxima !== undefined ? dto.edadMaxima : anterior.edadMaxima;
+        const nivelMinimoId = dto.nivelMinimoId !== undefined ? dto.nivelMinimoId : (anterior.nivelMinimo?.id ?? null);
         const activo = dto.activo ?? anterior.activo;
         this.validarEdades(edadMinima, edadMaxima);
 
