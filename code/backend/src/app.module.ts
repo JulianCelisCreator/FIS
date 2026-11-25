@@ -9,6 +9,7 @@ import { ExternalDependenciesModule } from './external-dependencies/external-dep
 import { GruposModule } from './grupos/grupos.module.js';
 import { M6AdministracionReportesFinanzasInventarioModule } from './modules/m6-administracion-reportes-finanzas-inventario/m6-administracion-reportes-finanzas-inventario.module.js';
 import { M1UsuariosAccesoModule } from './modules/m1-usuarios-acceso/m1-usuarios-acceso.module.js';
+import { M2SeguimientoDeportivoModule } from './modules/m2-gestion-deportiva/m2-seguimiento-deportivo.module.js';
 import { M4CompetenciasResultadosModule } from './modules/m4-competencias-resultados/m4-competencias-resultados.module.js';
 import { M5PlanesTarifasPagosModule } from './modules/m5-planes-tarifas-pagos/m5-planes-tarifas-pagos.module.js';
 
@@ -22,6 +23,7 @@ import { M5PlanesTarifasPagosModule } from './modules/m5-planes-tarifas-pagos/m5
     GruposModule,
     M6AdministracionReportesFinanzasInventarioModule,
     M1UsuariosAccesoModule,
+    M2SeguimientoDeportivoModule,
     M4CompetenciasResultadosModule,
     M5PlanesTarifasPagosModule,
   ],
