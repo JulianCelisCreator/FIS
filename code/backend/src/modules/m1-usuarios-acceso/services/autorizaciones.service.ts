@@ -9,8 +9,9 @@ import {
   Rol,
   type UsuarioAutenticado,
 } from '../../../common/auth/usuario-autenticado.js';
-import { BaseDatosService } from '../../../common/database/base-datos.service.js';
+import { BaseDatosService, type Consultor } from '../../../common/database/base-datos.service.js';
 import { hoyEnClub } from '../../../common/utils/fecha-club.js';
+import { UsuariosRepository } from '../repositories/usuarios.repository.js';
 import type { RegistrarAutorizacionDto } from '../dto/registrar-autorizacion.dto.js';
 import {
   AutorizacionesRepository,
@@ -31,6 +32,9 @@ import {
 
 export const MENSAJE_TEXTO_ACTUALIZADO =
   'El texto de la autorización cambió. Vuelve a abrirlo y acéptalo de nuevo.';
+/** HU-M1-04 CA-05 (decisión del equipo): firmar autorizaciones exige el correo verificado. */
+export const MENSAJE_CORREO_SIN_VERIFICAR =
+  'Para registrar autorizaciones primero verifica tu correo: abre el enlace que te enviamos o usa «Reenviar enlace» en el aviso de arriba.';
 
 /** Detalle que abre la Card «Autorización del acudiente» (HU-M1-09). */
 export interface DetalleAutorizacion extends PatinadorConAutorizacion {
@@ -54,7 +58,18 @@ export class AutorizacionesService {
     private readonly baseDatos: BaseDatosService,
     private readonly autorizaciones: AutorizacionesRepository,
     private readonly auditoria: AuditoriaRepository,
+    private readonly usuarios: UsuariosRepository,
   ) {}
+
+  /**
+   * HU-M1-04 CA-05: el Acudiente que firma por sí mismo necesita el correo
+   * verificado. El Administrador que registra en nombre del acudiente no.
+   */
+  private async faltaVerificarCorreo(consultor: Consultor, usuario: UsuarioAutenticado): Promise<boolean> {
+    if (usuario.roles.includes(Rol.ADMINISTRADOR)) return false;
+    const cuenta = await this.usuarios.buscarParaVerificacion(consultor, { id: usuario.id });
+    return !cuenta?.correoVerificado;
+  }
 
   /** Patinadores del acudiente (o todos, si es Administrador) con su estado. */
   listar(usuario: UsuarioAutenticado): Promise<PatinadorConAutorizacion[]> {
@@ -79,7 +94,7 @@ export class AutorizacionesService {
       patinadorId,
     );
     validarConsultaAutorizacion(usuario, patinador);
-    return this.conAcciones(patinador);
+    return this.conAcciones(patinador, await this.faltaVerificarCorreo(this.baseDatos.consultor, usuario));
   }
 
   /**
@@ -103,6 +118,9 @@ export class AutorizacionesService {
         dto.acudienteId,
       );
 
+      if (await this.faltaVerificarCorreo(consultor, usuario)) {
+        throw new ForbiddenException(MENSAJE_CORREO_SIN_VERIFICAR);
+      }
       if (dto.versionTexto !== VERSION_TEXTO_AUTORIZACION) {
         throw new BadRequestException(MENSAJE_TEXTO_ACTUALIZADO);
       }
@@ -152,8 +170,11 @@ export class AutorizacionesService {
 
   private conAcciones(
     patinador: PatinadorConAutorizacion,
+    faltaVerificarCorreo = false,
   ): DetalleAutorizacion {
-    const motivoNoRegistra = motivoParaNoRegistrar(patinador);
+    const motivoNoRegistra =
+      motivoParaNoRegistrar(patinador) ??
+      (faltaVerificarCorreo && !patinador.autorizacion ? MENSAJE_CORREO_SIN_VERIFICAR : null);
     return {
       ...patinador,
       puedeRegistrar:

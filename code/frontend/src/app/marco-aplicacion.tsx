@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
+import { AvisoVerificacion } from '../modules/m1-usuarios-acceso/components/aviso-verificacion.tsx'
 import { Avatar } from '../shared/ui/componentes.tsx'
 import { Icono } from '../shared/ui/icono.tsx'
 import { MarcaVelora } from '../shared/ui/marca-velora.tsx'
@@ -119,6 +120,11 @@ export function MarcoAplicacion({
               </div>
             )}
             {sesion && (
+              <a className="vl-user__cuenta" href="#/mi-cuenta" aria-current={paginaActual === 'mi-cuenta' ? 'page' : undefined}>
+                Mi cuenta
+              </a>
+            )}
+            {sesion && (
               <button
                 className="vl-button vl-button--sm vl-user__salir"
                 type="button"
@@ -138,7 +144,11 @@ export function MarcoAplicacion({
         </div>
       </aside>
 
-      <main className="vl-main">{children}</main>
+      <main className="vl-main">
+        {/* HU-M1-04: aviso mientras el correo no esté verificado. */}
+        <AvisoVerificacion />
+        {children}
+      </main>
     </div>
   )
 }

@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import type { MouseEvent } from 'react'
 import { MarcaVelora } from './shared/ui/marca-velora.tsx'
 
+/** Ingreso de M1 (HU-M1-02): la aplicación por roles vive en /app/. */
+const RUTA_ACCESO = '/app/'
+
 const navLinks = [
   { href: '#pista', label: 'Módulos' },
   { href: '#roles', label: 'Roles' },
@@ -417,7 +420,6 @@ function App() {
   const menuButton = useRef<HTMLButtonElement>(null)
   const navRef = useRef<HTMLElement>(null)
   const demoDialog = useRef<HTMLDialogElement>(null)
-  const accessDialog = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
     let frame = 0
@@ -550,9 +552,10 @@ function App() {
                 ))}
               </div>
               <div className="nav__actions">
-                <button type="button" className="button button--ghost" onClick={() => openDialog(accessDialog.current)}>
+                {/* M1 (HU-M1-02): el ingreso vive en /app/. */}
+                <a className="button button--ghost" href={RUTA_ACCESO} onClick={closeMenu}>
                   Acceso
-                </button>
+                </a>
                 <button type="button" className="button button--primary" onClick={() => openDialog(demoDialog.current)}>
                   Solicitar demo
                 </button>
@@ -560,9 +563,9 @@ function App() {
             </nav>
 
             <div className="masthead__actions">
-              <button type="button" className="text-button" onClick={() => openDialog(accessDialog.current)}>
+              <a className="text-button" href={RUTA_ACCESO}>
                 Acceso
-              </button>
+              </a>
               <button type="button" className="button button--primary" onClick={() => openDialog(demoDialog.current)}>
                 Solicitar demo
               </button>
@@ -970,9 +973,9 @@ function App() {
               <a href="#reglas">Reglas</a>
               <a href="#confianza">Confianza</a>
               <a href="#faq">Preguntas</a>
-              <button type="button" className="footer__access" onClick={() => openDialog(accessDialog.current)}>
+              <a className="footer__access" href={RUTA_ACCESO}>
                 Acceso
-              </button>
+              </a>
               <a href="#inicio">Volver arriba</a>
             </nav>
 
@@ -1009,29 +1012,6 @@ function App() {
             </a>
             <button type="button" className="button button--ghost" onClick={() => demoDialog.current?.close()}>
               Cerrar
-            </button>
-          </div>
-        </div>
-      </dialog>
-
-      <dialog ref={accessDialog} className="dialog" aria-labelledby="access-title" onClick={closeOnBackdrop}>
-        <div className="dialog__paper">
-          <button
-            type="button"
-            className="dialog__close"
-            aria-label="Cerrar diálogo de acceso"
-            onClick={() => accessDialog.current?.close()}
-          >
-            <CloseIcon />
-          </button>
-          <h2 id="access-title">El acceso se habilita con M1.</h2>
-          <p>
-            La ruta de ingreso todavía no está publicada. Esta landing no deja enlaces rotos: cuando M1 esté listo,
-            el acceso tendrá su propio destino.
-          </p>
-          <div className="dialog__actions">
-            <button type="button" className="button button--primary" onClick={() => accessDialog.current?.close()}>
-              Entendido
             </button>
           </div>
         </div>
