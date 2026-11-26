@@ -1,0 +1,124 @@
+/*
+  HU-3.2 · Asignación de profesores (Módulo 3 · Grupo 02).
+  Alineado con wireframes/grupo-02/asignacion-profesores/asignacion-profesores.html
+  y los tokens del Design System.
+*/
+
+.m3-prof__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .m3-prof__grid {
+    grid-template-columns: 1.2fr 1fr;
+  }
+}
+
+.m3-prof__fila-seleccionada td {
+  background: var(--ice-deep) !important;
+}
+
+.m3-prof__fila-conflicto td {
+  background: rgba(255, 106, 92, 0.06);
+}
+
+.m3-prof__docente-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.m3-prof__docente-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.m3-prof__docente-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.m3-prof__tooltip-wrap {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+}
+
+.m3-prof__tooltip-btn {
+  padding: 0.15rem 0.45rem;
+  color: var(--alert-ink);
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-tag);
+  font-weight: 700;
+  text-decoration: underline;
+  background: rgba(255, 106, 92, 0.12);
+  border: 1px solid var(--alert-ink);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.m3-prof__tooltip-box {
+  margin-top: 0.2rem;
+  padding: 0.45rem 0.6rem;
+  color: var(--white);
+  font-size: var(--app-fs-caption);
+  line-height: 1.35;
+  background: var(--rink-black);
+  border-radius: var(--radius);
+}
+
+.m3-prof__agenda-lista {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.m3-prof__agenda-item {
+  padding: 0.75rem 0.9rem;
+  background: var(--ice);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.m3-prof__agenda-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.m3-prof__horarios-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.m3-prof__horario-chip {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-tag);
+  font-weight: 600;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
