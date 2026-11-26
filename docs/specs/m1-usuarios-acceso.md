@@ -80,6 +80,7 @@ No se crean más pantallas. Una pantalla, una tarea (`EXPLANATION.md` §11).
 | Cuenta de usuario | `Activa` (success) · `Desactivada` (neutral) |
 | Cuenta de profesor | `Por registrar` (neutral) → `Cuenta activa` (success) |
 | Perfil de patinador menor | `Bloqueado` (error, falta autorización o póliza) → `Habilitado` (success) |
+| Póliza médica | `Vigente` (success) · `Vencida` (error) · `Pendiente` (warning) |
 
 Reglas: `Anulado/Cancelado` siempre neutral, `Rechazado` siempre error; estado siempre ícono + texto; copy en español estilo oración (`Al día`, `En validación`).
 
@@ -93,7 +94,7 @@ La IA no debe proponer otro plan; si ve una necesidad no cubierta, reporta brech
 | W02 | `AppShell` pública, `Card`, `FormField` + `TextInput email`, `StatusBadge` correo, `Button primary`, `Alert info/success` contextual, `Link` volver al acceso. Dos bloques: verificar (código o enlace) y recuperar (solicitar → definir nueva con confirmación). |
 | W03 | `AppShell` privada Adm, `Breadcrumb`, `DataTable` (nombre+`Avatar`, correo, rol, `StatusBadge` cuenta + correo, acciones por fila) + `FilterBar` (buscar, rol, estado) + `Pagination`, `Button primary` Crear, `Dialog/Form` crear/editar, `Dialog/Confirm` Desactivar (nunca Eliminar). Móvil: tabla → tarjetas. |
 | W04 | `AppShell` privada Adm, `DataTable` roles (rol, n.º usuarios, descripción) + `Select` asignar rol + `Button secondary`, `DescriptionList` o matriz solo lectura de permisos (qué ve cada rol), ejemplo `Alert error` acceso denegado + `StatusBadge`. Sin edición de permisos en wireframe (solo asignación). |
-| W05 | `AppShell` privada (Adm ve todo, Acu solo sus patinadores), `PlayerProfileCard compact` + `DescriptionList`, `Select searchable` vincular (M1-11), `Checkbox` autorización + fecha (M1-09), `FormField` + `TextInput`/`DateInput` póliza: aseguradora, número, vigencia (M1-10), `Button primary` Guardar, `StatusBadge` Bloqueado/Habilitado, `Stepper` o `RequestTracker` (Vinculado → Autorizado → Póliza → Habilitado). |
+| W05 | `AppShell` privada (Adm ve todo, Acu solo sus patinadores), `PlayerProfileCard compact` + `DescriptionList`, `Select searchable` vincular (M1-11), `Checkbox` autorización + fecha (M1-09), `FormField` + `TextInput`/`DateInput` póliza: aseguradora, número, vigencia (M1-10), `Button primary` Guardar, `StatusBadge` Bloqueado/Habilitado y de póliza (Vigente/Vencida/Pendiente), `Stepper` o `RequestTracker` (Vinculado → Autorizado → Póliza → Habilitado). Brecha DS: no hay componente de carga de archivos; en la app se usa el input nativo con estilos de campo y se documenta la excepción. |
 | W06 | `AppShell` privada, `Stepper` (Creada por Adm → Por registrar → Primer ingreso → Cuenta activa), `StatusBadge` profesor, `DataTable` o `Card` mínima de profesores por activar, menú de usuario + `Button secondary/ghost` Cerrar sesión, `Toast success` ("Sesión cerrada", "Cuenta activada"). |
 
 Tokens: solo capa 2. Responsive obligatorio 375 + 1280, verificar 768. Controles `lg` en móvil, `md` en escritorio. Español, `Desactivar/Anular`, fechas `DD/MM/AAAA`.
@@ -192,8 +193,8 @@ Actor que la ve: Adm (gestiona todo) y Acu (Carolina Ramírez solo ve a sus pati
 Qué ve y qué NO ve ese actor (privacidad): Acu solo sus patinadores asociados; nunca ve otros menores ni gestión de usuarios. Patinador menor no confirma por sí mismo. Profesor no gestiona esto.
 Objetivo de la pantalla en una frase: Vincular a Sofía con Carolina, registrar su autorización y su póliza para desbloquear su perfil.
 Datos que muestra o captura, con ejemplos reales: vínculo Sofía Ramírez (9 años) ↔ Carolina Ramírez (madre, carolina.ramirez@example.com); autorización Checkbox "Autorizo la participación de Sofía Ramírez" + fecha 21/09/2026; póliza Sura POL-882341 vigente 01/01/2026 a 31/12/2026, adjunto póliza.pdf.
-Estados a cubrir (de status-and-formats.md): perfil del menor Bloqueado (error) mientras falte autorización o póliza → Habilitado (success) cuando ambas están. Con StatusBadge + Stepper Vinculado → Autorizado → Póliza → Habilitado.
-Acción principal y acciones secundarias: principal "Guardar" / "Vincular"; secundarias "Desvincular" (Confirm) y "Reemplazar póliza". Sin Eliminar.
+Estados a cubrir (de status-and-formats.md): perfil del menor Bloqueado (error) mientras falte autorización o póliza → Habilitado (success) cuando ambas están; póliza Vigente (success), Vencida (error) o Pendiente (warning), calculada al consultar con la fecha de Bogotá. Con StatusBadge + Stepper Vinculado → Autorizado → Póliza → Habilitado.
+Acción principal y acciones secundarias: principal "Guardar" / "Vincular"; secundarias "Desvincular" (Confirm) y "Reemplazar póliza" (conserva el historial, sin borrado físico). Sin Eliminar. El adjunto se valida como PDF/JPG/PNG de hasta 5 MB y se descarga solo con sesión autorizada.
 Salida: wireframes/grupo-01/familia-menor/
 Plan de componentes a respetar (§6 W05): AppShell privada, PlayerProfileCard compact + DescriptionList, Select searchable vincular, Checkbox autorización, FormField+TextInput+DateInput póliza, Button primary, StatusBadge, Stepper/RequestTracker. Acu ve variante solo lectura salvo sus campos.
 Primero confirma que respetas este plan; luego genera.
@@ -219,6 +220,7 @@ Primero confirma que respetas este plan; luego genera.
 
 - `Select searchable` de usuarios en W05 si el catálogo aún no lo tiene: usar `Select single` nativo y nota "Temporal".
 - `RequestTracker` para menor si no existe: usar `Stepper` + `StatusBadge`.
+- Componente de carga de archivos (M1-10): no existe en el DS. En la app se usa el `input type=file` nativo con las clases de campo; el diálogo se abre a pantalla completa en móvil.
 - Bandeja de notificaciones, gestión de sanciones y revisión de póliza por Fisioterapeuta no tienen RF propio: no dibujar; el resultado se muestra con `ValidationChecklist`/badge en M4.
 
 ## 10. Definición de terminado de esta spec

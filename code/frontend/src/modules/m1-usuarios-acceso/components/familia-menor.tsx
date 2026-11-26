@@ -6,20 +6,30 @@ import {
   detalleAutorizacion,
   listarPatinadoresAutorizacion,
 } from '../services/autorizaciones.service.ts'
+import { detallePoliza } from '../services/polizas.service.ts'
 import type {
   DetalleAutorizacion,
   PatinadorConAutorizacion,
 } from '../types/autorizaciones.types.ts'
+import type { DetallePoliza } from '../types/polizas.types.ts'
 import { DialogoAutorizacion } from './dialogo-autorizacion.tsx'
+import { DialogoPoliza } from './dialogo-poliza.tsx'
 import { SelectorContextoPatinador } from './selector-contexto-patinador.tsx'
 import { TarjetaAutorizacion } from './tarjeta-autorizacion.tsx'
 import { TarjetaPerfilPatinador } from './tarjeta-perfil-patinador.tsx'
+import { TarjetaPoliza } from './tarjeta-poliza.tsx'
 import './familia-menor.css'
 
 interface RespuestaDetalle {
   /** Consulta que respondió; si no coincide con la actual, se está cargando. */
   consulta: string
   detalle: DetalleAutorizacion | null
+  error: string | null
+}
+
+interface RespuestaPoliza {
+  consulta: string
+  detalle: DetallePoliza | null
   error: string | null
 }
 
@@ -38,8 +48,10 @@ export function FamiliaMenor({ patinadorInicial }: { patinadorInicial?: number }
   const [errorLista, setErrorLista] = useState<string | null>(null)
   const [seleccionadoId, setSeleccionadoId] = useState<number | null>(patinadorInicial ?? null)
   const [respuestaDetalle, setRespuestaDetalle] = useState<RespuestaDetalle | null>(null)
+  const [respuestaPoliza, setRespuestaPoliza] = useState<RespuestaPoliza | null>(null)
   const [version, setVersion] = useState(0)
   const [dialogoAbierto, setDialogoAbierto] = useState(false)
+  const [dialogoPolizaAbierto, setDialogoPolizaAbierto] = useState(false)
   const [aviso, setAviso] = useState<{
     tono: 'success' | 'warning'
     titulo: string
@@ -51,6 +63,11 @@ export function FamiliaMenor({ patinadorInicial }: { patinadorInicial?: number }
   const detalle = respondida ? respuestaDetalle.detalle : null
   const cargandoDetalle = seleccionadoId !== null && !respondida
   const errorDetalle = respondida ? respuestaDetalle.error : null
+
+  const respondidaPoliza = respuestaPoliza?.consulta === consulta
+  const poliza = respondidaPoliza ? respuestaPoliza.detalle : null
+  const cargandoPoliza = seleccionadoId !== null && !respondidaPoliza
+  const errorPoliza = respondidaPoliza ? respuestaPoliza.error : null
 
   useEffect(() => {
     let vigente = true
@@ -83,6 +100,21 @@ export function FamiliaMenor({ patinadorInicial }: { patinadorInicial?: number }
       })
       .catch((error: Error) => {
         if (vigente) setRespuestaDetalle({ consulta, detalle: null, error: error.message })
+      })
+    return () => {
+      vigente = false
+    }
+  }, [seleccionadoId, version, consulta])
+
+  useEffect(() => {
+    if (seleccionadoId === null) return
+    let vigente = true
+    detallePoliza(seleccionadoId)
+      .then((actual) => {
+        if (vigente) setRespuestaPoliza({ consulta, detalle: actual, error: null })
+      })
+      .catch((error: Error) => {
+        if (vigente) setRespuestaPoliza({ consulta, detalle: null, error: error.message })
       })
     return () => {
       vigente = false
@@ -123,6 +155,26 @@ export function FamiliaMenor({ patinadorInicial }: { patinadorInicial?: number }
   }
 
   const reintentar = () => setVersion((v) => v + 1)
+
+  /**
+   * CA-01 y CA-04: al registrar la póliza se refresca también el detalle de la
+   * autorización, porque el estado del perfil del menor depende de ella.
+   */
+  const polizaRegistrada = (actualizado: DetallePoliza) => {
+    const siguienteVersion = version + 1
+    setDialogoPolizaAbierto(false)
+    setRespuestaPoliza({
+      consulta: `${actualizado.id}|${siguienteVersion}`,
+      detalle: actualizado,
+      error: null,
+    })
+    setAviso({
+      tono: 'success',
+      titulo: 'Póliza registrada',
+      texto: `La póliza de ${actualizado.nombre} quedó registrada.`,
+    })
+    setVersion(siguienteVersion)
+  }
 
   return (
     <div className="app-page">
@@ -198,6 +250,33 @@ export function FamiliaMenor({ patinadorInicial }: { patinadorInicial?: number }
           <TarjetaPerfilPatinador detalle={detalle} />
           <TarjetaAutorizacion detalle={detalle} alRegistrar={() => setDialogoAbierto(true)} />
         </div>
+      )}
+
+      {cargandoPoliza && (
+        <p className="vl-text-caption" role="status">
+          Cargando póliza…
+        </p>
+      )}
+
+      {errorPoliza && (
+        <Alerta tono="error" titulo="No se pudo cargar la póliza">
+          <p>{errorPoliza}</p>
+          <button className="vl-button vl-button--secondary vl-button--sm" type="button" onClick={reintentar}>
+            Reintentar
+          </button>
+        </Alerta>
+      )}
+
+      {poliza && seleccionadoId !== null && (
+        <TarjetaPoliza detalle={poliza} alRegistrar={() => setDialogoPolizaAbierto(true)} />
+      )}
+
+      {dialogoPolizaAbierto && poliza?.puedeRegistrar && (
+        <DialogoPoliza
+          detalle={poliza}
+          alCerrar={() => setDialogoPolizaAbierto(false)}
+          alRegistrar={polizaRegistrada}
+        />
       )}
 
       {dialogoAbierto && detalle?.puedeRegistrar && sesion && (

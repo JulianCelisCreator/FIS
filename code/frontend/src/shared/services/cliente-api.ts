@@ -60,3 +60,25 @@ export async function pedir<T>(
   if (!respuesta.ok) throw new ErrorApi(respuesta.status, mensajeDeError(cuerpo, respuesta.status))
   return cuerpo as T
 }
+
+/**
+ * Envía un formulario multipart (archivos). No se fija Content-Type: el
+ * navegador agrega el boundary que necesita multer en el backend.
+ */
+export async function enviarFormulario<T>(ruta: string, formulario: FormData): Promise<T> {
+  let respuesta: Response
+  try {
+    respuesta = await fetch(urlApi(ruta), {
+      method: 'POST',
+      headers: { Accept: 'application/json' },
+      credentials: 'same-origin',
+      body: formulario,
+    })
+  } catch {
+    throw new ErrorApi(0, mensajeDeError(null, 0))
+  }
+
+  const cuerpo: unknown = await respuesta.json().catch(() => null)
+  if (!respuesta.ok) throw new ErrorApi(respuesta.status, mensajeDeError(cuerpo, respuesta.status))
+  return cuerpo as T
+}

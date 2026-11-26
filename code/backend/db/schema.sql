@@ -359,7 +359,10 @@ CREATE TABLE poliza (
   numero_poliza   TEXT NOT NULL,
   vigente_desde   DATE NOT NULL,
   vigente_hasta   DATE NOT NULL,
-  archivo_url     TEXT,                      -- adjunto (PDF o imagen)
+  archivo_url     TEXT,                      -- clave privada del adjunto (PDF o imagen)
+  archivo_nombre  TEXT,                      -- nombre original del archivo
+  archivo_tipo    TEXT,                      -- MIME del archivo
+  archivo_tamano  INTEGER CHECK (archivo_tamano IS NULL OR archivo_tamano > 0),
   estado_revision TEXT NOT NULL DEFAULT 'PENDIENTE'
                   CHECK (estado_revision IN ('PENDIENTE','APROBADA','RECHAZADA')),
   revisada_por    BIGINT REFERENCES usuario(id),   -- Fisioterapeuta (M4-07)
@@ -1023,14 +1026,14 @@ SELECT pt.id AS patinador_id,
        EXISTS (SELECT 1 FROM autorizacion_acudiente a
                WHERE a.patinador_id = pt.id AND a.revocada_en IS NULL)  AS tiene_autorizacion,
        EXISTS (SELECT 1 FROM poliza po
-               WHERE po.patinador_id = pt.id AND po.estado_revision <> 'RECHAZADA'
+               WHERE po.patinador_id = pt.id AND po.estado_revision = 'APROBADA'
                  AND current_date BETWEEN po.vigente_desde AND po.vigente_hasta) AS tiene_poliza_vigente,
        CASE
          WHEN age(current_date, pt.fecha_nacimiento) >= interval '18 years' THEN 'HABILITADO'
          WHEN EXISTS (SELECT 1 FROM autorizacion_acudiente a
                       WHERE a.patinador_id = pt.id AND a.revocada_en IS NULL)
           AND EXISTS (SELECT 1 FROM poliza po
-                      WHERE po.patinador_id = pt.id AND po.estado_revision <> 'RECHAZADA'
+                      WHERE po.patinador_id = pt.id AND po.estado_revision = 'APROBADA'
                         AND current_date BETWEEN po.vigente_desde AND po.vigente_hasta) THEN 'HABILITADO'
          ELSE 'BLOQUEADO'
        END AS estado_perfil

@@ -29,4 +29,9 @@ describe("status-catalog (spec §10)", () => {
     assert.deepEqual(resolveStatus("cuenta", "activa"), { label: "Activa", tone: "success", icon: "check-circle" });
     assert.deepEqual(resolveStatus("cuenta", "desactivada"), { label: "Desactivada", tone: "neutral", icon: "minus-circle" });
   });
+  it("poliza: vigente/vencida/pendiente (M1-10)", () => {
+    assert.deepEqual(resolveStatus("poliza", "vigente"), { label: "Vigente", tone: "success", icon: "check-circle" });
+    assert.deepEqual(resolveStatus("poliza", "vencida"), { label: "Vencida", tone: "error", icon: "x-circle" });
+    assert.deepEqual(resolveStatus("poliza", "pendiente"), { label: "Pendiente", tone: "warning", icon: "alert-triangle" });
+  });
 });

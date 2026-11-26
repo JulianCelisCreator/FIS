@@ -16,7 +16,8 @@
 
 - Estado mostrado: Vinculado completado, Autorizado en curso, Póliza pendiente → `Bloqueado` (error). Con autorización + póliza pasa a `Habilitado` (success).
 - Vínculo Sofía Ramírez (9 años) ↔ Carolina Ramírez (madre, carolina.ramirez@example.com); principal “Vincular”, secundaria “Desvincular” (Confirm).
-- Autorización con `Checkbox` + `DateInput` (21/09/2026); póliza Sura POL-882341 01/01/2026 a 31/12/2026 con adjunto póliza.pdf y “Reemplazar póliza”. Sin Eliminar.
+- Autorización con `Checkbox` + `DateInput` (21/09/2026); póliza Sura POL-882341 01/01/2026 a 31/12/2026 con adjunto póliza.pdf y “Reemplazar póliza”. Sin Eliminar; reemplazar conserva el historial.
+- Estados de la póliza en la app: `Vigente` (success), `Vencida` (error) y `Pendiente` (warning), calculados al consultar con la fecha de Bogotá. Se muestran con `StatusBadge entity="poliza"`.
 - Variante Acu (no dibujada aparte): solo sus patinadores, solo lectura salvo autorización y póliza; el menor no confirma por sí mismo.
 
 ## Brechas (spec §9, protocolo skill §5)
@@ -25,6 +26,7 @@
 |---|---|
 | `Select searchable` de usuarios no existe como tal (`ps-combobox` es un stub sin búsqueda) | `Select` simple nativo + nota visible “Temporal” en la página |
 | `RequestTracker` para el menor | `Stepper` + `StatusBadge`, como prevé la spec |
+| No hay componente de carga de archivos en el DS | En la app se usa el `input type=file` nativo con estilos de campo; el diálogo de póliza se abre a pantalla completa en móvil |
 
 ## Verificación
 

@@ -2,6 +2,9 @@
 
 Formato semántico. Cada entrada cita RF o decisión.
 
+## [0.1.5] — 2026-11-25
+- `status-catalog.js`: entidad `poliza` (`vigente`→success, `vencida`→error, `pendiente`→warning) para la Card «Póliza médica» de HU-M1-10. Orden skill→código→pruebas: fila agregada primero a `references/status-and-formats.md` §3 y luego 1 prueba en `status-catalog.test.mjs`. La app ya usa los mismos estados en `componentes.tsx`. Sin componente nuevo: la carga de archivos sigue siendo una brecha del DS (sección 6) resuelta en la app con el input nativo.
+
 ## [0.1.0] — 2026-09-30
 - F0 Fundación: `tokens.css` (tokens.md §2–§8), `base/*` (alias responsivos, tipografía `.ps-text-*`, layout), `format.js` (§7.7), `status-catalog.js` (status-and-formats §3 + precedencia M5-12), `aria-disabled.js` (§7.5), `capacity.js` (regla M3-02), `sprite.svg` provisional (§7.8), esqueleto de catálogo, `check-*` y pruebas. RF transversales: formatos M4-13, M5-04; estados §5.1.
 - F1 Átomos: Button/IconButton (§9.1), Link, Icon, Badge, StatusBadge (sin tono libre), Avatar (iniciales), Skeleton, TimeDisplay, CurrencyDisplay. RF transversal + M1-02, M3-02, M4-11/14/16, M5-12/13/16, M6-06/08.
