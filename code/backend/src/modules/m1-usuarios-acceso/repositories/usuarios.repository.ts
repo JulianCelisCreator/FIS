@@ -120,6 +120,19 @@ export class UsuariosRepository {
     return rows[0] ?? { roles: [], permisos: [] };
   }
 
+  /** Hash actual de la contraseña (HU-M1-08 CA-05: verificar la contraseña actual). */
+  async obtenerContrasenaHash(consultor: Consultor, usuarioId: number): Promise<string | null> {
+    const { rows } = await consultor.query<{ hash: string }>(
+      `SELECT contrasena_hash AS hash FROM usuario WHERE id = $1`,
+      [usuarioId],
+    );
+    return rows[0]?.hash ?? null;
+  }
+
+  async actualizarContrasena(consultor: Consultor, usuarioId: number, contrasenaHash: string): Promise<void> {
+    await consultor.query(`UPDATE usuario SET contrasena_hash = $2 WHERE id = $1`, [usuarioId, contrasenaHash]);
+  }
+
   async registrarIngreso(consultor: Consultor, usuarioId: number): Promise<void> {
     await consultor.query(`UPDATE usuario SET ultimo_ingreso_en = now() WHERE id = $1`, [usuarioId]);
   }
