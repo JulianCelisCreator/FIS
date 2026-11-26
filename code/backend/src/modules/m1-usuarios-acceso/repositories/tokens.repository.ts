@@ -8,10 +8,16 @@ export interface TokenVigente {
   usuarioId: number;
 }
 
+/** Un token en cualquier estado, para explicar por qué no sirve (HU-M1-04 CA-03). */
+export interface TokenEncontrado extends TokenVigente {
+  usado: boolean;
+  vencido: boolean;
+}
+
 /**
  * Enlaces de un solo uso (tabla token_usuario): recuperación de contraseña
- * (HU-M1-08) y, más adelante, verificación de correo (HU-M1-04). Solo se
- * guarda el hash del token, nunca el token.
+ * (HU-M1-08) y verificación de correo (HU-M1-04). Solo se guarda el hash del
+ * token, nunca el token.
  */
 @Injectable()
 export class TokensRepository {
@@ -49,6 +55,21 @@ export class TokensRepository {
     const { rows } = await consultor.query<TokenVigente>(
       `SELECT id, usuario_id AS "usuarioId" FROM token_usuario
        WHERE token_hash = $1 AND tipo = $2 AND usado_en IS NULL AND expira_en > now()
+       FOR UPDATE`,
+      [tokenHash, tipo],
+    );
+    return rows[0] ?? null;
+  }
+
+  /**
+   * El token con ese hash aunque esté usado o vencido, bloqueado para usarlo en
+   * la misma transacción. null si no existe.
+   */
+  async buscarPorHash(consultor: Consultor, tokenHash: string, tipo: TipoToken): Promise<TokenEncontrado | null> {
+    const { rows } = await consultor.query<TokenEncontrado>(
+      `SELECT id, usuario_id AS "usuarioId", usado_en IS NOT NULL AS usado, expira_en <= now() AS vencido
+       FROM token_usuario
+       WHERE token_hash = $1 AND tipo = $2
        FOR UPDATE`,
       [tokenHash, tipo],
     );

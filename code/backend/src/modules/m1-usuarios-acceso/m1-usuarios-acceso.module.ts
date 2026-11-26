@@ -15,6 +15,7 @@ import { GestionCuentasService } from './services/gestion-cuentas.service.js';
 import { IngresoService } from './services/ingreso.service.js';
 import { RecuperacionService } from './services/recuperacion.service.js';
 import { RolesService } from './services/roles.service.js';
+import { VerificacionService } from './services/verificacion.service.js';
 
 /** M1 · Usuarios y Acceso. */
 @Module({
@@ -33,6 +34,7 @@ import { RolesService } from './services/roles.service.js';
     AutorizacionesService,
     RecuperacionService,
     CambioContrasenaService,
+    VerificacionService,
     UsuariosRepository,
     SesionesRepository,
     AutorizacionesRepository,

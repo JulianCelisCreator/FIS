@@ -8,6 +8,7 @@ import { Usuarios } from '../modules/m1-usuarios-acceso/components/usuarios.tsx'
 import { PantallaAcceso } from '../modules/m1-usuarios-acceso/components/pantalla-acceso.tsx'
 import { RecuperarContrasena } from '../modules/m1-usuarios-acceso/components/recuperar-contrasena.tsx'
 import { RestablecerContrasena } from '../modules/m1-usuarios-acceso/components/restablecer-contrasena.tsx'
+import { VerificarCorreo } from '../modules/m1-usuarios-acceso/components/verificar-correo.tsx'
 import { AsignarCambiarPlan } from '../modules/m5-planes-tarifas-pagos/components/asignar-cambiar-plan.tsx'
 import { Cartera } from '../modules/m5-planes-tarifas-pagos/components/cartera.tsx'
 import { HistorialPagos } from '../modules/m5-planes-tarifas-pagos/components/historial-pagos.tsx'
@@ -103,6 +104,12 @@ export function Aplicacion() {
         </div>
       </main>
     )
+  }
+
+  // HU-M1-04: enlace de verificación del correo. Pública; con sesión ofrece volver a Velora.
+  if (pagina === 'verificar') {
+    const token = parametros.get('token') ?? ''
+    return <VerificarCorreo key={token} token={token} />
   }
 
   // Modo directo para demostración de Módulo 3 si no hay sesión activa en BD M1

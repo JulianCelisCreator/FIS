@@ -7,9 +7,11 @@ import {
 } from '../../../common/auth/token-sesion.js';
 import { IniciarSesionDto } from '../dto/iniciar-sesion.dto.js';
 import { RestablecerContrasenaDto, SolicitarRecuperacionDto, TokenRecuperacionDto } from '../dto/recuperacion.dto.js';
+import { ReenviarVerificacionDto, TokenVerificacionDto } from '../dto/verificacion.dto.js';
 import { CierreSesionService } from '../services/cierre-sesion.service.js';
 import { IngresoService } from '../services/ingreso.service.js';
 import { RecuperacionService } from '../services/recuperacion.service.js';
+import { VerificacionService } from '../services/verificacion.service.js';
 
 /** Pantalla pública de ingreso: no exige sesión. */
 @Controller('m1/acceso')
@@ -18,7 +20,22 @@ export class AccesoController {
     private readonly ingresoService: IngresoService,
     private readonly cierreSesionService: CierreSesionService,
     private readonly recuperacionService: RecuperacionService,
+    private readonly verificacionService: VerificacionService,
   ) {}
+
+  /** HU-M1-04 CA-02 y CA-03: usar el enlace de verificación (pantalla pública). */
+  @Post('verificacion/confirmar')
+  @HttpCode(HttpStatus.OK)
+  confirmarVerificacion(@Body() dto: TokenVerificacionDto) {
+    return this.verificacionService.confirmar(dto.token);
+  }
+
+  /** HU-M1-04 CA-03: pedir otro enlace desde la pantalla de fallo. Responde igual exista o no la cuenta. */
+  @Post('verificacion/reenviar')
+  @HttpCode(HttpStatus.OK)
+  reenviarVerificacion(@Body() dto: ReenviarVerificacionDto) {
+    return this.verificacionService.reenviarPorCorreo(dto.correo);
+  }
 
   /**
    * HU-M1-02: ingresar con correo y contraseña. El token viaja solo en una
