@@ -4,6 +4,7 @@ import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { AuditoriaModule } from './common/auditoria/auditoria.module.js';
 import { AuthModule } from './common/auth/auth.module.js';
+import { CorreoModule } from './common/correo/correo.module.js';
 import { BaseDatosModule } from './common/database/base-datos.module.js';
 import { ExternalDependenciesModule } from './external-dependencies/external-dependencies.module.js';
 import { GruposModule } from './grupos/grupos.module.js';
@@ -18,6 +19,7 @@ import { M5PlanesTarifasPagosModule } from './modules/m5-planes-tarifas-pagos/m5
     BaseDatosModule,
     AuditoriaModule,
     AuthModule,
+    CorreoModule,
     ExternalDependenciesModule,
     GruposModule,
     M6AdministracionReportesFinanzasInventarioModule,

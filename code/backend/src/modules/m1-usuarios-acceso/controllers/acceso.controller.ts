@@ -6,8 +6,10 @@ import {
   opcionesCookieSesion,
 } from '../../../common/auth/token-sesion.js';
 import { IniciarSesionDto } from '../dto/iniciar-sesion.dto.js';
+import { RestablecerContrasenaDto, SolicitarRecuperacionDto, TokenRecuperacionDto } from '../dto/recuperacion.dto.js';
 import { CierreSesionService } from '../services/cierre-sesion.service.js';
 import { IngresoService } from '../services/ingreso.service.js';
+import { RecuperacionService } from '../services/recuperacion.service.js';
 
 /** Pantalla pública de ingreso: no exige sesión. */
 @Controller('m1/acceso')
@@ -15,6 +17,7 @@ export class AccesoController {
   constructor(
     private readonly ingresoService: IngresoService,
     private readonly cierreSesionService: CierreSesionService,
+    private readonly recuperacionService: RecuperacionService,
   ) {}
 
   /**
@@ -46,5 +49,26 @@ export class AccesoController {
   async salir(@Req() solicitud: Request, @Res({ passthrough: true }) respuesta: Response) {
     await this.cierreSesionService.cerrar(leerCookie(solicitud.headers.cookie, COOKIE_SESION));
     respuesta.clearCookie(COOKIE_SESION, opcionesCookieSesion());
+  }
+
+  /** HU-M1-08 CA-01: pedir el enlace. Responde lo mismo exista o no la cuenta. */
+  @Post('recuperacion')
+  @HttpCode(HttpStatus.OK)
+  solicitarRecuperacion(@Body() dto: SolicitarRecuperacionDto) {
+    return this.recuperacionService.solicitar(dto.correo);
+  }
+
+  /** HU-M1-08 CA-02: ¿el enlace sigue sirviendo? El token va en el cuerpo, no en la URL. */
+  @Post('recuperacion/validar')
+  @HttpCode(HttpStatus.OK)
+  validarRecuperacion(@Body() dto: TokenRecuperacionDto) {
+    return this.recuperacionService.validar(dto.token);
+  }
+
+  /** HU-M1-08 CA-03, CA-04 y CA-06: definir la nueva contraseña con el enlace. */
+  @Post('recuperacion/restablecer')
+  @HttpCode(HttpStatus.OK)
+  restablecer(@Body() dto: RestablecerContrasenaDto) {
+    return this.recuperacionService.restablecer(dto.token, dto.contrasena);
   }
 }

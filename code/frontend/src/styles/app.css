@@ -280,6 +280,24 @@ p {
   text-transform: uppercase;
 }
 
+/* «Mi cuenta» (HU-M1-08): enlace sobre la pista; la marca de carril señala que está abierta. */
+.vl-user__cuenta {
+  justify-self: start;
+  color: var(--white);
+  font-size: var(--app-fs-small);
+  text-underline-offset: 0.2em;
+}
+
+.vl-user__cuenta:hover {
+  color: var(--signal);
+}
+
+.vl-user__cuenta[aria-current='page'] {
+  padding-left: 0.6rem;
+  box-shadow: inset 3px 0 0 var(--signal);
+  text-decoration: none;
+}
+
 /* Cerrar sesión (HU-M1-03): botón fantasma sobre la pista (DESIGN.md, button-ghost). */
 .vl-user .vl-user__salir {
   justify-self: start;
