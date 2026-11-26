@@ -34,6 +34,7 @@ export interface VentaRegistrada {
   medioPago: MedioPago
   referenciaPago: string | null
   total: number
+  pagoId: number
   comprobante: string
   estadoPago: 'REGISTRADO' | 'ANULADO'
   registradoPor: string

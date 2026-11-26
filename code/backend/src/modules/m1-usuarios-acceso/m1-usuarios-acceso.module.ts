@@ -40,7 +40,6 @@ import { VerificacionService } from './services/verificacion.service.js';
     AutorizacionesRepository,
     TokensRepository,
   ],
-  // M4 (RF-M4-09) reutiliza la validación de la autorización sin pasar por la pantalla.
-  exports: [AutorizacionesService],
+  exports: [AutorizacionesService, UsuariosRepository],
 })
 export class M1UsuariosAccesoModule {}

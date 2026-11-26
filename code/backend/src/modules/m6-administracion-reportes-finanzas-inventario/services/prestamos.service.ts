@@ -67,7 +67,18 @@ export class PrestamosService {
         tabla: 'prestamo_uniforme',
         registroId: creado.id,
         accion: 'CREAR',
-        valorNuevo: { ...dto, tarifaDia, dias: cobro.dias, valorCobro: cobro.valor, cobroId: creado.cobroId },
+        valorNuevo: {
+          uniformeId: dto.uniformeId,
+          patinadorId: dto.patinadorId,
+          responsableId: dto.responsableId,
+          cantidad: dto.cantidad,
+          fechaDevolucionPrevista: dto.fechaDevolucionPrevista,
+          estadoEntrega: dto.estadoEntrega,
+          tarifaDia,
+          dias: cobro.dias,
+          valorCobro: cobro.valor,
+          cobroId: creado.cobroId,
+        },
         usuarioId: usuario.id,
       });
       return creado.id;

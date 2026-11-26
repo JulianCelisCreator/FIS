@@ -1,7 +1,3 @@
-// Inventario, ventas y préstamos de M6 contra la API NestJS (/m6/...). La
-// sesión viaja en la cookie de M1 (HU-M1-02); las reglas de negocio las valida
-// el servidor y aquí solo se revisa lo necesario para avisar antes de enviar.
-
 import { pedir } from '../../../shared/services/cliente-api.ts'
 import type {
   DatosProveedor,
@@ -29,7 +25,6 @@ export interface MovimientoInventario {
   registradoEn: string
 }
 
-/** Referencia tal como la devuelve GET /m6/uniformes (proveedor como texto). */
 interface UniformeApi extends Omit<UniformeInventario, 'proveedor' | 'proveedorId'> {
   proveedorId: number | null
   proveedor: string | null
@@ -53,7 +48,6 @@ async function uniformeDeApi(peticion: Promise<UniformeApi>): Promise<UniformeIn
   return adaptarUniforme(uniforme, proveedores)
 }
 
-/** Cuerpo de POST/PATCH /m6/uniformes: sin campos vacíos que el DTO rechaza. */
 function cuerpoUniforme(datos: DatosUniforme) {
   return {
     ...datos,
@@ -63,8 +57,6 @@ function cuerpoUniforme(datos: DatosUniforme) {
     fotoUrl: datos.fotoUrl?.trim() || null,
   }
 }
-
-// --- Inventario y proveedores (HU-6.6 / RF-M6-06) ---
 
 export function listarMovimientos(uniformeId?: number): Promise<MovimientoInventario[]> {
   return pedir<MovimientoInventario[]>(
@@ -158,10 +150,6 @@ export async function ajustarStock(
   }))
 }
 
-// --- Préstamo de implementos (HU-6.8 / RF-M6-08) ---
-// El préstamo genera un cobro en M5 de tarifa por unidad y día × cantidad ×
-// días previstos (mínimo 1).
-
 export interface PrestamoUniformeApi {
   id: number
   uniformeId: number
@@ -174,14 +162,12 @@ export interface PrestamoUniformeApi {
   valorPorUnidad: number
   valorCobro: number
   duracionDias: number
-  /** null cuando la tarifa es 0 y no se generó cobro. */
   cobroId: number | null
   saldoPendiente: number
   fechaPrestamo: string
   fechaDevolucionPrevista: string
   estadoEntrega: 'NUEVO' | 'BUEN_ESTADO' | 'CON_DESGASTE'
   estado: 'ACTIVO' | 'DEVUELTO' | 'PERDIDA_DANO'
-  /** Igual a estado, salvo ACTIVO con fecha prevista pasada: VENCIDO. */
   estadoActual: 'ACTIVO' | 'VENCIDO' | 'DEVUELTO' | 'PERDIDA_DANO'
   fechaRecepcion: string | null
   estadoRecepcion: 'BUEN_ESTADO' | 'CON_DESGASTE' | 'DANADO' | null
@@ -209,7 +195,6 @@ export interface ResponsablePrestamo {
   nombre: string
 }
 
-/** GET /m6/prestamos/patinadores: patinador activo y quién puede responder. */
 export interface PatinadorPrestamo {
   id: number
   nombre: string
@@ -259,11 +244,6 @@ export async function recibirPrestamo(id: number, datos: DatosRecepcion): Promis
   })
 }
 
-// --- Venta de uniformes (HU-6.7 / RF-M6-07) ---
-// POST /m6/ventas valida existencias, precios y medio de pago, registra el
-// cobro y el pago en M5 (comprobante), descuenta el stock y deja el movimiento
-// VENTA en el Kardex, todo en una transacción. Una venta confirmada no se edita.
-
 export function listarVentas(): Promise<VentaRegistrada[]> {
   return pedir<VentaRegistrada[]>('/m6/ventas')
 }
@@ -272,7 +252,6 @@ export function listarCompradoresVenta(): Promise<CompradorVenta[]> {
   return pedir<CompradorVenta[]>('/m6/ventas/compradores')
 }
 
-/** Une las líneas repetidas de una misma referencia sumando sus cantidades. */
 export function consolidarItemsVenta(items: DatosVenta['items']): DatosVenta['items'] {
   const porUniforme = new Map<number, number>()
   for (const item of items) porUniforme.set(item.uniformeId, (porUniforme.get(item.uniformeId) ?? 0) + item.cantidad)
@@ -291,11 +270,6 @@ export function registrarVenta(datos: DatosVenta): Promise<VentaRegistrada> {
   })
 }
 
-/**
- * Devolución total o parcial (HU-6.7): no se devuelve más de lo pendiente, el
- * stock regresa y, si una sola devolución cubre toda la venta, el servidor
- * anula su pago. La venta original no se modifica.
- */
 export async function registrarDevolucion(ventaId: number, datos: DatosDevolucion): Promise<VentaRegistrada> {
   if (datos.motivo.trim().length < 3) throw new Error('Escribe el motivo de la devolución.')
   if (!MEDIOS_PAGO.some((medio) => medio.valor === datos.medioReembolso)) throw new Error('Elige el medio del reembolso.')

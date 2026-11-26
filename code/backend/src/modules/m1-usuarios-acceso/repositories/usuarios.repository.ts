@@ -260,7 +260,8 @@ export class UsuariosRepository {
   async asignarRol(consultor: Consultor, usuarioId: number, rol: Rol, asignadoPor: number): Promise<void> {
     await consultor.query(
       `INSERT INTO usuario_rol (usuario_id, rol_id, asignado_por)
-       SELECT $1, r.id, $3 FROM rol r WHERE r.codigo = $2`,
+       SELECT $1, r.id, $3 FROM rol r WHERE r.codigo = $2
+       ON CONFLICT (usuario_id, rol_id) DO NOTHING`,
       [usuarioId, rol, asignadoPor],
     );
   }

@@ -17,6 +17,7 @@ export function listarPersonal(filtros: FiltrosPersonal = {}): Promise<PaginaPer
     consulta: {
       buscar: filtros.buscar?.trim() || undefined,
       estado: filtros.estado || undefined,
+      cargo: filtros.cargo || undefined,
       pagina: String(filtros.pagina ?? 1),
       tamano: String(TAMANO_PAGINA),
     },

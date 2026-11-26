@@ -17,7 +17,6 @@ const fechaHora = new Intl.DateTimeFormat('es-CO', {
   timeZone: 'America/Bogota',
 })
 
-// Íconos propios del panel (trazo de 1.8 px sobre retícula de 24 px).
 const ICONOS: Record<string, ReactNode> = {
   patinadores: <><circle cx="12" cy="7" r="3.5" /><path d="M5 20c.8-3.8 3.6-6 7-6s6.2 2.2 7 6" /></>,
   grupos: <><circle cx="8" cy="8" r="3" /><circle cx="16.5" cy="9" r="2.5" /><path d="M2.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5M14 14.3c.8-.2 1.6-.3 2.5-.3 2.4 0 4.3 1.6 4.9 4.5" /></>,
@@ -78,7 +77,6 @@ const TONOS: Record<Pendiente['tono'], 'error' | 'advertencia' | 'info'> = {
   info: 'info',
 }
 
-/** Pendientes derivados de los indicadores, con el enlace donde se resuelven. */
 function construirPendientes(panel: DatosPanel): Pendiente[] {
   const pendientes: Pendiente[] = []
   const enMora = panel.patinadoresEnMora
@@ -152,10 +150,7 @@ const ATAJOS = [
   },
 ]
 
-/**
- * Panel general administrativo (HU-6.1 / RF-M6-01), solo para el Administrador.
- * El tablero de ingresos lleva su propio período; los conteos son de hoy.
- */
+/** Panel general administrativo (HU-6.1). */
 export function PanelAdministrativo() {
   const hoy = hoyEnClub()
   const [desde, setDesde] = useState(`${hoy.slice(0, 8)}01`)
@@ -166,7 +161,6 @@ export function PanelAdministrativo() {
   const [cargando, setCargando] = useState(true)
   const ultimaSolicitud = useRef(0)
 
-  // Solo la respuesta de la última solicitud puede pisar la pantalla.
   const mostrar = (peticion: Promise<DatosPanel>) => {
     const solicitud = ++ultimaSolicitud.current
     return peticion
@@ -183,12 +177,10 @@ export function PanelAdministrativo() {
       })
   }
 
-  // Primera carga: ingresos del mes en curso.
   useEffect(() => {
     void mostrar(consultarPanel())
   }, [])
 
-  // HU-6.1: el formulario del tablero solo recalcula las cifras del período.
   const recalcular = (evento: FormEvent) => {
     evento.preventDefault()
     if (cargando) return
@@ -199,7 +191,6 @@ export function PanelAdministrativo() {
     void mostrar(consultarPanel(desde, hasta))
   }
 
-  // Relee el panel con el último período aplicado (o el mes en curso al abrir).
   const actualizar = () => {
     if (cargando) return
     setCargando(true)
@@ -368,6 +359,15 @@ export function PanelAdministrativo() {
                 valor={numero.format(panel.profesoresActivos)}
                 nota={panel.profesoresActivos === 0 ? 'registrar en personal' : 'en el registro de personal'}
                 href={enlace('personal')} />
+              <Indicador icono="cartera" etiqueta="Cartera pendiente"
+                valor={formatoCop(panel.carteraPendiente)}
+                alerta={panel.patinadoresEnMora > 0}
+                nota={panel.carteraPendiente === 0
+                  ? 'sin cobros pendientes'
+                  : panel.patinadoresEnMora > 0
+                    ? `${numero.format(panel.patinadoresEnMora)} ${panel.patinadoresEnMora === 1 ? 'patinador en mora' : 'patinadores en mora'}`
+                    : 'sin patinadores en mora'}
+                href={enlace('reportes')} />
               <Indicador icono="inventario" etiqueta="Unidades disponibles"
                 valor={numero.format(panel.unidadesDisponibles)}
                 alerta={panel.referenciasBajoMinimo > 0}

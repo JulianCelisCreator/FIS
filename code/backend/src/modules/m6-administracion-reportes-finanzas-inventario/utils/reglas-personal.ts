@@ -1,10 +1,8 @@
-// Reglas de negocio del registro de personal (HU-6.2 / RF-M6-02), sin acceso a
-// base de datos para poder probarlas de forma aislada.
+// Reglas de negocio del registro de personal (HU-6.2).
 
 export class ErrorReglaPersonal extends Error {
   constructor(
     mensaje: string,
-    /** NO_ENCONTRADO → 404, DUPLICADO → 409, INVALIDO → 400. */
     readonly motivo: 'NO_ENCONTRADO' | 'DUPLICADO' | 'INVALIDO' = 'INVALIDO',
   ) {
     super(mensaje);
@@ -22,11 +20,6 @@ export interface DatosPersonales {
 
 const espacios = (texto: string) => texto.trim().replace(/\s+/g, ' ');
 
-/**
- * Limpia los datos antes de guardarlos: sin espacios sobrantes, documento en
- * mayúsculas, correo en minúsculas y teléfono sin espacios. Así la unicidad
- * de documento y correo no depende de cómo se escribieron.
- */
 export function normalizarPersonal<T extends DatosPersonales>(datos: T): T {
   const limpio = { ...datos };
   if (limpio.numeroDocumento !== undefined) {
@@ -46,7 +39,6 @@ export function normalizarPersonal<T extends DatosPersonales>(datos: T): T {
   return limpio;
 }
 
-/** Mensaje para cada restricción de unicidad de la tabla personal. */
 const DUPLICADOS: Record<string, string> = {
   personal_tipo_documento_numero_documento_key:
     'Ya existe una persona registrada con ese tipo y número de documento',
@@ -54,10 +46,6 @@ const DUPLICADOS: Record<string, string> = {
   personal_usuario_id_key: 'Esa cuenta ya está vinculada a otra persona del personal',
 };
 
-/**
- * Traduce un error de PostgreSQL por valor duplicado (23505) al campo que falla.
- * Devuelve null si el error no es de unicidad de personal.
- */
 export function mensajeDuplicado(error: unknown): string | null {
   if (typeof error !== 'object' || error === null) return null;
   const { code, constraint } = error as { code?: string; constraint?: string };
@@ -68,14 +56,9 @@ export function mensajeDuplicado(error: unknown): string | null {
 export interface CuentaVinculable {
   id: number;
   estado: string;
-  /** Persona del personal que ya tiene la cuenta, si la hay. */
   personalId: number | null;
 }
 
-/**
- * Una cuenta de M1 se puede vincular si existe, no está desactivada y no
- * pertenece a otra persona del personal. M6 no crea cuentas: solo las vincula.
- */
 export function validarCuentaVinculable(
   cuenta: CuentaVinculable | null,
   personalId: number | null,

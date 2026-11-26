@@ -9,12 +9,8 @@ import type {
   ValoresVentas,
 } from '../utils/reglas-reporte.js';
 
-// Consultas de solo lectura de los reportes financieros (HU-6.4). Leen las
-// tablas de M5 (cobro, pago, pago_cobro, comprobante) y de M6 (ventas,
-// devoluciones y Kardex). Solo se expone el nombre del patinador: nada de
-// documentos ni datos de contacto (Ley 1581 de 2012).
+// Consultas de solo lectura de los reportes financieros (HU-6.4).
 
-/** Pagos registrados en el rango repartidos por el concepto del cobro que cubren. */
 const SQL_INGRESOS = `
   WITH pagos AS (
     SELECT id, monto FROM pago
@@ -54,11 +50,6 @@ const SQL_PAGOS = `
   WHERE p.estado = 'REGISTRADO' AND p.fecha_pago BETWEEN $1::date AND $2::date
   ORDER BY p.fecha_pago, p.id`;
 
-/**
- * Cartera a la fecha de corte: cobros no anulados emitidos hasta esa fecha,
- * menos los pagos registrados con fecha de pago hasta esa fecha. Vencido con
- * los días de gracia de M5 (igual que v_saldo_cobro.vencido_desde).
- */
 const SQL_CARTERA = `
   WITH gracia AS (
     SELECT COALESCE((SELECT valor::int FROM parametro_sistema WHERE clave = 'dias_gracia_mora'), 0) AS dias

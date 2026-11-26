@@ -54,6 +54,16 @@ export class PersonalService {
     return this.personal.cuentasDisponibles(buscar);
   }
 
+  listarDisponibilidadDocentes() {
+    return this.personal.disponibilidadDocentes();
+  }
+
+  async disponibilidadDocente(id: number) {
+    const [disponibilidad] = await this.personal.disponibilidadDocentes(id);
+    if (!disponibilidad) throw new NotFoundException('El docente no existe en el registro de personal');
+    return disponibilidad;
+  }
+
   async detalle(id: number): Promise<Personal> {
     const persona = await this.personal.detalle(id);
     if (!persona) throw new NotFoundException('La persona no existe en el registro de personal');

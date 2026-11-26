@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Alerta, Campo, DialogoConfirmacion, Insignia, ListaDatos } from '../../../shared/ui/componentes.tsx'
 import { formatoCop, formatoFecha, hoyEnClub } from '../../../shared/utils/formato.ts'
+import { enlace } from '../../../shared/utils/use-ruta.ts'
+import { urlComprobante } from '../../m5-planes-tarifas-pagos/services/m5.service.ts'
 import { MEDIOS_PAGO, type MedioPago } from '../../m5-planes-tarifas-pagos/types/m5.types.ts'
 import {
   consolidarItemsVenta,
@@ -574,7 +576,20 @@ export function VentasUniformes() {
               </table>
             </div>
             <p className="vl-text-heading-h5">Total: {formatoCop(comprobante.total)}</p>
-            <div>
+            <div className="app-actions">
+              {comprobante.pagoId > 0 && (
+                <a
+                  className="vl-button vl-button--primary vl-button--sm"
+                  href={urlComprobante(comprobante.pagoId)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Descargar PDF (M5)
+                </a>
+              )}
+              <a className="vl-button vl-button--secondary vl-button--sm" href={enlace('historial-pagos')}>
+                Ver en historial de pagos
+              </a>
               <button className="vl-button vl-button--secondary vl-button--sm" type="button" onClick={() => window.print()}>
                 Imprimir comprobante
               </button>

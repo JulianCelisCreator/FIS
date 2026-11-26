@@ -8,7 +8,8 @@ export type ConceptoCobro =
   | 'GASTOS_ADMINISTRATIVOS'
   | 'VENTA_UNIFORME'
   | 'VALORACION'
-  | 'RECARGO_MORA';
+  | 'RECARGO_MORA'
+  | 'PRESTAMO_IMPLEMENTO';
 
 export interface NuevoCobro {
   patinadorId: number;

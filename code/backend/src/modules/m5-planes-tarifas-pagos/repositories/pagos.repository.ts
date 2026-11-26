@@ -4,7 +4,7 @@ import type { MedioPago } from '../enums/medio-pago.enum.js';
 
 export interface NuevoPago {
   patinadorId: number;
-  tipo: 'COBRO' | 'SESION' | 'MATRICULA';
+  tipo: 'COBRO' | 'SESION' | 'MATRICULA' | 'VENTA_UNIFORME';
   monto: number;
   fechaPago: string;
   medioPago: MedioPago;

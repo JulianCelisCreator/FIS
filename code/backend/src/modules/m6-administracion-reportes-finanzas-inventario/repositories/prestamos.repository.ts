@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BaseDatosService, Consultor } from '../../../common/database/base-datos.service.js';
+import { CobrosRepository } from '../../m5-planes-tarifas-pagos/repositories/cobros.repository.js';
 import type { CrearPrestamoDto, RecibirPrestamoDto } from '../dto/prestamos.dto.js';
 import { unidadesQueRegresan, type CobroPrestamo } from '../utils/reglas-prestamo.js';
 
@@ -37,7 +38,10 @@ export interface PatinadorPrestamo {
 
 @Injectable()
 export class PrestamosRepository {
-  constructor(private readonly baseDatos: BaseDatosService) {}
+  constructor(
+    private readonly baseDatos: BaseDatosService,
+    private readonly cobrosM5: CobrosRepository,
+  ) {}
 
   /** Todos los préstamos, o solo uno si se indica su id. */
   listar(id?: number): Promise<Prestamo[]> {
@@ -156,13 +160,18 @@ export class PrestamosRepository {
   ) {
     let cobroId: number | null = null;
     if (cobro.valor > 0) {
-      const [fila] = await consultor.query<{ id: number }>(
-        `INSERT INTO cobro (patinador_id, concepto, descripcion, valor, fecha_limite, creado_por)
-         VALUES ($1, 'PRESTAMO_IMPLEMENTO', $2, $3, $4, $5)
-         RETURNING id`,
-        [dto.patinadorId, descripcionCobro, cobro.valor, dto.fechaDevolucionPrevista, usuarioId],
-      ).then((resultado) => resultado.rows);
-      cobroId = fila.id;
+      cobroId = await this.cobrosM5.crear(consultor, {
+        patinadorId: dto.patinadorId,
+        asignacionPlanId: null,
+        tarifaId: null,
+        concepto: 'PRESTAMO_IMPLEMENTO',
+        periodo: null,
+        descripcion: descripcionCobro,
+        valor: cobro.valor,
+        fechaLimite: dto.fechaDevolucionPrevista,
+        estado: 'PENDIENTE',
+        creadoPor: usuarioId,
+      });
     }
     const [creado] = await consultor.query<{ id: number }>(
       `INSERT INTO prestamo_uniforme
