@@ -110,6 +110,6 @@ export class RecuperacionService {
 }
 
 /** Dirección de la aplicación para los enlaces del correo (APP_URL en .env). */
-function urlAplicacion(): string {
+export function urlAplicacion(): string {
   return (process.env.APP_URL?.trim() || 'http://localhost:5173').replace(/\/+$/, '');
 }

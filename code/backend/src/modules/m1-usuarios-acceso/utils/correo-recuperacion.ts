@@ -1,7 +1,7 @@
 import type { CorreoSaliente } from '../../../common/correo/correo.service.js';
 
 /** Escapa texto que va dentro del HTML del correo. */
-function escapar(texto: string): string {
+export function escapar(texto: string): string {
   return texto.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] ?? c);
 }
 
