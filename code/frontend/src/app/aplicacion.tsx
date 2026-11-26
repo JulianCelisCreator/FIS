@@ -19,9 +19,10 @@ import {
   type PestanaPago,
 } from '../modules/m5-planes-tarifas-pagos/components/registrar-pago.tsx'
 import { PERMISOS_M5 } from '../modules/m5-planes-tarifas-pagos/types/m5.types.ts'
+import { NivelesPatinaje } from '../modules/m2-gestion-deportiva/components/niveles-patinaje.tsx'
 import { PerfilesPatinador } from '../modules/m2-gestion-deportiva/components/perfiles-patinador.tsx'
-import { PERMISOS_M2 } from '../modules/m2-gestion-deportiva/types/m2.types.ts'
 import { AsociacionPerfiles } from '../modules/m2-gestion-deportiva/components/asociacion-perfiles.tsx'
+import { PERMISOS_M2 } from '../modules/m2-gestion-deportiva/types/m2.types.ts'
 import { M4Modulo } from '../modules/m4-competencias-resultados/components/m4-modulo.tsx'
 import { PERMISOS_M4 } from '../modules/m4-competencias-resultados/types/m4.types.ts'
 import { ConfiguracionGrupos } from '../modules/m3-grupos-horarios/components/configuracion-grupos.tsx'
@@ -43,8 +44,9 @@ import { MarcoAplicacion } from './marco-aplicacion.tsx'
 
 const PANTALLAS = [
   { pagina: 'panel', texto: 'Panel general', grupo: 'Administración', permiso: PERMISOS_PANEL.panelConsultar },
-  { pagina: 'm2-perfiles-patinador', texto: 'Perfiles de patinador', permiso: PERMISOS_M2.patinadorGestionar },
-  { pagina: 'm2-asociaciones', texto: 'Asociar acudientes', permiso: PERMISOS_M2.acudienteGestionar },
+  { pagina: 'm2-niveles', texto: 'Niveles de patinaje', grupo: 'Gestión deportiva', permiso: PERMISOS_M2.nivelGestionar },
+  { pagina: 'm2-perfiles-patinador', texto: 'Perfiles de patinador', grupo: 'Gestión deportiva', permiso: PERMISOS_M2.patinadorGestionar },
+  { pagina: 'm2-asociaciones', texto: 'Asociar acudientes', grupo: 'Gestión deportiva', permiso: PERMISOS_M2.acudienteGestionar },
   { pagina: 'm4', texto: 'Competencias y resultados', grupo: 'Competencias y resultados', permiso: PERMISOS_M4.consultar },
   { pagina: 'planes', texto: 'Planes y tarifas', grupo: 'Planes y pagos', permiso: PERMISOS_M5.planGestionar },
   { pagina: 'asignar-plan', texto: 'Asignar o cambiar plan', grupo: 'Planes y pagos', permiso: PERMISOS_M5.planAsignar },
@@ -162,30 +164,24 @@ export function Aplicacion() {
       : []
   const deportivas = PANTALLAS.filter((pantalla) => pantalla.pagina.startsWith('m2') && tienePermiso(pantalla.permiso))
   const competencias = PANTALLAS.filter((pantalla) => pantalla.pagina === 'm4' && tienePermiso(pantalla.permiso))
-  const pantallasPermitidas = PANTALLAS.filter((pantalla) => !pantalla.pagina.startsWith('m2') && !pantalla.pagina.startsWith('m2') && pantalla.pagina !== 'm4' && tienePermiso(pantalla.permiso))
+  const pantallasPermitidas = PANTALLAS.filter(
+    (pantalla) => !pantalla.pagina.startsWith('m2') && pantalla.pagina !== 'm4' && tienePermiso(pantalla.permiso),
+  )
   const subpantallas = tieneRol('ADMINISTRADOR') ? Object.keys(SUBPANTALLAS_ADMINISTRADOR) : []
   const permitidas = [
-    ...usuarios, ...deportivas, ...competencias, ...deportivas,
+    ...usuarios,
+    ...deportivas,
+    ...competencias,
     ...gruposHorarios,
     ...pantallasPermitidas,
     ...misPagos,
-    ...subpantallas.map((p) => ({
-      pagina: p,
-      texto: p,
-    })),
-  ];
-  
-  const actual = pagina || permitidas[0]?.pagina || '';
+    ...subpantallas.map((p) => ({ pagina: p, texto: p })),
+  ]
+  const actual = pagina || permitidas[0]?.pagina || ''
   const navegacion = [
-    {
-      grupo: 'Usuarios',
-      enlaces: usuarios,
-    },
+    { grupo: 'Usuarios', enlaces: usuarios },
     { grupo: 'Gestión deportiva', enlaces: deportivas },
-    {
-      grupo: 'Grupos y horarios',
-      enlaces: gruposHorarios,
-    },
+    { grupo: 'Grupos y horarios', enlaces: gruposHorarios },
     ...[
       'Competencias y resultados',
       'Planes y pagos',
@@ -194,14 +190,14 @@ export function Aplicacion() {
     ].map((grupo) => ({
       grupo,
       enlaces: [
-        ...pantallasPermitidas.filter(
-          (pantalla) => pantalla.grupo === grupo
-        ),
+        ...(grupo === 'Competencias y resultados'
+          ? competencias
+          : pantallasPermitidas.filter((pantalla) => pantalla.grupo === grupo)),
         // Cada pantalla va solo en su grupo; «Mis pagos» no tiene permiso propio y se agrega aparte.
         ...(grupo === 'Planes y pagos' ? misPagos : []),
       ],
     })),
-  ];
+  ]
 
   let contenido
   if (actual === 'mi-cuenta') {
@@ -253,6 +249,8 @@ export function Aplicacion() {
     )
   } else if (actual === 'm4') {
     contenido = <M4Modulo key={sesion.id} />
+  } else if (actual === 'm2-niveles') {
+    contenido = <NivelesPatinaje key={sesion.id} />
   } else if (actual === 'm2-perfiles-patinador') {
     contenido = <PerfilesPatinador key={sesion.id} />
   } else if (actual === 'm2-asociaciones') {

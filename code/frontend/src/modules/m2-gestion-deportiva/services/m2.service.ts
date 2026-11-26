@@ -1,5 +1,26 @@
 import { pedir } from '../../../shared/services/cliente-api.ts'
-import type { DatosPerfilPatinador, PerfilPatinador } from '../types/m2.types.ts'
+import type {
+  AcudienteDisponible,
+  DatosPerfilPatinador,
+  NivelPatinaje,
+  PatinadorConAcudientes,
+  PerfilPatinador,
+} from '../types/m2.types.ts'
+
+export function listarNiveles(): Promise<NivelPatinaje[]> {
+  return pedir('/m2/niveles')
+}
+
+export function crearNivel(datos: { nombre: string; descripcion?: string; orden: number }): Promise<NivelPatinaje> {
+  return pedir('/m2/niveles', { metodo: 'POST', cuerpo: datos })
+}
+
+export function actualizarNivel(
+  nivelId: number,
+  cambios: { nombre?: string; descripcion?: string | null; orden?: number; activo?: boolean },
+): Promise<NivelPatinaje> {
+  return pedir(`/m2/niveles/${nivelId}`, { metodo: 'PATCH', cuerpo: cambios })
+}
 
 export function listarPerfilesPatinador(): Promise<PerfilPatinador[]> {
   return pedir('/m2/perfiles-patinador')
@@ -12,7 +33,6 @@ export function crearPerfilPatinador(datos: DatosPerfilPatinador): Promise<Perfi
 export function actualizarPerfilPatinador(id: number, cambios: Partial<DatosPerfilPatinador>): Promise<PerfilPatinador> {
   return pedir(`/m2/perfiles-patinador/${id}`, { metodo: 'PATCH', cuerpo: cambios })
 }
-import type { AcudienteDisponible, PatinadorConAcudientes } from '../types/m2.types.ts'
 
 export function listarPatinadores(buscar?: string): Promise<PatinadorConAcudientes[]> {
   return pedir('/m2/patinadores', { consulta: { buscar } })
