@@ -1,7 +1,3 @@
-export const PERMISOS_M2 = {
-  patinadorGestionar: 'M2_PATINADOR_GESTIONAR',
-} as const
-
 export interface PerfilPatinador {
   id: number
   tipoDocumento: string
@@ -22,4 +18,32 @@ export interface DatosPerfilPatinador {
   fechaNacimiento: string
   genero: 'FEMENINO' | 'MASCULINO'
   telefonoContacto?: string | null
+}
+export const PERMISOS_M2 = {
+  patinadorGestionar: 'M2_PATINADOR_GESTIONAR',
+  acudienteGestionar: 'M2_ACUDIENTE_GESTIONAR',
+  nivelGestionar: 'M2_NIVEL_GESTIONAR',
+  nivelConsultar: 'M2_NIVEL_CONSULTAR',
+} as const
+
+export interface AcudienteDisponible {
+  id: number
+  nombre: string
+  tipoDocumento: string | null
+  numeroDocumento: string | null
+  correo: string
+}
+
+export interface AcudienteVinculado extends AcudienteDisponible {
+  parentesco: string
+  esPrincipal: boolean
+}
+
+export interface PatinadorConAcudientes {
+  id: number
+  nombre: string
+  tipoDocumento: string
+  numeroDocumento: string
+  fechaNacimiento: string
+  acudientes: AcudienteVinculado[]
 }
