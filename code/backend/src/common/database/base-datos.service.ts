@@ -13,16 +13,25 @@ pg.types.setTypeParser(pg.types.builtins.DATE, (valor: string) => valor);
 pg.types.setTypeParser(pg.types.builtins.INT8, (valor: string) => Number(valor));
 pg.types.setTypeParser(pg.types.builtins.NUMERIC, (valor: string) => Number(valor));
 
+const urlBaseDatos = process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL;
+
 @Injectable()
 export class BaseDatosService implements OnApplicationShutdown {
+  // En Vercel la integración de Neon inyecta DATABASE_URL(_UNPOOLED), con sslmode=require.
+  // Se usa la conexión directa porque el pooler de Neon no acepta el parámetro
+  // `options` (zona horaria). En local se usan las variables DB_* de .env.
   private readonly pool = new pg.Pool({
-    host: process.env.DB_HOST ?? 'localhost',
-    port: Number(process.env.DB_PORT ?? 5432),
-    database: process.env.DB_NAME ?? 'patinaje',
-    user: process.env.DB_USER ?? 'patinaje',
-    password: process.env.DB_PASSWORD ?? 'patinaje_dev',
+    ...(urlBaseDatos
+      ? { connectionString: urlBaseDatos }
+      : {
+          host: process.env.DB_HOST ?? 'localhost',
+          port: Number(process.env.DB_PORT ?? 5432),
+          database: process.env.DB_NAME ?? 'patinaje',
+          user: process.env.DB_USER ?? 'patinaje',
+          password: process.env.DB_PASSWORD ?? 'patinaje_dev',
+        }),
     options: '-c timezone=America/Bogota',
-    max: Number(process.env.DB_POOL_MAX ?? 10),
+    max: Number(process.env.DB_POOL_MAX ?? (process.env.VERCEL ? 3 : 10)),
   });
 
   /** Consultor para lecturas y escrituras que no necesitan transacción. */
