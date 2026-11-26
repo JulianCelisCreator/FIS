@@ -33,7 +33,7 @@ function mensajeDeError(cuerpo: unknown, estado: number): string {
 
 export async function pedir<T>(
   ruta: string,
-  opciones: { metodo?: 'GET' | 'POST' | 'PATCH'; cuerpo?: unknown; consulta?: Record<string, string | undefined> } = {},
+  opciones: { metodo?: 'GET' | 'POST' | 'PUT' | 'PATCH'; cuerpo?: unknown; consulta?: Record<string, string | undefined> } = {},
 ): Promise<T> {
   const parametros = new URLSearchParams()
   for (const [clave, valor] of Object.entries(opciones.consulta ?? {})) {
