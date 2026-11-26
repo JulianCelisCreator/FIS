@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react'
 import { Alerta, Campo, DialogoConfirmacion, Insignia, ListaDatos } from '../../../shared/ui/componentes.tsx'
 import { formatoCop, formatoFecha } from '../../../shared/utils/formato.ts'
-import { historialPagos, urlComprobante, urlExportarHistorial } from '../services/m5.service.ts'
+import { useSesion } from '../../../shared/sesion/use-sesion.ts'
+import { anularPago, historialPagos, urlComprobante, urlExportarHistorial } from '../services/m5.service.ts'
 import {
+  ESTADO_CARTERA_DS,
   MEDIOS_PAGO,
+  PERMISOS_M5,
   type FiltrosHistorial,
   type MedioPago,
   type PagoHistorial,
   type RespuestaHistorial,
+  type ResultadoAnulacion,
 } from '../types/m5.types.ts'
 import { cobroAplicado, textoMedio } from '../utils/textos-pagos.ts'
 
@@ -17,8 +21,15 @@ const FORMATO_FECHA_HORA = new Intl.DateTimeFormat('es-CO', {
   timeZone: 'America/Bogota',
 })
 
+/** Los pagos de ventas y préstamos de uniformes (M6) no se anulan desde M5. */
+function esPagoDeM5(pago: PagoHistorial): boolean {
+  return pago.tipo !== 'VENTA_UNIFORME' && pago.cobros.every((cobro) => !['VENTA_UNIFORME', 'PRESTAMO_IMPLEMENTO'].includes(cobro.concepto))
+}
+
 /** RF-M5-16: historial de pagos del Administrador y el Contador, con exportación (wireframes/grupo-04/historial-pagos). */
 export function HistorialPagos() {
+  const { tienePermiso } = useSesion()
+  const puedeAnular = tienePermiso(PERMISOS_M5.pagoAnular)
   const [buscar, setBuscar] = useState('')
   const [texto, setTexto] = useState('')
   const [desde, setDesde] = useState('')
@@ -28,6 +39,10 @@ export function HistorialPagos() {
   const [respuesta, setRespuesta] = useState<RespuestaHistorial | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [anulado, setAnulado] = useState<PagoHistorial | null>(null)
+  const [porAnular, setPorAnular] = useState<PagoHistorial | null>(null)
+  const [resultadoAnulacion, setResultadoAnulacion] = useState<ResultadoAnulacion | null>(null)
+  // Cambia después de anular para volver a consultar el historial con los mismos filtros.
+  const [recarga, setRecarga] = useState(0)
 
   useEffect(() => {
     const espera = setTimeout(() => setTexto(buscar.trim()), 300)
@@ -62,7 +77,7 @@ export function HistorialPagos() {
     return () => {
       vigente = false
     }
-  }, [texto, desde, hasta, medio, estado, rangoInvalido])
+  }, [texto, desde, hasta, medio, estado, rangoInvalido, recarga])
 
   const hayFiltros = buscar || desde || hasta || medio || estado
   const limpiar = () => {
@@ -108,6 +123,17 @@ export function HistorialPagos() {
           </a>
         </div>
       </header>
+
+      {resultadoAnulacion && (
+        <Alerta tono="success" titulo={`Pago anulado · N.º ${resultadoAnulacion.comprobante?.replace(/^CP-/, '') ?? '—'}`}>
+          <p>
+            {formatoCop(resultadoAnulacion.cobros.reduce((suma, cobro) => suma + cobro.montoDevuelto, 0))} volvieron al saldo
+            {resultadoAnulacion.cobros.some((cobro) => cobro.estado === 'ANULADO') ? ' (el cobro de sesiones quedó anulado)' : ''}.
+            Cartera recalculada: <Insignia entidad="cartera" estado={ESTADO_CARTERA_DS[resultadoAnulacion.estadoCartera.estado]} />{' '}
+            {formatoCop(resultadoAnulacion.estadoCartera.saldoPendiente)} pendientes.
+          </p>
+        </Alerta>
+      )}
 
       <form className="vl-filter-bar" role="search" aria-label="Filtrar pagos" onSubmit={(evento) => evento.preventDefault()}>
         <Campo etiqueta="Buscar" id="filtro-buscar">
@@ -221,6 +247,16 @@ export function HistorialPagos() {
                             Ver motivo
                           </button>
                         )}
+                        {puedeAnular && pago.estado === 'REGISTRADO' && esPagoDeM5(pago) && (
+                          <button
+                            className="vl-link app-boton-enlace app-boton-enlace--peligro"
+                            type="button"
+                            aria-label={`Anular el pago N.º ${pago.comprobante?.replace(/^CP-/, '') ?? pago.pagoId}`}
+                            onClick={() => setPorAnular(pago)}
+                          >
+                            Anular
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -267,6 +303,93 @@ export function HistorialPagos() {
           />
         </DialogoConfirmacion>
       )}
+
+      {porAnular && (
+        <DialogoAnular
+          pago={porAnular}
+          alCancelar={() => setPorAnular(null)}
+          alAnular={(resultado) => {
+            setPorAnular(null)
+            setResultadoAnulacion(resultado)
+            setRecarga((valor) => valor + 1)
+          }}
+        />
+      )}
     </div>
+  )
+}
+
+/** RF-M5-11: confirmación con motivo obligatorio; el pago no se borra y no se puede deshacer. */
+function DialogoAnular({
+  pago,
+  alCancelar,
+  alAnular,
+}: {
+  pago: PagoHistorial
+  alCancelar: () => void
+  alAnular: (resultado: ResultadoAnulacion) => void
+}) {
+  const [motivo, setMotivo] = useState('')
+  const [intentado, setIntentado] = useState(false)
+  const [ocupado, setOcupado] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const motivoLimpio = motivo.trim()
+  const errorMotivo = motivoLimpio.length < 5 ? 'Escribe el motivo de la anulación (mínimo 5 caracteres).' : null
+  const sesiones = pago.tipo === 'SESION'
+
+  const confirmar = () => {
+    setIntentado(true)
+    if (errorMotivo) return
+    setOcupado(true)
+    setError(null)
+    anularPago(pago.pagoId, motivoLimpio)
+      .then(alAnular)
+      .catch((e: Error) => {
+        setError(e.message)
+        setOcupado(false)
+      })
+  }
+
+  return (
+    <DialogoConfirmacion
+      abierto
+      variante="form"
+      titulo={`Anular el pago N.º ${pago.comprobante?.replace(/^CP-/, '') ?? pago.pagoId}`}
+      textoConfirmar="Anular pago"
+      textoOcupado="Anulando…"
+      ocupado={ocupado}
+      alConfirmar={confirmar}
+      alCancelar={alCancelar}
+    >
+      <ListaDatos
+        filas={[
+          ['Patinador', pago.patinador],
+          ['Cobro', cobroAplicado(pago)],
+          ['Monto', `${formatoCop(pago.monto)} · ${textoMedio(pago.medioPago)} · ${formatoFecha(pago.fechaPago)}`],
+        ]}
+      />
+      <Alerta tono="warning" titulo="No se puede deshacer">
+        <p>
+          El pago queda como «Anulado»; no se borra.{' '}
+          {sesiones
+            ? 'El cobro de las sesiones también se anula.'
+            : `Los ${formatoCop(pago.monto)} vuelven al saldo de ${cobroAplicado(pago).toLowerCase()}.`}{' '}
+          El comprobante se marca como anulado, la cartera se recalcula y la anulación queda en la auditoría con tu nombre y el motivo.
+        </p>
+      </Alerta>
+      <Campo etiqueta="Motivo de la anulación" id="motivo-anulacion" obligatorio error={intentado ? errorMotivo : null}>
+        <textarea
+          id="motivo-anulacion"
+          className="vl-textarea"
+          rows={3}
+          maxLength={500}
+          placeholder="Ej.: se digitó $ 15.000 en vez de $ 150.000"
+          value={motivo}
+          aria-invalid={intentado && Boolean(errorMotivo)}
+          onChange={(evento) => setMotivo(evento.target.value)}
+        />
+      </Campo>
+      {error && <Alerta tono="error" titulo="No se pudo anular el pago">{error}</Alerta>}
+    </DialogoConfirmacion>
   )
 }

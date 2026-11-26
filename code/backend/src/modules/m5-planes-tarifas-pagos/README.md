@@ -14,6 +14,7 @@ Módulo del Grupo 04. Por ahora implementa:
 | RF-M5-08 | Generación automática de cobros mensuales |
 | RF-M5-09 | Registro manual de pago de un cobro (total o parcial) |
 | RF-M5-10 | Registro manual de pago por sesión (plan de día único) |
+| RF-M5-11 | Anulación de pago con motivo obligatorio y auditoría |
 | RF-M5-13 | Consulta de cartera con filtros combinables |
 | RF-M5-15 | Descarga del comprobante de pago en PDF |
 | RF-M5-16 | Historial de pagos con filtros y exportación PDF/XLSX |
@@ -44,6 +45,7 @@ Todos exigen una sesión iniciada (ver [Autenticación](#autenticación)). Fecha
 | `POST /m5/pagos/cobro` | `M5_PAGO_REGISTRAR` | Administrador, Contador |
 | `POST /m5/pagos/sesion` | `M5_PAGO_REGISTRAR` | Administrador, Contador |
 | `POST /m5/pagos/matricula` | `M5_PAGO_REGISTRAR` | Administrador, Contador |
+| `PATCH /m5/pagos/:id/anular` | `M5_PAGO_ANULAR` | Administrador |
 | `GET /m5/cartera?estado=&planId=&patinador=&acudiente=&venceDesde=&venceHasta=` | `M5_CARTERA_CONSULTAR` | Administrador, Contador |
 | `GET /m5/pagos?desde=&hasta=&medio=&estado=&buscar=` | `M5_PAGO_HISTORIAL` | Administrador, Contador |
 | `GET /m5/pagos/exportar?formato=pdf\|xlsx&…filtros` | `M5_PAGO_HISTORIAL` | Administrador, Contador |
@@ -163,7 +165,15 @@ Errores: `400` datos inválidos, `401` sin usuario, `403` sin permiso o patinado
 - **Concurrencia:** el cobro se bloquea durante la transacción, así que dos pagos simultáneos no pueden superar el saldo.
 - **Por sesión:** exige un plan de día único que rija en la fecha del pago. Crea un cobro de sesiones × tarifa que queda pagado de una vez.
 - **Matrícula:** son dos cobros (matrícula y gastos administrativos) pagados con un solo pago y un solo comprobante.
-- **Inmutabilidad:** los pagos no se editan ni se borran. La anulación (RF-M5-11) queda pendiente.
+- **Inmutabilidad:** los pagos no se editan ni se borran; se anulan.
+
+### Anulación (RF-M5-11)
+
+- Solo el Administrador, con motivo obligatorio (`{ "motivo": "…" }`, de 5 a 500 caracteres). No se puede deshacer.
+- El pago y su comprobante pasan a `ANULADO` y se conservan. El monto vuelve al saldo de cada cobro, que regresa a `PENDIENTE` si le queda saldo, y la cartera se recalcula.
+- El cobro de sesiones nace con su pago, así que se anula con él para no crear deuda.
+- Queda en `auditoria` (`tabla = 'pago'`, `accion = 'ANULAR'`) con el usuario, el motivo y los valores anterior y nuevo.
+- Responde 409 si el pago ya está anulado o si es de una venta o un préstamo de M6, que tienen sus propias devoluciones.
 
 Las asignaciones y los cambios se registran en `auditoria`.
 

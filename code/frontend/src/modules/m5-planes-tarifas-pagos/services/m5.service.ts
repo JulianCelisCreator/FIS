@@ -18,6 +18,7 @@ import type {
   RespuestaCartera,
   RespuestaHistorial,
   TipoPlan,
+  ResultadoAnulacion,
 } from '../types/m5.types.ts'
 
 // --- Planes y tarifas (RF-M5-01 a RF-M5-05) ---
@@ -73,6 +74,11 @@ export async function planesParaElegir(esAdministrador: boolean): Promise<PlanOf
   }
   const oferta = await pedir<{ planes: Omit<PlanOfertado, 'asignable'>[] }>('/m5/planes/oferta')
   return oferta.planes.map((plan) => ({ ...plan, asignable: true }))
+}
+
+/** RF-M5-05: planes activos con tarifa vigente, la misma vista para todos los roles. */
+export function ofertaDePlanes(): Promise<{ fecha: string; planes: Omit<PlanOfertado, 'asignable'>[] }> {
+  return pedir('/m5/planes/oferta')
 }
 
 export function planDelPatinador(patinadorId: number): Promise<PlanDelPatinador> {
@@ -136,6 +142,11 @@ export function urlExportarHistorial(filtros: FiltrosHistorial, formato: 'pdf' |
     if (valor !== undefined) parametros.set(clave, valor)
   }
   return urlApi(`/m5/pagos/exportar?${parametros}`)
+}
+
+/** RF-M5-11: anula un pago con motivo obligatorio (solo Administrador). */
+export function anularPago(pagoId: number, motivo: string): Promise<ResultadoAnulacion> {
+  return pedir(`/m5/pagos/${pagoId}/anular`, { metodo: 'PATCH', cuerpo: { motivo } })
 }
 
 /** Enlace al comprobante en PDF de un pago (RF-M5-15). */

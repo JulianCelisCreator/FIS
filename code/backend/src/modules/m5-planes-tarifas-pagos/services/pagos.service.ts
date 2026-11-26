@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { AuditoriaRepository } from '../../../common/auditoria/auditoria.repository.js';
 import type { UsuarioAutenticado } from '../../../common/auth/usuario-autenticado.js';
 import {
   BaseDatosService,
@@ -28,6 +29,9 @@ const formatoCop = new Intl.NumberFormat('es-CO', {
   maximumFractionDigits: 0,
 });
 
+/** Cobros que nacen en M6 (ventas y préstamos): sus pagos no se anulan desde M5. */
+const CONCEPTOS_DE_M6 = ['VENTA_UNIFORME', 'PRESTAMO_IMPLEMENTO'];
+
 /** Evita errores de punto flotante al restar valores con centavos. */
 function redondearCentavos(valor: number): number {
   return Math.round(valor * 100) / 100;
@@ -47,6 +51,7 @@ export class PagosService {
     private readonly asignaciones: AsignacionesRepository,
     private readonly cobros: CobrosRepository,
     private readonly pagos: PagosRepository,
+    private readonly auditoria: AuditoriaRepository,
   ) {}
 
   /** Pago total o parcial de un cobro; el monto no puede superar su saldo. */
@@ -216,6 +221,67 @@ export class PagosService {
     });
   }
 
+  /**
+   * RF-M5-11: anula un pago con motivo obligatorio. El pago y su comprobante se
+   * conservan como ANULADO; el monto vuelve al saldo de sus cobros (el cobro de
+   * sesiones, que nace con su pago, se anula con él) y la cartera se recalcula.
+   */
+  async anularPago(usuario: UsuarioAutenticado, pagoId: number, motivo: string) {
+    return this.baseDatos.transaccion(async (tx) => {
+      const pago = await this.pagos.bloquearParaAnular(tx, pagoId);
+      if (!pago) {
+        throw new NotFoundException('El pago no existe');
+      }
+      if (pago.estado === 'ANULADO') {
+        throw new ConflictException('El pago ya está anulado');
+      }
+      if (pago.tipo === 'VENTA_UNIFORME') {
+        throw new ConflictException('Los pagos de uniformes se gestionan con las devoluciones de M6');
+      }
+      const cobros = await this.pagos.cobrosDelPago(tx, pagoId);
+      if (cobros.some((cobro) => CONCEPTOS_DE_M6.includes(cobro.concepto))) {
+        throw new ConflictException('Los pagos de uniformes e implementos se gestionan en M6');
+      }
+      await this.obtenerPatinadorBloqueado(tx, pago.patinadorId);
+      await this.cobros.bloquear(tx, cobros.map((cobro) => cobro.id));
+      await this.pagos.anular(tx, pagoId, usuario.id, motivo);
+      await this.pagos.anularComprobante(tx, pagoId);
+
+      const cobrosAfectados = [];
+      for (const cobro of cobros) {
+        let estado: 'PENDIENTE' | 'PAGADO' | 'ANULADO';
+        if (pago.tipo === 'SESION' && cobro.concepto === 'SESION') {
+          await this.cobros.anular(tx, cobro.id, `Pago anulado: ${motivo}`);
+          estado = 'ANULADO';
+        } else {
+          estado = await this.cobros.recalcularEstado(tx, cobro.id);
+        }
+        cobrosAfectados.push({ cobroId: cobro.id, montoDevuelto: cobro.montoAplicado, estado });
+      }
+
+      await this.auditoria.registrar(tx, {
+        modulo: 'M5',
+        tabla: 'pago',
+        registroId: pagoId,
+        accion: 'ANULAR',
+        valorAnterior: { estado: 'REGISTRADO', monto: pago.monto, comprobante: pago.comprobante },
+        valorNuevo: { estado: 'ANULADO', cobros: cobrosAfectados },
+        motivo,
+        usuarioId: usuario.id,
+      });
+
+      return {
+        pagoId,
+        patinadorId: pago.patinadorId,
+        estado: 'ANULADO' as const,
+        comprobante: pago.comprobante,
+        motivo,
+        cobros: cobrosAfectados,
+        estadoCartera: await this.pagos.estadoCartera(tx, pago.patinadorId),
+      };
+    });
+  }
+
   private async obtenerPatinadorBloqueado(tx: Consultor, patinadorId: number): Promise<void> {
     const patinador = await this.patinadores.obtenerContexto(tx, patinadorId);
     if (!patinador) {
@@ -224,7 +290,6 @@ export class PagosService {
     await this.patinadores.bloquear(tx, patinadorId);
   }
 
-  /** Emite el comprobante con sus datos históricos y lee la cartera recalculada. */
   /** Emite el comprobante con sus datos históricos y lee la cartera recalculada. */
   private async cerrarPago(
     tx: Consultor,

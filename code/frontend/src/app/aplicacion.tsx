@@ -13,6 +13,7 @@ import { AsignarCambiarPlan } from '../modules/m5-planes-tarifas-pagos/component
 import { Cartera } from '../modules/m5-planes-tarifas-pagos/components/cartera.tsx'
 import { HistorialPagos } from '../modules/m5-planes-tarifas-pagos/components/historial-pagos.tsx'
 import { MisPagos } from '../modules/m5-planes-tarifas-pagos/components/mis-pagos.tsx'
+import { OfertaPlanes } from '../modules/m5-planes-tarifas-pagos/components/oferta-planes.tsx'
 import { PlanesTarifas } from '../modules/m5-planes-tarifas-pagos/components/planes-tarifas.tsx'
 import {
   RegistrarPago,
@@ -164,6 +165,11 @@ export function Aplicacion() {
       : []
   const deportivas = PANTALLAS.filter((pantalla) => pantalla.pagina.startsWith('m2') && tienePermiso(pantalla.permiso))
   const competencias = PANTALLAS.filter((pantalla) => pantalla.pagina === 'm4' && tienePermiso(pantalla.permiso))
+  // «Planes de la escuela» (RF-M5-05): quien consulta planes sin gestionarlos (Contador, Acudiente, Patinador).
+  const ofertaPlanes =
+    tienePermiso(PERMISOS_M5.planConsultar) && !tienePermiso(PERMISOS_M5.planGestionar)
+      ? [{ pagina: 'oferta-planes', texto: 'Planes de la escuela' }]
+      : []
   const pantallasPermitidas = PANTALLAS.filter(
     (pantalla) => !pantalla.pagina.startsWith('m2') && pantalla.pagina !== 'm4' && tienePermiso(pantalla.permiso),
   )
@@ -175,6 +181,7 @@ export function Aplicacion() {
     ...gruposHorarios,
     ...pantallasPermitidas,
     ...misPagos,
+    ...ofertaPlanes,
     ...subpantallas.map((p) => ({ pagina: p, texto: p })),
   ]
   const actual = pagina || permitidas[0]?.pagina || ''
@@ -194,7 +201,7 @@ export function Aplicacion() {
           ? competencias
           : pantallasPermitidas.filter((pantalla) => pantalla.grupo === grupo)),
         // Cada pantalla va solo en su grupo; «Mis pagos» no tiene permiso propio y se agrega aparte.
-        ...(grupo === 'Planes y pagos' ? misPagos : []),
+        ...(grupo === 'Planes y pagos' ? [...ofertaPlanes, ...misPagos] : []),
       ],
     })),
   ]
@@ -257,6 +264,8 @@ export function Aplicacion() {
     contenido = <AsociacionPerfiles key={sesion.id} />
   } else if (actual === 'planes') {
     contenido = <PlanesTarifas key={sesion.id} />
+  } else if (actual === 'oferta-planes') {
+    contenido = <OfertaPlanes key={sesion.id} />
   } else if (actual === 'cartera') {
     contenido = <Cartera key={sesion.id} />
   } else if (actual === 'historial-pagos') {
