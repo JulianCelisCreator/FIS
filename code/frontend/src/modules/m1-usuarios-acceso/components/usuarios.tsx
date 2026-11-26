@@ -187,7 +187,11 @@ export function Usuarios() {
                           <span>{cuenta.nombre}</span>
                         </span>
                       </td>
-                      <td data-label="Correo" className="m1-usuarios__correo">{cuenta.correo}</td>
+                      <td data-label="Correo">
+                        {/* HU-M1-04 CA-04: el Administrador ve si el correo está verificado. */}
+                        <span className="m1-usuarios__correo">{cuenta.correo}</span>{' '}
+                        <Insignia entidad="correo" estado={cuenta.correoVerificado ? 'verificado' : 'sin-verificar'} />
+                      </td>
                       <td data-label="Rol">
                         {cuenta.roles.length > 0 ? (
                           <span className="m1-usuarios__roles">

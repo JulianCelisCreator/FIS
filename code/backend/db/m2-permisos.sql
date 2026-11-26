@@ -1,8 +1,9 @@
--- Permisos y asignaciones iniciales de M2. Ejecutar una vez después de schema.sql.
+-- Permisos y asignaciones iniciales del Módulo 2. Ejecutar después de schema.sql.
 BEGIN;
 INSERT INTO permiso (codigo, modulo, descripcion) VALUES
+  ('M2_PATINADOR_GESTIONAR', 'M2', 'Registrar y actualizar perfiles deportivos de patinadores (M2-01, M2-02)'),
   ('M2_ACUDIENTE_GESTIONAR', 'M2', 'Asociar perfiles existentes de patinador y acudiente (HU-M2-03)'),
-  ('M2_NIVEL_GESTIONAR', 'M2', 'Crear, editar y desactivar niveles de patinaje (HU-M2-04)'),
+  ('M2_NIVEL_GESTIONAR', 'M2', 'Crear, editar e inactivar niveles de patinaje (HU-M2-04)'),
   ('M2_NIVEL_CONSULTAR', 'M2', 'Consultar el nivel actual de un patinador (HU-M2-05)')
 ON CONFLICT (codigo) DO NOTHING;
 

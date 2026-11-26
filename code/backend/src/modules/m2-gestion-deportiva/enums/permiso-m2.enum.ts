@@ -1,5 +1,6 @@
-/** Permisos del módulo deportivo; las asignaciones por rol viven en db/m2-permisos.sql. */
+/** Permisos del módulo deportivo. */
 export enum PermisoM2 {
+  PATINADOR_GESTIONAR = 'M2_PATINADOR_GESTIONAR',
   ACUDIENTE_GESTIONAR = 'M2_ACUDIENTE_GESTIONAR',
   NIVEL_GESTIONAR = 'M2_NIVEL_GESTIONAR',
   NIVEL_CONSULTAR = 'M2_NIVEL_CONSULTAR',

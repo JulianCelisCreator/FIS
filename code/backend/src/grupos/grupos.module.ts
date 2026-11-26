@@ -1,0 +1,20 @@
+import { Module } from '@nestjs/common';
+import { ExternalDependenciesModule } from '../external-dependencies/external-dependencies.module.js';
+import { CalendarioController } from './calendario.controller.js';
+import { GruposController } from './grupos.controller.js';
+import { GruposService } from './grupos.service.js';
+import { HorariosController } from './horarios.controller.js';
+import { ProfesoresGrupoController } from './profesores.controller.js';
+
+@Module({
+  imports: [ExternalDependenciesModule],
+  controllers: [
+    GruposController,
+    ProfesoresGrupoController,
+    HorariosController,
+    CalendarioController,
+  ],
+  providers: [GruposService],
+  exports: [GruposService],
+})
+export class GruposModule {}

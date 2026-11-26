@@ -34,6 +34,8 @@ export interface CuentaListada {
   roles: Rol[]
   estado: EstadoCuenta
   ultimoIngresoEn: string | null
+  /** HU-M1-04 CA-04: el Administrador ve si el correo está verificado. */
+  correoVerificado: boolean
 }
 
 export interface PaginaCuentas {
