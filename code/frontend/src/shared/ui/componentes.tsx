@@ -71,6 +71,12 @@ const ESTADOS: Record<string, Record<string, [string, Tono]>> = {
     desactivada: ['Desactivada', 'neutral'],
   },
 
+  // HU-M1-04: estado del correo de la cuenta.
+  correo: {
+    verificado: ['Verificado', 'success'],
+    'sin-verificar': ['Sin verificar', 'warning'],
+  },
+
   plan: {
     activo: ['Activo', 'success'],
     inactivo: ['Inactivo', 'neutral'],

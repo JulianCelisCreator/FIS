@@ -1,8 +1,8 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useSesion } from '../../../shared/sesion/use-sesion.ts'
 import { NOMBRE_ROL } from '../../../shared/sesion/sesion.types.ts'
-import { Alerta, Campo, ListaDatos } from '../../../shared/ui/componentes.tsx'
-import { cambiarContrasena } from '../services/mi-cuenta.service.ts'
+import { Alerta, Campo, Insignia, ListaDatos } from '../../../shared/ui/componentes.tsx'
+import { cambiarContrasena, consultarMiCuenta, type DatosMiCuenta } from '../services/mi-cuenta.service.ts'
 import { describirCampo } from '../utils/describir-campo.ts'
 import { reglasIncumplidas } from '../utils/politica-contrasena.ts'
 import { ReglasContrasena } from './reglas-contrasena.tsx'
@@ -33,6 +33,18 @@ export function MiCuenta() {
   const [ver, setVer] = useState(false)
   const [enviando, setEnviando] = useState(false)
   const [aviso, setAviso] = useState<{ tono: 'success' | 'error'; texto: string } | null>(null)
+  // HU-M1-04 CA-04: correo y si está verificado.
+  const [datos, setDatos] = useState<DatosMiCuenta | null>(null)
+
+  useEffect(() => {
+    let vigente = true
+    consultarMiCuenta()
+      .then((d) => vigente && setDatos(d))
+      .catch(() => vigente && setDatos(null))
+    return () => {
+      vigente = false
+    }
+  }, [])
 
   const cambiar = (campo: keyof Campos, valor: string) => {
     const siguientes = { ...campos, [campo]: valor }
@@ -74,6 +86,15 @@ export function MiCuenta() {
 
   if (!sesion) return null
 
+  const correo = datos ? (
+    <span>
+      <span>{datos.correo}</span>{' '}
+      <Insignia entidad="correo" estado={datos.correoVerificado ? 'verificado' : 'sin-verificar'} />
+    </span>
+  ) : (
+    '…'
+  )
+
   return (
     <div className="app-page">
       <header className="vl-stack">
@@ -89,6 +110,7 @@ export function MiCuenta() {
         <ListaDatos
           filas={[
             ['Nombre', sesion.nombre],
+            ['Correo', correo],
             ['Rol', sesion.roles.map((r) => NOMBRE_ROL[r]).join(' y ') || 'Sin rol'],
           ]}
         />

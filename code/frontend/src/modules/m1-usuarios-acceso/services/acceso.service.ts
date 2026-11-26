@@ -26,3 +26,13 @@ export function validarEnlaceRecuperacion(token: string): Promise<{ valido: bool
 export function restablecerContrasena(token: string, contrasena: string): Promise<{ mensaje: string }> {
   return pedir<{ mensaje: string }>('/m1/acceso/recuperacion/restablecer', { metodo: 'POST', cuerpo: { token, contrasena } })
 }
+
+/** HU-M1-04 CA-02 y CA-03: usar el enlace de verificación; si falla, el error trae el motivo. */
+export function confirmarVerificacion(token: string): Promise<{ mensaje: string }> {
+  return pedir<{ mensaje: string }>('/m1/acceso/verificacion/confirmar', { metodo: 'POST', cuerpo: { token } })
+}
+
+/** HU-M1-04 CA-03: pedir otro enlace sin sesión. La respuesta es la misma exista o no la cuenta. */
+export function reenviarVerificacionPorCorreo(correo: string): Promise<{ mensaje: string }> {
+  return pedir<{ mensaje: string }>('/m1/acceso/verificacion/reenviar', { metodo: 'POST', cuerpo: { correo } })
+}

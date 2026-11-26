@@ -332,6 +332,23 @@ p {
   margin-top: 1.5rem;
 }
 
+/* HU-M1-04: aviso de correo sin verificar, alineado con el ancho de la página. */
+.app-aviso-verificacion {
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding-top: 1.25rem;
+}
+
+.app-aviso-verificacion .vl-alert p + p,
+.app-aviso-verificacion .vl-button {
+  margin-top: 0.75rem;
+}
+
+/* La página que sigue al aviso no repite todo su margen superior. */
+.app-aviso-verificacion + .app-page {
+  padding-top: 1.25rem;
+}
+
 /* Encabezado: título a la izquierda, acción principal a la derecha (abajo en móvil). */
 .app-head {
   display: flex;
