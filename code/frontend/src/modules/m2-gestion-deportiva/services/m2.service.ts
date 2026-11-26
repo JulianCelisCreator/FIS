@@ -12,7 +12,6 @@ export function crearPerfilPatinador(datos: DatosPerfilPatinador): Promise<Perfi
 export function actualizarPerfilPatinador(id: number, cambios: Partial<DatosPerfilPatinador>): Promise<PerfilPatinador> {
   return pedir(`/m2/perfiles-patinador/${id}`, { metodo: 'PATCH', cuerpo: cambios })
 }
-import { pedir } from '../../../shared/services/cliente-api.ts'
 import type { AcudienteDisponible, PatinadorConAcudientes } from '../types/m2.types.ts'
 
 export function listarPatinadores(buscar?: string): Promise<PatinadorConAcudientes[]> {
