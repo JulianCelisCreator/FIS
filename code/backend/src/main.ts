@@ -13,4 +13,6 @@ async function bootstrap() {
   const app = configurarAplicacion(await NestFactory.create(AppModule));
   await app.listen(process.env.PORT ?? 3000);
 }
-await bootstrap();
+// Sin top-level await: en Vercel, app.listen() queda interceptado y su promesa no
+// se resuelve; si el módulo la esperara, la función nunca terminaría de iniciar.
+void bootstrap();
