@@ -53,7 +53,7 @@ export class AsociacionesRepository {
   async listarAcudientes(consultor: Consultor, buscar?: string): Promise<AcudienteDisponible[]> {
     const texto = buscar?.trim() ? `%${buscar.trim().replace(/[\\%_]/g, '\\$&')}%` : null;
     const { rows } = await consultor.query<AcudienteDisponible>(
-      `SELECT DISTINCT u.id, u.nombres || ' ' || u.apellidos AS nombre,
+      `SELECT u.id, u.nombres || ' ' || u.apellidos AS nombre,
               u.tipo_documento AS "tipoDocumento", u.numero_documento AS "numeroDocumento", u.correo
        FROM usuario u
        JOIN usuario_rol ur ON ur.usuario_id = u.id
