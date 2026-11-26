@@ -1,3 +1,5 @@
+import type { RegistroNotificacionM1 } from '../../external-dependencies/interfaces/external-dependencies.interfaces.js';
+
 export type CategoriaPatinaje =
   | 'Iniciacion'
   | 'Transicion'
@@ -18,12 +20,33 @@ export type EstadoCupoGrupo = 'con-cupo' | 'alerta-90' | 'lleno';
 
 export type RolDocenteGrupo = 'TITULAR' | 'ASISTENTE';
 
+export type EstadoHorarioM3 = 'ACTIVO' | 'REPROGRAMADO' | 'CANCELADO';
+
+/**
+ * Contrato oficial API-M3-03 (GET /api/v1/horarios)
+ * Respuesta JSON Base: [{ horarioId, grupoId, diaSemana, horaInicio, horaFin, sedeId, estado }]
+ * Mantiene además id, dia y pista para retrocompatibilidad.
+ */
 export interface Horario {
   id: string;
+  horarioId?: string;
+  grupoId?: string;
+  nombreGrupo?: string;
+  nivelNombre?: string;
   dia: DiaSemana;
+  diaSemana?: DiaSemana;
   horaInicio: string; // Formato HH:mm (ej. "14:00")
   horaFin: string; // Formato HH:mm (ej. "16:00")
+  sedeId?: string;
+  sedeNombre?: string;
   pista: string;
+  estado?: EstadoHorarioM3;
+  motivoCancelacion?: string | null;
+}
+
+export interface RespuestaOperacionHorarioM3 {
+  horario: Horario;
+  notificacion: RegistroNotificacionM1 | null;
 }
 
 export interface ProfesorAsignadoGrupo {
