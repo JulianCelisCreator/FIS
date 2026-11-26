@@ -1,6 +1,6 @@
 # M5 · Planes, Tarifas y Pagos
 
-Módulo del Grupo 04. Por ahora implementa:
+Módulo del Grupo 04. Implementa los 18 RF de §4.5; la especificación, los criterios de aceptación y la trazabilidad RF → código → prueba están en [`docs/specs/m5-planes-tarifas-pagos.md`](../../../../../docs/specs/m5-planes-tarifas-pagos.md).
 
 | RF | Capacidad |
 | --- | --- |
