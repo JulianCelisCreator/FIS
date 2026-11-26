@@ -17,7 +17,7 @@ export const MAX_SOLICITUDES = 3;
 export const VENTANA_SOLICITUDES_MS = 15 * 60 * 1000;
 
 export const MENSAJE_SOLICITUD =
-  'Si el correo está registrado, recibirás un enlace para crear una nueva contraseña. Revisa también la carpeta de spam.';
+  'Si el correo está registrado y la cuenta está activa, recibirás un enlace para crear una nueva contraseña. Revisa también la carpeta de spam. Si no te llega, contacta al Administrador de la escuela.';
 export const MENSAJE_ENLACE_INVALIDO =
   'El enlace no es válido: ya se usó, venció o no existe. Pide uno nuevo.';
 
