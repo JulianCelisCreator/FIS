@@ -1,7 +1,6 @@
 /**
  * Tipos compartidos para el Módulo 3 (Grupos, Horarios y Programación - Grupo 2).
- * Alineados con API-M3-01, API-M3-02, API-M3-03 y las dependencias DEP-M1-02,
- * DEP-M1-05, DEP-M2-01, DEP-M2-02, DEP-G4-01 y DEP-M6-01.
+ * Alineados con API-M3-01 a API-M3-05 y las 12 dependencias DEP-M1-01 a DEP-M6-01.
  */
 
 export type DiaSemanaM3 =
@@ -18,6 +17,107 @@ export type EstadoCupoGrupoM3 = 'con-cupo' | 'alerta-90' | 'lleno'
 export type RolDocenteGrupoM3 = 'TITULAR' | 'ASISTENTE'
 
 export type EstadoHorarioM3 = 'ACTIVO' | 'REPROGRAMADO' | 'CANCELADO'
+
+export type EstadoInscripcionGrupoM3 = 'ACTIVO' | 'RETIRADO_CAMBIO'
+
+export type RolExternoM1 = 'ADMIN' | 'PROFESOR' | 'ESTUDIANTE' | 'ACUDIENTE'
+
+export type TipoEventoCalendarioM3 =
+  | 'ENTRENAMIENTO'
+  | 'COMPETENCIA'
+  | 'EVENTO_INSTITUCIONAL'
+
+/**
+ * Contrato oficial API-M3-05 (GET /api/v1/calendario)
+ * Respuesta JSON Base: [{ eventoId, tipo, titulo, inicio, fin, ubicacion }]
+ */
+export interface EventoCalendarioM3 {
+  eventoId: string
+  tipo: TipoEventoCalendarioM3
+  titulo: string
+  inicio: string // ISO 8601: YYYY-MM-DDTHH:mm:ssZ
+  fin: string // ISO 8601: YYYY-MM-DDTHH:mm:ssZ
+  ubicacion: string
+  sedeId: string
+  grupoId: string | null
+  nombreGrupo: string | null
+  categorias: string[]
+  descripcion: string
+  estado: 'PROGRAMADO' | 'REPROGRAMADO' | 'ANULADO'
+  editablePorAdmin: boolean
+}
+
+export interface RespuestaCalendarioConsolidadoM3 {
+  sesion: {
+    userId: string
+    rol: RolExternoM1
+    nombreCompleto: string
+    gruposAsociadosIds: string[]
+  }
+  eventos: EventoCalendarioM3[]
+}
+
+/**
+ * Contrato oficial API-M3-04 (GET /api/v1/grupos/{id}/estudiantes)
+ * Respuesta JSON Base: [{ estudianteId, fechaInscripcion, estado }]
+ */
+export interface InscripcionEstudianteGrupoM3 {
+  estudianteId: string
+  nombreEstudiante: string
+  grupoId: string
+  nombreGrupo: string
+  fechaInscripcion: string // ISO 8601: YYYY-MM-DDTHH:mm:ssZ
+  estado: EstadoInscripcionGrupoM3
+}
+
+export interface ContextoAutogestionGrupoM3 {
+  estudianteId: string
+  actorRol: 'ESTUDIANTE' | 'ACUDIENTE'
+  actorId: string
+  perfilDeportivo: {
+    estudianteId: string
+    nombreCompleto: string
+    nivelId: string
+    categoriaId: string
+    estadoDeportivo: 'ACTIVO' | 'SUSPENDIDO' | 'INACTIVO'
+  }
+  validacionMenor: {
+    estudianteId: string
+    nombreEstudiante: string
+    edad: number
+    esMenorEdad: boolean
+    acudienteId: string | null
+    nombreAcudiente?: string | null
+    tieneAutorizacion: boolean
+  }
+  poliza: {
+    estudianteId: string
+    polizaVigente: boolean
+    fechaVencimiento: string
+    numeroPoliza?: string
+  }
+  planCartera: {
+    estudianteId: string
+    nombrePlan: string
+    planActivo: boolean
+    alDiaEnPagos: boolean
+    estadoCartera: 'AL_DIA' | 'PENDIENTE' | 'VENCIDO'
+    limiteClasesSemanales: number
+  }
+  puedeGestionarCambio: boolean
+  motivoBloqueoActor: string | null
+  grupoActual: GrupoConfiguradoM3 | null
+  gruposElegibles: GrupoConfiguradoM3[]
+}
+
+export interface ResultadoCambioGrupoM3 {
+  estudianteId: string
+  tipoOperacion: 'INSCRIPCION' | 'CAMBIO_GRUPO'
+  grupoAnterior: GrupoConfiguradoM3 | null
+  grupoNuevo: GrupoConfiguradoM3
+  inscripcion: InscripcionEstudianteGrupoM3
+  mensaje: string
+}
 
 /**
  * Contrato oficial API-M3-03 (GET /api/v1/horarios)
@@ -442,6 +542,132 @@ export const GRUPOS_M3_FALLBACK: GrupoConfiguradoM3[] = [
         diaSemana: 'Sabado',
         horaInicio: '08:00',
         horaFin: '10:00',
+        sedeId: 'SEDE-NORTE-P1',
+        sedeNombre: 'Norte',
+        pista: 'Pista 1 · Norte',
+        estado: 'ACTIVO',
+      },
+    ],
+    activo: true,
+  },
+  {
+    grupoId: 'GRP-04',
+    id: 'GRP-04',
+    nombre: 'Iniciación Norte B',
+    nivelId: 'NIV-01',
+    nivelNombre: 'Iniciación',
+    categoriaId: 'CAT-02',
+    categoriaNombre: 'Infantil A (8 a 10 años)',
+    sedeId: 'SEDE-NORTE-P1',
+    sedeNombre: 'Norte',
+    pista: 'Pista 1 · Norte',
+    aforoMaximoFisicoSede: 25,
+    dias: ['Martes', 'Jueves'],
+    aforoMax: 20,
+    cupoMaximo: 20,
+    ocupados: 9,
+    inscritosActuales: 9,
+    porcentajeOcupacion: 45,
+    alerta90: false,
+    estadoCupo: 'con-cupo',
+    bloqueadoInscripcion: false,
+    profesorId: 'PROF-01',
+    profesorNombre: 'Carlos Mendoza',
+    horarios: [
+      {
+        id: 'HOR-07',
+        horarioId: 'HOR-07',
+        grupoId: 'GRP-04',
+        nombreGrupo: 'Iniciación Norte B',
+        nivelNombre: 'Iniciación',
+        dia: 'Martes',
+        diaSemana: 'Martes',
+        horaInicio: '16:00',
+        horaFin: '18:00',
+        sedeId: 'SEDE-NORTE-P1',
+        sedeNombre: 'Norte',
+        pista: 'Pista 1 · Norte',
+        estado: 'ACTIVO',
+      },
+    ],
+    activo: true,
+  },
+  {
+    grupoId: 'GRP-05',
+    id: 'GRP-05',
+    nombre: 'Iniciación Sur A',
+    nivelId: 'NIV-01',
+    nivelNombre: 'Iniciación',
+    categoriaId: 'CAT-02',
+    categoriaNombre: 'Infantil A (8 a 10 años)',
+    sedeId: 'SEDE-SUR-P2',
+    sedeNombre: 'Sur',
+    pista: 'Pista 2 · Sur',
+    aforoMaximoFisicoSede: 20,
+    dias: ['Lunes', 'Miercoles'],
+    aforoMax: 20,
+    cupoMaximo: 20,
+    ocupados: 18,
+    inscritosActuales: 18,
+    porcentajeOcupacion: 90,
+    alerta90: true,
+    estadoCupo: 'alerta-90',
+    bloqueadoInscripcion: false,
+    profesorId: 'PROF-03',
+    profesorNombre: 'Ana Gómez',
+    horarios: [
+      {
+        id: 'HOR-09',
+        horarioId: 'HOR-09',
+        grupoId: 'GRP-05',
+        nombreGrupo: 'Iniciación Sur A',
+        nivelNombre: 'Iniciación',
+        dia: 'Lunes',
+        diaSemana: 'Lunes',
+        horaInicio: '18:00',
+        horaFin: '20:00',
+        sedeId: 'SEDE-SUR-P2',
+        sedeNombre: 'Sur',
+        pista: 'Pista 2 · Sur',
+        estado: 'ACTIVO',
+      },
+    ],
+    activo: true,
+  },
+  {
+    grupoId: 'GRP-06',
+    id: 'GRP-06',
+    nombre: 'Iniciación Norte C',
+    nivelId: 'NIV-01',
+    nivelNombre: 'Iniciación',
+    categoriaId: 'CAT-02',
+    categoriaNombre: 'Infantil A (8 a 10 años)',
+    sedeId: 'SEDE-NORTE-P1',
+    sedeNombre: 'Norte',
+    pista: 'Pista 1 · Norte',
+    aforoMaximoFisicoSede: 25,
+    dias: ['Viernes', 'Sabado'],
+    aforoMax: 20,
+    cupoMaximo: 20,
+    ocupados: 20,
+    inscritosActuales: 20,
+    porcentajeOcupacion: 100,
+    alerta90: true,
+    estadoCupo: 'lleno',
+    bloqueadoInscripcion: true,
+    profesorId: 'PROF-01',
+    profesorNombre: 'Carlos Mendoza',
+    horarios: [
+      {
+        id: 'HOR-10',
+        horarioId: 'HOR-10',
+        grupoId: 'GRP-06',
+        nombreGrupo: 'Iniciación Norte C',
+        nivelNombre: 'Iniciación',
+        dia: 'Viernes',
+        diaSemana: 'Viernes',
+        horaInicio: '09:00',
+        horaFin: '11:00',
         sedeId: 'SEDE-NORTE-P1',
         sedeNombre: 'Norte',
         pista: 'Pista 1 · Norte',

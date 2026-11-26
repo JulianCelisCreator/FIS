@@ -31,6 +31,12 @@ export class M1UsuariosMockAdapter implements IPuertoM1Usuarios {
       activo: true,
       nombreCompleto: 'Ana Gómez',
     },
+    'mock-jwt-profesor-04': {
+      userId: 'PROF-04',
+      rol: 'PROFESOR',
+      activo: true,
+      nombreCompleto: 'Luis Rojas',
+    },
     'mock-jwt-acudiente-01': {
       userId: 'ACU-01',
       rol: 'ACUDIENTE',

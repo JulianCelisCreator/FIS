@@ -1,0 +1,84 @@
+/*
+  HU-3.4 · Selección y cambio de grupo por parte del usuario (Módulo 3 · Grupo 02).
+  Alineado con wireframes/grupo-02/cambio-grupo/cambio-grupo.html y tokens del Design System.
+*/
+
+.m3-cambio__cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.15rem;
+}
+
+@media (min-width: 768px) {
+  .m3-cambio__cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1100px) {
+  .m3-cambio__cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.m3-cambio__card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.35rem;
+  background: var(--chalk);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  transition:
+    border-color 0.18s var(--ease),
+    box-shadow 0.18s var(--ease);
+}
+
+.m3-cambio__card--actual {
+  background: var(--ice);
+  border-color: var(--rink);
+  box-shadow: inset 4px 0 0 var(--rink);
+}
+
+.m3-cambio__card--lleno {
+  opacity: 0.78;
+  background: var(--white);
+  border-color: var(--alert-ink);
+}
+
+.m3-cambio__card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.m3-cambio__card-meta {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--ink-soft);
+  font-size: var(--app-fs-small);
+}
+
+.m3-cambio__validaciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  margin-top: 0.35rem;
+}
+
+.m3-cambio__two {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .m3-cambio__two {
+    grid-template-columns: 1fr 1.25fr;
+  }
+}
