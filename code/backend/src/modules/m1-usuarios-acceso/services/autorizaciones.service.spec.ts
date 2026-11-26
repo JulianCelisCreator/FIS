@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import type { AuditoriaRepository } from '../../../common/auditoria/auditoria.repository.js';
 import {
   Rol,
@@ -13,8 +13,10 @@ import type {
   NuevaAutorizacion,
   PatinadorConAutorizacion,
 } from '../repositories/autorizaciones.repository.js';
+import type { UsuariosRepository } from '../repositories/usuarios.repository.js';
 import {
   AutorizacionesService,
+  MENSAJE_CORREO_SIN_VERIFICAR,
   MENSAJE_TEXTO_ACTUALIZADO,
 } from './autorizaciones.service.js';
 
@@ -54,8 +56,11 @@ const pendiente = (): PatinadorConAutorizacion => ({
   },
 });
 
-function crearServicio() {
+function crearServicio({ correoVerificado = true } = {}) {
   let ficha = pendiente();
+  const usuarios = {
+    buscarParaVerificacion: vi.fn().mockResolvedValue({ id: 10, correoVerificado }),
+  } as unknown as UsuariosRepository;
   const creadas: NuevaAutorizacion[] = [];
   const bloquear = vi.fn().mockResolvedValue(undefined);
   const autorizaciones = {
@@ -84,7 +89,7 @@ function crearServicio() {
   const registrar = vi.fn().mockResolvedValue(undefined);
   const auditoria = { registrar } as unknown as AuditoriaRepository;
   return {
-    servicio: new AutorizacionesService(baseDatos, autorizaciones, auditoria),
+    servicio: new AutorizacionesService(baseDatos, autorizaciones, auditoria, usuarios),
     creadas,
     registrar,
     bloquear,
@@ -131,5 +136,32 @@ describe('AutorizacionesService.registrar (HU-M1-09)', () => {
     ).rejects.toThrow(new BadRequestException(MENSAJE_TEXTO_ACTUALIZADO));
     expect(creadas).toHaveLength(0);
     expect(registrar).not.toHaveBeenCalled();
+  });
+});
+
+describe('HU-M1-04 CA-05: autorizaciones con el correo sin verificar', () => {
+  const administrador: UsuarioAutenticado = { id: 1, roles: [Rol.ADMINISTRADOR], permisos: [] };
+
+  it('el acudiente sin correo verificado no registra y se le dice cómo verificarlo', async () => {
+    const { servicio, creadas, registrar } = crearServicio({ correoVerificado: false });
+
+    await expect(servicio.registrar(acudiente, 100, { acepta: true, versionTexto: 'v1' })).rejects.toThrow(
+      new ForbiddenException(MENSAJE_CORREO_SIN_VERIFICAR),
+    );
+    expect(creadas).toHaveLength(0);
+    expect(registrar).not.toHaveBeenCalled();
+  });
+
+  it('el detalle oculta «Registrar» y explica el motivo', async () => {
+    const { servicio } = crearServicio({ correoVerificado: false });
+    const detalle = await servicio.detalle(acudiente, 100);
+    expect(detalle.puedeRegistrar).toBe(false);
+    expect(detalle.motivoNoRegistra).toBe(MENSAJE_CORREO_SIN_VERIFICAR);
+  });
+
+  it('el Administrador registra en nombre del acudiente sin exigir su propio correo verificado', async () => {
+    const { servicio, creadas } = crearServicio({ correoVerificado: false });
+    await servicio.registrar(administrador, 100, { acepta: true, versionTexto: 'v1' });
+    expect(creadas).toHaveLength(1);
   });
 });

@@ -5,6 +5,7 @@ import { CobrosService } from './cobros.service.js';
 import { BaseDatosService } from '../../../common/database/base-datos.service.js';
 import { CobrosRepository } from '../repositories/cobros.repository.js';
 import { PatinadoresRepository } from '../repositories/patinadores.repository.js';
+import { AuditoriaRepository } from '../../../common/auditoria/auditoria.repository.js';
 
 describe('CobrosService - revisión diaria de cartera', () => {
   afterEach(() => {
@@ -31,6 +32,7 @@ describe('CobrosService - revisión diaria de cartera', () => {
       baseDatos,
       cobros,
       patinadores,
+      {} as AuditoriaRepository,
     );
 
     const logSpy = vi

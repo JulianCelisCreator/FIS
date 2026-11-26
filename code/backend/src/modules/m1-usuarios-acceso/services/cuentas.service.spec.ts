@@ -10,6 +10,7 @@ import {
 } from '../repositories/usuarios.repository.js';
 import { verificarContrasena } from '../utils/contrasena.js';
 import { CuentasService, MENSAJE_CORREO_DUPLICADO, MENSAJE_SOLO_ADMINISTRADOR } from './cuentas.service.js';
+import type { VerificacionService } from './verificacion.service.js';
 
 const consultor = {} as Consultor;
 const baseDatos = {
@@ -27,7 +28,7 @@ const dto = {
   rol: Rol.PROFESOR as CrearCuentaDto['rol'],
 };
 
-function crearServicio(opciones: { existe?: boolean; carrera?: boolean } = {}) {
+function crearServicio(opciones: { existe?: boolean; carrera?: boolean; correoFalla?: boolean } = {}) {
   const creados: NuevoUsuario[] = [];
   const roles: [number, Rol, number][] = [];
   const usuarios = {
@@ -44,8 +45,38 @@ function crearServicio(opciones: { existe?: boolean; carrera?: boolean } = {}) {
   } as unknown as UsuariosRepository;
   const registrarAuditoria = vi.fn().mockResolvedValue(undefined);
   const auditoria = { registrar: registrarAuditoria } as unknown as AuditoriaRepository;
-  return { servicio: new CuentasService(baseDatos, usuarios, auditoria), creados, roles, registrarAuditoria };
+  const enviarAlCrear = opciones.correoFalla
+    ? vi.fn().mockRejectedValue(new Error('Resend caído'))
+    : vi.fn().mockResolvedValue(undefined);
+  const verificacion = { enviarAlCrear } as unknown as VerificacionService;
+  return {
+    servicio: new CuentasService(baseDatos, usuarios, auditoria, verificacion),
+    creados,
+    roles,
+    registrarAuditoria,
+    enviarAlCrear,
+  };
 }
+
+describe('CuentasService.crear y la verificación de correo (HU-M1-04 CA-01)', () => {
+  it('envía el enlace de verificación a la cuenta recién creada', async () => {
+    const { servicio, enviarAlCrear } = crearServicio();
+    await servicio.crear(administrador, dto);
+    expect(enviarAlCrear).toHaveBeenCalledWith(9);
+  });
+
+  it('si el envío falla, la cuenta igual queda creada', async () => {
+    const { servicio, creados } = crearServicio({ correoFalla: true });
+    await expect(servicio.crear(administrador, dto)).resolves.toMatchObject({ id: 9 });
+    expect(creados).toHaveLength(1);
+  });
+
+  it('no envía nada si la cuenta no se crea', async () => {
+    const { servicio, enviarAlCrear } = crearServicio({ existe: true });
+    await expect(servicio.crear(administrador, dto)).rejects.toThrow(ConflictException);
+    expect(enviarAlCrear).not.toHaveBeenCalled();
+  });
+});
 
 describe('CuentasService.crear (HU-M1-01)', () => {
   it('CA-01 y CA-04: guarda la cuenta con el rol elegido y la registra en auditoría', async () => {

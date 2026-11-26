@@ -20,5 +20,8 @@ export const CARACTERISTICAS_TIPO_PLAN: Record<TipoPlan, CaracteristicasTipoPlan
   [TipoPlan.SEIS_DIAS_GIMNASIO]: { periodicidad: 'MENSUAL', diasPorSemana: 6, incluyeGimnasio: true },
 };
 
-/** Días límite de pago que ofrece el formulario de planes. */
-export const DIAS_LIMITE_PAGO = [5, 10, 15, 20];
+/**
+ * Día límite de pago de los planes mensuales: el cliente cobra en los primeros
+ * cinco días del mes (reunión del 19/11/2026).
+ */
+export const DIAS_LIMITE_PAGO = [5];

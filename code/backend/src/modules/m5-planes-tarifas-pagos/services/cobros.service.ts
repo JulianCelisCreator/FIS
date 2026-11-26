@@ -1,17 +1,21 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
+import { AuditoriaRepository } from '../../../common/auditoria/auditoria.repository.js';
 import type { UsuarioAutenticado } from '../../../common/auth/usuario-autenticado.js';
-import { BaseDatosService } from '../../../common/database/base-datos.service.js';
+import { BaseDatosService, type Consultor } from '../../../common/database/base-datos.service.js';
 import { hoyEnClub, ZONA_HORARIA_CLUB } from '../../../common/utils/fecha-club.js';
 import { CobrosRepository } from '../repositories/cobros.repository.js';
 import { PatinadoresRepository } from '../repositories/patinadores.repository.js';
-import { diaDelMes, periodoDesdeMes } from '../utils/calculo-cobros.js';
+import { diaDelMes, periodoDesdeMes, primerDiaDelMes } from '../utils/calculo-cobros.js';
 import { validarConsultaDePagos } from '../validators/acceso-patinador.validator.js';
 
 export interface ResultadoGeneracion {
   periodo: string;
   generados: number;
   omitidosSinTarifa: number;
+  /** Solo al generar el mes en curso: recargos por mora creados y planes cancelados por no pago. */
+  recargosMora?: number;
+  cancelacionesPorMora?: number;
 }
 
 /** Generación de mensualidades (RF-M5-08) y consulta de cobros pendientes. */
@@ -23,6 +27,7 @@ export class CobrosService {
     private readonly baseDatos: BaseDatosService,
     private readonly cobros: CobrosRepository,
     private readonly patinadores: PatinadoresRepository,
+    private readonly auditoria: AuditoriaRepository,
   ) {}
 
   /**
@@ -39,10 +44,12 @@ export class CobrosService {
         return;
       }
       const resultado = await this.generarMensualidades();
-      if (resultado.generados > 0 || resultado.omitidosSinTarifa > 0) {
+      if (resultado.generados > 0 || resultado.omitidosSinTarifa > 0 || resultado.recargosMora || resultado.cancelacionesPorMora) {
         this.logger.log(
           `Mensualidades ${resultado.periodo}: ${resultado.generados} generadas, ` +
-            `${resultado.omitidosSinTarifa} asignaciones sin tarifa vigente`,
+            `${resultado.omitidosSinTarifa} asignaciones sin tarifa vigente, ` +
+            `${resultado.recargosMora ?? 0} recargos por mora, ` +
+            `${resultado.cancelacionesPorMora ?? 0} planes cancelados por no pago`,
         );
       }
     } catch (error) {
@@ -96,11 +103,39 @@ export class CobrosService {
     }
     const periodo = periodoDesdeMes(mesAGenerar);
 
-    return this.baseDatos.transaccion(async (tx) => ({
-      periodo,
-      generados: await this.cobros.generarMensualidades(tx, periodo),
-      omitidosSinTarifa: await this.cobros.asignacionesSinTarifa(tx, periodo),
-    }));
+    return this.baseDatos.transaccion(async (tx) => {
+      // La mora va primero: un plan cancelado por no pago ya no recibe la mensualidad del mes.
+      const mora = mesAGenerar === mesActual ? await this.procesarMora(tx, periodo) : null;
+      return {
+        periodo,
+        generados: await this.cobros.generarMensualidades(tx, periodo),
+        omitidosSinTarifa: await this.cobros.asignacionesSinTarifa(tx, periodo),
+        ...mora,
+      };
+    });
+  }
+
+  /**
+   * Reglas de mora del plan mensual (reunión del 19/11/2026): el primer mes sin
+   * pagar se sigue entrenando; desde el segundo se cobra un recargo por cada
+   * mensualidad atrasada y al empezar el tercero se cancela el plan.
+   */
+  private async procesarMora(tx: Consultor, mesActual: string) {
+    const porcentaje = await this.cobros.parametroNumerico(tx, 'recargo_mora_mensual_pct', 10);
+    const recargosMora = await this.cobros.generarRecargosMora(tx, primerDiaDelMes(mesActual), porcentaje);
+    const canceladas = await this.cobros.cancelarPorMora(tx, primerDiaDelMes(mesActual));
+    for (const asignacion of canceladas) {
+      await this.auditoria.registrar(tx, {
+        modulo: 'M5',
+        tabla: 'asignacion_plan',
+        registroId: asignacion.id,
+        accion: 'CANCELAR_POR_MORA',
+        valorNuevo: { fechaFin: asignacion.fechaFin, planId: asignacion.planId },
+        motivo: 'Mensualidad pendiente desde hace tres meses',
+        usuarioId: null,
+      });
+    }
+    return { recargosMora, cancelacionesPorMora: canceladas.length };
   }
 
   /** Cobros con saldo de un patinador: lo que muestra «Cobro a pagar» al registrar un pago. */

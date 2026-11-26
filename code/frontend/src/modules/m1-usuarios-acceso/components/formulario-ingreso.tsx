@@ -101,6 +101,10 @@ export function FormularioIngreso() {
       <button className="vl-button vl-button--primary m1-acceso__accion" type="submit" aria-disabled={enviando || undefined}>
         {enviando ? 'Ingresando…' : 'Ingresar'}
       </button>
+      {/* HU-M1-08: recuperar la contraseña desde el ingreso. */}
+      <a className="vl-link m1-acceso__enlace" href="#/recuperar">
+        ¿Olvidaste tu contraseña?
+      </a>
     </form>
   )
 }

@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, Injectable } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { AuditoriaRepository } from '../../../common/auditoria/auditoria.repository.js';
 import { Rol, type UsuarioAutenticado } from '../../../common/auth/usuario-autenticado.js';
 import { BaseDatosService } from '../../../common/database/base-datos.service.js';
@@ -7,6 +7,7 @@ import type { RolCuenta } from '../enums/rol-cuenta.enum.js';
 import { CorreoDuplicadoError, UsuariosRepository } from '../repositories/usuarios.repository.js';
 import { hashContrasena } from '../utils/contrasena.js';
 import { generarContrasenaTemporal } from '../utils/contrasena-temporal.js';
+import { VerificacionService } from './verificacion.service.js';
 
 export const MENSAJE_CORREO_DUPLICADO = 'Este correo ya está en uso por otra cuenta.';
 export const MENSAJE_SOLO_ADMINISTRADOR = 'Solo el Administrador puede crear cuentas.';
@@ -29,10 +30,13 @@ export interface CuentaCreada {
  */
 @Injectable()
 export class CuentasService {
+  private readonly logger = new Logger(CuentasService.name);
+
   constructor(
     private readonly baseDatos: BaseDatosService,
     private readonly usuarios: UsuariosRepository,
     private readonly auditoria: AuditoriaRepository,
+    private readonly verificacion: VerificacionService,
   ) {}
 
   async crear(administrador: UsuarioAutenticado, dto: CrearCuentaDto): Promise<CuentaCreada> {
@@ -48,8 +52,9 @@ export class CuentasService {
     const contrasenaTemporal = generarContrasenaTemporal();
     const contrasenaHash = await hashContrasena(contrasenaTemporal);
 
+    let creada: CuentaCreada;
     try {
-      return await this.baseDatos.transaccion(async (consultor) => {
+      creada = await this.baseDatos.transaccion(async (consultor) => {
         const usuario = await this.usuarios.crear(consultor, {
           nombres: dto.nombres,
           apellidos: dto.apellidos,
@@ -81,5 +86,12 @@ export class CuentasService {
       if (error instanceof CorreoDuplicadoError) throw new ConflictException(MENSAJE_CORREO_DUPLICADO);
       throw error;
     }
+
+    // HU-M1-04 CA-01: con la cuenta ya guardada, se envía el enlace de verificación.
+    // Si falla el envío, la cuenta igual queda creada; la persona puede pedir otro enlace.
+    await this.verificacion
+      .enviarAlCrear(creada.id)
+      .catch((error: Error) => this.logger.error(`No se pudo enviar la verificación a la cuenta ${creada.id}: ${error.message}`));
+    return creada;
   }
 }

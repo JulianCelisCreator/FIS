@@ -94,7 +94,7 @@ describe.skipIf(!process.env.DB_HOST)('M5 planes y tarifas (e2e)', () => {
       const gimnasio = await http()
         .post('/m5/planes')
         .set(como('admin'))
-        .send({ nombre: nombre('Alto rendimiento'), tipo: 'SEIS_DIAS_GIMNASIO', diaLimitePago: 10 })
+        .send({ nombre: nombre('Alto rendimiento'), tipo: 'SEIS_DIAS_GIMNASIO', diaLimitePago: 5 })
         .expect(201);
       expect(gimnasio.body).toMatchObject({ diasPorSemana: 6, incluyeGimnasio: true });
       ids.gimnasio = gimnasio.body.id;
@@ -111,6 +111,13 @@ describe.skipIf(!process.env.DB_HOST)('M5 planes y tarifas (e2e)', () => {
         .set(como('admin'))
         .send({ nombre: nombre('Día raro'), tipo: 'SEIS_DIAS', diaLimitePago: 7 })
         .expect(400);
+      // Los planes mensuales se pagan en los primeros cinco días del mes (reunión del 19/11/2026).
+      const diaDiez = await http()
+        .post('/m5/planes')
+        .set(como('admin'))
+        .send({ nombre: nombre('Día diez'), tipo: 'SEIS_DIAS', diaLimitePago: 10 })
+        .expect(400);
+      expect(diaDiez.body.message).toContain('Los planes mensuales se pagan hasta el día 5 de cada mes');
       await http()
         .post('/m5/planes')
         .set(como('admin'))
@@ -196,9 +203,9 @@ describe.skipIf(!process.env.DB_HOST)('M5 planes y tarifas (e2e)', () => {
       const res = await http()
         .patch(`/m5/planes/${ids.mensual}`)
         .set(como('admin'))
-        .send({ nombre: nombre('Formación tres días'), diaLimitePago: 10, descripcion: '3 días por semana' })
+        .send({ nombre: nombre('Formación tres días'), diaLimitePago: 5, descripcion: '3 días por semana' })
         .expect(200);
-      expect(res.body).toMatchObject({ diaLimitePago: 10, descripcion: '3 días por semana' });
+      expect(res.body).toMatchObject({ diaLimitePago: 5, descripcion: '3 días por semana' });
       expect(res.body.nombre).toBe(nombre('Formación tres días'));
     });
 

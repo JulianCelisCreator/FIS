@@ -1,6 +1,6 @@
 # M5 · Planes, Tarifas y Pagos
 
-Módulo del Grupo 04. Por ahora implementa:
+Módulo del Grupo 04. Implementa los 18 RF de §4.5; la especificación, los criterios de aceptación y la trazabilidad RF → código → prueba están en [`docs/specs/m5-planes-tarifas-pagos.md`](../../../../../docs/specs/m5-planes-tarifas-pagos.md).
 
 | RF | Capacidad |
 | --- | --- |
@@ -14,6 +14,7 @@ Módulo del Grupo 04. Por ahora implementa:
 | RF-M5-08 | Generación automática de cobros mensuales |
 | RF-M5-09 | Registro manual de pago de un cobro (total o parcial) |
 | RF-M5-10 | Registro manual de pago por sesión (plan de día único) |
+| RF-M5-11 | Anulación de pago con motivo obligatorio y auditoría |
 | RF-M5-13 | Consulta de cartera con filtros combinables |
 | RF-M5-15 | Descarga del comprobante de pago en PDF |
 | RF-M5-16 | Historial de pagos con filtros y exportación PDF/XLSX |
@@ -43,7 +44,10 @@ Todos exigen una sesión iniciada (ver [Autenticación](#autenticación)). Fecha
 | `GET /m5/patinadores/:id/cobros-pendientes` | — | Administrador, Contador, acudiente propio, patinador mayor |
 | `POST /m5/pagos/cobro` | `M5_PAGO_REGISTRAR` | Administrador, Contador |
 | `POST /m5/pagos/sesion` | `M5_PAGO_REGISTRAR` | Administrador, Contador |
+| `POST /m5/pagos/valoracion` | `M5_PAGO_REGISTRAR` | Administrador, Contador |
+| `GET /m5/pagos/parametros` | `M5_PAGO_REGISTRAR` | Administrador, Contador |
 | `POST /m5/pagos/matricula` | `M5_PAGO_REGISTRAR` | Administrador, Contador |
+| `PATCH /m5/pagos/:id/anular` | `M5_PAGO_ANULAR` | Administrador |
 | `GET /m5/cartera?estado=&planId=&patinador=&acudiente=&venceDesde=&venceHasta=` | `M5_CARTERA_CONSULTAR` | Administrador, Contador |
 | `GET /m5/pagos?desde=&hasta=&medio=&estado=&buscar=` | `M5_PAGO_HISTORIAL` | Administrador, Contador |
 | `GET /m5/pagos/exportar?formato=pdf\|xlsx&…filtros` | `M5_PAGO_HISTORIAL` | Administrador, Contador |
@@ -81,8 +85,11 @@ Los permisos de cada rol están en `rol_permiso` (sembrados en `db/schema.sql`).
 { "cobroId": 40, "monto": 200000, "fechaPago": "2026-11-07",
   "medioPago": "TRANSFERENCIA", "referencia": "TRX-2231" }
 
-// POST /m5/pagos/sesion
-{ "patinadorId": 15, "numeroSesiones": 4, "fechaPago": "2026-11-07", "medioPago": "EFECTIVO" }
+// POST /m5/pagos/sesion   (fechaClase opcional: por defecto la del pago; la del día anterior lleva recargo)
+{ "patinadorId": 15, "numeroSesiones": 4, "fechaClase": "2026-11-06", "fechaPago": "2026-11-07", "medioPago": "EFECTIVO" }
+
+// POST /m5/pagos/valoracion
+{ "patinadorId": 18, "fechaPago": "2026-11-07", "medioPago": "EFECTIVO" }
 
 // POST /m5/pagos/matricula
 { "patinadorId": 12, "valorMatricula": 120000, "valorGastosAdministrativos": 45000,
@@ -154,7 +161,14 @@ Errores: `400` datos inválidos, `401` sin usuario, `403` sin permiso o patinado
 
 ### Mora (RF-M5-12)
 
-- Un cobro se paga hasta su fecha límite y pasa a «Vencido» después de `parametro_sistema.dias_gracia_mora` días (4 por defecto): con límite el día 5, queda vencido desde el día 10, como dicen los wireframes.
+Reglas de la reunión con el cliente del 19/11/2026. Los valores provisionales son parámetros de `parametro_sistema` y las preguntas abiertas están en [`docs/specs/m5-preguntas-pendientes-cliente.md`](../../../../../docs/specs/m5-preguntas-pendientes-cliente.md).
+
+- Las mensualidades se pagan del día 1 al 5 (único día límite aceptado) y pasan a «Vencido» desde el día 6 (`dias_gracia_mora = 0`). Los wireframes, anteriores a la reunión, dicen «desde el día 10».
+- **Plan mensual:** el proceso diario de las 00:05 (y `POST /m5/cobros/generacion` del mes en curso), antes de generar las mensualidades:
+  - crea un cobro `RECARGO_MORA` del `recargo_mora_mensual_pct` (10 %) por cada mensualidad con saldo de un mes anterior, una sola vez (índice `cobro_recargo_uk`), con fecha límite el día 5;
+  - cancela el plan de quien debe una mensualidad de hace dos meses o más (tercer mes): `fecha_fin` = último día del mes anterior, `motivo_fin` y auditoría `CANCELAR_POR_MORA`. Un cambio programado que no generó cobros se descarta. La deuda sigue.
+- **Plan diario:** `POST /m5/pagos/sesion` acepta `fechaClase` (por defecto, la del pago). Se puede pagar por adelantado; la clase del día anterior se paga con un recargo del `recargo_sesion_pct` (10 %) en un cobro `RECARGO_MORA`; una más antigua responde 409.
+- **Clase de valoración:** `POST /m5/pagos/valoracion` (`valor_clase_valoracion`, $ 10.000), una vez y antes de la matrícula. `POST /m5/pagos/matricula` descuenta la valoración pagada (`abonoValoracion` en la respuesta). Una valoración ya abonada no se anula.
 - La vista `v_saldo_cobro` expone `vencido_desde`, y la usan `v_estado_cartera`, los cobros pendientes y las respuestas de asignación y cambio.
 
 ### Pagos (RF-M5-09, RF-M5-10)
@@ -163,7 +177,15 @@ Errores: `400` datos inválidos, `401` sin usuario, `403` sin permiso o patinado
 - **Concurrencia:** el cobro se bloquea durante la transacción, así que dos pagos simultáneos no pueden superar el saldo.
 - **Por sesión:** exige un plan de día único que rija en la fecha del pago. Crea un cobro de sesiones × tarifa que queda pagado de una vez.
 - **Matrícula:** son dos cobros (matrícula y gastos administrativos) pagados con un solo pago y un solo comprobante.
-- **Inmutabilidad:** los pagos no se editan ni se borran. La anulación (RF-M5-11) queda pendiente.
+- **Inmutabilidad:** los pagos no se editan ni se borran; se anulan.
+
+### Anulación (RF-M5-11)
+
+- Solo el Administrador, con motivo obligatorio (`{ "motivo": "…" }`, de 5 a 500 caracteres). No se puede deshacer.
+- El pago y su comprobante pasan a `ANULADO` y se conservan. El monto vuelve al saldo de cada cobro, que regresa a `PENDIENTE` si le queda saldo, y la cartera se recalcula.
+- El cobro de sesiones nace con su pago, así que se anula con él para no crear deuda.
+- Queda en `auditoria` (`tabla = 'pago'`, `accion = 'ANULAR'`) con el usuario, el motivo y los valores anterior y nuevo.
+- Responde 409 si el pago ya está anulado o si es de una venta o un préstamo de M6, que tienen sus propias devoluciones.
 
 Las asignaciones y los cambios se registran en `auditoria`.
 
@@ -185,7 +207,7 @@ Los controladores usan `AutenticacionGuard` (`common/auth/`), que lee la cookie 
 | --- | --- | --- |
 | Matrícula | Se exige antes del primer plan de cualquier tipo, incluido el de día único. | El wireframe la pide «antes de activar el plan» sin excepciones. |
 | Cambio desde o hacia día único | También rige desde el mes siguiente. | Así se mantiene una sola regla para todos los cambios. |
-| Día límite | Se acepta 5, 10, 15 o 20, al crear y al editar. | El diálogo de edición del wireframe solo ofrece 5, 10 y 15; se asume un descuido. |
+| Día límite | Solo el día 5. | El cliente cobra en los primeros cinco días del mes (19/11/2026). |
 | Reactivar planes | No se implementa. | No está en el RF ni en el wireframe; para volver a ofrecerlo se crea un plan nuevo. |
 
 ## Pruebas

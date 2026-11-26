@@ -164,19 +164,22 @@ export function DialogoPlan({
         <Campo
           etiqueta="Día límite de pago"
           id="plan-dia-limite"
-          obligatorio
-          ayuda={editando ? 'El cambio solo afecta a los cobros que se generen después.' : 'Solo en planes mensuales.'}
+          ayuda="Los planes mensuales se pagan del día 1 al 5 de cada mes; desde el día 6 quedan en «Vencido»."
         >
-          <select
-            id="plan-dia-limite"
-            className="vl-select"
-            value={diaLimite}
-            onChange={(evento) => setDiaLimite(Number(evento.target.value))}
-          >
-            {DIAS_LIMITE_PAGO.map((dia) => (
-              <option key={dia} value={dia}>{dia}</option>
-            ))}
-          </select>
+          {DIAS_LIMITE_PAGO.length > 1 ? (
+            <select
+              id="plan-dia-limite"
+              className="vl-select"
+              value={diaLimite}
+              onChange={(evento) => setDiaLimite(Number(evento.target.value))}
+            >
+              {DIAS_LIMITE_PAGO.map((dia) => (
+                <option key={dia} value={dia}>{dia}</option>
+              ))}
+            </select>
+          ) : (
+            <input id="plan-dia-limite" className="vl-input" readOnly value={`Día ${DIAS_LIMITE_PAGO[0]} de cada mes`} />
+          )}
         </Campo>
       )}
       <Campo etiqueta="Descripción" id="plan-descripcion" ayuda="Opcional. Se muestra en la oferta de planes.">

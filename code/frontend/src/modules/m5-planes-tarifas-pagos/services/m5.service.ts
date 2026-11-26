@@ -18,6 +18,9 @@ import type {
   RespuestaCartera,
   RespuestaHistorial,
   TipoPlan,
+  ResultadoAnulacion,
+  ResultadoValoracion,
+  ParametrosPago,
 } from '../types/m5.types.ts'
 
 // --- Planes y tarifas (RF-M5-01 a RF-M5-05) ---
@@ -75,6 +78,11 @@ export async function planesParaElegir(esAdministrador: boolean): Promise<PlanOf
   return oferta.planes.map((plan) => ({ ...plan, asignable: true }))
 }
 
+/** RF-M5-05: planes activos con tarifa vigente, la misma vista para todos los roles. */
+export function ofertaDePlanes(): Promise<{ fecha: string; planes: Omit<PlanOfertado, 'asignable'>[] }> {
+  return pedir('/m5/planes/oferta')
+}
+
 export function planDelPatinador(patinadorId: number): Promise<PlanDelPatinador> {
   return pedir(`/m5/patinadores/${patinadorId}/plan`)
 }
@@ -97,9 +105,19 @@ export function pagarCobro(datos: DatosTransaccion & { cobroId: number; monto: n
 }
 
 export function pagarSesiones(
-  datos: DatosTransaccion & { patinadorId: number; numeroSesiones: number },
+  datos: DatosTransaccion & { patinadorId: number; numeroSesiones: number; fechaClase?: string },
 ): Promise<ResultadoPagoSesion> {
   return pedir('/m5/pagos/sesion', { metodo: 'POST', cuerpo: datos })
+}
+
+/** Clase de valoración previa a la inscripción; se abona a la matrícula. */
+export function pagarValoracion(datos: DatosTransaccion & { patinadorId: number }): Promise<ResultadoValoracion> {
+  return pedir('/m5/pagos/valoracion', { metodo: 'POST', cuerpo: datos })
+}
+
+/** Valor de la valoración y porcentajes de recargo vigentes. */
+export function parametrosPago(): Promise<ParametrosPago> {
+  return pedir('/m5/pagos/parametros')
 }
 
 export function pagarMatricula(
@@ -136,6 +154,11 @@ export function urlExportarHistorial(filtros: FiltrosHistorial, formato: 'pdf' |
     if (valor !== undefined) parametros.set(clave, valor)
   }
   return urlApi(`/m5/pagos/exportar?${parametros}`)
+}
+
+/** RF-M5-11: anula un pago con motivo obligatorio (solo Administrador). */
+export function anularPago(pagoId: number, motivo: string): Promise<ResultadoAnulacion> {
+  return pedir(`/m5/pagos/${pagoId}/anular`, { metodo: 'PATCH', cuerpo: { motivo } })
 }
 
 /** Enlace al comprobante en PDF de un pago (RF-M5-15). */

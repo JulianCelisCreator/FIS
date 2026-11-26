@@ -13,7 +13,7 @@ import {
 import { DIAS_LIMITE_PAGO, TipoPlan } from '../enums/tipo-plan.enum.js';
 import { FORMATO_FECHA } from './datos-transaccion.dto.js';
 
-const MENSAJE_DIA_LIMITE = `diaLimitePago debe ser uno de: ${DIAS_LIMITE_PAGO.join(', ')}`;
+const MENSAJE_DIA_LIMITE = `Los planes mensuales se pagan hasta el día ${DIAS_LIMITE_PAGO.join(', ')} de cada mes`;
 
 /** Entrada de RF-M5-01: crear un plan de servicio. */
 export class CrearPlanDto {
