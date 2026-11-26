@@ -18,6 +18,8 @@ import {
   type PestanaPago,
 } from '../modules/m5-planes-tarifas-pagos/components/registrar-pago.tsx'
 import { PERMISOS_M5 } from '../modules/m5-planes-tarifas-pagos/types/m5.types.ts'
+import { PerfilesPatinador } from '../modules/m2-gestion-deportiva/components/perfiles-patinador.tsx'
+import { PERMISOS_M2 } from '../modules/m2-gestion-deportiva/types/m2.types.ts'
 import { M4Modulo } from '../modules/m4-competencias-resultados/components/m4-modulo.tsx'
 import { PERMISOS_M4 } from '../modules/m4-competencias-resultados/types/m4.types.ts'
 import { ConfiguracionGrupos } from '../modules/m3-grupos-horarios/components/configuracion-grupos.tsx'
@@ -39,6 +41,7 @@ import { MarcoAplicacion } from './marco-aplicacion.tsx'
 
 const PANTALLAS = [
   { pagina: 'panel', texto: 'Panel general', grupo: 'Administración', permiso: PERMISOS_PANEL.panelConsultar },
+  { pagina: 'm2-perfiles-patinador', texto: 'Perfiles de patinador', permiso: PERMISOS_M2.patinadorGestionar },
   { pagina: 'm4', texto: 'Competencias y resultados', grupo: 'Competencias y resultados', permiso: PERMISOS_M4.consultar },
   { pagina: 'planes', texto: 'Planes y tarifas', grupo: 'Planes y pagos', permiso: PERMISOS_M5.planGestionar },
   { pagina: 'asignar-plan', texto: 'Asignar o cambiar plan', grupo: 'Planes y pagos', permiso: PERMISOS_M5.planAsignar },
@@ -148,10 +151,11 @@ export function Aplicacion() {
     tieneRol('ACUDIENTE') || tieneRol('PATINADOR')
       ? [{ pagina: 'mis-pagos', texto: tieneRol('ACUDIENTE') ? 'Pagos de mis patinadores' : 'Mis pagos' }]
       : []
-  const pantallasPermitidas = PANTALLAS.filter((pantalla) => tienePermiso(pantalla.permiso))
+  const deportivas = PANTALLAS.filter((pantalla) => pantalla.pagina.startsWith('m2') && tienePermiso(pantalla.permiso))
+  const pantallasPermitidas = PANTALLAS.filter((pantalla) => !pantalla.pagina.startsWith('m2') && tienePermiso(pantalla.permiso))
   const subpantallas = tieneRol('ADMINISTRADOR') ? Object.keys(SUBPANTALLAS_ADMINISTRADOR) : []
   const permitidas = [
-    ...usuarios,
+    ...usuarios, ...deportivas,
     ...gruposHorarios,
     ...pantallasPermitidas,
     ...misPagos,
@@ -167,6 +171,7 @@ export function Aplicacion() {
       grupo: 'Usuarios',
       enlaces: usuarios,
     },
+    { grupo: 'Gestión deportiva', enlaces: deportivas },
     {
       grupo: 'Grupos y horarios',
       enlaces: gruposHorarios,
@@ -238,6 +243,8 @@ export function Aplicacion() {
     )
   } else if (actual === 'm4') {
     contenido = <M4Modulo key={sesion.id} />
+  } else if (actual === 'm2-perfiles-patinador') {
+    contenido = <PerfilesPatinador key={sesion.id} />
   } else if (actual === 'planes') {
     contenido = <PlanesTarifas key={sesion.id} />
   } else if (actual === 'cartera') {
