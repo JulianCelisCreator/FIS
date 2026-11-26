@@ -54,6 +54,9 @@ Fuente: `REQUIREMENTS.md` §5.1. Los marcados *(derivado)* no están en el docum
 | | Cuenta activa | `success` | M1-03 |
 | Perfil de patinador menor | Bloqueado (falta autorización o póliza) | `error` | M1-02 |
 | | Habilitado | `success` | M1-02 |
+| Póliza médica | Vigente | `success` | M1-10 |
+| | Vencida *(derivado)* | `error` | M1-10 |
+| | Pendiente *(derivado)* | `warning` | M1-10 |
 | Grupo | Con cupo | `success` | M3-02 |
 | | Alerta al 90 % | `warning` | M3-02 |
 | | Lleno | `error` | M3-02 |

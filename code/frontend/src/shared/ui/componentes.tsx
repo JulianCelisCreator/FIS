@@ -99,6 +99,13 @@ const ESTADOS: Record<string, Record<string, [string, Tono]>> = {
     'no-aplica': ['No aplica', 'neutral'],
   },
 
+  poliza: {
+    vigente: ['Vigente', 'success'],
+    vencida: ['Vencida', 'error'],
+    pendiente: ['Pendiente', 'warning'],
+    'no-aplica': ['No aplica', 'neutral'],
+  },
+
   perfil: {
     bloqueado: ['Bloqueado', 'error'],
     habilitado: ['Habilitado', 'success'],

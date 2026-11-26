@@ -14,6 +14,7 @@ const TABLE = {
   cuenta: { activa: ["Activa", "success"], desactivada: ["Desactivada", "neutral"] },
   profesor: { "por-registrar": ["Por registrar", "neutral"], "cuenta-activa": ["Cuenta activa", "success"] },
   patinador: { bloqueado: ["Bloqueado", "error"], habilitado: ["Habilitado", "success"] },
+  poliza: { vigente: ["Vigente", "success"], vencida: ["Vencida", "error"], pendiente: ["Pendiente", "warning"] },
   grupo: { "con-cupo": ["Con cupo", "success"], "alerta-90": ["Alerta al 90 %", "warning"], lleno: ["Lleno", "error"] },
   competencia: { programada: ["Programada", "info"], cancelada: ["Cancelada", "neutral"] },
   inscripcion: { "en-validacion": ["En validación", "info"], aprobada: ["Aprobada", "success"], rechazada: ["Rechazada", "error"], anulada: ["Anulada", "neutral"] },

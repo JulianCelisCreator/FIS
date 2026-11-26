@@ -76,10 +76,15 @@ BEGIN
   -- Autorización del acudiente y póliza (pantalla «Familia del menor») --------
   -- Sofía: póliza vigente y autorización pendiente (Carolina puede registrarla).
   -- Mateo: autorización registrada, pero sin póliza: su perfil sigue Bloqueado.
+  -- El adjunto se sirve desde almacenamiento privado (POLIZAS_DIR, por defecto
+  -- uploads/polizas). Para probar «Ver póliza», copia un PDF de prueba a
+  -- uploads/polizas/demo-poliza-882341.pdf; el nombre es solo la clave privada.
   INSERT INTO poliza (patinador_id, aseguradora, numero_poliza, vigente_desde, vigente_hasta,
+                      archivo_url, archivo_nombre, archivo_tipo, archivo_tamano,
                       estado_revision, registrado_por)
   VALUES (p_sofia, 'Sura', 'POL-882341', current_date - interval '1 month',
-          current_date + interval '11 months', 'APROBADA', u_andrea);
+          current_date + interval '11 months', 'demo-poliza-882341.pdf', 'poliza.pdf',
+          'application/pdf', 245760, 'APROBADA', u_andrea);
   INSERT INTO autorizacion_acudiente (patinador_id, acudiente_id, fecha_autorizacion,
                                       version_texto, registrado_por)
   VALUES (p_mateo, u_carolina, current_date - interval '5 days', 'v1', u_carolina);

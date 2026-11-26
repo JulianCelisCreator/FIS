@@ -6,12 +6,14 @@ DDL de la base de datos de la plataforma (PostgreSQL 17), común a todos los mó
 | --- | --- |
 | `schema.sql` | Todo el DDL: tablas, restricciones, índices, vistas, comentarios y catálogos semilla. |
 | `compose.yaml` | Contenedor de PostgreSQL que carga `schema.sql` al crearse. |
-| `datos-demo.sql` | Datos de demostración de M5 con los nombres de los wireframes (opcional, se cargan a mano). |
+| `datos-demo.sql` | Datos de demostración con los nombres de los wireframes (M1, M5; opcional, se cargan a mano). |
 | `m4-permisos.sql` | Permisos y asignaciones por rol del módulo M4 (ejecutar después de `schema.sql`). |
 | `datos-demo-m6.sql` | Datos de demostración de M6 (personal, proveedores, inventario, ventas con devoluciones y préstamos). Requiere `datos-demo.sql`. |
-| `migraciones/` | Scripts para aplicar cambios de `schema.sql` a una base ya creada sin borrar datos (`psql … -f db/migraciones/<archivo>.sql`). Una base nueva no los necesita. La migración `2026-11-19-m6-foto-uniforme.sql` agrega la foto de inventario. `2026-11-19-m6-ventas-formato-actual.sql` actualiza el formato anterior de ventas solo si no existen ventas; de lo contrario, requiere conciliación manual. |
+| `migraciones/` | Scripts para aplicar cambios de `schema.sql` a una base ya creada sin borrar datos (`psql … -f db/migraciones/<archivo>.sql`). Una base nueva no los necesita. La migración `2026-11-19-m6-foto-uniforme.sql` agrega la foto de inventario. `2026-11-19-m6-ventas-formato-actual.sql` actualiza el formato anterior de ventas solo si no existen ventas; de lo contrario, requiere conciliación manual. `2026-11-25-m1-poliza-archivo.sql` agrega los metadatos del adjunto de la póliza y alinea `v_perfil_patinador` con M4-07 (HU-M1-10). |
 
 ## Levantar la base
+
+Para probar el enlace «Ver póliza» con los datos demo de HU-M1-10, copia un PDF de prueba a `uploads/polizas/demo-poliza-882341.pdf` (o a la ruta que indique `POLIZAS_DIR`). El nombre guardado en `poliza.archivo_url` es una clave privada, no una URL pública; sin el archivo físico el endpoint responde un error claro.
 
 Requisito: Docker. Desde `code/backend`:
 
@@ -118,7 +120,7 @@ Lo que depende de varias filas o del rol (aforo lleno, que un menor no se asigne
 
 | Grupo | Supuesto |
 | --- | --- |
-| M1 | La autenticación usa refresh tokens guardados en `sesion`. La revisión de la póliza por el Fisioterapeuta queda opcional en `poliza.estado_revision` porque no tiene RF. |
+| M1 | La autenticación usa refresh tokens guardados en `sesion`. Como la revisión de la póliza por el Fisioterapeuta no tiene RF propio, la póliza registrada por Acudiente/Administrador queda `APROBADA` para que M4-07 la valide; los campos `revisada_*` quedan listos si se confirma el flujo. Tipos de adjunto: PDF/JPG/PNG hasta 5 MB; se guarda fuera del directorio público y se sirve por una ruta autenticada. |
 | M2 | Valores de `evaluacion_nivel.resultado` (`APROBADO`, `EN_PROCESO`, `NO_APROBADO`). Las categorías tienen género, porque M4-03 las usa. |
 | M3 | Un patinador está en un solo grupo a la vez. `evento_calendario` cubre lo que no son horarios ni competencias. |
 | M4 | Lista de modalidades de `prueba`. Los puntos del ranking se guardan en `resultado.puntos` con una regla que define el grupo. `sancion` no tiene RF propio. |

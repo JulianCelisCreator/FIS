@@ -191,6 +191,7 @@
 | Cuenta de usuario | Activa · Desactivada | M1-05 |
 | Cuenta de profesor | `Por registrar` → `Cuenta activa` | M1-12 |
 | Perfil de patinador menor | Bloqueado (falta autorización o póliza) → Habilitado | M1-09, M1-10 |
+| Póliza médica | Vigente · Vencida *(derivado)* · Pendiente *(derivado)* | M1-10 |
 | Grupo | Con cupo · Alerta al 90 % · Lleno (bloquea matrículas) | M3-02 |
 | Competencia | `Programada` · Cancelada *(derivado)* | M4-01, M4-12 |
 | Inscripción | `En validación` → `Aprobada` / `Rechazada` (con causal) / `Anulada` | M4-06, 11, 12 |
@@ -278,6 +279,7 @@ Hallazgos de consistencia al consolidar el documento; conviene resolverlos con l
 4. **Funcionalidades referenciadas sin requisito propio:**
    - Registro de **sanciones disciplinarias** (M4-10 lo da por existente).
    - **Carga y validación de la póliza** por el Fisioterapeuta (M1-10 permite registrar la póliza por Acudiente o Administrador; falta precisar el flujo de revisión del Fisioterapeuta en M4-07).
+     - Supuesto aplicado en HU-M1-10 mientras se confirma el flujo: la póliza registrada queda `APROBADA` para que M4-07 pueda validarla; los campos de revisión quedan listos en la BD. Tipos de archivo permitidos: PDF/JPG/PNG, máximo 5 MB. Aún requiere validación con el club y el docente el tratamiento de datos de salud de menores (Ley 1581 de 2012) y el almacenamiento privado.
    - **Notificaciones automáticas** (M3-04 y M4-12 las exigen).
    - Consulta de **información general para el Visitante** (sin requisito propio en M1).
    - Delimitación entre la vinculación de cuentas (M1-11) y la asociación de perfiles (M2-04).

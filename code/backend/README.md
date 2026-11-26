@@ -2,7 +2,7 @@
 
 API de la plataforma de gestión de la escuela de patinaje, desarrollada con NestJS y TypeScript. Su arquitectura objetivo es **modular por dominio**: cada módulo agrupa las capacidades y reglas de negocio que le corresponden y expone únicamente lo que otros módulos necesitan.
 
-> **Estado actual:** está implementada una parte de M5 (asignación y cambio de plan, generación de mensualidades y registro de pagos; ver [su README](src/modules/m5-planes-tarifas-pagos/README.md)) y la infraestructura transversal que usa: conexión a PostgreSQL, auditoría y la sesión de M1 (registro e inicio de sesión, ver `src/modules/m1-usuarios-acceso/`). Los demás módulos de esta guía son la estructura acordada para el desarrollo futuro.
+> **Estado actual:** está implementada una parte de M5 (asignación y cambio de plan, generación de mensualidades y registro de pagos; ver [su README](src/modules/m5-planes-tarifas-pagos/README.md)) y la infraestructura transversal que usa: conexión a PostgreSQL, auditoría y la sesión de M1. M1 también cubre vinculación de acudientes, autorización y gestión de póliza médica (HU-M1-09/10/11; ver [su README](src/modules/m1-usuarios-acceso/README.md)). Los demás módulos de esta guía son la estructura acordada para el desarrollo futuro.
 
 ## Puesta en marcha
 
