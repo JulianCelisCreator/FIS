@@ -133,6 +133,21 @@ export class UsuariosRepository {
     await consultor.query(`UPDATE usuario SET contrasena_hash = $2 WHERE id = $1`, [usuarioId, contrasenaHash]);
   }
 
+  /**
+   * HU-M1-12: reemplaza la contraseña temporal y pasa la cuenta a «Activa» en
+   * una sola sentencia. Solo actúa si la cuenta sigue «Por registrar»; devuelve
+   * false si otra solicitud ya la activó o cambió su estado.
+   */
+  async activar(consultor: Consultor, usuarioId: number, contrasenaHash: string): Promise<boolean> {
+    const { rowCount } = await consultor.query(
+      `UPDATE usuario
+          SET contrasena_hash = $2, estado = 'ACTIVA', activado_en = now()
+        WHERE id = $1 AND estado = 'POR_REGISTRAR'`,
+      [usuarioId, contrasenaHash],
+    );
+    return rowCount === 1;
+  }
+
   async registrarIngreso(consultor: Consultor, usuarioId: number): Promise<void> {
     await consultor.query(`UPDATE usuario SET ultimo_ingreso_en = now() WHERE id = $1`, [usuarioId]);
   }

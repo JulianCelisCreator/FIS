@@ -2,15 +2,18 @@ import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/c
 import { crearTokenSesion, DURACION_SESION_MS } from '../../../common/auth/token-sesion.js';
 import type { Rol } from '../../../common/auth/usuario-autenticado.js';
 import { BaseDatosService } from '../../../common/database/base-datos.service.js';
+import type { Consultor } from '../../../common/database/base-datos.service.js';
 import type { IniciarSesionDto } from '../dto/iniciar-sesion.dto.js';
 import { SesionesRepository } from '../repositories/sesiones.repository.js';
-import { UsuariosRepository } from '../repositories/usuarios.repository.js';
+import { UsuariosRepository, type UsuarioParaIngreso } from '../repositories/usuarios.repository.js';
 import { hashContrasena, verificarContrasena } from '../utils/contrasena.js';
 
 export const MENSAJE_CREDENCIALES = 'El correo o la contraseña no son correctos.';
 export const MENSAJE_CUENTA_DESACTIVADA = 'Tu cuenta está desactivada. Contacta al Administrador.';
-export const MENSAJE_CUENTA_POR_REGISTRAR =
-  'Tu cuenta aún no está activa. Contacta al Administrador para completar la activación.';
+export const MENSAJE_ACTIVACION_REQUERIDA =
+  'Es tu primer ingreso. Crea una contraseña personal para activar tu cuenta.';
+/** Código que el frontend usa para pasar a «Crea tu contraseña» (HU-M1-12 CA-02). */
+export const CODIGO_ACTIVACION_REQUERIDA = 'ACTIVACION_REQUERIDA';
 
 export interface ContextoIngreso {
   ip: string | null;
@@ -42,35 +45,56 @@ export class IngresoService {
   ) {}
 
   async iniciar(dto: IniciarSesionDto, contexto: ContextoIngreso): Promise<SesionIniciada> {
-    const usuario = await this.usuarios.buscarParaIngreso(this.baseDatos.consultor, dto.correo);
-
-    if (!usuario) {
-      this.hashFicticio ??= hashContrasena('contrasena-de-referencia');
-      await verificarContrasena(dto.contrasena, await this.hashFicticio);
-      throw new UnauthorizedException(MENSAJE_CREDENCIALES);
-    }
-    if (!(await verificarContrasena(dto.contrasena, usuario.contrasenaHash))) {
-      throw new UnauthorizedException(MENSAJE_CREDENCIALES);
-    }
+    const usuario = await this.verificarCredenciales(dto.correo, dto.contrasena);
     // Desde aquí la persona demostró ser dueña de la cuenta: los mensajes pueden ser específicos.
     if (usuario.estado === 'DESACTIVADA') throw new ForbiddenException(MENSAJE_CUENTA_DESACTIVADA); // CA-03
-    // Precondición «cuenta habilitada»: la activación de «Por registrar» es otra historia (HU-M1-12).
-    if (usuario.estado !== 'ACTIVA') throw new ForbiddenException(MENSAJE_CUENTA_POR_REGISTRAR);
+    // HU-M1-12 CA-01 y CA-02: una cuenta «Por registrar» no recibe sesión; primero
+    // reemplaza su contraseña temporal (POST /m1/acceso/activacion).
+    if (usuario.estado === 'POR_REGISTRAR') {
+      throw new ForbiddenException({
+        statusCode: 403,
+        message: MENSAJE_ACTIVACION_REQUERIDA,
+        codigo: CODIGO_ACTIVACION_REQUERIDA,
+      });
+    }
 
+    return this.baseDatos.transaccion((cliente) => this.abrirSesion(cliente, usuario, contexto));
+  }
+
+  /**
+   * Comprueba correo y contraseña. Un correo que no existe y una contraseña
+   * equivocada dan el mismo error y tardan lo mismo (HU-M1-02 CA-02).
+   */
+  async verificarCredenciales(correo: string, contrasena: string): Promise<UsuarioParaIngreso> {
+    const usuario = await this.usuarios.buscarParaIngreso(this.baseDatos.consultor, correo);
+    if (!usuario) {
+      this.hashFicticio ??= hashContrasena('contrasena-de-referencia');
+      await verificarContrasena(contrasena, await this.hashFicticio);
+      throw new UnauthorizedException(MENSAJE_CREDENCIALES);
+    }
+    if (!(await verificarContrasena(contrasena, usuario.contrasenaHash))) {
+      throw new UnauthorizedException(MENSAJE_CREDENCIALES);
+    }
+    return usuario;
+  }
+
+  /** Abre la sesión dentro de la transacción del que llama (ingreso o activación). */
+  async abrirSesion(
+    cliente: Consultor,
+    usuario: Pick<UsuarioParaIngreso, 'id' | 'nombre'>,
+    contexto: ContextoIngreso,
+  ): Promise<SesionIniciada> {
     const { token, hash } = crearTokenSesion();
     const expiraEn = new Date(Date.now() + DURACION_SESION_MS);
-
-    return this.baseDatos.transaccion(async (cliente) => {
-      await this.sesiones.crear(cliente, {
-        usuarioId: usuario.id,
-        tokenHash: hash,
-        expiraEn,
-        ip: contexto.ip,
-        userAgent: contexto.userAgent?.slice(0, 500) ?? null,
-      });
-      await this.usuarios.registrarIngreso(cliente, usuario.id);
-      const { roles, permisos } = await this.usuarios.rolesYPermisos(cliente, usuario.id);
-      return { token, expiraEn, sesion: { id: usuario.id, nombre: usuario.nombre, roles, permisos } };
+    await this.sesiones.crear(cliente, {
+      usuarioId: usuario.id,
+      tokenHash: hash,
+      expiraEn,
+      ip: contexto.ip,
+      userAgent: contexto.userAgent?.slice(0, 500) ?? null,
     });
+    await this.usuarios.registrarIngreso(cliente, usuario.id);
+    const { roles, permisos } = await this.usuarios.rolesYPermisos(cliente, usuario.id);
+    return { token, expiraEn, sesion: { id: usuario.id, nombre: usuario.nombre, roles, permisos } };
   }
 }
