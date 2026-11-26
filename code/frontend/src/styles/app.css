@@ -444,6 +444,48 @@ p {
   border-radius: var(--radius);
 }
 
+.app-m2-lista {
+  display: grid;
+  gap: 1rem;
+}
+
+.app-m2-lista__fila {
+  min-width: 0;
+  padding: 1rem;
+  background: var(--chalk);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.app-m2-propuesta__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.app-m2-resumen {
+  display: flex;
+  flex-wrap: wrap;
+  grid-column: 1 / -1;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem;
+  background: var(--chalk);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.app-m2-historial {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--chalk);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
 .app-panel-head {
   display: flex;
   flex-wrap: wrap;

@@ -32,9 +32,19 @@ import { RegistroPersonal } from '../modules/m6-personal/components/registro-per
 import { PERMISOS_PERSONAL } from '../modules/m6-personal/types/personal.types.ts'
 import { ReportesFinancieros } from '../modules/m6-reportes/components/reportes-financieros.tsx'
 import { PERMISOS_REPORTES } from '../modules/m6-reportes/types/reportes.types.ts'
+import { Categorias } from '../modules/m2-gestion-deportiva/components/categorias.tsx'
+import { AsignacionCategorias } from '../modules/m2-gestion-deportiva/components/asignacion-categorias.tsx'
+import { SeguimientoProfesor } from '../modules/m2-gestion-deportiva/components/seguimiento-profesor.tsx'
+import { MiProgreso } from '../modules/m2-gestion-deportiva/components/mi-progreso.tsx'
+import { PERMISOS_M2_SEGUIMIENTO } from '../modules/m2-gestion-deportiva/types/seguimiento.types.ts'
 import { MarcoAplicacion } from './marco-aplicacion.tsx'
 
 const PANTALLAS = [
+  { pagina: 'm2-categorias', texto: 'Niveles y categorías', grupo: 'Gestión deportiva', permiso: PERMISOS_M2_SEGUIMIENTO.categoriaConsultar },
+  { pagina: 'm2-asignaciones', texto: 'Asignaciones y propuestas', grupo: 'Gestión deportiva', permiso: PERMISOS_M2_SEGUIMIENTO.asignacionGestionar },
+  { pagina: 'm2-propuestas', texto: 'Propuestas de categoría', grupo: 'Gestión deportiva', permiso: PERMISOS_M2_SEGUIMIENTO.categoriaProponer },
+  { pagina: 'm2-seguimiento', texto: 'Seguimiento de entrenamiento', grupo: 'Gestión deportiva', permiso: PERMISOS_M2_SEGUIMIENTO.entrenamientoConsultar },
+  { pagina: 'm2-progreso', texto: 'Mi progreso deportivo', grupo: 'Gestión deportiva', permiso: PERMISOS_M2_SEGUIMIENTO.categoriaActualConsultar },
   { pagina: 'panel', texto: 'Panel general', grupo: 'Administración', permiso: PERMISOS_PANEL.panelConsultar },
   { pagina: 'm4', texto: 'Competencias y resultados', grupo: 'Competencias y resultados', permiso: PERMISOS_M4.consultar },
   { pagina: 'planes', texto: 'Planes y tarifas', grupo: 'Planes y pagos', permiso: PERMISOS_M5.planGestionar },
@@ -64,7 +74,7 @@ const PANTALLA_FAMILIA = { pagina: 'familia-menor', texto: 'Familia del menor' }
 
 const PESTANAS_PAGO: PestanaPago[] = ['cobro', 'sesion', 'matricula']
 
-/** Aplicación interna con las pantallas de M1, M5 y M6 habilitadas por rol. */
+/** Aplicación interna con pantallas habilitadas por rol para los módulos M1 a M6. */
 export function Aplicacion() {
   const { sesion, cargando, tienePermiso, tieneRol } = useSesion()
   const { pagina, parametros } = useRuta()
@@ -138,6 +148,7 @@ export function Aplicacion() {
     },
     ...[
       'Competencias y resultados',
+      'Gestión deportiva',
       'Planes y pagos',
       'Uniformes',
       'Administración',
@@ -197,6 +208,14 @@ export function Aplicacion() {
     )
   } else if (actual === 'm4') {
     contenido = <M4Modulo key={sesion.id} />
+  } else if (actual === 'm2-categorias') {
+    contenido = <Categorias key={sesion.id} />
+  } else if (actual === 'm2-asignaciones' || actual === 'm2-propuestas') {
+    contenido = <AsignacionCategorias key={sesion.id} />
+  } else if (actual === 'm2-seguimiento') {
+    contenido = <SeguimientoProfesor key={sesion.id} />
+  } else if (actual === 'm2-progreso') {
+    contenido = <MiProgreso key={sesion.id} />
   } else if (actual === 'planes') {
     contenido = <PlanesTarifas key={sesion.id} />
   } else if (actual === 'cartera') {
