@@ -29,7 +29,6 @@ export function MiProgreso() {
   const [cargando, setCargando] = useState(true)
   const [cargandoDetalle, setCargandoDetalle] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [version, setVersion] = useState(0)
 
   useEffect(() => {
     let vigente = true
@@ -51,7 +50,7 @@ export function MiProgreso() {
     }
     void cargar()
     return () => { vigente = false }
-  }, [version])
+  }, [])
 
   useEffect(() => {
     if (!patinadorId) {
@@ -91,7 +90,7 @@ export function MiProgreso() {
     }
     void cargarDetalle()
     return () => { vigente = false }
-  }, [patinadorId, puedeConsultarHistorial, puedeConsultarObservaciones, version])
+  }, [patinadorId, puedeConsultarHistorial, puedeConsultarObservaciones])
 
   const seleccionado = useMemo(
     () => patinadores.find((patinador) => String(patinador.patinadorId) === patinadorId) ?? null,

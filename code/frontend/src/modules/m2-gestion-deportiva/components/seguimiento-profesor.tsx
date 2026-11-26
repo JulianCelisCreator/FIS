@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Alerta, Campo } from '../../../shared/ui/componentes.tsx'
 import { useSesion } from '../../../shared/sesion/use-sesion.ts'
 import { formatoFecha } from '../../../shared/utils/formato.ts'
@@ -137,11 +137,6 @@ export function SeguimientoProfesor() {
     void cargarFicha()
     return () => { vigente = false }
   }, [patinadorId, version])
-
-  const patinador = useMemo(
-    () => patinadores.find((fila) => String(fila.id) === patinadorId) ?? null,
-    [patinadores, patinadorId],
-  )
 
   const recargarFicha = (mensaje: string) => {
     setAviso(mensaje)

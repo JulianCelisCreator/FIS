@@ -3,7 +3,6 @@ import type {
   CategoriaActualPatinador,
   CategoriaClub,
   CatalogoClub,
-  EvaluacionPatinador,
   FichaEntrenamiento,
   HabilidadPatinador,
   HistorialPatinador,
