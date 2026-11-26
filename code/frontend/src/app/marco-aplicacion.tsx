@@ -119,6 +119,11 @@ export function MarcoAplicacion({
               </div>
             )}
             {sesion && (
+              <a className="vl-user__cuenta" href="#/mi-cuenta" aria-current={paginaActual === 'mi-cuenta' ? 'page' : undefined}>
+                Mi cuenta
+              </a>
+            )}
+            {sesion && (
               <button
                 className="vl-button vl-button--sm vl-user__salir"
                 type="button"

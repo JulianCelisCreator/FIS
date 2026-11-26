@@ -2,9 +2,12 @@ import { Alerta } from '../shared/ui/componentes.tsx'
 import { useSesion } from '../shared/sesion/use-sesion.ts'
 import { useRuta } from '../shared/utils/use-ruta.ts'
 import { FamiliaMenor } from '../modules/m1-usuarios-acceso/components/familia-menor.tsx'
+import { MiCuenta } from '../modules/m1-usuarios-acceso/components/mi-cuenta.tsx'
 import { NuevaCuenta } from '../modules/m1-usuarios-acceso/components/nueva-cuenta.tsx'
 import { Usuarios } from '../modules/m1-usuarios-acceso/components/usuarios.tsx'
 import { PantallaAcceso } from '../modules/m1-usuarios-acceso/components/pantalla-acceso.tsx'
+import { RecuperarContrasena } from '../modules/m1-usuarios-acceso/components/recuperar-contrasena.tsx'
+import { RestablecerContrasena } from '../modules/m1-usuarios-acceso/components/restablecer-contrasena.tsx'
 import { AsignarCambiarPlan } from '../modules/m5-planes-tarifas-pagos/components/asignar-cambiar-plan.tsx'
 import { Cartera } from '../modules/m5-planes-tarifas-pagos/components/cartera.tsx'
 import { HistorialPagos } from '../modules/m5-planes-tarifas-pagos/components/historial-pagos.tsx'
@@ -65,6 +68,13 @@ const PESTANAS_PAGO: PestanaPago[] = ['cobro', 'sesion', 'matricula']
 export function Aplicacion() {
   const { sesion, cargando, tienePermiso, tieneRol } = useSesion()
   const { pagina, parametros } = useRuta()
+
+  // HU-M1-08: recuperación de contraseña. Pantallas públicas: sirven con o sin sesión.
+  if (pagina === 'recuperar') return <RecuperarContrasena />
+  if (pagina === 'restablecer') {
+    const token = parametros.get('token') ?? ''
+    return <RestablecerContrasena key={token} token={token} />
+  }
 
   if (cargando) {
     return (
@@ -144,7 +154,10 @@ export function Aplicacion() {
   ];
 
   let contenido
-  if (permitidas.length === 0) {
+  if (actual === 'mi-cuenta') {
+    // «Mi cuenta» (HU-M1-08 CA-05) es de cualquier rol; se abre desde el bloque de usuario del riel.
+    contenido = <MiCuenta key={sesion.id} />
+  } else if (permitidas.length === 0) {
     contenido = (
       <div className="app-page">
         <h1>Hola, {sesion.nombre}</h1>
