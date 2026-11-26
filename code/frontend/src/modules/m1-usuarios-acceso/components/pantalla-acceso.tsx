@@ -1,7 +1,9 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useSesion } from '../../../shared/sesion/use-sesion.ts'
 import { Alerta } from '../../../shared/ui/componentes.tsx'
 import { MarcaVelora } from '../../../shared/ui/marca-velora.tsx'
+import type { DatosIngreso } from '../services/acceso.service.ts'
+import { ActivarCuenta } from './activar-cuenta.tsx'
 import { FormularioIngreso } from './formulario-ingreso.tsx'
 import './pantalla-acceso.css'
 
@@ -45,6 +47,10 @@ export function MarcoAcceso({ titulo, texto, children }: { titulo: string; texto
  */
 export function PantallaAcceso() {
   const { sesionRecienCerrada } = useSesion()
+  // HU-M1-12: credenciales de una cuenta «Por registrar» que debe crear su contraseña.
+  const [porActivar, setPorActivar] = useState<DatosIngreso | null>(null)
+
+  if (porActivar) return <ActivarCuenta credenciales={porActivar} alCancelar={() => setPorActivar(null)} />
 
   return (
     <MarcoAcceso titulo="Ingresa a Velora" texto="Usa el correo y la contraseña de tu cuenta.">
@@ -54,7 +60,7 @@ export function PantallaAcceso() {
           <p>Ingresa de nuevo cuando quieras.</p>
         </Alerta>
       )}
-      <FormularioIngreso />
+      <FormularioIngreso alRequerirActivacion={setPorActivar} />
     </MarcoAcceso>
   )
 }

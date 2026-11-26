@@ -7,6 +7,7 @@ import { AutorizacionesRepository } from './repositories/autorizaciones.reposito
 import { SesionesRepository } from './repositories/sesiones.repository.js';
 import { TokensRepository } from './repositories/tokens.repository.js';
 import { UsuariosRepository } from './repositories/usuarios.repository.js';
+import { ActivacionService } from './services/activacion.service.js';
 import { AutorizacionesService } from './services/autorizaciones.service.js';
 import { CambioContrasenaService } from './services/cambio-contrasena.service.js';
 import { CierreSesionService } from './services/cierre-sesion.service.js';
@@ -33,6 +34,7 @@ import { RolesService } from './services/roles.service.js';
     AutorizacionesService,
     RecuperacionService,
     CambioContrasenaService,
+    ActivacionService,
     UsuariosRepository,
     SesionesRepository,
     AutorizacionesRepository,

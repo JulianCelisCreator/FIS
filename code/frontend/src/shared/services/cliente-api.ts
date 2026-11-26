@@ -10,15 +10,29 @@ export function urlApi(ruta: string): string {
   return `${BASE}${ruta}`
 }
 
-/** Error de la API con el mensaje en español que devuelve el backend. */
+/**
+ * Error de la API con el mensaje en español que devuelve el backend. `codigo`
+ * viene solo cuando el backend necesita que la interfaz reaccione de una forma
+ * concreta (por ejemplo, ACTIVACION_REQUERIDA en el primer ingreso).
+ */
 export class ErrorApi extends Error {
   readonly estado: number
+  readonly codigo: string | undefined
 
-  constructor(estado: number, mensaje: string) {
+  constructor(estado: number, mensaje: string, codigo?: string) {
     super(mensaje)
     this.name = 'ErrorApi'
     this.estado = estado
+    this.codigo = codigo
   }
+}
+
+function codigoDeError(cuerpo: unknown): string | undefined {
+  if (cuerpo && typeof cuerpo === 'object' && 'codigo' in cuerpo) {
+    const { codigo } = cuerpo as { codigo: unknown }
+    if (typeof codigo === 'string') return codigo
+  }
+  return undefined
 }
 
 function mensajeDeError(cuerpo: unknown, estado: number): string {
@@ -57,6 +71,8 @@ export async function pedir<T>(
   }
 
   const cuerpo: unknown = await respuesta.json().catch(() => null)
-  if (!respuesta.ok) throw new ErrorApi(respuesta.status, mensajeDeError(cuerpo, respuesta.status))
+  if (!respuesta.ok) {
+    throw new ErrorApi(respuesta.status, mensajeDeError(cuerpo, respuesta.status), codigoDeError(cuerpo))
+  }
   return cuerpo as T
 }

@@ -5,8 +5,10 @@ import {
   leerCookie,
   opcionesCookieSesion,
 } from '../../../common/auth/token-sesion.js';
+import { ActivarCuentaDto } from '../dto/activar-cuenta.dto.js';
 import { IniciarSesionDto } from '../dto/iniciar-sesion.dto.js';
 import { RestablecerContrasenaDto, SolicitarRecuperacionDto, TokenRecuperacionDto } from '../dto/recuperacion.dto.js';
+import { ActivacionService } from '../services/activacion.service.js';
 import { CierreSesionService } from '../services/cierre-sesion.service.js';
 import { IngresoService } from '../services/ingreso.service.js';
 import { RecuperacionService } from '../services/recuperacion.service.js';
@@ -18,6 +20,7 @@ export class AccesoController {
     private readonly ingresoService: IngresoService,
     private readonly cierreSesionService: CierreSesionService,
     private readonly recuperacionService: RecuperacionService,
+    private readonly activacionService: ActivacionService,
   ) {}
 
   /**
@@ -32,6 +35,26 @@ export class AccesoController {
     @Res({ passthrough: true }) respuesta: Response,
   ) {
     const { token, expiraEn, sesion } = await this.ingresoService.iniciar(dto, {
+      ip: solicitud.ip ?? null,
+      userAgent: solicitud.get('user-agent') ?? null,
+    });
+    respuesta.cookie(COOKIE_SESION, token, { ...opcionesCookieSesion(), expires: expiraEn });
+    return sesion;
+  }
+
+  /**
+   * HU-M1-12: primer ingreso de una cuenta «Por registrar». Reemplaza la
+   * contraseña temporal, activa la cuenta y deja la sesión abierta, igual que
+   * el ingreso.
+   */
+  @Post('activacion')
+  @HttpCode(HttpStatus.OK)
+  async activar(
+    @Body() dto: ActivarCuentaDto,
+    @Req() solicitud: Request,
+    @Res({ passthrough: true }) respuesta: Response,
+  ) {
+    const { token, expiraEn, sesion } = await this.activacionService.activar(dto, {
       ip: solicitud.ip ?? null,
       userAgent: solicitud.get('user-agent') ?? null,
     });

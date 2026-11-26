@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react'
+import { ErrorApi } from '../../../shared/services/cliente-api.ts'
 import { useSesion } from '../../../shared/sesion/use-sesion.ts'
 import { Alerta, Campo } from '../../../shared/ui/componentes.tsx'
-import { ingresar } from '../services/acceso.service.ts'
+import { CODIGO_ACTIVACION_REQUERIDA, ingresar, type DatosIngreso } from '../services/acceso.service.ts'
 import { describirCampo } from '../utils/describir-campo.ts'
 import { validarIngreso, type CamposIngreso, type ErroresIngreso } from '../utils/validar-ingreso.ts'
 
@@ -10,9 +11,11 @@ const ORDEN_CAMPOS: (keyof CamposIngreso)[] = ['correo', 'contrasena']
 /**
  * HU-M1-02 · Inicio de sesión con correo y contraseña. Sin selector de rol: el
  * sistema identifica los roles de la cuenta. Al ingresar, la sesión queda en
- * el proveedor y la aplicación muestra las pantallas autorizadas.
+ * el proveedor y la aplicación muestra las pantallas autorizadas. Si la
+ * cuenta está «Por registrar», pasa las credenciales a «Crea tu contraseña»
+ * (HU-M1-12 CA-02).
  */
-export function FormularioIngreso() {
+export function FormularioIngreso({ alRequerirActivacion }: { alRequerirActivacion: (datos: DatosIngreso) => void }) {
   const { establecerSesion } = useSesion()
   const [campos, setCampos] = useState<CamposIngreso>({ correo: '', contrasena: '' })
   const [errores, setErrores] = useState<ErroresIngreso>({})
@@ -43,9 +46,14 @@ export function FormularioIngreso() {
     }
 
     setEnviando(true)
+    const datos = { correo: campos.correo.trim(), contrasena: campos.contrasena }
     try {
-      establecerSesion(await ingresar({ correo: campos.correo.trim(), contrasena: campos.contrasena }))
+      establecerSesion(await ingresar(datos))
     } catch (error) {
+      if (error instanceof ErrorApi && error.codigo === CODIGO_ACTIVACION_REQUERIDA) {
+        alRequerirActivacion(datos)
+        return
+      }
       // CA-02 y CA-03: el mensaje de la API no revela cuál dato falló.
       setErrorGeneral(error instanceof Error ? error.message : 'No se pudo ingresar. Intenta de nuevo.')
       setCampos((actuales) => ({ ...actuales, contrasena: '' }))

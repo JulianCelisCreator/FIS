@@ -6,10 +6,11 @@ import type { NuevaSesion, SesionesRepository } from '../repositories/sesiones.r
 import type { UsuarioParaIngreso, UsuariosRepository } from '../repositories/usuarios.repository.js';
 import { hashContrasena } from '../utils/contrasena.js';
 import {
+  CODIGO_ACTIVACION_REQUERIDA,
   IngresoService,
+  MENSAJE_ACTIVACION_REQUERIDA,
   MENSAJE_CREDENCIALES,
   MENSAJE_CUENTA_DESACTIVADA,
-  MENSAJE_CUENTA_POR_REGISTRAR,
 } from './ingreso.service.js';
 
 const consultor = {} as Consultor;
@@ -87,16 +88,27 @@ describe('IngresoService.iniciar (HU-M1-02)', () => {
     expect(sesionesCreadas).toHaveLength(0);
   });
 
-  it('una cuenta «Por registrar» no ingresa hasta activarse (precondición: cuenta habilitada)', async () => {
+  it('HU-M1-12 CA-01 y CA-02: una cuenta «Por registrar» no recibe sesión y se le pide crear su contraseña', async () => {
     const { servicio, sesionesCreadas } = crearServicio({ estado: 'POR_REGISTRAR' });
-    await expect(servicio.iniciar(ingreso, contexto)).rejects.toThrow(
-      new ForbiddenException(MENSAJE_CUENTA_POR_REGISTRAR),
-    );
+    const error = await servicio.iniciar(ingreso, contexto).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(ForbiddenException);
+    expect((error as ForbiddenException).getResponse()).toMatchObject({
+      message: MENSAJE_ACTIVACION_REQUERIDA,
+      codigo: CODIGO_ACTIVACION_REQUERIDA,
+    });
     expect(sesionesCreadas).toHaveLength(0);
   });
 
   it('una contraseña equivocada en una cuenta desactivada no revela su estado', async () => {
     const { servicio } = crearServicio({ estado: 'DESACTIVADA' });
+    await expect(servicio.iniciar({ ...ingreso, contrasena: 'otra' }, contexto)).rejects.toThrow(
+      new UnauthorizedException(MENSAJE_CREDENCIALES),
+    );
+  });
+
+  it('una contraseña equivocada en una cuenta «Por registrar» no revela que falta activarla', async () => {
+    const { servicio } = crearServicio({ estado: 'POR_REGISTRAR' });
     await expect(servicio.iniciar({ ...ingreso, contrasena: 'otra' }, contexto)).rejects.toThrow(
       new UnauthorizedException(MENSAJE_CREDENCIALES),
     );
