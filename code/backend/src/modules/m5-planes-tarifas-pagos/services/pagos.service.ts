@@ -16,12 +16,14 @@ import type {
   RegistrarMatriculaDto,
   RegistrarPagoCobroDto,
   RegistrarPagoSesionDto,
+  RegistrarValoracionDto,
 } from '../dto/registrar-pagos.dto.js';
 import { AsignacionesRepository } from '../repositories/asignaciones.repository.js';
 import { CobrosRepository } from '../repositories/cobros.repository.js';
 import { PagosRepository, type NuevoPago } from '../repositories/pagos.repository.js';
 import { PatinadoresRepository } from '../repositories/patinadores.repository.js';
 import { PlanesRepository } from '../repositories/planes.repository.js';
+import { sumarDias } from '../utils/calculo-cobros.js';
 
 const formatoCop = new Intl.NumberFormat('es-CO', {
   style: 'currency',
@@ -117,22 +119,35 @@ export class PagosService {
    */
   async registrarPagoSesion(usuario: UsuarioAutenticado, dto: RegistrarPagoSesionDto) {
     validarFechaPago(dto.fechaPago);
+    // Se paga el día de la clase, por adelantado o, con recargo, al día siguiente (día de gracia).
+    const fechaClase = dto.fechaClase ?? dto.fechaPago;
+    const diaDeGracia = fechaClase === sumarDias(dto.fechaPago, -1);
+    if (fechaClase < dto.fechaPago && !diaDeGracia) {
+      throw new ConflictException(
+        'Una sesión atrasada solo se puede pagar hasta el día siguiente a la clase',
+      );
+    }
 
     return this.baseDatos.transaccion(async (tx) => {
       await this.obtenerPatinadorBloqueado(tx, dto.patinadorId);
 
-      const asignacion = await this.asignaciones.vigente(tx, dto.patinadorId, dto.fechaPago);
+      const asignacion = await this.asignaciones.vigente(tx, dto.patinadorId, fechaClase);
       if (!asignacion || asignacion.periodicidad !== 'POR_SESION') {
         throw new ConflictException(
-          'El patinador no tiene un plan de día único activo en la fecha del pago',
+          'El patinador no tiene un plan de día único activo en la fecha de la clase',
         );
       }
-      const tarifa = await this.planes.tarifaVigente(tx, asignacion.planId, dto.fechaPago);
+      const tarifa = await this.planes.tarifaVigente(tx, asignacion.planId, fechaClase);
       if (!tarifa) {
         throw new ConflictException(`El plan ${asignacion.planNombre} no tiene una tarifa vigente`);
       }
 
-      const monto = redondearCentavos(tarifa.valor * dto.numeroSesiones);
+      const valorSesiones = redondearCentavos(tarifa.valor * dto.numeroSesiones);
+      const porcentaje = diaDeGracia
+        ? await this.cobros.parametroNumerico(tx, 'recargo_sesion_pct', 10)
+        : 0;
+      const recargo = Math.round((valorSesiones * porcentaje) / 100);
+      const monto = redondearCentavos(valorSesiones + recargo);
       const sesiones = dto.numeroSesiones === 1 ? '1 sesión' : `${dto.numeroSesiones} sesiones`;
       const cobroId = await this.cobros.crear(tx, {
         patinadorId: dto.patinadorId,
@@ -141,8 +156,8 @@ export class PagosService {
         concepto: 'SESION',
         periodo: null,
         descripcion: `${asignacion.planNombre}: ${sesiones}`,
-        valor: monto,
-        fechaLimite: dto.fechaPago,
+        valor: valorSesiones,
+        fechaLimite: fechaClase,
         estado: 'PAGADO',
         creadoPor: usuario.id,
       });
@@ -153,15 +168,87 @@ export class PagosService {
         monto,
         numeroSesiones: dto.numeroSesiones,
       });
-      await this.pagos.aplicarACobro(tx, pagoId, cobroId, monto);
+      await this.pagos.aplicarACobro(tx, pagoId, cobroId, valorSesiones);
+
+      let recargoCobroId: number | null = null;
+      if (recargo > 0) {
+        recargoCobroId = await this.cobros.crear(tx, {
+          patinadorId: dto.patinadorId,
+          asignacionPlanId: asignacion.id,
+          tarifaId: null,
+          concepto: 'RECARGO_MORA',
+          periodo: null,
+          descripcion: `Recargo por pago al día siguiente de la clase (${porcentaje} %)`,
+          valor: recargo,
+          fechaLimite: fechaClase,
+          estado: 'PAGADO',
+          creadoPor: usuario.id,
+          cobroOrigenId: cobroId,
+        });
+        await this.pagos.aplicarACobro(tx, pagoId, recargoCobroId, recargo);
+      }
 
       return {
         ...(await this.cerrarPago(tx, pagoId, dto.patinadorId)),
         cobroId,
         numeroSesiones: dto.numeroSesiones,
         valorSesion: tarifa.valor,
+        fechaClase,
+        recargo,
         monto,
       };
+    });
+  }
+
+  /** Valores provisionales de la reunión del 19/11/2026 para mostrar los totales antes de confirmar. */
+  async parametros() {
+    const consultor = this.baseDatos.consultor;
+    return {
+      valorValoracion: await this.cobros.parametroNumerico(consultor, 'valor_clase_valoracion', 10000),
+      recargoSesionPct: await this.cobros.parametroNumerico(consultor, 'recargo_sesion_pct', 10),
+      recargoMoraMensualPct: await this.cobros.parametroNumerico(consultor, 'recargo_mora_mensual_pct', 10),
+    };
+  }
+
+  /**
+   * Clase de valoración previa a la inscripción (reunión del 19/11/2026). Se
+   * paga una sola vez, antes de la matrícula, y su valor se abona a la matrícula.
+   */
+  async registrarValoracion(usuario: UsuarioAutenticado, dto: RegistrarValoracionDto) {
+    validarFechaPago(dto.fechaPago);
+
+    return this.baseDatos.transaccion(async (tx) => {
+      await this.obtenerPatinadorBloqueado(tx, dto.patinadorId);
+      if (await this.cobros.matriculaPagada(tx, dto.patinadorId)) {
+        throw new ConflictException('El patinador ya está inscrito: la valoración es previa a la matrícula');
+      }
+      if ((await this.cobros.valoracionPagada(tx, dto.patinadorId)) !== null) {
+        throw new ConflictException('El patinador ya pagó su clase de valoración');
+      }
+
+      const valor = await this.cobros.parametroNumerico(tx, 'valor_clase_valoracion', 10000);
+      const cobroId = await this.cobros.crear(tx, {
+        patinadorId: dto.patinadorId,
+        asignacionPlanId: null,
+        tarifaId: null,
+        concepto: 'VALORACION',
+        periodo: null,
+        descripcion: 'Clase de valoración',
+        valor,
+        fechaLimite: dto.fechaPago,
+        estado: 'PAGADO',
+        creadoPor: usuario.id,
+      });
+      const pagoId = await this.pagos.crear(tx, {
+        ...datosTransaccion(dto, usuario),
+        patinadorId: dto.patinadorId,
+        tipo: 'COBRO',
+        monto: valor,
+        numeroSesiones: null,
+      });
+      await this.pagos.aplicarACobro(tx, pagoId, cobroId, valor);
+
+      return { ...(await this.cerrarPago(tx, pagoId, dto.patinadorId)), cobroId, monto: valor };
     });
   }
 
@@ -178,15 +265,24 @@ export class PagosService {
         throw new ConflictException('La matrícula y los gastos administrativos ya están pagados');
       }
 
+      // La clase de valoración pagada se abona a la matrícula (reunión del 19/11/2026).
+      const valoracion = await this.cobros.valoracionPagada(tx, dto.patinadorId);
+      const abonoValoracion = valoracion === null ? 0 : Math.min(valoracion, dto.valorMatricula - 1);
       const conceptos = [
-        { concepto: 'MATRICULA' as const, descripcion: 'Matrícula', valor: dto.valorMatricula },
+        {
+          concepto: 'MATRICULA' as const,
+          descripcion: abonoValoracion > 0
+            ? `Matrícula (abono de la valoración: ${formatoCop.format(abonoValoracion)})`
+            : 'Matrícula',
+          valor: redondearCentavos(dto.valorMatricula - abonoValoracion),
+        },
         {
           concepto: 'GASTOS_ADMINISTRATIVOS' as const,
           descripcion: 'Gastos administrativos',
           valor: dto.valorGastosAdministrativos,
         },
       ];
-      const monto = redondearCentavos(dto.valorMatricula + dto.valorGastosAdministrativos);
+      const monto = redondearCentavos(dto.valorMatricula - abonoValoracion + dto.valorGastosAdministrativos);
       const pagoId = await this.pagos.crear(tx, {
         ...datosTransaccion(dto, usuario),
         patinadorId: dto.patinadorId,
@@ -216,6 +312,7 @@ export class PagosService {
       return {
         ...(await this.cerrarPago(tx, pagoId, dto.patinadorId)),
         monto,
+        abonoValoracion,
         cobros,
       };
     });
@@ -242,6 +339,12 @@ export class PagosService {
       if (cobros.some((cobro) => CONCEPTOS_DE_M6.includes(cobro.concepto))) {
         throw new ConflictException('Los pagos de uniformes e implementos se gestionan en M6');
       }
+      if (
+        cobros.some((cobro) => cobro.concepto === 'VALORACION') &&
+        (await this.cobros.matriculaPagada(tx, pago.patinadorId))
+      ) {
+        throw new ConflictException('La valoración ya se abonó a la matrícula; no se puede anular');
+      }
       await this.obtenerPatinadorBloqueado(tx, pago.patinadorId);
       await this.cobros.bloquear(tx, cobros.map((cobro) => cobro.id));
       await this.pagos.anular(tx, pagoId, usuario.id, motivo);
@@ -250,7 +353,8 @@ export class PagosService {
       const cobrosAfectados = [];
       for (const cobro of cobros) {
         let estado: 'PENDIENTE' | 'PAGADO' | 'ANULADO';
-        if (pago.tipo === 'SESION' && cobro.concepto === 'SESION') {
+        // Los cobros que nacen con su pago (sesiones, su recargo y la valoración) se anulan con él.
+        if (pago.tipo === 'SESION' || cobro.concepto === 'VALORACION') {
           await this.cobros.anular(tx, cobro.id, `Pago anulado: ${motivo}`);
           estado = 'ANULADO';
         } else {

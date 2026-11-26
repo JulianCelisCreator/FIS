@@ -44,6 +44,8 @@ Todos exigen una sesión iniciada (ver [Autenticación](#autenticación)). Fecha
 | `GET /m5/patinadores/:id/cobros-pendientes` | — | Administrador, Contador, acudiente propio, patinador mayor |
 | `POST /m5/pagos/cobro` | `M5_PAGO_REGISTRAR` | Administrador, Contador |
 | `POST /m5/pagos/sesion` | `M5_PAGO_REGISTRAR` | Administrador, Contador |
+| `POST /m5/pagos/valoracion` | `M5_PAGO_REGISTRAR` | Administrador, Contador |
+| `GET /m5/pagos/parametros` | `M5_PAGO_REGISTRAR` | Administrador, Contador |
 | `POST /m5/pagos/matricula` | `M5_PAGO_REGISTRAR` | Administrador, Contador |
 | `PATCH /m5/pagos/:id/anular` | `M5_PAGO_ANULAR` | Administrador |
 | `GET /m5/cartera?estado=&planId=&patinador=&acudiente=&venceDesde=&venceHasta=` | `M5_CARTERA_CONSULTAR` | Administrador, Contador |
@@ -83,8 +85,11 @@ Los permisos de cada rol están en `rol_permiso` (sembrados en `db/schema.sql`).
 { "cobroId": 40, "monto": 200000, "fechaPago": "2026-11-07",
   "medioPago": "TRANSFERENCIA", "referencia": "TRX-2231" }
 
-// POST /m5/pagos/sesion
-{ "patinadorId": 15, "numeroSesiones": 4, "fechaPago": "2026-11-07", "medioPago": "EFECTIVO" }
+// POST /m5/pagos/sesion   (fechaClase opcional: por defecto la del pago; la del día anterior lleva recargo)
+{ "patinadorId": 15, "numeroSesiones": 4, "fechaClase": "2026-11-06", "fechaPago": "2026-11-07", "medioPago": "EFECTIVO" }
+
+// POST /m5/pagos/valoracion
+{ "patinadorId": 18, "fechaPago": "2026-11-07", "medioPago": "EFECTIVO" }
 
 // POST /m5/pagos/matricula
 { "patinadorId": 12, "valorMatricula": 120000, "valorGastosAdministrativos": 45000,
@@ -156,7 +161,14 @@ Errores: `400` datos inválidos, `401` sin usuario, `403` sin permiso o patinado
 
 ### Mora (RF-M5-12)
 
-- Un cobro se paga hasta su fecha límite y pasa a «Vencido» después de `parametro_sistema.dias_gracia_mora` días (4 por defecto): con límite el día 5, queda vencido desde el día 10, como dicen los wireframes.
+Reglas de la reunión con el cliente del 19/11/2026. Los valores provisionales son parámetros de `parametro_sistema` y las preguntas abiertas están en [`docs/specs/m5-preguntas-pendientes-cliente.md`](../../../../../docs/specs/m5-preguntas-pendientes-cliente.md).
+
+- Las mensualidades se pagan del día 1 al 5 (único día límite aceptado) y pasan a «Vencido» desde el día 6 (`dias_gracia_mora = 0`). Los wireframes, anteriores a la reunión, dicen «desde el día 10».
+- **Plan mensual:** el proceso diario de las 00:05 (y `POST /m5/cobros/generacion` del mes en curso), antes de generar las mensualidades:
+  - crea un cobro `RECARGO_MORA` del `recargo_mora_mensual_pct` (10 %) por cada mensualidad con saldo de un mes anterior, una sola vez (índice `cobro_recargo_uk`), con fecha límite el día 5;
+  - cancela el plan de quien debe una mensualidad de hace dos meses o más (tercer mes): `fecha_fin` = último día del mes anterior, `motivo_fin` y auditoría `CANCELAR_POR_MORA`. Un cambio programado que no generó cobros se descarta. La deuda sigue.
+- **Plan diario:** `POST /m5/pagos/sesion` acepta `fechaClase` (por defecto, la del pago). Se puede pagar por adelantado; la clase del día anterior se paga con un recargo del `recargo_sesion_pct` (10 %) en un cobro `RECARGO_MORA`; una más antigua responde 409.
+- **Clase de valoración:** `POST /m5/pagos/valoracion` (`valor_clase_valoracion`, $ 10.000), una vez y antes de la matrícula. `POST /m5/pagos/matricula` descuenta la valoración pagada (`abonoValoracion` en la respuesta). Una valoración ya abonada no se anula.
 - La vista `v_saldo_cobro` expone `vencido_desde`, y la usan `v_estado_cartera`, los cobros pendientes y las respuestas de asignación y cambio.
 
 ### Pagos (RF-M5-09, RF-M5-10)
@@ -195,7 +207,7 @@ Los controladores usan `AutenticacionGuard` (`common/auth/`), que lee la cookie 
 | --- | --- | --- |
 | Matrícula | Se exige antes del primer plan de cualquier tipo, incluido el de día único. | El wireframe la pide «antes de activar el plan» sin excepciones. |
 | Cambio desde o hacia día único | También rige desde el mes siguiente. | Así se mantiene una sola regla para todos los cambios. |
-| Día límite | Se acepta 5, 10, 15 o 20, al crear y al editar. | El diálogo de edición del wireframe solo ofrece 5, 10 y 15; se asume un descuido. |
+| Día límite | Solo el día 5. | El cliente cobra en los primeros cinco días del mes (19/11/2026). |
 | Reactivar planes | No se implementa. | No está en el RF ni en el wireframe; para volver a ofrecerlo se crea un plan nuevo. |
 
 ## Pruebas

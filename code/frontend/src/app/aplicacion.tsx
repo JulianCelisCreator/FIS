@@ -85,7 +85,7 @@ const SUBPANTALLAS_ADMINISTRADOR: Record<string, string> = { 'nueva-cuenta': 'us
 /** HU-M1-09: el Administrador y el Acudiente consultan la autorización del menor. */
 const PANTALLA_FAMILIA = { pagina: 'familia-menor', texto: 'Familia del menor' }
 
-const PESTANAS_PAGO: PestanaPago[] = ['cobro', 'sesion', 'matricula']
+const PESTANAS_PAGO: PestanaPago[] = ['cobro', 'sesion', 'valoracion', 'matricula']
 
 /** Aplicación interna con las pantallas de M1, M5 y M6 habilitadas por rol. */
 export function Aplicacion() {

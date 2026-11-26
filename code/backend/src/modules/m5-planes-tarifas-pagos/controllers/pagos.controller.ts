@@ -1,4 +1,4 @@
-import { Body, Controller, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { AutenticacionGuard } from '../../../common/auth/autenticacion.guard.js';
 import { RequierePermiso, UsuarioActual } from '../../../common/auth/decoradores.js';
 import { PermisosGuard } from '../../../common/auth/permisos.guard.js';
@@ -8,6 +8,7 @@ import {
   RegistrarMatriculaDto,
   RegistrarPagoCobroDto,
   RegistrarPagoSesionDto,
+  RegistrarValoracionDto,
 } from '../dto/registrar-pagos.dto.js';
 import { PermisoM5 } from '../enums/permiso-m5.enum.js';
 import { PagosService } from '../services/pagos.service.js';
@@ -46,6 +47,23 @@ export class PagosController {
     @Body() dto: RegistrarMatriculaDto,
   ) {
     return this.pagosService.registrarMatricula(usuario, dto);
+  }
+
+  /** Valor de la valoración y porcentajes de recargo vigentes (para los totales de la pantalla). */
+  @Get('parametros')
+  @RequierePermiso(PermisoM5.PAGO_REGISTRAR)
+  parametros() {
+    return this.pagosService.parametros();
+  }
+
+  /** Clase de valoración previa a la inscripción; se abona a la matrícula. */
+  @Post('valoracion')
+  @RequierePermiso(PermisoM5.PAGO_REGISTRAR)
+  registrarValoracion(
+    @UsuarioActual() usuario: UsuarioAutenticado,
+    @Body() dto: RegistrarValoracionDto,
+  ) {
+    return this.pagosService.registrarValoracion(usuario, dto);
   }
 
   /** RF-M5-11: anulación con motivo obligatorio; solo el Administrador tiene el permiso. */

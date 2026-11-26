@@ -131,8 +131,9 @@ export function Cartera() {
 
       <Alerta tono="info" titulo="Fechas límite y mora">
         <p>
-          Los cobros mensuales se pagan hasta su fecha límite. Si queda saldo, el estado cambia solo a «Vencido» después de
-          los días de gracia (desde el día 10 para la fecha límite del 5). El sistema calcula el estado; nadie lo edita.
+          Las mensualidades se pagan del día 1 al 5; con saldo, el estado cambia solo a «Vencido» desde el día 6. El primer
+          mes atrasado se sigue entrenando; desde el segundo se cobra un recargo por mora y al tercero se cancela el plan.
+          El sistema calcula el estado; nadie lo edita.
         </p>
       </Alerta>
 

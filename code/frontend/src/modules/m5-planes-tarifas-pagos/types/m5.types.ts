@@ -15,7 +15,7 @@ export const TIPOS_PLAN: { valor: TipoPlan; texto: string; periodicidad: Periodi
 ]
 
 /** Días límite de pago que acepta la API para los planes mensuales. */
-export const DIAS_LIMITE_PAGO = [5, 10, 15, 20]
+export const DIAS_LIMITE_PAGO = [5]
 
 export const PERMISOS_M5 = {
   planGestionar: 'M5_PLAN_GESTIONAR',
@@ -23,9 +23,9 @@ export const PERMISOS_M5 = {
   pagoRegistrar: 'M5_PAGO_REGISTRAR',
   carteraConsultar: 'M5_CARTERA_CONSULTAR',
   pagoHistorial: 'M5_PAGO_HISTORIAL',
+  comprobanteDescargar: 'M5_COMPROBANTE_DESCARGAR',
   pagoAnular: 'M5_PAGO_ANULAR',
   planConsultar: 'M5_PLAN_CONSULTAR',
-  comprobanteDescargar: 'M5_COMPROBANTE_DESCARGAR',
 } as const
 
 export const MEDIOS_PAGO: { valor: MedioPago; texto: string }[] = [
@@ -61,6 +61,8 @@ export interface PatinadorM5 {
   } | null
   tieneCambioProgramado: boolean
   matriculaPagada: boolean
+  /** Valor de la clase de valoración pagada (se abona a la matrícula), o null. */
+  valoracionPagada: number | null
   estadoCartera: EstadoCartera
 }
 
@@ -203,9 +205,24 @@ export interface ResultadoPagoCobro extends ResultadoPagoBase {
 export interface ResultadoPagoSesion extends ResultadoPagoBase {
   numeroSesiones: number
   valorSesion: number
+  fechaClase: string
+  /** Recargo por pagar al día siguiente de la clase (día de gracia); 0 si no aplica. */
+  recargo: number
 }
 
-export type ResultadoMatricula = ResultadoPagoBase
+export interface ResultadoMatricula extends ResultadoPagoBase {
+  /** Clase de valoración descontada de la matrícula; 0 si no hubo. */
+  abonoValoracion: number
+}
+
+export type ResultadoValoracion = ResultadoPagoBase
+
+/** GET /m5/pagos/parametros: valores provisionales de la reunión con el cliente (19/11/2026). */
+export interface ParametrosPago {
+  valorValoracion: number
+  recargoSesionPct: number
+  recargoMoraMensualPct: number
+}
 
 // --- Consultas (RF-M5-13, 15, 16, 17 y 18) ---
 
