@@ -1128,6 +1128,9 @@ INSERT INTO parametro_sistema (clave, valor, descripcion) VALUES
 
 -- Permisos de M5 y M6 (los demás módulos agregan los suyos con el mismo formato).
 INSERT INTO permiso (codigo, modulo, descripcion) VALUES
+  ('M2_ACUDIENTE_GESTIONAR', 'M2', 'Asociar perfiles existentes de patinador y acudiente (HU-M2-03)'),
+  ('M2_NIVEL_GESTIONAR',     'M2', 'Crear, editar y desactivar niveles de patinaje (HU-M2-04)'),
+  ('M2_NIVEL_CONSULTAR',     'M2', 'Consultar el nivel actual de un patinador (HU-M2-05)'),
   ('M5_PLAN_GESTIONAR',        'M5', 'Crear, editar y desactivar planes; registrar tarifas (M5-01 a M5-04)'),
   ('M5_PLAN_CONSULTAR',        'M5', 'Consultar planes y tarifas vigentes (M5-05)'),
   ('M5_PLAN_ASIGNAR',          'M5', 'Asignar o cambiar el plan de un patinador (M5-06, M5-07)'),
@@ -1173,5 +1176,10 @@ SELECT usuario.id, rol.id, usuario.id
 FROM usuario
 CROSS JOIN rol
 WHERE usuario.correo = 'contador@m6.local' AND rol.codigo = 'CONTADOR';
+
+-- Acudientes y patinadores consultan únicamente su nivel actual; el backend limita el alcance al perfil propio o vinculado.
+INSERT INTO rol_permiso (rol_id, permiso_id)
+SELECT r.id, p.id FROM rol r JOIN permiso p ON p.codigo = 'M2_NIVEL_CONSULTAR'
+WHERE r.codigo IN ('PATINADOR','ACUDIENTE');
 
 COMMIT;

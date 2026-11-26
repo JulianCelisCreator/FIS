@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
@@ -8,33 +9,50 @@ import {
 import { G4SedesCarteraMockAdapter } from '../external-dependencies/adapters/g4-sedes-cartera.mock.adapter.js';
 import { M1UsuariosMockAdapter } from '../external-dependencies/adapters/m1-usuarios.mock.adapter.js';
 import { M2DeportivoMockAdapter } from '../external-dependencies/adapters/m2-deportivo.mock.adapter.js';
+import { M4CompetenciasMockAdapter } from '../external-dependencies/adapters/m4-competencias.mock.adapter.js';
 import { M6PersonalMockAdapter } from '../external-dependencies/adapters/m6-personal.mock.adapter.js';
 import {
   type IPuertoG4SedesCartera,
   type IPuertoM1Usuarios,
   type IPuertoM2Deportivo,
+  type IPuertoM4Competencias,
   type IPuertoM6Personal,
   PUERTO_G4_SEDES_CARTERA,
   PUERTO_M1_USUARIOS,
   PUERTO_M2_DEPORTIVO,
+  PUERTO_M4_COMPETENCIAS,
   PUERTO_M6_PERSONAL,
+  type RegistroNotificacionM1,
 } from '../external-dependencies/interfaces/external-dependencies.interfaces.js';
 import {
   AsignarProfesorDto,
   AsignarProfesoresMultipleDto,
   CreateGrupoDto,
+  InscribirCambiarGrupoDto,
   UpdateGrupoDto,
 } from './dto/create-grupo.dto.js';
-import { CreateHorarioDto } from './dto/create-horario.dto.js';
+import {
+  ActualizarEventoGlobalDto,
+  CancelarHorarioDto,
+  CrearEventoGlobalDto,
+  CreateHorarioDto,
+  UpdateHorarioDto,
+} from './dto/create-horario.dto.js';
 import {
   type CategoriaPatinaje,
+  type ContextoAutogestionGrupoM3,
   type DiaSemana,
   type EstadoCupoGrupo,
   type EvaluacionDisponibilidadProfesorM3,
+  type EventoCalendarioM3,
   Grupo,
   type GrupoAsignadoProfesorM3,
   type Horario,
+  type InscripcionEstudianteGrupoM3,
   type ProfesorAsignadoGrupo,
+  type RespuestaCalendarioConsolidadoM3,
+  type RespuestaOperacionHorarioM3,
+  type ResultadoCambioGrupoM3,
   type RolDocenteGrupo,
 } from './entities/grupo.entity.js';
 
@@ -48,14 +66,28 @@ const DIAS_VALIDOS: DiaSemana[] = [
   'Domingo',
 ];
 
+const FECHAS_OCTUBRE_POR_DIA: Record<DiaSemana, string[]> = {
+  Lunes: ['2026-10-05', '2026-10-12', '2026-10-19', '2026-10-26'],
+  Martes: ['2026-10-06', '2026-10-13', '2026-10-20', '2026-10-27'],
+  Miercoles: ['2026-10-07', '2026-10-14', '2026-10-21', '2026-10-28'],
+  Jueves: ['2026-10-08', '2026-10-15', '2026-10-22', '2026-10-29'],
+  Viernes: ['2026-10-09', '2026-10-16', '2026-10-23', '2026-10-30'],
+  Sabado: ['2026-10-10', '2026-10-17', '2026-10-24', '2026-10-31'],
+  Domingo: ['2026-10-11', '2026-10-18', '2026-10-25'],
+};
+
 @Injectable()
 export class GruposService {
   private readonly puertoM1: IPuertoM1Usuarios;
   private readonly puertoM2: IPuertoM2Deportivo;
   private readonly puertoG4: IPuertoG4SedesCartera;
+  private readonly puertoM4: IPuertoM4Competencias;
   private readonly puertoM6: IPuertoM6Personal;
 
   private grupos: Grupo[] = [];
+  private contadorHorarios = 10;
+  private inscripcionesEstudiantes: InscripcionEstudianteGrupoM3[] = [];
+  private eventosGlobalesClub: EventoCalendarioM3[] = [];
 
   constructor(
     @Optional()
@@ -70,11 +102,15 @@ export class GruposService {
     @Optional()
     @Inject(PUERTO_M6_PERSONAL)
     puertoM6?: IPuertoM6Personal,
+    @Optional()
+    @Inject(PUERTO_M4_COMPETENCIAS)
+    puertoM4?: IPuertoM4Competencias,
   ) {
     this.puertoM1 = puertoM1 ?? new M1UsuariosMockAdapter();
     this.puertoM2 = puertoM2 ?? new M2DeportivoMockAdapter();
     this.puertoG4 = puertoG4 ?? new G4SedesCarteraMockAdapter();
     this.puertoM6 = puertoM6 ?? new M6PersonalMockAdapter();
+    this.puertoM4 = puertoM4 ?? new M4CompetenciasMockAdapter();
 
     this.grupos = [
       this.construirGrupo({
@@ -99,17 +135,48 @@ export class GruposService {
         horarios: [
           {
             id: 'HOR-00',
+            horarioId: 'HOR-00',
+            grupoId: 'GRP-01',
+            nombreGrupo: 'Iniciación Norte A',
+            nivelNombre: 'Iniciación',
             dia: 'Lunes',
+            diaSemana: 'Lunes',
             horaInicio: '14:00',
             horaFin: '16:00',
+            sedeId: 'SEDE-NORTE-P1',
+            sedeNombre: 'Norte',
             pista: 'Pista 1 · Norte',
+            estado: 'ACTIVO',
           },
           {
             id: 'HOR-01',
+            horarioId: 'HOR-01',
+            grupoId: 'GRP-01',
+            nombreGrupo: 'Iniciación Norte A',
+            nivelNombre: 'Iniciación',
             dia: 'Martes',
+            diaSemana: 'Martes',
             horaInicio: '15:00',
             horaFin: '17:00',
+            sedeId: 'SEDE-SALITRE-P1',
+            sedeNombre: 'El Salitre',
             pista: 'Pista Principal - El Salitre',
+            estado: 'ACTIVO',
+          },
+          {
+            id: 'HOR-06',
+            horarioId: 'HOR-06',
+            grupoId: 'GRP-01',
+            nombreGrupo: 'Iniciación Norte A',
+            nivelNombre: 'Iniciación',
+            dia: 'Miercoles',
+            diaSemana: 'Miercoles',
+            horaInicio: '08:00',
+            horaFin: '10:00',
+            sedeId: 'SEDE-NORTE-P1',
+            sedeNombre: 'Norte',
+            pista: 'Pista 1 · Norte',
+            estado: 'ACTIVO',
           },
         ],
         activo: true,
@@ -142,17 +209,33 @@ export class GruposService {
         horarios: [
           {
             id: 'HOR-02',
+            horarioId: 'HOR-02',
+            grupoId: 'GRP-02',
+            nombreGrupo: 'Intermedio Sur B',
+            nivelNombre: 'Intermedio',
             dia: 'Martes',
+            diaSemana: 'Martes',
             horaInicio: '14:00',
             horaFin: '16:00',
+            sedeId: 'SEDE-SUR-P2',
+            sedeNombre: 'Sur',
             pista: 'Pista 2 · Sur',
+            estado: 'ACTIVO',
           },
           {
             id: 'HOR-03',
+            horarioId: 'HOR-03',
+            grupoId: 'GRP-02',
+            nombreGrupo: 'Intermedio Sur B',
+            nivelNombre: 'Intermedio',
             dia: 'Jueves',
+            diaSemana: 'Jueves',
             horaInicio: '14:00',
             horaFin: '16:00',
+            sedeId: 'SEDE-SUR-P2',
+            sedeNombre: 'Sur',
             pista: 'Pista 2 · Sur',
+            estado: 'ACTIVO',
           },
         ],
         activo: true,
@@ -179,30 +262,207 @@ export class GruposService {
         horarios: [
           {
             id: 'HOR-04',
+            horarioId: 'HOR-04',
+            grupoId: 'GRP-03',
+            nombreGrupo: 'Avanzado Norte C',
+            nivelNombre: 'Avanzado',
             dia: 'Viernes',
-            horaInicio: '16:00',
-            horaFin: '18:00',
+            diaSemana: 'Viernes',
+            horaInicio: '14:00',
+            horaFin: '16:00',
+            sedeId: 'SEDE-NORTE-P1',
+            sedeNombre: 'Norte',
             pista: 'Pista 1 · Norte',
+            estado: 'ACTIVO',
           },
           {
             id: 'HOR-05',
+            horarioId: 'HOR-05',
+            grupoId: 'GRP-03',
+            nombreGrupo: 'Avanzado Norte C',
+            nivelNombre: 'Avanzado',
             dia: 'Sabado',
+            diaSemana: 'Sabado',
             horaInicio: '08:00',
             horaFin: '10:00',
+            sedeId: 'SEDE-NORTE-P1',
+            sedeNombre: 'Norte',
             pista: 'Pista 1 · Norte',
+            estado: 'ACTIVO',
+          },
+        ],
+        activo: true,
+      }),
+      this.construirGrupo({
+        grupoId: 'GRP-04',
+        nombre: 'Iniciación Norte B',
+        nivelId: 'NIV-01',
+        categoriaId: 'CAT-02',
+        sedeId: 'SEDE-NORTE-P1',
+        dias: ['Martes', 'Jueves'],
+        aforoMax: 20,
+        ocupados: 9,
+        profesorId: 'PROF-01',
+        profesorNombre: 'Carlos Mendoza',
+        horarios: [
+          {
+            id: 'HOR-07',
+            horarioId: 'HOR-07',
+            grupoId: 'GRP-04',
+            nombreGrupo: 'Iniciación Norte B',
+            nivelNombre: 'Iniciación',
+            dia: 'Martes',
+            diaSemana: 'Martes',
+            horaInicio: '16:00',
+            horaFin: '18:00',
+            sedeId: 'SEDE-NORTE-P1',
+            sedeNombre: 'Norte',
+            pista: 'Pista 1 · Norte',
+            estado: 'ACTIVO',
+          },
+          {
+            id: 'HOR-08',
+            horarioId: 'HOR-08',
+            grupoId: 'GRP-04',
+            nombreGrupo: 'Iniciación Norte B',
+            nivelNombre: 'Iniciación',
+            dia: 'Jueves',
+            diaSemana: 'Jueves',
+            horaInicio: '16:00',
+            horaFin: '18:00',
+            sedeId: 'SEDE-NORTE-P1',
+            sedeNombre: 'Norte',
+            pista: 'Pista 1 · Norte',
+            estado: 'ACTIVO',
+          },
+        ],
+        activo: true,
+      }),
+      this.construirGrupo({
+        grupoId: 'GRP-05',
+        nombre: 'Iniciación Sur A',
+        nivelId: 'NIV-01',
+        categoriaId: 'CAT-02',
+        sedeId: 'SEDE-SUR-P2',
+        dias: ['Lunes', 'Miercoles'],
+        aforoMax: 20,
+        ocupados: 18,
+        profesorId: 'PROF-03',
+        profesorNombre: 'Ana Gómez',
+        horarios: [
+          {
+            id: 'HOR-09',
+            horarioId: 'HOR-09',
+            grupoId: 'GRP-05',
+            nombreGrupo: 'Iniciación Sur A',
+            nivelNombre: 'Iniciación',
+            dia: 'Lunes',
+            diaSemana: 'Lunes',
+            horaInicio: '18:00',
+            horaFin: '20:00',
+            sedeId: 'SEDE-SUR-P2',
+            sedeNombre: 'Sur',
+            pista: 'Pista 2 · Sur',
+            estado: 'ACTIVO',
+          },
+        ],
+        activo: true,
+      }),
+      this.construirGrupo({
+        grupoId: 'GRP-06',
+        nombre: 'Iniciación Norte C',
+        nivelId: 'NIV-01',
+        categoriaId: 'CAT-02',
+        sedeId: 'SEDE-NORTE-P1',
+        dias: ['Viernes', 'Sabado'],
+        aforoMax: 20,
+        ocupados: 20,
+        profesorId: 'PROF-01',
+        profesorNombre: 'Carlos Mendoza',
+        horarios: [
+          {
+            id: 'HOR-10',
+            horarioId: 'HOR-10',
+            grupoId: 'GRP-06',
+            nombreGrupo: 'Iniciación Norte C',
+            nivelNombre: 'Iniciación',
+            dia: 'Viernes',
+            diaSemana: 'Viernes',
+            horaInicio: '09:00',
+            horaFin: '11:00',
+            sedeId: 'SEDE-NORTE-P1',
+            sedeNombre: 'Norte',
+            pista: 'Pista 1 · Norte',
+            estado: 'ACTIVO',
           },
         ],
         activo: true,
       }),
     ];
+
+    this.inscripcionesEstudiantes = [
+      {
+        estudianteId: 'EST-01',
+        nombreEstudiante: 'Sofía Ramírez',
+        grupoId: 'GRP-01',
+        nombreGrupo: 'Iniciación Norte A',
+        fechaInscripcion: '2026-09-23T14:00:00Z',
+        estado: 'ACTIVO',
+      },
+      {
+        estudianteId: 'EST-03',
+        nombreEstudiante: 'Mateo Valderrama',
+        grupoId: 'GRP-01',
+        nombreGrupo: 'Iniciación Norte A',
+        fechaInscripcion: '2026-09-25T10:30:00Z',
+        estado: 'ACTIVO',
+      },
+      {
+        estudianteId: 'EST-04',
+        nombreEstudiante: 'Valentina Torres',
+        grupoId: 'GRP-04',
+        nombreGrupo: 'Iniciación Norte B',
+        fechaInscripcion: '2026-09-26T09:15:00Z',
+        estado: 'ACTIVO',
+      },
+    ];
+
+    this.eventosGlobalesClub = [
+      {
+        eventoId: 'EVT-INST-01',
+        tipo: 'EVENTO_INSTITUCIONAL',
+        titulo: 'Festivo · Jornada Institucional de Mantenimiento',
+        inicio: '2026-10-12T08:00:00Z',
+        fin: '2026-10-12T18:00:00Z',
+        ubicacion: 'Todas las sedes (Norte, Sur y El Salitre)',
+        sedeId: 'SEDE-NORTE-P1',
+        grupoId: null,
+        nombreGrupo: 'Todos los grupos del club',
+        categorias: ['Todas las categorías'],
+        descripcion:
+          'Fecha institucional de cierre de pistas por día festivo y revisión de seguridad.',
+        estado: 'PROGRAMADO',
+        editablePorAdmin: true,
+      },
+      {
+        eventoId: 'EVT-INST-02',
+        tipo: 'EVENTO_INSTITUCIONAL',
+        titulo: 'Reunión General de Acudientes y Entrega de Uniformes',
+        inicio: '2026-10-15T17:00:00Z',
+        fin: '2026-10-15T19:00:00Z',
+        ubicacion: 'Auditorio Principal · Sede Norte',
+        sedeId: 'SEDE-NORTE-P1',
+        grupoId: null,
+        nombreGrupo: 'Todos los grupos del club',
+        categorias: ['Todas las categorías'],
+        descripcion:
+          'Socialización del reglamento técnico de competencias y entrega de indumentaria.',
+        estado: 'PROGRAMADO',
+        editablePorAdmin: true,
+      },
+    ];
   }
 
-  /**
-   * Regla de aforo RF2.5 / RF-M3-02 (aritmética entera según design-system.md §9.2):
-   * - < 90% -> Con cupo (alerta90 = false)
-   * - >= 90% y < 100% -> Alerta al 90 % (alerta90 = true)
-   * - >= 100% -> Lleno (alerta90 = true, bloqueadoInscripcion = true)
-   */
   calcularMetricasAforo(ocupados: number, aforoMax: number): {
     alerta90: boolean;
     estadoCupo: EstadoCupoGrupo;
@@ -265,6 +525,24 @@ export class GruposService {
         c.categoriaId.toLowerCase() === categoriaId.toLowerCase() ||
         c.nombre.toLowerCase().includes(categoriaId.toLowerCase()),
     );
+  }
+
+  private resolverSedePorIdOPista(sedeIdOPista?: string, fallbackSedeId?: string) {
+    const sedes = this.puertoG4.listarSedesYPistas();
+    if (sedeIdOPista) {
+      const encontrada = sedes.find(
+        (s) =>
+          s.sedeId.toLowerCase() === sedeIdOPista.toLowerCase() ||
+          s.nombreSede.toLowerCase() === sedeIdOPista.toLowerCase() ||
+          s.pista.toLowerCase() === sedeIdOPista.toLowerCase(),
+      );
+      if (encontrada) return encontrada;
+    }
+    if (fallbackSedeId) {
+      const porFallback = this.puertoG4.obtenerSedePorId(fallbackSedeId);
+      if (porFallback) return porFallback;
+    }
+    return sedes[0];
   }
 
   private construirGrupo(params: {
@@ -372,10 +650,6 @@ export class GruposService {
     return grupo;
   }
 
-  /**
-   * Catálogos consumidos de DEP-M2-01, DEP-M2-02 y DEP-G4-01 para el formulario
-   * de configuración de grupos (HU-3.1).
-   */
   obtenerCatalogosConfiguracion(authorizationHeader?: string) {
     const sesion = this.puertoM1.validarSesion(authorizationHeader);
     return {
@@ -389,7 +663,6 @@ export class GruposService {
 
   /**
    * API-M3-01: GET /api/v1/grupos
-   * Devuelve [{ grupoId, nombre, nivelId, categoriaId, sedeId, aforoMax, ocupados, alerta90, ... }]
    */
   findAll(authorizationHeader?: string): Grupo[] {
     this.puertoM1.validarSesion(authorizationHeader);
@@ -404,10 +677,6 @@ export class GruposService {
     return this.sincronizarMetricas(grupo);
   }
 
-  /**
-   * HU-3.1: Crear grupo validando campos obligatorios (nombre, nivel, sede, días, cupo)
-   * y asegurando que no exceda el aforo físico máximo de DEP-G4-01.
-   */
   create(createGrupoDto: CreateGrupoDto): Grupo {
     const nombre = createGrupoDto.nombre?.trim();
     if (!nombre) {
@@ -510,9 +779,6 @@ export class GruposService {
     return nuevoGrupo;
   }
 
-  /**
-   * Editar configuración de un grupo existente revalidando límites de DEP-G4-01 y aforo.
-   */
   actualizar(id: string, dto: UpdateGrupoDto): Grupo {
     const grupo = this.findOne(id);
 
@@ -595,18 +861,12 @@ export class GruposService {
     return this.sincronizarMetricas(grupo);
   }
 
-  /**
-   * Desactivar o reactivar un grupo (Regla de negocio 5: sin borrado físico).
-   */
   cambiarEstado(id: string, activo: boolean): Grupo {
     const grupo = this.findOne(id);
     grupo.activo = activo;
     return this.sincronizarMetricas(grupo);
   }
 
-  /**
-   * Escenario BDD 2: Valida y registra un cupo en el grupo, bloqueando al llegar al 100%.
-   */
   registrarInscripcionEnGrupo(grupoId: string): Grupo {
     const grupo = this.findOne(grupoId);
     if (!grupo.activo) {
@@ -634,10 +894,10 @@ export class GruposService {
     );
   }
 
-  /**
-   * Evalúa si un profesor tiene conflicto de horario o restricción contractual (DEP-M6-01)
-   * frente a los horarios de un grupo objetivo, cruzando además contra otros grupos asignados.
-   */
+  private horariosActivosDelGrupo(grupo: Grupo): Horario[] {
+    return grupo.horarios.filter((h) => h.estado !== 'CANCELADO');
+  }
+
   evaluarConflictoHorarioProfesor(
     grupo: Grupo,
     profesorId: string,
@@ -656,9 +916,10 @@ export class GruposService {
       return `El profesor ${nombreProfesor} no tiene un contrato activo en DEP-M6-01 (estado: ${infoPersonalM6.estadoContrato}).`;
     }
 
-    // 1. Cruzar horarios del grupo contra bloques ocupados externos y disponibilidad de DEP-M6-01
+    const horariosGrupo = this.horariosActivosDelGrupo(grupo);
+
     if (infoPersonalM6) {
-      for (const hActual of grupo.horarios) {
+      for (const hActual of horariosGrupo) {
         const conflictoExterno = infoPersonalM6.bloquesOcupadosExternos?.find(
           (bloque) =>
             bloque.diaSemana === hActual.dia &&
@@ -681,7 +942,6 @@ export class GruposService {
       }
     }
 
-    // 2. Cruzar horarios del grupo contra asignaciones previas en otros grupos activos
     const otrosGruposDelProfesor = this.grupos.filter(
       (g) =>
         g.activo &&
@@ -690,8 +950,8 @@ export class GruposService {
     );
 
     for (const otroGrupo of otrosGruposDelProfesor) {
-      for (const hActual of grupo.horarios) {
-        const cruce = otroGrupo.horarios.find(
+      for (const hActual of horariosGrupo) {
+        const cruce = this.horariosActivosDelGrupo(otroGrupo).find(
           (hOtro) =>
             hOtro.dia === hActual.dia &&
             hActual.horaInicio < hOtro.horaFin &&
@@ -708,7 +968,6 @@ export class GruposService {
 
   /**
    * API-M3-02: GET /api/v1/profesores/{id}/grupos
-   * Devuelve [{ grupoId, nombreGrupo, rolDocente, horarios[] }]
    */
   obtenerGruposPorProfesor(profesorId: string): GrupoAsignadoProfesorM3[] {
     const resultado: GrupoAsignadoProfesorM3[] = [];
@@ -724,18 +983,13 @@ export class GruposService {
           rolDocente: asignacion?.rolDocente ?? 'TITULAR',
           sedeNombre: grupo.sedeNombre,
           nivelNombre: grupo.nivelNombre,
-          horarios: grupo.horarios,
+          horarios: this.horariosActivosDelGrupo(grupo),
         });
       }
     }
     return resultado;
   }
 
-  /**
-   * Lista todos los profesores activos de DEP-M1-02 enriquecidos con su disponibilidad
-   * laboral de DEP-M6-01, sus grupos asignados (API-M3-02) y la validación de conflicto
-   * en tiempo real frente al grupo consultado.
-   */
   listarProfesoresConDisponibilidad(
     grupoId?: string,
   ): EvaluacionDisponibilidadProfesorM3[] {
@@ -771,9 +1025,6 @@ export class GruposService {
     });
   }
 
-  /**
-   * Obtiene el perfil actualizado y la agenda completa de un profesor específico.
-   */
   obtenerPerfilProfesor(profesorId: string) {
     const profM1 = this.puertoM1
       .listarProfesoresActivos()
@@ -797,10 +1048,6 @@ export class GruposService {
     };
   }
 
-  /**
-   * HU-3.2: Asignar un profesor a un grupo validando conflictos en tiempo real
-   * contra otros grupos y DEP-M6-01 (Escenario BDD 3).
-   */
   asignarProfesor(grupoId: string, dto: AsignarProfesorDto): Grupo {
     const grupo = this.findOne(grupoId);
 
@@ -848,10 +1095,6 @@ export class GruposService {
     return this.sincronizarMetricas(grupo);
   }
 
-  /**
-   * HU-3.2: Asignar múltiples profesores en lote a un grupo específico.
-   * Si alguno presenta traslape de horario, bloquea la operación con el detalle del conflicto.
-   */
   asignarProfesoresMultiple(
     grupoId: string,
     dto: AsignarProfesoresMultipleDto,
@@ -863,7 +1106,6 @@ export class GruposService {
       );
     }
 
-    // Primero validamos todos para que la asignación sea atómica
     for (const profesorId of dto.profesoresIds) {
       const profM1 = this.puertoM1
         .listarProfesoresActivos()
@@ -907,9 +1149,6 @@ export class GruposService {
     return this.sincronizarMetricas(grupo);
   }
 
-  /**
-   * HU-3.2: Quitar (desasignar) un profesor de un grupo actualizando de inmediato su agenda.
-   */
   desasignarProfesor(grupoId: string, profesorId: string): Grupo {
     const grupo = this.findOne(grupoId);
     const existia = grupo.profesoresAsignados.some(
@@ -935,37 +1174,864 @@ export class GruposService {
     return this.sincronizarMetricas(grupo);
   }
 
-  agregarHorario(grupoId: string, dto: CreateHorarioDto): Horario {
-    const grupo = this.findOne(grupoId);
+  // ==========================================================================
+  // HU-3.3: PROGRAMACIÓN DE HORARIOS DE CLASE, ANTI-SOLAPAMIENTO Y DEP-M1-05
+  // ==========================================================================
 
-    if (dto.horaInicio >= dto.horaFin) {
+  private validarSolapamientoYDisponibilidadHorario(params: {
+    grupo: Grupo;
+    dia: DiaSemana;
+    horaInicio: string;
+    horaFin: string;
+    sedeId: string;
+    pista: string;
+    aforoMaximoFisicoPista: number;
+    excluirHorarioId?: string;
+  }) {
+    const {
+      grupo,
+      dia,
+      horaInicio,
+      horaFin,
+      sedeId,
+      pista,
+      aforoMaximoFisicoPista,
+      excluirHorarioId,
+    } = params;
+
+    if (!DIAS_VALIDOS.includes(dia)) {
+      throw new BadRequestException(
+        `El día '${dia}' no es un día de la semana válido`,
+      );
+    }
+
+    if (horaInicio >= horaFin) {
       throw new BadRequestException(
         'La hora de inicio debe ser anterior a la hora de finalizacion',
       );
     }
 
-    const existeSolapamiento = grupo.horarios.some(
+    const solapaEnMismoGrupo = this.horariosActivosDelGrupo(grupo).some(
       (h) =>
-        h.dia === dto.dia &&
-        dto.horaInicio < h.horaFin &&
-        dto.horaFin > h.horaInicio,
+        h.id !== excluirHorarioId &&
+        h.horarioId !== excluirHorarioId &&
+        h.dia === dia &&
+        horaInicio < h.horaFin &&
+        horaFin > h.horaInicio,
     );
 
-    if (existeSolapamiento) {
+    if (solapaEnMismoGrupo) {
       throw new BadRequestException(
-        `El grupo ya tiene un entrenamiento programado el dia ${dto.dia} en ese rango de horas`,
+        `El grupo «${grupo.nombre}» ya tiene un entrenamiento programado el día ${dia} en ese rango de horas`,
       );
     }
 
-    const nuevoHorario: Horario = {
-      id: `HOR-${Date.now()}`,
+    for (const otroGrupo of this.grupos) {
+      if (!otroGrupo.activo || otroGrupo.grupoId === grupo.grupoId) continue;
+
+      for (const hOtro of this.horariosActivosDelGrupo(otroGrupo)) {
+        if (
+          hOtro.id === excluirHorarioId ||
+          hOtro.horarioId === excluirHorarioId
+        ) {
+          continue;
+        }
+        const mismaPistaOSede =
+          (hOtro.sedeId && hOtro.sedeId === sedeId) ||
+          hOtro.pista.toLowerCase() === pista.toLowerCase();
+
+        const mismoBloque =
+          hOtro.dia === dia &&
+          horaInicio < hOtro.horaFin &&
+          horaFin > hOtro.horaInicio;
+
+        if (mismaPistaOSede && mismoBloque) {
+          const aforoCombinado = grupo.aforoMax + otroGrupo.aforoMax;
+          throw new BadRequestException(
+            `Solapamiento de pista: ${pista} ya está ocupada el ${dia} de ${hOtro.horaInicio} a ${hOtro.horaFin} por el grupo «${otroGrupo.nombre}» (aforo combinado ${aforoCombinado}/${aforoMaximoFisicoPista} excede la capacidad física de DEP-G4-01).`,
+          );
+        }
+      }
+    }
+
+    for (const docente of grupo.profesoresAsignados) {
+      const infoM6 = this.puertoM6.obtenerDisponibilidadDocente(
+        docente.profesorId,
+      );
+      if (infoM6) {
+        const conflictoExterno = infoM6.bloquesOcupadosExternos?.find(
+          (b) =>
+            b.diaSemana === dia &&
+            horaInicio < b.horaFin &&
+            horaFin > b.horaInicio,
+        );
+        if (conflictoExterno) {
+          throw new BadRequestException(
+            `Conflicto docente: ${docente.nombreCompleto} tiene ocupado el ${dia} de ${conflictoExterno.horaInicio} a ${conflictoExterno.horaFin} (${conflictoExterno.motivo}).`,
+          );
+        }
+      }
+
+      for (const otroGrupo of this.grupos) {
+        if (!otroGrupo.activo || otroGrupo.grupoId === grupo.grupoId) continue;
+        if (!this.profesorPerteneceAGrupo(otroGrupo, docente.profesorId))
+          continue;
+
+        const cruceDocente = this.horariosActivosDelGrupo(otroGrupo).find(
+          (hOtro) =>
+            hOtro.dia === dia &&
+            horaInicio < hOtro.horaFin &&
+            horaFin > hOtro.horaInicio,
+        );
+        if (cruceDocente) {
+          throw new BadRequestException(
+            `Conflicto docente: el profesor ${docente.nombreCompleto} ya dicta clase en «${otroGrupo.nombre}» el ${dia} de ${cruceDocente.horaInicio} a ${cruceDocente.horaFin}.`,
+          );
+        }
+      }
+    }
+  }
+
+  private obtenerDestinatariosNotificacionGrupo(grupo: Grupo): string[] {
+    const ids = new Set<string>();
+    for (const p of grupo.profesoresAsignados) {
+      ids.add(p.profesorId);
+    }
+    if (grupo.profesorId) ids.add(grupo.profesorId);
+    ids.add(`ESTUDIANTES-${grupo.grupoId}`);
+    return Array.from(ids);
+  }
+
+  /**
+   * API-M3-03: GET /api/v1/horarios
+   */
+  listarHorarios(filtros?: {
+    grupoId?: string;
+    sedeId?: string;
+    fechaInicio?: string;
+    fechaFin?: string;
+    incluirCancelados?: boolean;
+  }): Horario[] {
+    const resultado: Horario[] = [];
+
+    for (const grupo of this.grupos) {
+      if (filtros?.grupoId && grupo.grupoId !== filtros.grupoId) continue;
+
+      for (const h of grupo.horarios) {
+        const sedeIdHorario = h.sedeId ?? grupo.sedeId;
+        if (filtros?.sedeId && sedeIdHorario !== filtros.sedeId) continue;
+        if (!filtros?.incluirCancelados && h.estado === 'CANCELADO') continue;
+
+        resultado.push({
+          ...h,
+          id: h.horarioId ?? h.id,
+          horarioId: h.horarioId ?? h.id,
+          grupoId: grupo.grupoId,
+          nombreGrupo: grupo.nombre,
+          nivelNombre: grupo.nivelNombre,
+          dia: h.diaSemana ?? h.dia,
+          diaSemana: h.diaSemana ?? h.dia,
+          sedeId: sedeIdHorario,
+          sedeNombre: h.sedeNombre ?? grupo.sedeNombre,
+          estado: h.estado ?? 'ACTIVO',
+        });
+      }
+    }
+
+    return resultado;
+  }
+
+  listarNotificacionesHorarios(): RegistroNotificacionM1[] {
+    return this.puertoM1.listarNotificacionesEnviadas();
+  }
+
+  agregarHorario(grupoId: string, dto: CreateHorarioDto): Horario {
+    const respuesta = this.crearHorario({
+      grupoId,
       dia: dto.dia,
+      diaSemana: dto.diaSemana,
       horaInicio: dto.horaInicio,
       horaFin: dto.horaFin,
+      sedeId: dto.sedeId,
       pista: dto.pista,
+    });
+    return respuesta.horario;
+  }
+
+  crearHorario(dto: CreateHorarioDto): RespuestaOperacionHorarioM3 {
+    const grupoId = dto.grupoId ?? 'GRP-01';
+    const grupo = this.findOne(grupoId);
+    const dia = (dto.diaSemana ?? dto.dia) as DiaSemana;
+    if (!dia) {
+      throw new BadRequestException('El día de la semana es obligatorio');
+    }
+
+    const sede = this.resolverSedePorIdOPista(
+      dto.sedeId ?? dto.pista,
+      grupo.sedeId,
+    );
+    const pista = dto.pista?.trim() || sede.pista;
+
+    this.validarSolapamientoYDisponibilidadHorario({
+      grupo,
+      dia,
+      horaInicio: dto.horaInicio,
+      horaFin: dto.horaFin,
+      sedeId: sede.sedeId,
+      pista,
+      aforoMaximoFisicoPista: sede.aforoMaximoFisico,
+    });
+
+    this.contadorHorarios += 1;
+    const horarioId = `HOR-${String(this.contadorHorarios).padStart(2, '0')}`;
+    const nuevoHorario: Horario = {
+      id: horarioId,
+      horarioId,
+      grupoId: grupo.grupoId,
+      nombreGrupo: grupo.nombre,
+      nivelNombre: grupo.nivelNombre,
+      dia,
+      diaSemana: dia,
+      horaInicio: dto.horaInicio,
+      horaFin: dto.horaFin,
+      sedeId: sede.sedeId,
+      sedeNombre: sede.nombreSede,
+      pista,
+      estado: 'ACTIVO',
+      motivoCancelacion: null,
     };
 
     grupo.horarios.push(nuevoHorario);
-    return nuevoHorario;
+    if (!grupo.dias.includes(dia)) {
+      grupo.dias.push(dia);
+    }
+
+    return {
+      horario: nuevoHorario,
+      notificacion: null,
+    };
+  }
+
+  actualizarHorario(
+    horarioId: string,
+    dto: UpdateHorarioDto,
+  ): RespuestaOperacionHorarioM3 {
+    let grupoOrigen: Grupo | undefined;
+    let horarioActual: Horario | undefined;
+
+    for (const g of this.grupos) {
+      const encontrado = g.horarios.find(
+        (h) => h.id === horarioId || h.horarioId === horarioId,
+      );
+      if (encontrado) {
+        grupoOrigen = g;
+        horarioActual = encontrado;
+        break;
+      }
+    }
+
+    if (!grupoOrigen || !horarioActual) {
+      throw new NotFoundException(`La franja horaria ${horarioId} no existe`);
+    }
+
+    const grupoDestino = dto.grupoId
+      ? this.findOne(dto.grupoId)
+      : grupoOrigen;
+
+    const nuevoDia = (dto.diaSemana ??
+      dto.dia ??
+      horarioActual.diaSemana ??
+      horarioActual.dia) as DiaSemana;
+    const nuevaHoraInicio = dto.horaInicio ?? horarioActual.horaInicio;
+    const nuevaHoraFin = dto.horaFin ?? horarioActual.horaFin;
+
+    const sedeObjetivo = this.resolverSedePorIdOPista(
+      dto.sedeId ?? dto.pista,
+      horarioActual.sedeId ?? grupoDestino.sedeId,
+    );
+    const nuevaPista =
+      dto.pista?.trim() ||
+      (dto.sedeId ? sedeObjetivo.pista : horarioActual.pista) ||
+      sedeObjetivo.pista;
+
+    this.validarSolapamientoYDisponibilidadHorario({
+      grupo: grupoDestino,
+      dia: nuevoDia,
+      horaInicio: nuevaHoraInicio,
+      horaFin: nuevaHoraFin,
+      sedeId: sedeObjetivo.sedeId,
+      pista: nuevaPista,
+      aforoMaximoFisicoPista: sedeObjetivo.aforoMaximoFisico,
+      excluirHorarioId: horarioActual.horarioId ?? horarioActual.id,
+    });
+
+    const descripcionAnterior = `${horarioActual.dia} ${horarioActual.horaInicio}–${horarioActual.horaFin} (${horarioActual.pista})`;
+
+    if (grupoDestino.grupoId !== grupoOrigen.grupoId) {
+      grupoOrigen.horarios = grupoOrigen.horarios.filter(
+        (h) => h.id !== horarioId && h.horarioId !== horarioId,
+      );
+      grupoDestino.horarios.push(horarioActual);
+    }
+
+    horarioActual.grupoId = grupoDestino.grupoId;
+    horarioActual.nombreGrupo = grupoDestino.nombre;
+    horarioActual.nivelNombre = grupoDestino.nivelNombre;
+    horarioActual.dia = nuevoDia;
+    horarioActual.diaSemana = nuevoDia;
+    horarioActual.horaInicio = nuevaHoraInicio;
+    horarioActual.horaFin = nuevaHoraFin;
+    horarioActual.sedeId = sedeObjetivo.sedeId;
+    horarioActual.sedeNombre = sedeObjetivo.nombreSede;
+    horarioActual.pista = nuevaPista;
+    horarioActual.estado = 'REPROGRAMADO';
+
+    const notificacion = this.puertoM1.enviarNotificacion({
+      destinatariosIds: this.obtenerDestinatariosNotificacionGrupo(grupoDestino),
+      asunto: `Reprogramación de entrenamiento · ${grupoDestino.nombre}`,
+      mensaje: `La sesión del grupo «${grupoDestino.nombre}» pasó de ${descripcionAnterior} a ${nuevoDia} ${nuevaHoraInicio}–${nuevaHoraFin} en ${nuevaPista}.`,
+    });
+
+    return {
+      horario: horarioActual,
+      notificacion,
+    };
+  }
+
+  cancelarHorario(
+    horarioId: string,
+    dto: CancelarHorarioDto,
+  ): RespuestaOperacionHorarioM3 {
+    const motivo = dto.motivo?.trim();
+    if (!motivo) {
+      throw new BadRequestException(
+        'El motivo es obligatorio para anular o cancelar una franja horaria',
+      );
+    }
+
+    let grupo: Grupo | undefined;
+    let horario: Horario | undefined;
+    for (const g of this.grupos) {
+      const encontrado = g.horarios.find(
+        (h) => h.id === horarioId || h.horarioId === horarioId,
+      );
+      if (encontrado) {
+        grupo = g;
+        horario = encontrado;
+        break;
+      }
+    }
+
+    if (!grupo || !horario) {
+      throw new NotFoundException(`La franja horaria ${horarioId} no existe`);
+    }
+
+    horario.estado = 'CANCELADO';
+    horario.motivoCancelacion = motivo;
+
+    const notificacion = this.puertoM1.enviarNotificacion({
+      destinatariosIds: this.obtenerDestinatariosNotificacionGrupo(grupo),
+      asunto: `Cancelación de sesión · ${grupo.nombre} (${horario.dia} ${horario.horaInicio})`,
+      mensaje: `Se anuló la franja del ${horario.dia} (${horario.horaInicio}–${horario.horaFin} en ${horario.pista}) para el grupo «${grupo.nombre}». Motivo: ${motivo}.`,
+    });
+
+    return {
+      horario,
+      notificacion,
+    };
+  }
+
+  // ==========================================================================
+  // HU-3.4: SELECCIÓN Y CAMBIO DE GRUPO POR PARTE DEL USUARIO Y API-M3-04
+  // ==========================================================================
+
+  /**
+   * API-M3-04: GET /api/v1/grupos/{id}/estudiantes
+   */
+  obtenerEstudiantesDeGrupo(grupoId: string): InscripcionEstudianteGrupoM3[] {
+    this.findOne(grupoId);
+    return this.inscripcionesEstudiantes.filter((i) => i.grupoId === grupoId);
+  }
+
+  listarPerfilesAutogestionHU34() {
+    const perfiles = this.puertoM2.listarPerfilesDeportivos();
+    return perfiles.map((p) => {
+      const menor = this.puertoM1.validarMenorYAcudiente(p.estudianteId);
+      const poliza = this.puertoM1.validarPolizaVigente(p.estudianteId);
+      const plan = this.puertoG4.obtenerEstadoPlanYCartera(p.estudianteId);
+      const inscripcionActiva = this.inscripcionesEstudiantes.find(
+        (i) => i.estudianteId === p.estudianteId && i.estado === 'ACTIVO',
+      );
+      return {
+        estudianteId: p.estudianteId,
+        nombreCompleto: p.nombreCompleto,
+        nivelId: p.nivelId,
+        categoriaId: p.categoriaId,
+        esMenorEdad: menor.esMenorEdad,
+        edad: menor.edad,
+        acudienteId: menor.acudienteId,
+        nombreAcudiente: menor.nombreAcudiente,
+        tieneAutorizacion: menor.tieneAutorizacion,
+        polizaVigente: poliza.polizaVigente,
+        planActivo: plan.planActivo,
+        alDiaEnPagos: plan.alDiaEnPagos,
+        nombrePlan: plan.nombrePlan,
+        grupoActualId: inscripcionActiva?.grupoId ?? null,
+        grupoActualNombre: inscripcionActiva?.nombreGrupo ?? null,
+      };
+    });
+  }
+
+  obtenerContextoAutogestionGrupo(
+    estudianteId: string,
+    actorRol: 'ESTUDIANTE' | 'ACUDIENTE' = 'ACUDIENTE',
+    acudienteId?: string,
+  ): ContextoAutogestionGrupoM3 {
+    const perfilDeportivo = this.puertoM2.obtenerPerfilDeportivo(estudianteId);
+    const validacionMenor = this.puertoM1.validarMenorYAcudiente(estudianteId);
+    const poliza = this.puertoM1.validarPolizaVigente(estudianteId);
+    const planCartera = this.puertoG4.obtenerEstadoPlanYCartera(estudianteId);
+
+    const inscripcionActiva = this.inscripcionesEstudiantes.find(
+      (i) => i.estudianteId === estudianteId && i.estado === 'ACTIVO',
+    );
+    const grupoActual = inscripcionActiva
+      ? this.grupos.find((g) => g.grupoId === inscripcionActiva.grupoId) ?? null
+      : null;
+
+    let puedeGestionarCambio = true;
+    let motivoBloqueoActor: string | null = null;
+
+    if (validacionMenor.esMenorEdad && actorRol === 'ESTUDIANTE') {
+      puedeGestionarCambio = false;
+      motivoBloqueoActor =
+        'Cambio no permitido para menores de edad: solo el acudiente autorizado puede inscribir o cambiar de grupo (DEP-M1-03).';
+    } else if (validacionMenor.esMenorEdad && actorRol === 'ACUDIENTE') {
+      const acudienteEfectivo = acudienteId ?? validacionMenor.acudienteId;
+      if (
+        !validacionMenor.tieneAutorizacion ||
+        !validacionMenor.acudienteId ||
+        acudienteEfectivo !== validacionMenor.acudienteId
+      ) {
+        puedeGestionarCambio = false;
+        motivoBloqueoActor = `El estudiante menor de edad (${validacionMenor.nombreEstudiante}) no cuenta con autorización activa de su acudiente vinculado en DEP-M1-03.`;
+      }
+    }
+
+    if (puedeGestionarCambio && !poliza.polizaVigente) {
+      puedeGestionarCambio = false;
+      motivoBloqueoActor = `La póliza médico-deportiva del estudiante se encuentra vencida (${poliza.fechaVencimiento.slice(0, 10)} · DEP-M1-04).`;
+    } else if (
+      puedeGestionarCambio &&
+      (!planCartera.planActivo || !planCartera.alDiaEnPagos)
+    ) {
+      puedeGestionarCambio = false;
+      motivoBloqueoActor = `El estudiante presenta bloqueo en plan o cartera (${planCartera.estadoCartera} · DEP-G4-02). Debe estar al día en pagos para inscribirse o cambiar de grupo.`;
+    }
+
+    const gruposElegibles = this.grupos
+      .filter(
+        (g) =>
+          g.activo &&
+          g.nivelId === perfilDeportivo.nivelId &&
+          (planCartera.limiteClasesSemanales <= 0 ||
+            g.dias.length <= planCartera.limiteClasesSemanales),
+      )
+      .map((g) => this.sincronizarMetricas(g));
+
+    return {
+      estudianteId,
+      actorRol,
+      actorId:
+        actorRol === 'ACUDIENTE'
+          ? (acudienteId ?? validacionMenor.acudienteId ?? 'ACU-01')
+          : estudianteId,
+      perfilDeportivo,
+      validacionMenor,
+      poliza,
+      planCartera,
+      puedeGestionarCambio,
+      motivoBloqueoActor,
+      grupoActual: grupoActual ? this.sincronizarMetricas(grupoActual) : null,
+      gruposElegibles,
+    };
+  }
+
+  inscribirOCambiarGrupoEstudiante(
+    dto: InscribirCambiarGrupoDto,
+  ): ResultadoCambioGrupoM3 {
+    const contexto = this.obtenerContextoAutogestionGrupo(
+      dto.estudianteId,
+      dto.actorRol,
+      dto.acudienteId,
+    );
+
+    if (!contexto.puedeGestionarCambio) {
+      throw new BadRequestException(
+        contexto.motivoBloqueoActor ??
+          'No cumple las validaciones requeridas para inscribir o cambiar de grupo',
+      );
+    }
+
+    const grupoDestino = this.findOne(dto.grupoDestinoId);
+    if (!grupoDestino.activo) {
+      throw new BadRequestException(
+        `El grupo «${grupoDestino.nombre}» no se encuentra activo`,
+      );
+    }
+
+    if (grupoDestino.nivelId !== contexto.perfilDeportivo.nivelId) {
+      throw new BadRequestException(
+        `El grupo «${grupoDestino.nombre}» (${grupoDestino.nivelNombre}) no corresponde al nivel técnico vigente del estudiante (${contexto.perfilDeportivo.nivelId} · DEP-M2-03).`,
+      );
+    }
+
+    if (
+      grupoDestino.dias.length > contexto.planCartera.limiteClasesSemanales
+    ) {
+      throw new BadRequestException(
+        `El grupo «${grupoDestino.nombre}» (${grupoDestino.dias.length} días/semana) supera el límite de clases semanales del plan activo (${contexto.planCartera.limiteClasesSemanales} días/semana · DEP-G4-02).`,
+      );
+    }
+
+    const inscripcionAnterior = this.inscripcionesEstudiantes.find(
+      (i) => i.estudianteId === dto.estudianteId && i.estado === 'ACTIVO',
+    );
+
+    if (inscripcionAnterior?.grupoId === grupoDestino.grupoId) {
+      throw new BadRequestException(
+        `El estudiante ya se encuentra inscrito en el grupo «${grupoDestino.nombre}»`,
+      );
+    }
+
+    if (grupoDestino.ocupados >= grupoDestino.aforoMax) {
+      throw new BadRequestException(
+        `No hay cupos disponibles en el grupo «${grupoDestino.nombre}» (${grupoDestino.ocupados}/${grupoDestino.aforoMax} · 100% de aforo alcanzado).`,
+      );
+    }
+
+    let grupoAnterior: Grupo | null = null;
+    if (inscripcionAnterior) {
+      inscripcionAnterior.estado = 'RETIRADO_CAMBIO';
+      const encontradoAnterior = this.grupos.find(
+        (g) => g.grupoId === inscripcionAnterior.grupoId,
+      );
+      if (encontradoAnterior) {
+        encontradoAnterior.ocupados = Math.max(
+          0,
+          encontradoAnterior.ocupados - 1,
+        );
+        grupoAnterior = this.sincronizarMetricas(encontradoAnterior);
+      }
+    }
+
+    grupoDestino.ocupados += 1;
+    const grupoNuevoActualizado = this.sincronizarMetricas(grupoDestino);
+
+    const nuevaInscripcion: InscripcionEstudianteGrupoM3 = {
+      estudianteId: dto.estudianteId,
+      nombreEstudiante: contexto.perfilDeportivo.nombreCompleto,
+      grupoId: grupoNuevoActualizado.grupoId,
+      nombreGrupo: grupoNuevoActualizado.nombre,
+      fechaInscripcion: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+      estado: 'ACTIVO',
+    };
+    this.inscripcionesEstudiantes.unshift(nuevaInscripcion);
+
+    const tipoOperacion = grupoAnterior ? 'CAMBIO_GRUPO' : 'INSCRIPCION';
+    const mensaje = grupoAnterior
+      ? `Cambio confirmado: ${contexto.perfilDeportivo.nombreCompleto} pasó de «${grupoAnterior.nombre}» (${grupoAnterior.ocupados}/${grupoAnterior.aforoMax}) a «${grupoNuevoActualizado.nombre}» (${grupoNuevoActualizado.ocupados}/${grupoNuevoActualizado.aforoMax}). El cupo anterior fue liberado de inmediato.`
+      : `Inscripción confirmada: ${contexto.perfilDeportivo.nombreCompleto} quedó inscrito en «${grupoNuevoActualizado.nombre}» (${grupoNuevoActualizado.ocupados}/${grupoNuevoActualizado.aforoMax}).`;
+
+    return {
+      estudianteId: dto.estudianteId,
+      tipoOperacion,
+      grupoAnterior,
+      grupoNuevo: grupoNuevoActualizado,
+      inscripcion: nuevaInscripcion,
+      mensaje,
+    };
+  }
+
+  // ==========================================================================
+  // HU-3.5: CALENDARIO CONSOLIDADO SEGMENTADO POR ROL Y API-M3-05
+  // ==========================================================================
+
+  private resolverGruposVisiblesParaSesion(
+    authorizationHeader?: string,
+    grupoIdFiltro?: string,
+  ): {
+    sesion: RespuestaCalendarioConsolidadoM3['sesion'];
+    gruposPermitidosIds: string[];
+  } {
+    const sesionM1 = this.puertoM1.validarSesion(authorizationHeader);
+    let gruposAsociadosIds: string[] = [];
+
+    if (sesionM1.rol === 'ADMIN') {
+      gruposAsociadosIds = this.grupos
+        .filter((g) => g.activo)
+        .map((g) => g.grupoId);
+    } else if (sesionM1.rol === 'PROFESOR') {
+      gruposAsociadosIds = this.obtenerGruposPorProfesor(sesionM1.userId).map(
+        (g) => g.grupoId,
+      );
+    } else {
+      const estId = sesionM1.estudianteVinculadoId ?? sesionM1.userId;
+      const insc = this.inscripcionesEstudiantes.find(
+        (i) => i.estudianteId === estId && i.estado === 'ACTIVO',
+      );
+      gruposAsociadosIds = insc ? [insc.grupoId] : ['GRP-01'];
+    }
+
+    const gruposPermitidosIds = grupoIdFiltro
+      ? gruposAsociadosIds.filter((id) => id === grupoIdFiltro)
+      : gruposAsociadosIds;
+
+    return {
+      sesion: {
+        userId: sesionM1.userId,
+        rol: sesionM1.rol,
+        nombreCompleto: sesionM1.nombreCompleto ?? sesionM1.userId,
+        gruposAsociadosIds,
+      },
+      gruposPermitidosIds,
+    };
+  }
+
+  /**
+   * API-M3-05: GET /api/v1/calendario
+   * Devuelve [{ eventoId, tipo, titulo, inicio, fin, ubicacion, ... }]
+   * consolidando entrenamientos (HU-3.3), competencias (DEP-M4-01) y eventos
+   * institucionales globales del club, filtrados por rol y pertenencia a grupo (DEP-M1-01).
+   */
+  obtenerEventosCalendario(
+    authorizationHeader?: string,
+    filtros?: {
+      tipo?: string;
+      grupoId?: string;
+      fechaInicio?: string;
+      fechaFin?: string;
+    },
+  ): EventoCalendarioM3[] {
+    const { sesion, gruposPermitidosIds } =
+      this.resolverGruposVisiblesParaSesion(
+        authorizationHeader,
+        filtros?.grupoId,
+      );
+
+    const eventos: EventoCalendarioM3[] = [];
+
+    // 1. Entrenamientos de los grupos asociados al usuario (HU-3.3)
+    for (const grupo of this.grupos) {
+      if (!grupo.activo) continue;
+      if (!gruposPermitidosIds.includes(grupo.grupoId)) continue;
+
+      for (const h of this.horariosActivosDelGrupo(grupo)) {
+        const dia = h.diaSemana ?? h.dia;
+        const fechasMes = FECHAS_OCTUBRE_POR_DIA[dia] ?? ['2026-10-05'];
+        for (const fecha of fechasMes) {
+          const inicioIso = `${fecha}T${h.horaInicio}:00Z`;
+          const finIso = `${fecha}T${h.horaFin}:00Z`;
+          eventos.push({
+            eventoId: `EVT-ENT-${h.horarioId ?? h.id}-${fecha}`,
+            tipo: 'ENTRENAMIENTO',
+            titulo: `Entrenamiento · ${grupo.nombre}`,
+            inicio: inicioIso,
+            fin: finIso,
+            ubicacion: `${h.pista} (Sede ${h.sedeNombre ?? grupo.sedeNombre})`,
+            sedeId: h.sedeId ?? grupo.sedeId,
+            grupoId: grupo.grupoId,
+            nombreGrupo: grupo.nombre,
+            categorias: [grupo.categoriaNombre],
+            descripcion: `Sesión de entrenamiento técnico nivel ${grupo.nivelNombre}. Entrenador: ${grupo.profesorNombre ?? 'Equipo técnico'}.`,
+            estado:
+              h.estado === 'REPROGRAMADO' ? 'REPROGRAMADO' : 'PROGRAMADO',
+            editablePorAdmin: false,
+          });
+        }
+      }
+    }
+
+    // 2. Competencias oficiales publicadas desde DEP-M4-01
+    const competenciasM4 = this.puertoM4.listarCompetenciasPublicadas(
+      filtros?.fechaInicio,
+      filtros?.fechaFin,
+    );
+    for (const comp of competenciasM4) {
+      const sede = this.puertoG4.obtenerSedePorId(comp.sedeId);
+      eventos.push({
+        eventoId: `EVT-COMP-${comp.competenciaId}`,
+        tipo: 'COMPETENCIA',
+        titulo: comp.titulo,
+        inicio: comp.fechaInicio,
+        fin: comp.fechaFin,
+        ubicacion: sede
+          ? `${sede.pista} · Sede ${sede.nombreSede}`
+          : comp.sedeId,
+        sedeId: comp.sedeId,
+        grupoId: null,
+        nombreGrupo: 'Grupos clasificados por categoría',
+        categorias: comp.categorias,
+        descripcion: `Competencia oficial publicada por Módulo 4 (DEP-M4-01). Categorías convocadas: ${comp.categorias.join(', ')}.`,
+        estado: 'PROGRAMADO',
+        editablePorAdmin: false,
+      });
+    }
+
+    // 3. Eventos globales e institucionales del club (editables exclusivamente por ADMIN)
+    for (const evtGlobal of this.eventosGlobalesClub) {
+      if (evtGlobal.estado === 'ANULADO') continue;
+      eventos.push({
+        ...evtGlobal,
+        editablePorAdmin: sesion.rol === 'ADMIN',
+      });
+    }
+
+    return eventos
+      .filter((ev) => {
+        if (filtros?.tipo && ev.tipo !== filtros.tipo) return false;
+        if (filtros?.fechaInicio && ev.fin < filtros.fechaInicio) return false;
+        if (filtros?.fechaFin && ev.inicio > filtros.fechaFin) return false;
+        return true;
+      })
+      .sort((a, b) => a.inicio.localeCompare(b.inicio));
+  }
+
+  obtenerCalendarioConContexto(
+    authorizationHeader?: string,
+    filtros?: {
+      tipo?: string;
+      grupoId?: string;
+      fechaInicio?: string;
+      fechaFin?: string;
+    },
+  ): RespuestaCalendarioConsolidadoM3 {
+    const { sesion } = this.resolverGruposVisiblesParaSesion(
+      authorizationHeader,
+      filtros?.grupoId,
+    );
+    const eventos = this.obtenerEventosCalendario(authorizationHeader, filtros);
+    return {
+      sesion,
+      eventos,
+    };
+  }
+
+  private exigirRolAdminCalendario(authorizationHeader?: string) {
+    const sesion = this.puertoM1.validarSesion(authorizationHeader);
+    if (sesion.rol !== 'ADMIN') {
+      throw new ForbiddenException(
+        `Acceso denegado: solo el rol ADMIN puede crear, editar o anular eventos institucionales globales (rol actual: ${sesion.rol} · DEP-M1-01).`,
+      );
+    }
+    return sesion;
+  }
+
+  /**
+   * HU-3.5: Crear un evento global del club (restringido exclusivamente a ADMIN).
+   */
+  crearEventoGlobal(
+    dto: CrearEventoGlobalDto,
+    authorizationHeader?: string,
+  ): EventoCalendarioM3 {
+    this.exigirRolAdminCalendario(authorizationHeader);
+
+    const titulo = dto.titulo?.trim();
+    if (!titulo) {
+      throw new BadRequestException(
+        'El título del evento global es obligatorio',
+      );
+    }
+    if (dto.inicio >= dto.fin) {
+      throw new BadRequestException(
+        'La fecha/hora de inicio debe ser anterior a la fecha/hora de fin',
+      );
+    }
+
+    const consecutivo = String(this.eventosGlobalesClub.length + 1).padStart(
+      2,
+      '0',
+    );
+    const nuevoEvento: EventoCalendarioM3 = {
+      eventoId: `EVT-INST-${consecutivo}`,
+      tipo: 'EVENTO_INSTITUCIONAL',
+      titulo,
+      inicio: dto.inicio,
+      fin: dto.fin,
+      ubicacion: dto.ubicacion.trim(),
+      sedeId: dto.sedeId ?? 'SEDE-NORTE-P1',
+      grupoId: null,
+      nombreGrupo: 'Todos los grupos del club',
+      categorias: ['Todas las categorías'],
+      descripcion:
+        dto.descripcion?.trim() ||
+        'Evento institucional global programado por la administración del club.',
+      estado: 'PROGRAMADO',
+      editablePorAdmin: true,
+    };
+
+    this.eventosGlobalesClub.push(nuevoEvento);
+    return nuevoEvento;
+  }
+
+  /**
+   * HU-3.5: Editar un evento global del club (restringido exclusivamente a ADMIN).
+   */
+  actualizarEventoGlobal(
+    eventoId: string,
+    dto: ActualizarEventoGlobalDto,
+    authorizationHeader?: string,
+  ): EventoCalendarioM3 {
+    this.exigirRolAdminCalendario(authorizationHeader);
+
+    const evento = this.eventosGlobalesClub.find(
+      (e) => e.eventoId === eventoId,
+    );
+    if (!evento) {
+      throw new NotFoundException(
+        `El evento institucional global ${eventoId} no existe`,
+      );
+    }
+
+    if (dto.titulo !== undefined) {
+      if (!dto.titulo.trim()) {
+        throw new BadRequestException('El título no puede estar vacío');
+      }
+      evento.titulo = dto.titulo.trim();
+    }
+    if (dto.inicio !== undefined) evento.inicio = dto.inicio;
+    if (dto.fin !== undefined) evento.fin = dto.fin;
+    if (evento.inicio >= evento.fin) {
+      throw new BadRequestException(
+        'La fecha/hora de inicio debe ser anterior a la fecha/hora de fin',
+      );
+    }
+    if (dto.ubicacion !== undefined) evento.ubicacion = dto.ubicacion.trim();
+    if (dto.descripcion !== undefined)
+      evento.descripcion = dto.descripcion.trim();
+
+    return evento;
+  }
+
+  /**
+   * HU-3.5: Anular un evento global del club sin borrado físico (restringido exclusivamente a ADMIN).
+   */
+  anularEventoGlobal(
+    eventoId: string,
+    authorizationHeader?: string,
+  ): EventoCalendarioM3 {
+    this.exigirRolAdminCalendario(authorizationHeader);
+
+    const evento = this.eventosGlobalesClub.find(
+      (e) => e.eventoId === eventoId,
+    );
+    if (!evento) {
+      throw new NotFoundException(
+        `El evento institucional global ${eventoId} no existe`,
+      );
+    }
+
+    evento.estado = 'ANULADO';
+    return evento;
   }
 }

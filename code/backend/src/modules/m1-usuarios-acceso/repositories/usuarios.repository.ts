@@ -37,6 +37,17 @@ export interface CuentaListada {
   roles: Rol[];
   estado: EstadoUsuario;
   ultimoIngresoEn: Date | null;
+  /** HU-M1-04 CA-04: el Administrador ve si el correo está verificado. */
+  correoVerificado: boolean;
+}
+
+/** Datos para enviar o reenviar el enlace de verificación (HU-M1-04). */
+export interface UsuarioParaVerificacion {
+  id: number;
+  nombre: string;
+  correo: string;
+  estado: EstadoUsuario;
+  correoVerificado: boolean;
 }
 
 export interface FiltrosListadoCuentas {
@@ -120,6 +131,43 @@ export class UsuariosRepository {
     return rows[0] ?? { roles: [], permisos: [] };
   }
 
+  /** Hash actual de la contraseña (HU-M1-08 CA-05: verificar la contraseña actual). */
+  async obtenerContrasenaHash(consultor: Consultor, usuarioId: number): Promise<string | null> {
+    const { rows } = await consultor.query<{ hash: string }>(
+      `SELECT contrasena_hash AS hash FROM usuario WHERE id = $1`,
+      [usuarioId],
+    );
+    return rows[0]?.hash ?? null;
+  }
+
+  async actualizarContrasena(consultor: Consultor, usuarioId: number, contrasenaHash: string): Promise<void> {
+    await consultor.query(`UPDATE usuario SET contrasena_hash = $2 WHERE id = $1`, [usuarioId, contrasenaHash]);
+  }
+
+  /** HU-M1-04: la cuenta por correo o por id, con su estado de verificación. */
+  async buscarParaVerificacion(
+    consultor: Consultor,
+    criterio: { correo: string } | { id: number },
+  ): Promise<UsuarioParaVerificacion | null> {
+    const porCorreo = 'correo' in criterio;
+    const { rows } = await consultor.query<UsuarioParaVerificacion>(
+      `SELECT id, nombres || ' ' || apellidos AS nombre, correo, estado,
+              correo_verificado_en IS NOT NULL AS "correoVerificado"
+       FROM usuario
+       WHERE ${porCorreo ? 'lower(correo) = lower($1)' : 'id = $1'}`,
+      [porCorreo ? criterio.correo : criterio.id],
+    );
+    return rows[0] ?? null;
+  }
+
+  /** HU-M1-04 CA-02: marca el correo como verificado; no cambia la fecha si ya lo estaba. */
+  async marcarCorreoVerificado(consultor: Consultor, usuarioId: number): Promise<void> {
+    await consultor.query(
+      `UPDATE usuario SET correo_verificado_en = COALESCE(correo_verificado_en, now()) WHERE id = $1`,
+      [usuarioId],
+    );
+  }
+
   async registrarIngreso(consultor: Consultor, usuarioId: number): Promise<void> {
     await consultor.query(`UPDATE usuario SET ultimo_ingreso_en = now() WHERE id = $1`, [usuarioId]);
   }
@@ -132,6 +180,7 @@ export class UsuariosRepository {
     const { rows } = await consultor.query<CuentaListada & { total: number }>(
       `SELECT u.id, u.nombres || ' ' || u.apellidos AS nombre, u.correo, u.estado,
               u.ultimo_ingreso_en AS "ultimoIngresoEn",
+              u.correo_verificado_en IS NOT NULL AS "correoVerificado",
               COALESCE(array_agg(r.codigo ORDER BY r.codigo) FILTER (WHERE r.id IS NOT NULL), '{}') AS roles,
               count(*) OVER () AS total
        FROM usuario u
@@ -164,6 +213,7 @@ export class UsuariosRepository {
     const { rows } = await consultor.query<CuentaListada>(
       `SELECT u.id, u.nombres || ' ' || u.apellidos AS nombre, u.correo, u.estado,
               u.ultimo_ingreso_en AS "ultimoIngresoEn",
+              u.correo_verificado_en IS NOT NULL AS "correoVerificado",
               COALESCE((SELECT array_agg(r.codigo ORDER BY r.codigo)
                         FROM usuario_rol ur JOIN rol r ON r.id = ur.rol_id
                         WHERE ur.usuario_id = u.id), '{}') AS roles
