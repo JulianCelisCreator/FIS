@@ -22,6 +22,7 @@ import { M4Modulo } from '../modules/m4-competencias-resultados/components/m4-mo
 import { PERMISOS_M4 } from '../modules/m4-competencias-resultados/types/m4.types.ts'
 import { ConfiguracionGrupos } from '../modules/m3-grupos-horarios/components/configuracion-grupos.tsx'
 import { AsignacionProfesores } from '../modules/m3-grupos-horarios/components/asignacion-profesores.tsx'
+import { ProgramacionHorarios } from '../modules/m3-grupos-horarios/components/programacion-horarios.tsx'
 import { InventarioUniformes } from '../modules/m6-inventario-uniformes/components/inventario-uniformes.tsx'
 import { PrestamosUniformes } from '../modules/m6-inventario-uniformes/components/prestamos-uniformes.tsx'
 import { VentasUniformes } from '../modules/m6-inventario-uniformes/components/ventas-uniformes.tsx'
@@ -55,6 +56,7 @@ const PANTALLAS_ADMINISTRADOR = [{ pagina: 'usuarios', texto: 'Usuarios' }]
 const PANTALLAS_M3_ADMIN = [
   { pagina: 'grupos', texto: 'Configuración de grupos' },
   { pagina: 'asignacion-profesores', texto: 'Asignación de profesores' },
+  { pagina: 'horarios', texto: 'Programación de horarios' },
 ]
 /** Pantallas que no van en el menú: se abren desde otra y resaltan a su pantalla de origen. */
 const SUBPANTALLAS_ADMINISTRADOR: Record<string, string> = { 'nueva-cuenta': 'usuarios' }
@@ -89,13 +91,22 @@ export function Aplicacion() {
   }
 
   // Modo directo para demostración de Módulo 3 si no hay sesión activa en BD M1
-  if (!sesion && (pagina === 'grupos' || pagina === 'asignacion-profesores')) {
+  if (
+    !sesion &&
+    (pagina === 'grupos' || pagina === 'asignacion-profesores' || pagina === 'horarios')
+  ) {
     return (
       <MarcoAplicacion
         navegacion={[{ grupo: 'Grupos y horarios', enlaces: PANTALLAS_M3_ADMIN }]}
         paginaActual={pagina}
       >
-        {pagina === 'asignacion-profesores' ? <AsignacionProfesores /> : <ConfiguracionGrupos />}
+        {pagina === 'asignacion-profesores' ? (
+          <AsignacionProfesores />
+        ) : pagina === 'horarios' ? (
+          <ProgramacionHorarios />
+        ) : (
+          <ConfiguracionGrupos />
+        )}
       </MarcoAplicacion>
     )
   }
@@ -185,6 +196,8 @@ export function Aplicacion() {
     contenido = <ConfiguracionGrupos key={sesion.id} />
   } else if (actual === 'asignacion-profesores') {
     contenido = <AsignacionProfesores key={sesion.id} />
+  } else if (actual === 'horarios') {
+    contenido = <ProgramacionHorarios key={sesion.id} />
   } else if (actual === 'nueva-cuenta') {
     contenido = <NuevaCuenta key={sesion.id} />
   } else if (actual === 'familia-menor') {
