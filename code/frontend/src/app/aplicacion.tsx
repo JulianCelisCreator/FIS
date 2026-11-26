@@ -147,13 +147,8 @@ export function Aplicacion() {
         ...pantallasPermitidas.filter(
           (pantalla) => pantalla.grupo === grupo
         ),
+        // Cada pantalla va solo en su grupo; «Mis pagos» no tiene permiso propio y se agrega aparte.
         ...(grupo === 'Planes y pagos' ? misPagos : []),
-        ...(grupo === 'Competencias y resultados'
-          ? permitidas.filter((p) => p.pagina === 'm4')
-          : []),
-        ...(grupo === 'Planes y pagos'
-          ? permitidas.filter((p) => p.pagina !== 'm4')
-          : []),
       ],
     })),
   ];
